@@ -87,3 +87,8 @@
 - [x] Admin dashboard for reviewing/verifying community KYC submissions (/admin, adminRouter)
 - [x] Admin tool added to sidebar nav (access-gated to admin role)
 - [x] 15 tests passing, zero TypeScript errors
+
+## Round 4 Tasks
+- [ ] Audit and verify valuation calculator works end-to-end
+- [ ] Audit and verify idea evaluator works end-to-end
+- [ ] Promote owner account to admin role via SQL
