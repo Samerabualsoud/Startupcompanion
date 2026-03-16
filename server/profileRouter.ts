@@ -19,7 +19,7 @@ const profileInput = z.object({
   websiteUrl: z.string().optional(),
   pitchDeckUrl: z.string().optional(),
   sector: z.string().optional(),
-  stage: z.enum(['pre-seed', 'seed', 'series-a', 'series-b', 'growth']).optional(),
+  stage: z.enum(['idea', 'pre-seed', 'seed', 'series-a', 'series-b', 'growth']).optional(),
   country: z.string().optional(),
   city: z.string().optional(),
   foundedYear: z.number().optional(),

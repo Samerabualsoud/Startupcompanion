@@ -139,7 +139,7 @@ export const startupProfiles = mysqlTable("startup_profiles", {
   websiteUrl: varchar("websiteUrl", { length: 512 }),
   pitchDeckUrl: varchar("pitchDeckUrl", { length: 1024 }),
   sector: varchar("sector", { length: 128 }),
-  stage: mysqlEnum("stage", ["pre-seed", "seed", "series-a", "series-b", "growth"]),
+  stage: mysqlEnum("stage", ["idea", "pre-seed", "seed", "series-a", "series-b", "growth"]),
   country: varchar("country", { length: 128 }),
   city: varchar("city", { length: 128 }),
   foundedYear: int("foundedYear"),

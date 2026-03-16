@@ -1,0 +1,1 @@
+ALTER TABLE `startup_profiles` MODIFY COLUMN `stage` enum('idea','pre-seed','seed','series-a','series-b','growth');

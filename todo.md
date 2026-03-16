@@ -165,3 +165,11 @@
 - [x] Fix AIInvestorEmail: SelectItem value="" → value="not-specified"
 - [x] Fix InvestorCRM: SelectItem value="" for Any stage/sector → non-empty values
 - [x] 0 TypeScript errors
+
+## DB Schema Fix (Round 13)
+- [x] Diagnosed: stage enum in DB was missing 'idea' value
+- [x] Updated drizzle/schema.ts: startupProfiles stage enum now includes 'idea'
+- [x] Updated profileRouter.ts: z.enum now includes 'idea'
+- [x] Ran pnpm db:push: migration 0008_woozy_polaris.sql applied successfully
+- [x] Verified: DB stage column now enum('idea','pre-seed','seed','series-a','series-b','growth')
+- [x] 0 TypeScript errors
