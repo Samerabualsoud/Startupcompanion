@@ -1,11 +1,16 @@
-import { eq } from "drizzle-orm";
+import { eq, and, or, like, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
-import { ENV } from './_core/env';
+import {
+  users, InsertUser,
+  startupProfiles, InsertStartupProfile,
+  teamMembers, InsertTeamMember,
+  savedValuations, InsertSavedValuation,
+  milestones, InsertMilestone,
+  vcFirms, angelInvestors, grants, ventureLawyers,
+} from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
@@ -18,81 +23,84 @@ export async function getDb() {
   return _db;
 }
 
-export async function upsertUser(user: InsertUser): Promise<void> {
-  if (!user.openId) {
-    throw new Error("User openId is required for upsert");
-  }
+// ── Custom Auth ────────────────────────────────────────────────────────────
 
+export async function createUser(data: { email: string; passwordHash: string; name?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(users).values({
+    email: data.email.toLowerCase().trim(),
+    passwordHash: data.passwordHash,
+    name: data.name ?? null,
+    loginMethod: "email",
+    lastSignedIn: new Date(),
+  });
+  const result = await db.select().from(users).where(eq(users.email, data.email.toLowerCase().trim())).limit(1);
+  return result[0] ?? null;
+}
+
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim())).limit(1);
+  return result[0] ?? null;
+}
+
+export async function getUserById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function updateUserLastSignedIn(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, id));
+}
+
+export async function updateUserName(id: number, name: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ name }).where(eq(users.id, id));
+}
+
+// Legacy OAuth upsert (kept for backward compat)
+export async function upsertUser(user: { openId?: string | null; email?: string | null; name?: string | null; loginMethod?: string | null; lastSignedIn?: Date; role?: "user" | "admin" }): Promise<void> {
+  if (!user.email && !user.openId) {
+    throw new Error("User email or openId is required for upsert");
+  }
   const db = await getDb();
   if (!db) {
     console.warn("[Database] Cannot upsert user: database not available");
     return;
   }
-
-  try {
-    const values: InsertUser = {
-      openId: user.openId,
-    };
-    const updateSet: Record<string, unknown> = {};
-
-    const textFields = ["name", "email", "loginMethod"] as const;
-    type TextField = (typeof textFields)[number];
-
-    const assignNullable = (field: TextField) => {
-      const value = user[field];
-      if (value === undefined) return;
-      const normalized = value ?? null;
-      values[field] = normalized;
-      updateSet[field] = normalized;
-    };
-
-    textFields.forEach(assignNullable);
-
-    if (user.lastSignedIn !== undefined) {
-      values.lastSignedIn = user.lastSignedIn;
-      updateSet.lastSignedIn = user.lastSignedIn;
-    }
-    if (user.role !== undefined) {
-      values.role = user.role;
-      updateSet.role = user.role;
-    } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
-    }
-
-    if (!values.lastSignedIn) {
-      values.lastSignedIn = new Date();
-    }
-
-    if (Object.keys(updateSet).length === 0) {
-      updateSet.lastSignedIn = new Date();
-    }
-
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
+  const email = user.email?.toLowerCase().trim() ?? `${user.openId}@oauth.local`;
+  const existing = await getUserByEmail(email);
+  if (existing) {
+    await db.update(users).set({
+      openId: user.openId ?? existing.openId,
+      name: user.name ?? existing.name,
+      lastSignedIn: user.lastSignedIn ?? new Date(),
+    }).where(eq(users.id, existing.id));
+  } else {
+    await db.insert(users).values({
+      email,
+      openId: user.openId ?? null,
+      name: user.name ?? null,
+      loginMethod: user.loginMethod ?? "oauth",
+      lastSignedIn: user.lastSignedIn ?? new Date(),
+      role: user.role ?? "user",
     });
-  } catch (error) {
-    console.error("[Database] Failed to upsert user:", error);
-    throw error;
   }
 }
 
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot get user: database not available");
-    return undefined;
-  }
-
+  if (!db) return undefined;
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
-
   return result.length > 0 ? result[0] : undefined;
 }
-
-// TODO: add feature queries here as your schema grows.
-
-import { startupProfiles, teamMembers, savedValuations, milestones,
-  InsertStartupProfile, InsertTeamMember, InsertSavedValuation, InsertMilestone } from "../drizzle/schema";
 
 // ── Startup Profiles ───────────────────────────────────────────────────────
 export async function getProfileByUserId(userId: number) {
@@ -182,4 +190,31 @@ export async function deleteMilestone(id: number) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
   await db.delete(milestones).where(eq(milestones.id, id));
+}
+
+// ── Resource Database Queries ──────────────────────────────────────────────
+
+export async function getVcFirms(filters?: { stage?: string; sector?: string; region?: string; search?: string }) {
+  const db = await getDb();
+  if (!db) return [];
+  let query = db.select().from(vcFirms).where(eq(vcFirms.isActive, true));
+  return query;
+}
+
+export async function getAngelInvestors(filters?: { stage?: string; sector?: string; region?: string; search?: string }) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(angelInvestors).where(eq(angelInvestors.isActive, true));
+}
+
+export async function getGrants(filters?: { type?: string; sector?: string; region?: string; search?: string }) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(grants).where(eq(grants.isActive, true));
+}
+
+export async function getVentureLawyers(filters?: { region?: string; specialization?: string; search?: string }) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(ventureLawyers).where(eq(ventureLawyers.isActive, true));
 }

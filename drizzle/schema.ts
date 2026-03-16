@@ -3,10 +3,14 @@ import { boolean, int, mysqlEnum, mysqlTable, text, timestamp, varchar, json, fl
 // ── Users ──────────────────────────────────────────────────────────────────
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
-  openId: varchar("openId", { length: 64 }).notNull().unique(),
+  // Custom auth
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  passwordHash: varchar("passwordHash", { length: 256 }),
+  emailVerified: boolean("emailVerified").default(false).notNull(),
+  // Legacy OAuth (kept for DB compatibility)
+  openId: varchar("openId", { length: 64 }).unique(),
   name: text("name"),
-  email: varchar("email", { length: 320 }),
-  loginMethod: varchar("loginMethod", { length: 64 }),
+  loginMethod: varchar("loginMethod", { length: 64 }).default("email"),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -117,3 +121,96 @@ export const milestones = mysqlTable("milestones", {
 
 export type Milestone = typeof milestones.$inferSelect;
 export type InsertMilestone = typeof milestones.$inferInsert;
+
+// ── Resource Database: VC Firms ────────────────────────────────────────────
+export const vcFirms = mysqlTable("vc_firms", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 256 }).notNull(),
+  description: text("description"),
+  website: varchar("website", { length: 512 }),
+  logoUrl: varchar("logoUrl", { length: 1024 }),
+  hqCity: varchar("hqCity", { length: 128 }),
+  hqCountry: varchar("hqCountry", { length: 128 }),
+  regions: json("regions"),           // string[]
+  stages: json("stages"),             // e.g. ["pre-seed","seed","series-a"]
+  sectors: json("sectors"),           // e.g. ["fintech","saas"]
+  checkSizeMin: float("checkSizeMin"),
+  checkSizeMax: float("checkSizeMax"),
+  aum: float("aum"),                  // Assets under management $M
+  portfolioCount: int("portfolioCount"),
+  notablePortfolio: json("notablePortfolio"), // string[]
+  linkedinUrl: varchar("linkedinUrl", { length: 512 }),
+  twitterUrl: varchar("twitterUrl", { length: 512 }),
+  applyUrl: varchar("applyUrl", { length: 512 }),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type VcFirm = typeof vcFirms.$inferSelect;
+
+// ── Resource Database: Angel Investors ────────────────────────────────────
+export const angelInvestors = mysqlTable("angel_investors", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 256 }).notNull(),
+  title: varchar("title", { length: 256 }),
+  bio: text("bio"),
+  photoUrl: varchar("photoUrl", { length: 1024 }),
+  location: varchar("location", { length: 256 }),
+  regions: json("regions"),
+  stages: json("stages"),
+  sectors: json("sectors"),
+  checkSizeMin: float("checkSizeMin"),
+  checkSizeMax: float("checkSizeMax"),
+  notableInvestments: json("notableInvestments"), // string[]
+  linkedinUrl: varchar("linkedinUrl", { length: 512 }),
+  twitterUrl: varchar("twitterUrl", { length: 512 }),
+  angellistUrl: varchar("angellistUrl", { length: 512 }),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AngelInvestor = typeof angelInvestors.$inferSelect;
+
+// ── Resource Database: Grants ──────────────────────────────────────────────
+export const grants = mysqlTable("grants", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 256 }).notNull(),
+  provider: varchar("provider", { length: 256 }).notNull(),
+  description: text("description"),
+  logoUrl: varchar("logoUrl", { length: 1024 }),
+  type: mysqlEnum("type", ["government", "corporate", "foundation", "eu", "other"]).default("other").notNull(),
+  regions: json("regions"),
+  sectors: json("sectors"),
+  stages: json("stages"),
+  amountMin: float("amountMin"),
+  amountMax: float("amountMax"),
+  currency: varchar("currency", { length: 8 }).default("USD"),
+  deadline: varchar("deadline", { length: 128 }),  // e.g. "Rolling" or "2025-06-30"
+  isEquityFree: boolean("isEquityFree").default(true).notNull(),
+  requirements: text("requirements"),
+  applyUrl: varchar("applyUrl", { length: 512 }),
+  websiteUrl: varchar("websiteUrl", { length: 512 }),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type Grant = typeof grants.$inferSelect;
+
+// ── Resource Database: Venture Lawyers ────────────────────────────────────
+export const ventureLawyers = mysqlTable("venture_lawyers", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 256 }).notNull(),
+  firm: varchar("firm", { length: 256 }),
+  title: varchar("title", { length: 256 }),
+  bio: text("bio"),
+  photoUrl: varchar("photoUrl", { length: 1024 }),
+  location: varchar("location", { length: 256 }),
+  regions: json("regions"),
+  specializations: json("specializations"), // e.g. ["term sheets","equity","ip","m&a"]
+  languages: json("languages"),
+  startupFriendly: boolean("startupFriendly").default(true).notNull(),
+  offersFreeConsult: boolean("offersFreeConsult").default(false).notNull(),
+  linkedinUrl: varchar("linkedinUrl", { length: 512 }),
+  websiteUrl: varchar("websiteUrl", { length: 512 }),
+  email: varchar("email", { length: 320 }),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type VentureLawyer = typeof ventureLawyers.$inferSelect;

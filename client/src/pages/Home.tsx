@@ -32,8 +32,9 @@ import TermSheetGlossary from '@/components/TermSheetGlossary';
 import InvestorCRM from '@/components/InvestorCRM';
 import RunwayOptimizer from '@/components/RunwayOptimizer';
 import FeasibilityEvaluator from '@/components/FeasibilityEvaluator';
+import ResourceDatabase from '@/components/ResourceDatabase';
 
-type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'feasibility';
+type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'feasibility' | 'resources';
 
 interface NavItem {
   id: ToolId;
@@ -62,9 +63,11 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'feasibility',   label: 'Idea Evaluator',        shortLabel: 'Idea Check', icon: Sparkles,    group: 'Valuation',    badge: 'AI' },
   // My Startup
   { id: 'profile',       label: 'My Startup Profile',    shortLabel: 'My Startup', icon: Building2,   group: 'My Startup' },
+  // Database
+  { id: 'resources',     label: 'Investor Database',     shortLabel: 'Database',   icon: Building2,   group: 'Database',     badge: 'New' },
 ];
 
-const GROUPS = ['Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources', 'My Startup'];
+const GROUPS = ['Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources', 'Database', 'My Startup'];
 
 const TOOL_COLORS: Record<ToolId, string> = {
   feasibility: '#6366F1',
@@ -78,6 +81,7 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'investor-crm': '#C4614A',
   runway: '#059669',
   profile: '#2D4A6B',
+  resources: '#10B981',
 };
 
 export default function Home() {
@@ -243,6 +247,7 @@ export default function Home() {
       case 'investor-crm':    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><InvestorCRM /></div>;
       case 'profile':         return <StartupProfile />;
       case 'feasibility':     return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><FeasibilityEvaluator /></div>;
+      case 'resources':       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ResourceDatabase /></div>;
       default: return null;
     }
   };
@@ -275,9 +280,9 @@ export default function Home() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground border border-border px-2.5 py-1 rounded-full">
+            <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground border border-border px-2.5 py-1 rounded-full">
             <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-            9 tools · Free
+            13 tools · Free
           </div>
           {chatComplete && chatAnswers && (
             <button
@@ -323,9 +328,9 @@ export default function Home() {
                       </button>
                     </>
                   ) : (
-                    <a href={getLoginUrl()} className="flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary/50 transition-colors">
+                    <button onClick={() => { window.location.href = getLoginUrl(); setUserMenuOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary/50 transition-colors">
                       <LogIn className="w-3.5 h-3.5" /> Sign In
-                    </a>
+                    </button>
                   )}
                 </motion.div>
               )}

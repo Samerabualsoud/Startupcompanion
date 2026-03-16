@@ -6,15 +6,18 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ReportProvider } from "./contexts/ReportContext";
 import { TrackedApplicationsProvider } from "./contexts/TrackedApplicationsContext";
+import LandingPage from "./pages/LandingPage";
 import Home from "./pages/Home";
-import Pricing from "./pages/Pricing";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/pricing"} component={Pricing} />
+      <Route path={"/"} component={LandingPage} />
+      <Route path={"/app"} component={Home} />
+      <Route path={"/login"} component={Login} />
+      <Route path={"/register"} component={Register} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
