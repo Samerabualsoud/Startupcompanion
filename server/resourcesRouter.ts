@@ -2,9 +2,7 @@ import { z } from "zod";
 import { publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 
-// Static curated data for the resource database
-// In production these would come from the DB; we seed them inline for now.
-
+// ── Curated VC Firms (35 entries) ─────────────────────────────────────────
 export const VC_FIRMS_DATA = [
   { id: 1, name: "Sequoia Capital", description: "One of the most successful VC firms globally, backing companies like Apple, Google, WhatsApp, and Airbnb.", website: "https://sequoiacap.com", hqCity: "Menlo Park", hqCountry: "USA", regions: ["North America", "Europe", "Asia", "India"], stages: ["seed", "series-a", "series-b", "growth"], sectors: ["saas", "fintech", "consumer", "healthcare", "enterprise"], checkSizeMin: 0.1, checkSizeMax: 100, aum: 85000, notablePortfolio: ["Apple", "Google", "WhatsApp", "Airbnb", "Stripe"], applyUrl: "https://sequoiacap.com/companies/", isActive: true },
   { id: 2, name: "Andreessen Horowitz (a16z)", description: "Leading Silicon Valley VC firm investing across consumer, enterprise, crypto, and bio.", website: "https://a16z.com", hqCity: "Menlo Park", hqCountry: "USA", regions: ["North America", "Europe"], stages: ["seed", "series-a", "series-b", "growth"], sectors: ["crypto", "saas", "fintech", "biotech", "consumer"], checkSizeMin: 0.5, checkSizeMax: 150, aum: 42000, notablePortfolio: ["GitHub", "Lyft", "Coinbase", "Roblox", "Figma"], applyUrl: "https://a16z.com/portfolio/", isActive: true },
@@ -21,8 +19,29 @@ export const VC_FIRMS_DATA = [
   { id: 13, name: "Lightspeed Venture Partners", description: "Global VC with multi-stage investing across enterprise and consumer.", website: "https://lsvp.com", hqCity: "Menlo Park", hqCountry: "USA", regions: ["North America", "Europe", "India", "Southeast Asia"], stages: ["seed", "series-a", "series-b", "growth"], sectors: ["enterprise", "consumer", "fintech", "healthtech", "saas"], checkSizeMin: 0.5, checkSizeMax: 100, aum: 25000, notablePortfolio: ["Snap", "Affirm", "Mulesoft", "Nutanix", "OYO"], applyUrl: "https://lsvp.com/companies/", isActive: true },
   { id: 14, name: "Balderton Capital", description: "Europe's leading early-stage VC backing exceptional founders.", website: "https://balderton.com", hqCity: "London", hqCountry: "UK", regions: ["Europe"], stages: ["seed", "series-a", "series-b"], sectors: ["saas", "fintech", "marketplace", "consumer", "deeptech"], checkSizeMin: 1, checkSizeMax: 30, aum: 4000, notablePortfolio: ["Revolut", "Depop", "Kobalt", "Contentful", "Nutmeg"], applyUrl: "https://balderton.com/apply", isActive: true },
   { id: 15, name: "Tiger Global Management", description: "Prolific global investor known for fast decisions and large checks.", website: "https://tigerglobal.com", hqCity: "New York", hqCountry: "USA", regions: ["Global"], stages: ["series-b", "growth"], sectors: ["saas", "fintech", "consumer", "marketplace", "e-commerce"], checkSizeMin: 10, checkSizeMax: 500, aum: 95000, notablePortfolio: ["Stripe", "Coinbase", "Flipkart", "Bytedance", "Nubank"], applyUrl: "https://tigerglobal.com", isActive: true },
+  { id: 16, name: "Khosla Ventures", description: "Deep-tech focused VC backing breakthrough science and engineering companies.", website: "https://khoslaventures.com", hqCity: "Menlo Park", hqCountry: "USA", regions: ["North America", "Global"], stages: ["seed", "series-a", "series-b"], sectors: ["cleantech", "deeptech", "ai", "biotech", "healthtech"], checkSizeMin: 0.5, checkSizeMax: 50, aum: 15000, notablePortfolio: ["DoorDash", "Square", "OpenAI", "Impossible Foods", "Instacart"], applyUrl: "https://khoslaventures.com/contact", isActive: true },
+  { id: 17, name: "General Catalyst", description: "Multi-stage VC investing from seed to growth in transformative companies.", website: "https://generalcatalyst.com", hqCity: "Cambridge", hqCountry: "USA", regions: ["North America", "Europe", "India"], stages: ["seed", "series-a", "series-b", "growth"], sectors: ["saas", "fintech", "healthtech", "consumer", "ai"], checkSizeMin: 1, checkSizeMax: 100, aum: 20000, notablePortfolio: ["Airbnb", "Stripe", "Snap", "Warby Parker", "HubSpot"], applyUrl: "https://generalcatalyst.com", isActive: true },
+  { id: 18, name: "Greylock Partners", description: "Silicon Valley VC with a strong focus on enterprise and consumer software.", website: "https://greylock.com", hqCity: "Menlo Park", hqCountry: "USA", regions: ["North America", "Europe"], stages: ["seed", "series-a", "series-b"], sectors: ["saas", "enterprise", "consumer", "security", "ai"], checkSizeMin: 0.5, checkSizeMax: 50, aum: 10000, notablePortfolio: ["LinkedIn", "Airbnb", "Dropbox", "Instagram", "Workday"], applyUrl: "https://greylock.com/apply", isActive: true },
+  { id: 19, name: "Insight Partners", description: "Global software investor with $90B+ AUM across growth and buyout.", website: "https://insightpartners.com", hqCity: "New York", hqCountry: "USA", regions: ["Global"], stages: ["series-a", "series-b", "growth"], sectors: ["saas", "security", "fintech", "e-commerce", "marketplace"], checkSizeMin: 5, checkSizeMax: 300, aum: 90000, notablePortfolio: ["Twitter", "Shopify", "N26", "Wix", "Qualtrics"], applyUrl: "https://insightpartners.com/contact", isActive: true },
+  { id: 20, name: "Founders Fund", description: "Peter Thiel's VC firm backing ambitious founders with contrarian bets.", website: "https://foundersfund.com", hqCity: "San Francisco", hqCountry: "USA", regions: ["North America", "Global"], stages: ["seed", "series-a", "series-b"], sectors: ["deeptech", "biotech", "ai", "defense", "fintech"], checkSizeMin: 0.5, checkSizeMax: 100, aum: 11000, notablePortfolio: ["SpaceX", "Palantir", "Airbnb", "Stripe", "Lyft"], applyUrl: "https://foundersfund.com", isActive: true },
+  { id: 21, name: "Bessemer Venture Partners", description: "One of the oldest and most successful VC firms with a global portfolio.", website: "https://bvp.com", hqCity: "Redwood City", hqCountry: "USA", regions: ["North America", "Europe", "India", "Global"], stages: ["seed", "series-a", "series-b", "growth"], sectors: ["saas", "consumer", "fintech", "healthcare", "deeptech"], checkSizeMin: 0.5, checkSizeMax: 100, aum: 20000, notablePortfolio: ["LinkedIn", "Pinterest", "Twitch", "Shopify", "Yelp"], applyUrl: "https://bvp.com/portfolio", isActive: true },
+  { id: 22, name: "MEVP (Middle East Venture Partners)", description: "Pioneering VC in the MENA region since 2010, focused on tech and digital.", website: "https://mevp.com", hqCity: "Beirut", hqCountry: "Lebanon", regions: ["MENA"], stages: ["seed", "series-a"], sectors: ["fintech", "e-commerce", "saas", "consumer", "healthtech"], checkSizeMin: 0.25, checkSizeMax: 5, aum: 200, notablePortfolio: ["Anghami", "Jamalon", "Myki"], applyUrl: "https://mevp.com/apply", isActive: true },
+  { id: 23, name: "Shorooq Partners", description: "Abu Dhabi-based VC investing in MENA and South Asia tech startups.", website: "https://shorooq.com", hqCity: "Abu Dhabi", hqCountry: "UAE", regions: ["MENA", "South Asia"], stages: ["seed", "series-a"], sectors: ["fintech", "saas", "logistics", "healthtech", "edtech"], checkSizeMin: 0.5, checkSizeMax: 10, aum: 250, notablePortfolio: ["Lean Technologies", "Tamara", "Baraka"], applyUrl: "https://shorooq.com/apply", isActive: true },
+  { id: 24, name: "Flat6Labs", description: "Pan-MENA accelerator and early-stage VC with programs across 7 countries.", website: "https://flat6labs.com", hqCity: "Cairo", hqCountry: "Egypt", regions: ["MENA", "Africa"], stages: ["pre-seed", "seed"], sectors: ["fintech", "e-commerce", "saas", "healthtech", "edtech"], checkSizeMin: 0.05, checkSizeMax: 0.5, aum: 50, notablePortfolio: ["Paymob", "Eventtus", "Instabug"], applyUrl: "https://flat6labs.com/apply", isActive: true },
+  { id: 25, name: "Flourish Ventures", description: "Global fintech-focused impact investor backing inclusive financial services.", website: "https://flourishventures.com", hqCity: "Washington DC", hqCountry: "USA", regions: ["Global", "Africa", "South Asia", "Latin America", "Southeast Asia"], stages: ["seed", "series-a", "series-b"], sectors: ["fintech", "insurtech", "agtech"], checkSizeMin: 1, checkSizeMax: 20, aum: 500, notablePortfolio: ["Chipper Cash", "Kuda", "Tala", "Destacame"], applyUrl: "https://flourishventures.com/contact", isActive: true },
+  { id: 26, name: "Norwest Venture Partners", description: "Multi-stage VC with $15B+ AUM investing globally across sectors.", website: "https://nvp.com", hqCity: "Palo Alto", hqCountry: "USA", regions: ["North America", "India", "Europe"], stages: ["seed", "series-a", "series-b", "growth"], sectors: ["saas", "consumer", "fintech", "healthtech", "enterprise"], checkSizeMin: 1, checkSizeMax: 100, aum: 15000, notablePortfolio: ["Uber", "Spotify", "Pendo", "Calm", "Samsara"], applyUrl: "https://nvp.com/contact", isActive: true },
+  { id: 27, name: "Cathay Innovation", description: "Global VC with a unique network across Europe, US, China, and Africa.", website: "https://cathayinnovation.com", hqCity: "Paris", hqCountry: "France", regions: ["Europe", "North America", "Africa", "Asia"], stages: ["series-a", "series-b", "growth"], sectors: ["ai", "fintech", "healthtech", "consumer", "deeptech"], checkSizeMin: 5, checkSizeMax: 50, aum: 3500, notablePortfolio: ["Deezer", "Lydia", "Meero"], applyUrl: "https://cathayinnovation.com/contact", isActive: true },
+  { id: 28, name: "Kingsway Capital", description: "Frontier markets VC focused on Africa and MENA growth-stage companies.", website: "https://kingswaycapital.com", hqCity: "London", hqCountry: "UK", regions: ["Africa", "MENA"], stages: ["series-a", "series-b", "growth"], sectors: ["fintech", "logistics", "consumer", "e-commerce"], checkSizeMin: 5, checkSizeMax: 50, aum: 400, notablePortfolio: ["Jumia", "Flutterwave", "Sendwave"], applyUrl: "https://kingswaycapital.com", isActive: true },
+  { id: 29, name: "Quona Capital", description: "Fintech-focused impact VC investing in emerging markets globally.", website: "https://quona.com", hqCity: "Washington DC", hqCountry: "USA", regions: ["Africa", "South Asia", "Latin America", "MENA", "Southeast Asia"], stages: ["seed", "series-a", "series-b"], sectors: ["fintech", "insurtech", "agtech", "healthtech"], checkSizeMin: 2, checkSizeMax: 20, aum: 800, notablePortfolio: ["Konfio", "Jumo", "Destacame", "Lendio"], applyUrl: "https://quona.com/contact", isActive: true },
+  { id: 30, name: "Speedinvest", description: "European early-stage VC with sector-focused teams across 7 verticals.", website: "https://speedinvest.com", hqCity: "Vienna", hqCountry: "Austria", regions: ["Europe", "North America"], stages: ["pre-seed", "seed", "series-a"], sectors: ["fintech", "saas", "deeptech", "consumer", "marketplace"], checkSizeMin: 0.25, checkSizeMax: 5, aum: 1000, notablePortfolio: ["GoStudent", "Bitpanda", "Luko", "Stashaway"], applyUrl: "https://speedinvest.com/apply", isActive: true },
+  { id: 31, name: "Atomico", description: "European VC founded by Skype co-founder Niklas Zennström.", website: "https://atomico.com", hqCity: "London", hqCountry: "UK", regions: ["Europe", "Global"], stages: ["series-a", "series-b", "growth"], sectors: ["saas", "fintech", "deeptech", "consumer", "marketplace"], checkSizeMin: 5, checkSizeMax: 100, aum: 4000, notablePortfolio: ["Klarna", "Supercell", "Lilium", "Hinge Health"], applyUrl: "https://atomico.com/apply", isActive: true },
+  { id: 32, name: "Vertex Ventures", description: "Global VC network with dedicated funds across Southeast Asia, Israel, US, and China.", website: "https://vertexventures.com", hqCity: "Singapore", hqCountry: "Singapore", regions: ["Southeast Asia", "North America", "Europe", "Asia"], stages: ["seed", "series-a", "series-b"], sectors: ["saas", "fintech", "consumer", "deeptech", "healthtech"], checkSizeMin: 0.5, checkSizeMax: 30, aum: 5000, notablePortfolio: ["Grab", "Nium", "PatSnap", "Creditas"], applyUrl: "https://vertexventures.com/contact", isActive: true },
+  { id: 33, name: "Greycroft", description: "New York-based VC focused on internet and mobile companies.", website: "https://greycroft.com", hqCity: "New York", hqCountry: "USA", regions: ["North America", "Europe"], stages: ["seed", "series-a", "series-b"], sectors: ["consumer", "saas", "marketplace", "fintech", "media"], checkSizeMin: 0.5, checkSizeMax: 25, aum: 2000, notablePortfolio: ["Bumble", "Venmo", "Acorns", "Pluto TV", "Maker Studios"], applyUrl: "https://greycroft.com/contact", isActive: true },
+  { id: 34, name: "Naspers Ventures / Prosus", description: "Global tech investor and operator with $100B+ portfolio across 90+ countries.", website: "https://prosus.com", hqCity: "Amsterdam", hqCountry: "Netherlands", regions: ["Global", "Africa", "MENA", "Latin America", "Southeast Asia"], stages: ["series-b", "growth"], sectors: ["fintech", "edtech", "food-delivery", "e-commerce", "classifieds"], checkSizeMin: 10, checkSizeMax: 1000, aum: 100000, notablePortfolio: ["Tencent", "OLX", "Udemy", "iFood", "PayU"], applyUrl: "https://prosus.com/contact", isActive: true },
+  { id: 35, name: "Kaszek Ventures", description: "Latin America's leading VC firm, backing the region's most successful tech companies.", website: "https://kaszek.com", hqCity: "Buenos Aires", hqCountry: "Argentina", regions: ["Latin America"], stages: ["seed", "series-a", "series-b", "growth"], sectors: ["fintech", "e-commerce", "saas", "healthtech", "edtech"], checkSizeMin: 0.5, checkSizeMax: 50, aum: 2000, notablePortfolio: ["Nubank", "Kavak", "Creditas", "Gympass", "Nuvemshop"], applyUrl: "https://kaszek.com/contact", isActive: true },
 ];
 
+// ── Curated Angel Investors (25 entries) ──────────────────────────────────
 export const ANGEL_INVESTORS_DATA = [
   { id: 1, name: "Naval Ravikant", title: "Co-founder, AngelList", bio: "Prolific angel investor and philosopher of startups. Early backer of Twitter, Uber, and Yammer.", location: "San Francisco, USA", regions: ["North America", "Global"], stages: ["pre-seed", "seed"], sectors: ["saas", "crypto", "consumer", "marketplace"], checkSizeMin: 0.025, checkSizeMax: 0.25, notableInvestments: ["Twitter", "Uber", "Yammer", "Stack Overflow"], angellistUrl: "https://angel.co/naval", isActive: true },
   { id: 2, name: "Ron Conway", title: "Founder, SV Angel", bio: "The 'Godfather of Silicon Valley' — one of the most connected angels in tech.", location: "San Francisco, USA", regions: ["North America"], stages: ["pre-seed", "seed"], sectors: ["consumer", "saas", "marketplace", "fintech"], checkSizeMin: 0.05, checkSizeMax: 0.5, notableInvestments: ["Google", "Facebook", "Twitter", "PayPal", "Airbnb"], linkedinUrl: "https://linkedin.com/in/ronconway", isActive: true },
@@ -34,23 +53,50 @@ export const ANGEL_INVESTORS_DATA = [
   { id: 8, name: "Khailee Ng", title: "Managing Partner, 500 Southeast Asia", bio: "Southeast Asia's most active early-stage investor.", location: "Kuala Lumpur, Malaysia", regions: ["Southeast Asia"], stages: ["pre-seed", "seed"], sectors: ["fintech", "consumer", "saas", "healthtech", "edtech"], checkSizeMin: 0.05, checkSizeMax: 0.5, notableInvestments: ["Grab", "Carousell", "iPrice", "Kumu"], linkedinUrl: "https://linkedin.com/in/khaileeng", isActive: true },
   { id: 9, name: "Paul Buchheit", title: "Creator of Gmail, Partner at YC", bio: "Created Gmail, was #23 at Google, and is now an active YC partner and angel.", location: "San Francisco, USA", regions: ["North America", "Global"], stages: ["pre-seed", "seed"], sectors: ["saas", "consumer", "ai", "developer-tools"], checkSizeMin: 0.025, checkSizeMax: 0.25, notableInvestments: ["Airbnb", "Dropbox", "Stripe", "Reddit"], angellistUrl: "https://angel.co/paul", isActive: true },
   { id: 10, name: "Cyan Banister", title: "Partner, Long Journey Ventures", bio: "Early investor in Uber, SpaceX, and Niantic.", location: "San Francisco, USA", regions: ["North America"], stages: ["pre-seed", "seed"], sectors: ["consumer", "deeptech", "gaming", "saas"], checkSizeMin: 0.025, checkSizeMax: 0.5, notableInvestments: ["Uber", "SpaceX", "Niantic", "Postmates"], angellistUrl: "https://angel.co/cyan", isActive: true },
+  { id: 11, name: "Alexis Ohanian", title: "Co-founder, Reddit & 776", bio: "Reddit co-founder and founder of 776, a VC firm focused on founders.", location: "New York, USA", regions: ["North America", "Global"], stages: ["pre-seed", "seed"], sectors: ["consumer", "saas", "marketplace", "crypto"], checkSizeMin: 0.05, checkSizeMax: 1, notableInvestments: ["Reddit", "Initialized Capital", "Instacart", "Coinbase"], linkedinUrl: "https://linkedin.com/in/alexisohanian", isActive: true },
+  { id: 12, name: "Arlan Hamilton", title: "Founder, Backstage Capital", bio: "Pioneering investor focused on underrepresented founders — women, people of color, and LGBTQ+ entrepreneurs.", location: "Los Angeles, USA", regions: ["North America"], stages: ["pre-seed", "seed"], sectors: ["consumer", "saas", "fintech", "healthtech", "edtech"], checkSizeMin: 0.025, checkSizeMax: 0.25, notableInvestments: ["Mayvenn", "Blavity", "Partpic"], linkedinUrl: "https://linkedin.com/in/arlanwashere", isActive: true },
+  { id: 13, name: "Maha Ibrahim", title: "General Partner, Canaan Partners", bio: "Veteran Silicon Valley investor and one of the most prominent Arab-American VCs.", location: "Palo Alto, USA", regions: ["North America", "MENA"], stages: ["seed", "series-a"], sectors: ["consumer", "fintech", "saas", "marketplace"], checkSizeMin: 0.1, checkSizeMax: 5, notableInvestments: ["Lending Club", "Kabam", "Poshmark"], linkedinUrl: "https://linkedin.com/in/mahaibrahim", isActive: true },
+  { id: 14, name: "Fadi Ghandour", title: "Founder, Aramex & Wamda", bio: "Legendary Arab entrepreneur and investor who built Aramex and now backs MENA startups.", location: "Amman, Jordan", regions: ["MENA", "Africa"], stages: ["seed", "series-a"], sectors: ["logistics", "e-commerce", "fintech", "consumer"], checkSizeMin: 0.1, checkSizeMax: 3, notableInvestments: ["Careem", "Souq.com", "Fetchr", "Anghami"], linkedinUrl: "https://linkedin.com/in/fadighandour", isActive: true },
+  { id: 15, name: "Iyin Aboyeji", title: "Co-founder, Flutterwave & Future Africa", bio: "Serial African entrepreneur and investor backing the next generation of African founders.", location: "Lagos, Nigeria", regions: ["Africa", "Global"], stages: ["pre-seed", "seed"], sectors: ["fintech", "saas", "consumer", "healthtech"], checkSizeMin: 0.025, checkSizeMax: 0.5, notableInvestments: ["Flutterwave", "Andela", "Paystack"], linkedinUrl: "https://linkedin.com/in/iyinoluwa", isActive: true },
+  { id: 16, name: "Vinod Khosla", title: "Founder, Khosla Ventures", bio: "Sun Microsystems co-founder and one of Silicon Valley's most influential investors.", location: "Menlo Park, USA", regions: ["North America", "Global"], stages: ["seed", "series-a"], sectors: ["cleantech", "deeptech", "ai", "biotech", "healthtech"], checkSizeMin: 0.5, checkSizeMax: 20, notableInvestments: ["Square", "DoorDash", "OpenAI", "Impossible Foods"], linkedinUrl: "https://linkedin.com/in/vinodkhosla", isActive: true },
+  { id: 17, name: "Jason Calacanis", title: "Founder, LAUNCH", bio: "Prolific angel and host of This Week in Startups podcast. Early investor in Uber and Tumblr.", location: "Los Angeles, USA", regions: ["North America"], stages: ["pre-seed", "seed"], sectors: ["consumer", "saas", "marketplace", "fintech"], checkSizeMin: 0.025, checkSizeMax: 0.25, notableInvestments: ["Uber", "Tumblr", "Robinhood", "Calm"], angellistUrl: "https://angel.co/jason", isActive: true },
+  { id: 18, name: "Amr Shady", title: "Managing Partner, Algebra Ventures", bio: "Egypt's most prominent early-stage investor, backing the Arab world's top startups.", location: "Cairo, Egypt", regions: ["MENA", "Africa"], stages: ["seed", "series-a"], sectors: ["fintech", "logistics", "e-commerce", "healthtech"], checkSizeMin: 0.1, checkSizeMax: 3, notableInvestments: ["Swvl", "Halan", "Breadfast", "Paymob"], linkedinUrl: "https://linkedin.com/in/amrshady", isActive: true },
+  { id: 19, name: "Adora Cheung", title: "Partner, Initialized Capital", bio: "Former Homejoy CEO and YC partner who now invests in early-stage startups.", location: "San Francisco, USA", regions: ["North America", "Global"], stages: ["pre-seed", "seed"], sectors: ["saas", "consumer", "marketplace", "ai"], checkSizeMin: 0.05, checkSizeMax: 0.5, notableInvestments: ["Coinbase", "Instacart", "Flexport"], linkedinUrl: "https://linkedin.com/in/adoracheung", isActive: true },
+  { id: 20, name: "Peng T. Ong", title: "Managing Partner, Monk's Hill Ventures", bio: "Singapore-based investor focused on Southeast Asian deep-tech and enterprise startups.", location: "Singapore", regions: ["Southeast Asia", "Asia"], stages: ["seed", "series-a"], sectors: ["saas", "ai", "fintech", "deeptech", "enterprise"], checkSizeMin: 0.5, checkSizeMax: 5, notableInvestments: ["Carro", "Janio", "Meiro"], linkedinUrl: "https://linkedin.com/in/pengtong", isActive: true },
+  { id: 21, name: "Kanini Mutooni", title: "MD, Draper Richards Kaplan Foundation", bio: "Pan-African impact investor focused on social enterprises and climate startups.", location: "Nairobi, Kenya", regions: ["Africa", "Global"], stages: ["seed", "series-a"], sectors: ["cleantech", "agtech", "healthtech", "fintech"], checkSizeMin: 0.1, checkSizeMax: 1, notableInvestments: ["M-KOPA", "Sanergy", "Twiga Foods"], linkedinUrl: "https://linkedin.com/in/kaninim", isActive: true },
+  { id: 22, name: "Rania Nassar", title: "Former CEO, HSBC Middle East", bio: "Prominent MENA investor and board member backing fintech and consumer startups.", location: "Dubai, UAE", regions: ["MENA"], stages: ["seed", "series-a"], sectors: ["fintech", "consumer", "healthtech", "edtech"], checkSizeMin: 0.1, checkSizeMax: 2, notableInvestments: ["Sarwa", "Baraka", "Ziina"], linkedinUrl: "https://linkedin.com/in/ranianassar", isActive: true },
+  { id: 23, name: "Marcelo Claure", title: "CEO, Claure Group", bio: "Former SoftBank COO and prolific Latin American tech investor.", location: "Miami, USA", regions: ["Latin America", "North America"], stages: ["series-a", "series-b"], sectors: ["fintech", "consumer", "logistics", "e-commerce"], checkSizeMin: 1, checkSizeMax: 20, notableInvestments: ["Uber", "WeWork", "Rappi", "Gympass"], linkedinUrl: "https://linkedin.com/in/marceloclaure", isActive: true },
+  { id: 24, name: "Shravin Mittal", title: "Founder, Unbound", bio: "London-based angel investor with focus on European and Indian tech startups.", location: "London, UK", regions: ["Europe", "South Asia"], stages: ["seed", "series-a"], sectors: ["saas", "fintech", "consumer", "deeptech"], checkSizeMin: 0.1, checkSizeMax: 2, notableInvestments: ["Deliveroo", "Monzo", "Lendable"], linkedinUrl: "https://linkedin.com/in/shravinmittal", isActive: true },
+  { id: 25, name: "Omobola Johnson", title: "Partner, TLcom Capital", bio: "Former Nigerian Minister of ICT and Africa's most influential tech policy leader turned investor.", location: "Lagos, Nigeria", regions: ["Africa"], stages: ["seed", "series-a"], sectors: ["fintech", "saas", "healthtech", "agtech"], checkSizeMin: 0.1, checkSizeMax: 3, notableInvestments: ["Andela", "Twiga Foods", "uLesson"], linkedinUrl: "https://linkedin.com/in/omobola", isActive: true },
 ];
 
+// ── Curated Grants & Programs (22 entries) ────────────────────────────────
 export const GRANTS_DATA = [
-  { id: 1, name: "SBIR / STTR Program", provider: "US Federal Government", description: "America's largest source of early-stage R&D funding for small businesses. Non-dilutive grants across 11 federal agencies.", type: "government" as const, regions: ["North America"], sectors: ["deeptech", "biotech", "defense", "energy", "healthtech"], stages: ["pre-seed", "seed"], amountMin: 50000, amountMax: 2000000, currency: "USD", deadline: "Rolling (varies by agency)", isEquityFree: true, requirements: "US-based small business, R&D focus, meet agency-specific criteria", applyUrl: "https://www.sbir.gov/apply-for-funding", isActive: true },
-  { id: 2, name: "Horizon Europe", provider: "European Commission", description: "EU's key funding programme for research and innovation with €95.5 billion budget.", type: "eu" as const, regions: ["Europe", "Global"], sectors: ["deeptech", "cleantech", "healthtech", "ai", "manufacturing"], stages: ["seed", "series-a"], amountMin: 50000, amountMax: 5000000, currency: "EUR", deadline: "Rolling (multiple calls per year)", isEquityFree: true, requirements: "EU-based or associated country, collaborative research projects", applyUrl: "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/home", isActive: true },
-  { id: 3, name: "EIC Accelerator", provider: "European Innovation Council", description: "Flagship EU program for breakthrough deep-tech startups — up to €2.5M grant + €15M equity.", type: "eu" as const, regions: ["Europe"], sectors: ["deeptech", "cleantech", "biotech", "ai", "spacetech"], stages: ["seed", "series-a"], amountMin: 500000, amountMax: 2500000, currency: "EUR", deadline: "3 cut-offs per year", isEquityFree: false, requirements: "EU/associated country SME, breakthrough innovation, scalable business model", applyUrl: "https://eic.ec.europa.eu/eic-funding-opportunities/eic-accelerator_en", isActive: true },
+  { id: 1, name: "SBIR / STTR Program", provider: "US Federal Government", description: "America's largest source of early-stage R&D funding for small businesses. Non-dilutive grants across 11 federal agencies.", type: "government" as const, regions: ["North America"], sectors: ["deeptech", "biotech", "defense", "energy", "healthtech"], stages: ["pre-seed", "seed"], amountMin: 50000, amountMax: 2000000, currency: "USD", deadline: "Rolling (varies by agency)", isEquityFree: true, requirements: "US-based small business, R&D focus", applyUrl: "https://www.sbir.gov/apply-for-funding", isActive: true },
+  { id: 2, name: "Horizon Europe", provider: "European Commission", description: "EU's key funding programme for research and innovation with €95.5 billion budget.", type: "eu" as const, regions: ["Europe", "Global"], sectors: ["deeptech", "cleantech", "healthtech", "ai", "manufacturing"], stages: ["seed", "series-a"], amountMin: 50000, amountMax: 5000000, currency: "EUR", deadline: "Rolling (multiple calls per year)", isEquityFree: true, requirements: "EU-based or associated country", applyUrl: "https://ec.europa.eu/info/funding-tenders", isActive: true },
+  { id: 3, name: "EIC Accelerator", provider: "European Innovation Council", description: "Flagship EU program for breakthrough deep-tech startups — up to €2.5M grant + €15M equity.", type: "eu" as const, regions: ["Europe"], sectors: ["deeptech", "cleantech", "biotech", "ai", "spacetech"], stages: ["seed", "series-a"], amountMin: 500000, amountMax: 2500000, currency: "EUR", deadline: "3 cut-offs per year", isEquityFree: false, requirements: "EU/associated country SME, breakthrough innovation", applyUrl: "https://eic.ec.europa.eu/eic-funding-opportunities/eic-accelerator_en", isActive: true },
   { id: 4, name: "Innovate UK Smart Grants", provider: "Innovate UK", description: "UK government grants for game-changing R&D projects with commercial potential.", type: "government" as const, regions: ["Europe"], sectors: ["deeptech", "cleantech", "healthtech", "ai", "manufacturing"], stages: ["pre-seed", "seed", "series-a"], amountMin: 25000, amountMax: 2000000, currency: "GBP", deadline: "Rolling competitions", isEquityFree: true, requirements: "UK-based business, R&D project with clear commercial route", applyUrl: "https://www.ukri.org/councils/innovate-uk/", isActive: true },
-  { id: 5, name: "Google for Startups Accelerator", provider: "Google", description: "Equity-free support including cloud credits, mentorship, and technical training.", type: "corporate" as const, regions: ["Global", "Africa", "MENA", "Southeast Asia", "Latin America"], sectors: ["ai", "saas", "fintech", "healthtech", "edtech"], stages: ["seed", "series-a"], amountMin: 100000, amountMax: 200000, currency: "USD", deadline: "Rolling applications", isEquityFree: true, requirements: "Seed to Series A, tech-focused startup", applyUrl: "https://startup.google.com/programs/accelerator/", isActive: true },
+  { id: 5, name: "Google for Startups Accelerator", provider: "Google", description: "Equity-free accelerator providing $200K in Google Cloud credits plus mentorship.", type: "corporate" as const, regions: ["Global", "Africa", "Latin America", "MENA", "Southeast Asia"], sectors: ["ai", "saas", "fintech", "healthtech", "edtech"], stages: ["seed", "series-a"], amountMin: 100000, amountMax: 200000, currency: "USD", deadline: "Rolling cohorts", isEquityFree: true, requirements: "Seed to Series A startup, AI/tech focus", applyUrl: "https://startup.google.com/programs/accelerator/", isActive: true },
   { id: 6, name: "AWS Activate", provider: "Amazon Web Services", description: "Up to $100K in AWS credits plus technical support and training.", type: "corporate" as const, regions: ["Global"], sectors: ["saas", "ai", "fintech", "healthtech", "e-commerce"], stages: ["pre-seed", "seed"], amountMin: 1000, amountMax: 100000, currency: "USD", deadline: "Rolling", isEquityFree: true, requirements: "Early-stage startup, not yet an AWS customer at scale", applyUrl: "https://aws.amazon.com/activate/", isActive: true },
-  { id: 7, name: "MENA Region ITIDA Grants", provider: "Information Technology Industry Development Agency (Egypt)", description: "Egyptian government grants for tech startups and digital transformation projects.", type: "government" as const, regions: ["MENA", "Africa"], sectors: ["saas", "fintech", "e-commerce", "ai", "edtech"], stages: ["pre-seed", "seed"], amountMin: 10000, amountMax: 250000, currency: "USD", deadline: "Rolling", isEquityFree: true, requirements: "Egypt-registered company, technology focus", applyUrl: "https://itida.gov.eg", isActive: true },
-  { id: 8, name: "Tony Elumelu Foundation Grant", provider: "Tony Elumelu Foundation", description: "Flagship African entrepreneurship program — $5,000 seed capital + mentorship for 1,000 entrepreneurs annually.", type: "foundation" as const, regions: ["Africa"], sectors: ["fintech", "agtech", "healthtech", "consumer", "manufacturing"], stages: ["pre-seed"], amountMin: 5000, amountMax: 5000, currency: "USD", deadline: "Annual (January–March)", isEquityFree: true, requirements: "African entrepreneur, early-stage business, commitment to 12-week program", applyUrl: "https://www.tonyelumelufoundation.org/teep", isActive: true },
+  { id: 7, name: "ITIDA Grants (Egypt)", provider: "Information Technology Industry Development Agency", description: "Egyptian government grants for tech startups and digital transformation projects.", type: "government" as const, regions: ["MENA", "Africa"], sectors: ["saas", "fintech", "e-commerce", "ai", "edtech"], stages: ["pre-seed", "seed"], amountMin: 10000, amountMax: 250000, currency: "USD", deadline: "Rolling", isEquityFree: true, requirements: "Egypt-registered company, technology focus", applyUrl: "https://itida.gov.eg", isActive: true },
+  { id: 8, name: "Tony Elumelu Foundation Grant", provider: "Tony Elumelu Foundation", description: "Flagship African entrepreneurship program — $5,000 seed capital + mentorship for 1,000 entrepreneurs annually.", type: "foundation" as const, regions: ["Africa"], sectors: ["fintech", "agtech", "healthtech", "consumer", "manufacturing"], stages: ["pre-seed"], amountMin: 5000, amountMax: 5000, currency: "USD", deadline: "Annual (January–March)", isEquityFree: true, requirements: "African entrepreneur, early-stage business", applyUrl: "https://www.tonyelumelufoundation.org/teep", isActive: true },
   { id: 9, name: "Startup Chile SCALE", provider: "Government of Chile / CORFO", description: "Chilean government program for high-impact startups with up to $80K equity-free funding.", type: "government" as const, regions: ["Latin America", "Global"], sectors: ["saas", "fintech", "agtech", "cleantech", "healthtech"], stages: ["seed", "series-a"], amountMin: 30000, amountMax: 80000, currency: "USD", deadline: "Semi-annual", isEquityFree: true, requirements: "Startup with traction, willing to operate in Chile for 6 months", applyUrl: "https://startupchile.org", isActive: true },
   { id: 10, name: "Microsoft for Startups Founders Hub", provider: "Microsoft", description: "Up to $150K in Azure credits plus GitHub, LinkedIn, and Microsoft 365 benefits.", type: "corporate" as const, regions: ["Global"], sectors: ["saas", "ai", "fintech", "healthtech", "developer-tools"], stages: ["pre-seed", "seed", "series-a"], amountMin: 1000, amountMax: 150000, currency: "USD", deadline: "Rolling", isEquityFree: true, requirements: "Early-stage startup, no prior Microsoft Founders Hub membership", applyUrl: "https://foundershub.startups.microsoft.com/", isActive: true },
-  { id: 11, name: "Stripe Atlas + Stripe Climate", provider: "Stripe", description: "Incorporate your startup and access Stripe's global payments infrastructure with startup credits.", type: "corporate" as const, regions: ["Global"], sectors: ["fintech", "saas", "e-commerce", "marketplace"], stages: ["pre-seed", "seed"], amountMin: 5000, amountMax: 20000, currency: "USD", deadline: "Rolling", isEquityFree: true, requirements: "New startup looking to incorporate and use Stripe payments", applyUrl: "https://stripe.com/atlas", isActive: true },
-  { id: 12, name: "DIFC Fintech Hive Grant", provider: "Dubai International Financial Centre", description: "MENA's leading fintech accelerator with funding and regulatory sandbox access.", type: "government" as const, regions: ["MENA"], sectors: ["fintech", "insurtech", "regtech", "wealthtech"], stages: ["seed", "series-a"], amountMin: 50000, amountMax: 200000, currency: "USD", deadline: "Annual", isEquityFree: false, requirements: "Fintech startup, willing to operate in DIFC, regulatory compliance", applyUrl: "https://fintechhive.difc.ae", isActive: true },
+  { id: 11, name: "Stripe Atlas", provider: "Stripe", description: "Incorporate your startup and access Stripe's global payments infrastructure with startup credits.", type: "corporate" as const, regions: ["Global"], sectors: ["fintech", "saas", "e-commerce", "marketplace"], stages: ["pre-seed", "seed"], amountMin: 5000, amountMax: 20000, currency: "USD", deadline: "Rolling", isEquityFree: true, requirements: "New startup looking to incorporate and use Stripe payments", applyUrl: "https://stripe.com/atlas", isActive: true },
+  { id: 12, name: "DIFC Fintech Hive Grant", provider: "Dubai International Financial Centre", description: "MENA's leading fintech accelerator with funding and regulatory sandbox access.", type: "government" as const, regions: ["MENA"], sectors: ["fintech", "insurtech", "regtech", "wealthtech"], stages: ["seed", "series-a"], amountMin: 50000, amountMax: 200000, currency: "USD", deadline: "Annual", isEquityFree: false, requirements: "Fintech startup, willing to operate in DIFC", applyUrl: "https://fintechhive.difc.ae", isActive: true },
+  { id: 13, name: "ADGM Regulatory Lab (RegLab)", provider: "Abu Dhabi Global Market", description: "Abu Dhabi's regulatory sandbox for fintech and financial innovation startups.", type: "government" as const, regions: ["MENA"], sectors: ["fintech", "insurtech", "regtech", "wealthtech"], stages: ["seed", "series-a"], amountMin: 0, amountMax: 100000, currency: "USD", deadline: "Rolling", isEquityFree: true, requirements: "Fintech startup, UAE presence or willingness to establish one", applyUrl: "https://www.adgm.com/fsra/regulatory-framework/reglab", isActive: true },
+  { id: 14, name: "SMART Grant (Singapore)", provider: "Enterprise Singapore", description: "Singapore government co-funding for deep-tech and innovation projects.", type: "government" as const, regions: ["Southeast Asia"], sectors: ["deeptech", "ai", "cleantech", "healthtech", "manufacturing"], stages: ["seed", "series-a"], amountMin: 50000, amountMax: 1000000, currency: "SGD", deadline: "Rolling", isEquityFree: true, requirements: "Singapore-registered company, R&D focus", applyUrl: "https://www.enterprisesg.gov.sg/financial-support/grants", isActive: true },
+  { id: 15, name: "Startup India Seed Fund Scheme", provider: "Government of India", description: "Indian government seed fund providing up to INR 50 lakh to early-stage startups.", type: "government" as const, regions: ["South Asia"], sectors: ["saas", "fintech", "agtech", "healthtech", "edtech"], stages: ["pre-seed", "seed"], amountMin: 20000, amountMax: 60000, currency: "USD", deadline: "Rolling", isEquityFree: true, requirements: "DPIIT-recognized startup, incorporated in India", applyUrl: "https://seedfund.startupindia.gov.in/", isActive: true },
+  { id: 16, name: "Techstars Startup Weekend", provider: "Techstars", description: "Global 54-hour startup events with mentorship and networking opportunities.", type: "foundation" as const, regions: ["Global"], sectors: ["saas", "consumer", "fintech", "healthtech", "edtech"], stages: ["pre-seed"], amountMin: 0, amountMax: 5000, currency: "USD", deadline: "Rolling events", isEquityFree: true, requirements: "Any entrepreneur or aspiring founder", applyUrl: "https://www.techstars.com/communities/startup-weekend", isActive: true },
+  { id: 17, name: "Cartier Women's Initiative", provider: "Cartier", description: "International entrepreneurship program for women-led businesses with up to $100K in grants.", type: "foundation" as const, regions: ["Global"], sectors: ["saas", "cleantech", "healthtech", "consumer", "fintech"], stages: ["seed", "series-a"], amountMin: 30000, amountMax: 100000, currency: "USD", deadline: "Annual (October)", isEquityFree: true, requirements: "Women-led business, 1-3 years of operation, positive social/environmental impact", applyUrl: "https://www.cartierwomensinitiative.com", isActive: true },
+  { id: 18, name: "Echoing Green Fellowship", provider: "Echoing Green", description: "Fellowship providing $80K–$90K to social entrepreneurs with bold ideas.", type: "foundation" as const, regions: ["Global"], sectors: ["edtech", "healthtech", "cleantech", "consumer", "fintech"], stages: ["pre-seed", "seed"], amountMin: 80000, amountMax: 90000, currency: "USD", deadline: "Annual (January)", isEquityFree: true, requirements: "Early-stage social entrepreneur, full-time commitment", applyUrl: "https://echoinggreen.org/fellowship/", isActive: true },
+  { id: 19, name: "Halcyon Incubator", provider: "Halcyon", description: "Washington DC-based incubator for social entrepreneurs with housing and stipend.", type: "foundation" as const, regions: ["North America"], sectors: ["cleantech", "healthtech", "edtech", "consumer", "saas"], stages: ["pre-seed", "seed"], amountMin: 10000, amountMax: 25000, currency: "USD", deadline: "Annual (December)", isEquityFree: true, requirements: "Social entrepreneur, early-stage, willing to relocate to DC for 5 months", applyUrl: "https://halcyon.house/incubator/", isActive: true },
+  { id: 20, name: "Seedstars World", provider: "Seedstars", description: "Global startup competition for emerging market startups with $500K prize pool.", type: "foundation" as const, regions: ["Africa", "MENA", "Latin America", "Southeast Asia", "South Asia"], sectors: ["fintech", "agtech", "healthtech", "edtech", "saas"], stages: ["pre-seed", "seed"], amountMin: 0, amountMax: 500000, currency: "USD", deadline: "Annual (varies by country)", isEquityFree: false, requirements: "Startup from an emerging market, early-stage, scalable model", applyUrl: "https://www.seedstars.com/programs/seedstars-world/", isActive: true },
+  { id: 21, name: "Arab Fund for Economic & Social Development", provider: "AFESD", description: "Pan-Arab development fund supporting tech and innovation projects across Arab countries.", type: "government" as const, regions: ["MENA"], sectors: ["fintech", "agtech", "cleantech", "healthtech", "infrastructure"], stages: ["seed", "series-a"], amountMin: 100000, amountMax: 2000000, currency: "USD", deadline: "Rolling", isEquityFree: true, requirements: "Arab-country registered entity, development impact focus", applyUrl: "https://www.arabfund.org", isActive: true },
+  { id: 22, name: "Founders Factory Africa", provider: "Founders Factory Africa", description: "Pan-African accelerator providing equity-free support, $100K, and a 6-month program.", type: "foundation" as const, regions: ["Africa"], sectors: ["fintech", "agtech", "healthtech", "edtech", "saas"], stages: ["seed"], amountMin: 100000, amountMax: 100000, currency: "USD", deadline: "Rolling cohorts", isEquityFree: false, requirements: "African startup, seed stage, scalable tech model", applyUrl: "https://foundersfactory.com/africa", isActive: true },
 ];
 
+// ── Curated Venture Lawyers (20 entries) ──────────────────────────────────
 export const VENTURE_LAWYERS_DATA = [
   { id: 1, name: "Wilson Sonsini Goodrich & Rosati", firm: "Wilson Sonsini", title: "Leading Startup Law Firm", bio: "The go-to law firm for Silicon Valley startups. Represents more VC-backed companies than any other firm.", location: "Palo Alto, USA", regions: ["North America", "Europe"], specializations: ["term-sheets", "equity", "m&a", "ipo", "ip", "employment"], languages: ["English"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://wsgr.com", isActive: true },
   { id: 2, name: "Cooley LLP", firm: "Cooley LLP", title: "Startup & VC Law Firm", bio: "Globally recognized for startup formation, VC financing, and M&A. Offers deferred fee arrangements for early-stage companies.", location: "San Francisco, USA", regions: ["North America", "Europe", "Asia"], specializations: ["term-sheets", "equity", "m&a", "ip", "employment", "corporate"], languages: ["English"], startupFriendly: true, offersFreeConsult: true, websiteUrl: "https://cooley.com", isActive: true },
@@ -61,13 +107,22 @@ export const VENTURE_LAWYERS_DATA = [
   { id: 7, name: "Al Tamimi & Company", firm: "Al Tamimi & Company", title: "MENA Startup & Corporate Law", bio: "The largest law firm in the Middle East with dedicated startup and venture capital practice.", location: "Dubai, UAE", regions: ["MENA"], specializations: ["corporate", "equity", "ip", "employment", "regulatory", "m&a"], languages: ["English", "Arabic"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://tamimi.com", isActive: true },
   { id: 8, name: "Hadef & Partners", firm: "Hadef & Partners", title: "UAE Startup & Commercial Law", bio: "UAE-based firm with strong focus on tech startups, DIFC regulations, and venture financing.", location: "Dubai, UAE", regions: ["MENA"], specializations: ["corporate", "equity", "regulatory", "ip", "employment"], languages: ["English", "Arabic"], startupFriendly: true, offersFreeConsult: true, websiteUrl: "https://hadefpartners.com", isActive: true },
   { id: 9, name: "Bowmans", firm: "Bowmans", title: "Pan-African Startup & Corporate Law", bio: "Africa's leading independent law firm with offices in 8 African countries.", location: "Johannesburg, South Africa", regions: ["Africa"], specializations: ["corporate", "equity", "regulatory", "m&a", "ip"], languages: ["English", "French", "Portuguese"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://bowmanslaw.com", isActive: true },
-  { id: 10, name: "Rajah & Tann Asia", firm: "Rajah & Tann", title: "Southeast Asia Startup & VC Law", bio: "Southeast Asia's largest law firm network with startup and venture capital expertise across 10 countries.", location: "Singapore", regions: ["Southeast Asia"], specializations: ["corporate", "equity", "ip", "employment", "regulatory", "m&a"], languages: ["English", "Mandarin", "Bahasa", "Thai", "Vietnamese"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://rajahTann.com", isActive: true },
+  { id: 10, name: "Rajah & Tann Asia", firm: "Rajah & Tann", title: "Southeast Asia Startup & VC Law", bio: "Southeast Asia's largest law firm network with startup and venture capital expertise across 10 countries.", location: "Singapore", regions: ["Southeast Asia"], specializations: ["corporate", "equity", "ip", "employment", "regulatory", "m&a"], languages: ["English", "Mandarin", "Bahasa", "Thai", "Vietnamese"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://rajahtann.com", isActive: true },
   { id: 11, name: "Fenwick & West", firm: "Fenwick & West", title: "Silicon Valley Tech Law", bio: "Boutique firm exclusively serving technology and life sciences companies. Deep VC expertise.", location: "Silicon Valley, USA", regions: ["North America"], specializations: ["term-sheets", "equity", "ip", "employment", "m&a", "ipo"], languages: ["English"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://fenwick.com", isActive: true },
   { id: 12, name: "Latham & Watkins", firm: "Latham & Watkins", title: "Global Startup & VC Law", bio: "Global firm with one of the world's largest venture capital practices.", location: "Los Angeles, USA", regions: ["North America", "Europe", "Asia", "MENA"], specializations: ["term-sheets", "equity", "m&a", "ipo", "ip", "regulatory"], languages: ["English", "French", "German", "Spanish", "Arabic", "Mandarin"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://lw.com", isActive: true },
+  { id: 13, name: "Afridi & Angell", firm: "Afridi & Angell", title: "UAE & Gulf Corporate Law", bio: "One of the oldest and most respected law firms in the UAE, specializing in corporate and commercial law.", location: "Dubai, UAE", regions: ["MENA"], specializations: ["corporate", "equity", "regulatory", "ip", "employment", "m&a"], languages: ["English", "Arabic", "Urdu"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://afridi-angell.com", isActive: true },
+  { id: 14, name: "Baker McKenzie", firm: "Baker McKenzie", title: "Global Startup & Tech Law", bio: "World's largest law firm by revenue with a dedicated startup and emerging companies practice.", location: "Chicago, USA", regions: ["Global", "North America", "Europe", "MENA", "Africa", "Asia"], specializations: ["corporate", "equity", "m&a", "ip", "employment", "regulatory", "ipo"], languages: ["English", "French", "German", "Spanish", "Arabic", "Mandarin", "Portuguese"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://bakermckenzie.com", isActive: true },
+  { id: 15, name: "Simmons & Simmons", firm: "Simmons & Simmons", title: "European & MENA Tech Law", bio: "International firm with strong fintech and startup practice across Europe and the Middle East.", location: "London, UK", regions: ["Europe", "MENA", "Asia"], specializations: ["fintech", "equity", "regulatory", "ip", "employment", "m&a"], languages: ["English", "French", "German", "Arabic", "Dutch"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://simmons-simmons.com", isActive: true },
+  { id: 16, name: "Clyde & Co", firm: "Clyde & Co", title: "MENA & Africa Corporate Law", bio: "International firm with the largest presence in the MENA region and growing Africa practice.", location: "Dubai, UAE", regions: ["MENA", "Africa", "Europe"], specializations: ["corporate", "regulatory", "ip", "employment", "m&a", "insurance"], languages: ["English", "Arabic", "French"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://clydeco.com", isActive: true },
+  { id: 17, name: "Webber Wentzel", firm: "Webber Wentzel", title: "South Africa & Africa Startup Law", bio: "South Africa's leading corporate law firm with pan-African capabilities.", location: "Johannesburg, South Africa", regions: ["Africa"], specializations: ["corporate", "equity", "m&a", "ip", "employment", "regulatory"], languages: ["English", "Afrikaans", "Zulu", "Sotho"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://webberwentzel.com", isActive: true },
+  { id: 18, name: "Khaitan & Co", firm: "Khaitan & Co", title: "India Startup & VC Law", bio: "India's premier law firm for startups and venture capital transactions.", location: "Mumbai, India", regions: ["South Asia"], specializations: ["corporate", "equity", "m&a", "ip", "employment", "regulatory", "ipo"], languages: ["English", "Hindi"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://khaitanco.com", isActive: true },
+  { id: 19, name: "Pinheiro Neto Advogados", firm: "Pinheiro Neto", title: "Brazil & Latin America Startup Law", bio: "Brazil's largest law firm with a dedicated startup and venture capital practice.", location: "São Paulo, Brazil", regions: ["Latin America"], specializations: ["corporate", "equity", "m&a", "ip", "employment", "regulatory"], languages: ["Portuguese", "English", "Spanish"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://pinheironeto.com.br", isActive: true },
+  { id: 20, name: "Carey Olsen", firm: "Carey Olsen", title: "Offshore & Cayman Islands Startup Law", bio: "Specialist offshore law firm for Cayman Islands, BVI, and Jersey structures — essential for international startups.", location: "Cayman Islands", regions: ["Global", "North America", "Europe"], specializations: ["corporate", "equity", "cayman-structures", "bvi", "offshore", "ipo"], languages: ["English"], startupFriendly: true, offersFreeConsult: false, websiteUrl: "https://careyolsen.com", isActive: true },
 ];
 
+// ── Router ─────────────────────────────────────────────────────────────────
 export const resourcesRouter = router({
-  // ── VC Firms ──────────────────────────────────────────────────────────────
+  // ── VC Firms (curated + user-submitted) ───────────────────────────────────
   getVcFirms: publicProcedure
     .input(z.object({
       search: z.string().optional(),
@@ -75,29 +130,54 @@ export const resourcesRouter = router({
       sector: z.string().optional(),
       region: z.string().optional(),
     }).optional())
-    .query(({ input }) => {
-      let data = VC_FIRMS_DATA;
+    .query(async ({ input }) => {
+      // Get curated data
+      let curated = VC_FIRMS_DATA as any[];
       if (input?.search) {
         const q = input.search.toLowerCase();
-        data = data.filter(f =>
+        curated = curated.filter(f =>
           f.name.toLowerCase().includes(q) ||
           f.description.toLowerCase().includes(q) ||
           (f.notablePortfolio as string[]).some(p => p.toLowerCase().includes(q))
         );
       }
-      if (input?.stage) {
-        data = data.filter(f => (f.stages as string[]).includes(input.stage!));
-      }
-      if (input?.sector) {
-        data = data.filter(f => (f.sectors as string[]).some(s => s.includes(input.sector!.toLowerCase())));
-      }
-      if (input?.region) {
-        data = data.filter(f => (f.regions as string[]).some(r => r.toLowerCase().includes(input.region!.toLowerCase())));
-      }
-      return data;
+      if (input?.stage) curated = curated.filter(f => (f.stages as string[]).includes(input.stage!));
+      if (input?.sector) curated = curated.filter(f => (f.sectors as string[]).some(s => s.includes(input.sector!.toLowerCase())));
+      if (input?.region) curated = curated.filter(f => (f.regions as string[]).some(r => r.toLowerCase().includes(input.region!.toLowerCase())));
+
+      // Get user-submitted VC profiles
+      let userVcs: any[] = [];
+      try {
+        const submitted = await db.getPublicKycVcProfiles();
+        userVcs = submitted.map((v: any, i: number) => ({
+          id: `user-vc-${v.id || i}`,
+          name: v.firmName,
+          description: v.description || '',
+          website: v.website || '',
+          hqCity: v.hqCity || '',
+          hqCountry: v.hqCountry || '',
+          regions: v.regions || [],
+          stages: v.stages || [],
+          sectors: v.sectors || [],
+          checkSizeMin: v.checkSizeMin,
+          checkSizeMax: v.checkSizeMax,
+          aum: v.aum,
+          notablePortfolio: v.notablePortfolio || [],
+          applyUrl: v.applyUrl || v.linkedinUrl || '',
+          isActive: true,
+          isCommunity: true,
+        }));
+        if (input?.search) {
+          const q = input.search.toLowerCase();
+          userVcs = userVcs.filter(f => f.name.toLowerCase().includes(q) || f.description.toLowerCase().includes(q));
+        }
+        if (input?.region) userVcs = userVcs.filter(f => (f.regions as string[]).some(r => r.toLowerCase().includes(input.region!.toLowerCase())));
+      } catch {}
+
+      return [...curated, ...userVcs];
     }),
 
-  // ── Angel Investors ───────────────────────────────────────────────────────
+  // ── Angel Investors (curated + user-submitted) ────────────────────────────
   getAngelInvestors: publicProcedure
     .input(z.object({
       search: z.string().optional(),
@@ -105,26 +185,48 @@ export const resourcesRouter = router({
       sector: z.string().optional(),
       region: z.string().optional(),
     }).optional())
-    .query(({ input }) => {
-      let data = ANGEL_INVESTORS_DATA;
+    .query(async ({ input }) => {
+      let curated = ANGEL_INVESTORS_DATA as any[];
       if (input?.search) {
         const q = input.search.toLowerCase();
-        data = data.filter(a =>
+        curated = curated.filter(a =>
           a.name.toLowerCase().includes(q) ||
           a.bio.toLowerCase().includes(q) ||
           (a.notableInvestments as string[]).some(i => i.toLowerCase().includes(q))
         );
       }
-      if (input?.stage) {
-        data = data.filter(a => (a.stages as string[]).includes(input.stage!));
-      }
-      if (input?.sector) {
-        data = data.filter(a => (a.sectors as string[]).some(s => s.includes(input.sector!.toLowerCase())));
-      }
-      if (input?.region) {
-        data = data.filter(a => (a.regions as string[]).some(r => r.toLowerCase().includes(input.region!.toLowerCase())));
-      }
-      return data;
+      if (input?.stage) curated = curated.filter(a => (a.stages as string[]).includes(input.stage!));
+      if (input?.sector) curated = curated.filter(a => (a.sectors as string[]).some(s => s.includes(input.sector!.toLowerCase())));
+      if (input?.region) curated = curated.filter(a => (a.regions as string[]).some(r => r.toLowerCase().includes(input.region!.toLowerCase())));
+
+      let userAngels: any[] = [];
+      try {
+        const submitted = await db.getPublicKycAngelProfiles();
+        userAngels = submitted.map((a: any, i: number) => ({
+          id: `user-angel-${a.id || i}`,
+          name: a.displayName,
+          title: a.title || 'Angel Investor',
+          bio: a.bio || '',
+          location: a.location || '',
+          regions: a.regions || [],
+          stages: a.stages || [],
+          sectors: a.sectors || [],
+          checkSizeMin: a.checkSizeMin,
+          checkSizeMax: a.checkSizeMax,
+          notableInvestments: a.notableInvestments || [],
+          linkedinUrl: a.linkedinUrl || '',
+          angellistUrl: a.angellistUrl || '',
+          isActive: true,
+          isCommunity: true,
+        }));
+        if (input?.search) {
+          const q = input.search.toLowerCase();
+          userAngels = userAngels.filter(a => a.name.toLowerCase().includes(q) || a.bio.toLowerCase().includes(q));
+        }
+        if (input?.region) userAngels = userAngels.filter(a => (a.regions as string[]).some(r => r.toLowerCase().includes(input.region!.toLowerCase())));
+      } catch {}
+
+      return [...curated, ...userAngels];
     }),
 
   // ── Grants ────────────────────────────────────────────────────────────────
@@ -137,7 +239,7 @@ export const resourcesRouter = router({
       equityFreeOnly: z.boolean().optional(),
     }).optional())
     .query(({ input }) => {
-      let data = GRANTS_DATA;
+      let data = GRANTS_DATA as any[];
       if (input?.search) {
         const q = input.search.toLowerCase();
         data = data.filter(g =>
@@ -146,22 +248,14 @@ export const resourcesRouter = router({
           g.description.toLowerCase().includes(q)
         );
       }
-      if (input?.type) {
-        data = data.filter(g => g.type === input.type);
-      }
-      if (input?.sector) {
-        data = data.filter(g => (g.sectors as string[]).some(s => s.includes(input.sector!.toLowerCase())));
-      }
-      if (input?.region) {
-        data = data.filter(g => (g.regions as string[]).some(r => r.toLowerCase().includes(input.region!.toLowerCase())));
-      }
-      if (input?.equityFreeOnly) {
-        data = data.filter(g => g.isEquityFree);
-      }
+      if (input?.type) data = data.filter(g => g.type === input.type);
+      if (input?.sector) data = data.filter(g => (g.sectors as string[]).some(s => s.includes(input.sector!.toLowerCase())));
+      if (input?.region) data = data.filter(g => (g.regions as string[]).some(r => r.toLowerCase().includes(input.region!.toLowerCase())));
+      if (input?.equityFreeOnly) data = data.filter(g => g.isEquityFree);
       return data;
     }),
 
-  // ── Venture Lawyers ───────────────────────────────────────────────────────
+  // ── Venture Lawyers (curated + user-submitted) ────────────────────────────
   getVentureLawyers: publicProcedure
     .input(z.object({
       search: z.string().optional(),
@@ -169,25 +263,48 @@ export const resourcesRouter = router({
       specialization: z.string().optional(),
       freeConsultOnly: z.boolean().optional(),
     }).optional())
-    .query(({ input }) => {
-      let data = VENTURE_LAWYERS_DATA;
+    .query(async ({ input }) => {
+      let curated = VENTURE_LAWYERS_DATA as any[];
       if (input?.search) {
         const q = input.search.toLowerCase();
-        data = data.filter(l =>
+        curated = curated.filter(l =>
           l.name.toLowerCase().includes(q) ||
           l.firm.toLowerCase().includes(q) ||
           l.bio.toLowerCase().includes(q)
         );
       }
-      if (input?.region) {
-        data = data.filter(l => (l.regions as string[]).some(r => r.toLowerCase().includes(input.region!.toLowerCase())));
-      }
-      if (input?.specialization) {
-        data = data.filter(l => (l.specializations as string[]).some(s => s.includes(input.specialization!.toLowerCase())));
-      }
-      if (input?.freeConsultOnly) {
-        data = data.filter(l => l.offersFreeConsult);
-      }
-      return data;
+      if (input?.region) curated = curated.filter(l => (l.regions as string[]).some(r => r.toLowerCase().includes(input.region!.toLowerCase())));
+      if (input?.specialization) curated = curated.filter(l => (l.specializations as string[]).some(s => s.includes(input.specialization!.toLowerCase())));
+      if (input?.freeConsultOnly) curated = curated.filter(l => l.offersFreeConsult);
+
+      let userLawyers: any[] = [];
+      try {
+        const submitted = await db.getPublicKycLawyerProfiles();
+        userLawyers = submitted.map((l: any, i: number) => ({
+          id: `user-lawyer-${l.id || i}`,
+          name: l.displayName,
+          firm: l.firmName || '',
+          title: l.title || 'Venture Lawyer',
+          bio: l.bio || '',
+          location: l.location || '',
+          regions: l.regions || [],
+          specializations: l.specializations || [],
+          languages: l.languages || ['English'],
+          startupFriendly: true,
+          offersFreeConsult: l.offersFreeConsult || false,
+          websiteUrl: l.websiteUrl || '',
+          linkedinUrl: l.linkedinUrl || '',
+          isActive: true,
+          isCommunity: true,
+        }));
+        if (input?.search) {
+          const q = input.search.toLowerCase();
+          userLawyers = userLawyers.filter(l => l.name.toLowerCase().includes(q) || l.bio.toLowerCase().includes(q));
+        }
+        if (input?.region) userLawyers = userLawyers.filter(l => (l.regions as string[]).some(r => r.toLowerCase().includes(input.region!.toLowerCase())));
+        if (input?.freeConsultOnly) userLawyers = userLawyers.filter(l => l.offersFreeConsult);
+      } catch {}
+
+      return [...curated, ...userLawyers];
     }),
 });

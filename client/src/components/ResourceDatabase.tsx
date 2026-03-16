@@ -8,10 +8,10 @@ import {
 type Tab = 'vc' | 'angel' | 'grants' | 'lawyers';
 
 const TABS: { id: Tab; label: string; icon: React.ElementType; count: number }[] = [
-  { id: 'vc', label: 'VC Firms', icon: Building2, count: 15 },
-  { id: 'angel', label: 'Angel Investors', icon: Users, count: 10 },
-  { id: 'grants', label: 'Grants & Programs', icon: Gift, count: 12 },
-  { id: 'lawyers', label: 'Venture Lawyers', icon: Scale, count: 12 },
+  { id: 'vc', label: 'VC Firms', icon: Building2, count: 35 },
+  { id: 'angel', label: 'Angel Investors', icon: Users, count: 25 },
+  { id: 'grants', label: 'Grants & Programs', icon: Gift, count: 22 },
+  { id: 'lawyers', label: 'Venture Lawyers', icon: Scale, count: 20 },
 ];
 
 const REGIONS = ['Global', 'North America', 'Europe', 'MENA', 'Africa', 'Southeast Asia', 'Latin America', 'Asia'];
@@ -97,6 +97,11 @@ function VcCard({ firm }: { firm: any }) {
         </div>
       )}
 
+      {firm.isCommunity && (
+        <div className="mb-2">
+          <Badge color="purple">🌐 Community Member</Badge>
+        </div>
+      )}
       {firm.applyUrl && (
         <a href={firm.applyUrl} target="_blank" rel="noopener noreferrer"
           className="flex items-center justify-center gap-1.5 w-full py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
@@ -155,6 +160,11 @@ function AngelCard({ angel }: { angel: any }) {
         </div>
       )}
 
+      {angel.isCommunity && (
+        <div className="mb-2">
+          <Badge color="purple">🌐 Community Member</Badge>
+        </div>
+      )}
       <div className="flex gap-2">
         {angel.linkedinUrl && (
           <a href={angel.linkedinUrl} target="_blank" rel="noopener noreferrer"
@@ -267,6 +277,11 @@ function LawyerCard({ lawyer }: { lawyer: any }) {
         </div>
       )}
 
+      {lawyer.isCommunity && (
+        <div className="mb-2">
+          <Badge color="purple">🌐 Community Member</Badge>
+        </div>
+      )}
       <div className="flex gap-2">
         {lawyer.websiteUrl && (
           <a href={lawyer.websiteUrl} target="_blank" rel="noopener noreferrer"

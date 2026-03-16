@@ -218,3 +218,117 @@ export async function getVentureLawyers(filters?: { region?: string; specializat
   if (!db) return [];
   return db.select().from(ventureLawyers).where(eq(ventureLawyers.isActive, true));
 }
+
+// ── KYC Helpers ────────────────────────────────────────────────────────────
+import {
+  kycVcProfiles, kycAngelProfiles, kycLawyerProfiles, kycStartupProfiles,
+  KycVcProfile, KycAngelProfile, KycLawyerProfile, KycStartupProfile
+} from "../drizzle/schema";
+
+export async function setUserKycCompleted(userId: number, userType: "startup" | "vc" | "angel" | "venture_lawyer" | "other") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(users).set({ kycCompleted: true, userType }).where(eq(users.id, userId));
+}
+
+// VC KYC
+export async function upsertKycVcProfile(userId: number, data: Omit<KycVcProfile, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'isVerified'>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await db.select().from(kycVcProfiles).where(eq(kycVcProfiles.userId, userId)).limit(1);
+  if (existing.length > 0) {
+    await db.update(kycVcProfiles).set({ ...data, updatedAt: new Date() }).where(eq(kycVcProfiles.userId, userId));
+  } else {
+    await db.insert(kycVcProfiles).values({ ...data, userId });
+  }
+  const result = await db.select().from(kycVcProfiles).where(eq(kycVcProfiles.userId, userId)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function getKycVcProfile(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(kycVcProfiles).where(eq(kycVcProfiles.userId, userId)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function getPublicKycVcProfiles() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(kycVcProfiles).where(eq(kycVcProfiles.isPublic, true));
+}
+
+// Angel KYC
+export async function upsertKycAngelProfile(userId: number, data: Omit<KycAngelProfile, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'isVerified'>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await db.select().from(kycAngelProfiles).where(eq(kycAngelProfiles.userId, userId)).limit(1);
+  if (existing.length > 0) {
+    await db.update(kycAngelProfiles).set({ ...data, updatedAt: new Date() }).where(eq(kycAngelProfiles.userId, userId));
+  } else {
+    await db.insert(kycAngelProfiles).values({ ...data, userId });
+  }
+  const result = await db.select().from(kycAngelProfiles).where(eq(kycAngelProfiles.userId, userId)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function getKycAngelProfile(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(kycAngelProfiles).where(eq(kycAngelProfiles.userId, userId)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function getPublicKycAngelProfiles() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(kycAngelProfiles).where(eq(kycAngelProfiles.isPublic, true));
+}
+
+// Lawyer KYC
+export async function upsertKycLawyerProfile(userId: number, data: Omit<KycLawyerProfile, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'isVerified'>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await db.select().from(kycLawyerProfiles).where(eq(kycLawyerProfiles.userId, userId)).limit(1);
+  if (existing.length > 0) {
+    await db.update(kycLawyerProfiles).set({ ...data, updatedAt: new Date() }).where(eq(kycLawyerProfiles.userId, userId));
+  } else {
+    await db.insert(kycLawyerProfiles).values({ ...data, userId });
+  }
+  const result = await db.select().from(kycLawyerProfiles).where(eq(kycLawyerProfiles.userId, userId)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function getKycLawyerProfile(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(kycLawyerProfiles).where(eq(kycLawyerProfiles.userId, userId)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function getPublicKycLawyerProfiles() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(kycLawyerProfiles).where(eq(kycLawyerProfiles.isPublic, true));
+}
+
+// Startup KYC
+export async function upsertKycStartupProfile(userId: number, data: Omit<KycStartupProfile, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'isVerified'>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await db.select().from(kycStartupProfiles).where(eq(kycStartupProfiles.userId, userId)).limit(1);
+  if (existing.length > 0) {
+    await db.update(kycStartupProfiles).set({ ...data, updatedAt: new Date() }).where(eq(kycStartupProfiles.userId, userId));
+  } else {
+    await db.insert(kycStartupProfiles).values({ ...data, userId });
+  }
+  const result = await db.select().from(kycStartupProfiles).where(eq(kycStartupProfiles.userId, userId)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function getKycStartupProfile(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(kycStartupProfiles).where(eq(kycStartupProfiles.userId, userId)).limit(1);
+  return result[0] ?? null;
+}

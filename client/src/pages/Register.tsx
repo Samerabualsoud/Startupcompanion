@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { useLocation, Link } from 'wouter';
 import { trpc } from '@/lib/trpc';
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { TrendingUp, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { APP_PATH, LOGIN_PATH } from '@/const';
+import { LOGIN_PATH } from '@/const';
 
-function PasswordStrength({ password }: { password: string }) {
+const KYC_PATH = '/onboarding';
+
+function PasswordStrength({ password, isRTL }: { password: string; isRTL: boolean }) {
   const checks = [
-    { label: 'At least 8 characters', ok: password.length >= 8 },
-    { label: 'Contains a number', ok: /\d/.test(password) },
-    { label: 'Contains a letter', ok: /[a-zA-Z]/.test(password) },
+    { label: isRTL ? '٨ أحرف على الأقل' : 'At least 8 characters', ok: password.length >= 8 },
+    { label: isRTL ? 'يحتوي على رقم' : 'Contains a number', ok: /\d/.test(password) },
+    { label: isRTL ? 'يحتوي على حرف' : 'Contains a letter', ok: /[a-zA-Z]/.test(password) },
   ];
   if (!password) return null;
   return (
@@ -26,6 +30,7 @@ function PasswordStrength({ password }: { password: string }) {
 export default function Register() {
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
+  const { t, isRTL } = useLanguage();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -36,10 +41,11 @@ export default function Register() {
   const registerMutation = trpc.auth.register.useMutation({
     onSuccess: async () => {
       await utils.auth.me.invalidate();
-      navigate(APP_PATH);
+      // Redirect to KYC onboarding after registration
+      navigate(KYC_PATH);
     },
     onError: (err) => {
-      setError(err.message || 'Something went wrong. Please try again.');
+      setError(err.message || (isRTL ? 'حدث خطأ ما. يرجى المحاولة مرة أخرى.' : 'Something went wrong. Please try again.'));
     },
   });
 
@@ -47,15 +53,33 @@ export default function Register() {
     e.preventDefault();
     setError('');
     if (!name || !email || !password) {
-      setError('Please fill in all fields');
+      setError(isRTL ? 'يرجى ملء جميع الحقول' : 'Please fill in all fields');
       return;
     }
     if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+      setError(isRTL ? 'يجب أن تكون كلمة المرور ٨ أحرف على الأقل' : 'Password must be at least 8 characters');
       return;
     }
     registerMutation.mutate({ name, email, password });
   };
+
+  const fontFamily = isRTL ? 'Noto Kufi Arabic, sans-serif' : 'Playfair Display, serif';
+
+  const FEATURES = isRTL ? [
+    'حاسبة تقييم بـ ٧ طرق',
+    'أداة تقسيم أسهم المؤسسين',
+    'نقاط الاستعداد للتمويل',
+    'إدارة علاقات المستثمرين وتتبع خط الأنابيب',
+    'قاعدة بيانات رأس المال المخاطر والملائكيين والمنح',
+    'فحص جدوى الأفكار بالذكاء الاصطناعي',
+  ] : [
+    '7-method valuation calculator',
+    'Co-founder equity split tool',
+    'Fundraising readiness score',
+    'Investor CRM & pipeline tracker',
+    'VC, angel & grants database',
+    'AI-powered idea feasibility check',
+  ];
 
   return (
     <div className="min-h-screen flex" style={{ background: 'oklch(0.978 0.008 80)' }}>
@@ -68,24 +92,19 @@ export default function Register() {
           <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.55 0.13 30)' }}>
             <TrendingUp className="w-5 h-5 text-white" />
           </div>
-          <span className="text-white font-bold text-lg" style={{ fontFamily: 'Playfair Display, serif' }}>
-            AI Startup Toolkit
+          <span className="text-white font-bold text-lg" style={{ fontFamily }}>
+            {t('appName')}
           </span>
         </div>
 
         <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
-            Everything you need to build, fund, and grow your startup.
+          <h2 className="text-2xl font-bold text-white" style={{ fontFamily }}>
+            {isRTL
+              ? 'كل ما تحتاجه لبناء شركتك الناشئة وتمويلها وتنميتها.'
+              : 'Everything you need to build, fund, and grow your startup.'}
           </h2>
           <div className="space-y-3">
-            {[
-              '7-method valuation calculator',
-              'Co-founder equity split tool',
-              'Fundraising readiness score',
-              'Investor CRM & pipeline tracker',
-              'VC, angel & grants database',
-              'AI-powered idea feasibility check',
-            ].map(feat => (
+            {FEATURES.map(feat => (
               <div key={feat} className="flex items-center gap-3 text-sm" style={{ color: 'oklch(0.7 0.03 240)' }}>
                 <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: 'oklch(0.65 0.13 30)' }} />
                 {feat}
@@ -95,27 +114,35 @@ export default function Register() {
         </div>
 
         <div className="text-xs" style={{ color: 'oklch(0.4 0.03 240)' }}>
-          Free forever · No credit card required
+          {isRTL ? 'مجاني للأبد · لا يلزم بطاقة ائتمان' : 'Free forever · No credit card required'}
         </div>
       </div>
 
       {/* Right panel */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
-          {/* Mobile logo */}
-          <div className="flex items-center gap-2.5 mb-8 lg:hidden">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
-              <TrendingUp className="w-4 h-4" style={{ color: 'oklch(0.55 0.13 30)' }} />
+          {/* Mobile logo + language switcher */}
+          <div className="flex items-center justify-between mb-8 lg:hidden">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
+                <TrendingUp className="w-4 h-4" style={{ color: 'oklch(0.55 0.13 30)' }} />
+              </div>
+              <span className="font-bold" style={{ fontFamily }}>{t('appName')}</span>
             </div>
-            <span className="font-bold" style={{ fontFamily: 'Playfair Display, serif' }}>AI Startup Toolkit</span>
+            <LanguageSwitcher />
+          </div>
+
+          {/* Desktop language switcher */}
+          <div className="hidden lg:flex justify-end mb-4">
+            <LanguageSwitcher />
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: 'Playfair Display, serif', color: 'oklch(0.18 0.05 240)' }}>
-              Create your account
+            <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'oklch(0.18 0.05 240)' }}>
+              {t('registerTitle')}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Free forever. No credit card required.
+              {isRTL ? 'مجاني للأبد. لا يلزم بطاقة ائتمان.' : 'Free forever. No credit card required.'}
             </p>
           </div>
 
@@ -127,16 +154,15 @@ export default function Register() {
               </div>
             )}
 
-            {/* Name */}
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: 'oklch(0.3 0.04 240)' }}>
-                Full name
+                {t('nameLabel')}
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Jane Smith"
+                placeholder={isRTL ? 'محمد أحمد' : 'Jane Smith'}
                 autoComplete="name"
                 required
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
@@ -146,10 +172,9 @@ export default function Register() {
               />
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: 'oklch(0.3 0.04 240)' }}>
-                Email address
+                {t('emailLabel')}
               </label>
               <input
                 type="email"
@@ -165,17 +190,16 @@ export default function Register() {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: 'oklch(0.3 0.04 240)' }}>
-                Password
+                {t('passwordLabel')}
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  placeholder="Min. 8 characters"
+                  placeholder={isRTL ? 'الحد الأدنى ٨ أحرف' : 'Min. 8 characters'}
                   autoComplete="new-password"
                   required
                   className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all pr-11"
@@ -191,7 +215,7 @@ export default function Register() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <PasswordStrength password={password} />
+              <PasswordStrength password={password} isRTL={isRTL} />
             </div>
 
             <button
@@ -201,21 +225,24 @@ export default function Register() {
               style={{ background: 'oklch(0.18 0.05 240)' }}
             >
               {registerMutation.isPending ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Creating account…</>
-              ) : 'Create free account'}
+                <><Loader2 className="w-4 h-4 animate-spin" /> {isRTL ? 'جارٍ إنشاء الحساب...' : 'Creating account…'}</>
+              ) : t('createAccount')}
             </button>
 
             <p className="text-xs text-center text-muted-foreground">
-              By creating an account you agree to our{' '}
-              <span className="underline cursor-pointer">Terms of Service</span> and{' '}
-              <span className="underline cursor-pointer">Privacy Policy</span>.
+              {isRTL
+                ? 'بإنشاء حساب، أنت توافق على '
+                : 'By creating an account you agree to our '}
+              <span className="underline cursor-pointer">{isRTL ? 'شروط الخدمة' : 'Terms of Service'}</span>
+              {isRTL ? ' و' : ' and '}
+              <span className="underline cursor-pointer">{isRTL ? 'سياسة الخصوصية' : 'Privacy Policy'}</span>.
             </p>
           </form>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
+            {t('haveAccount')}{' '}
             <Link href={LOGIN_PATH} className="font-semibold hover:underline" style={{ color: 'oklch(0.55 0.13 30)' }}>
-              Sign in
+              {t('signInLink')}
             </Link>
           </div>
         </div>

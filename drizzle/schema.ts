@@ -12,6 +12,9 @@ export const users = mysqlTable("users", {
   name: text("name"),
   loginMethod: varchar("loginMethod", { length: 64 }).default("email"),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  // KYC
+  userType: mysqlEnum("userType", ["startup", "vc", "angel", "venture_lawyer", "other"]).default("startup").notNull(),
+  kycCompleted: boolean("kycCompleted").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -26,27 +29,120 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// ── Startup Profiles ───────────────────────────────────────────────────────
+// ── KYC: VC Firm Profile ───────────────────────────────────────────────────
+export const kycVcProfiles = mysqlTable("kyc_vc_profiles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  firmName: varchar("firmName", { length: 256 }).notNull(),
+  yourTitle: varchar("yourTitle", { length: 128 }),
+  description: text("description"),
+  website: varchar("website", { length: 512 }),
+  hqCity: varchar("hqCity", { length: 128 }),
+  hqCountry: varchar("hqCountry", { length: 128 }),
+  regions: json("regions"),
+  stages: json("stages"),
+  sectors: json("sectors"),
+  checkSizeMin: float("checkSizeMin"),
+  checkSizeMax: float("checkSizeMax"),
+  aum: float("aum"),
+  portfolioCount: int("portfolioCount"),
+  notablePortfolio: json("notablePortfolio"),
+  linkedinUrl: varchar("linkedinUrl", { length: 512 }),
+  twitterUrl: varchar("twitterUrl", { length: 512 }),
+  applyUrl: varchar("applyUrl", { length: 512 }),
+  isPublic: boolean("isPublic").default(true).notNull(),
+  isVerified: boolean("isVerified").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type KycVcProfile = typeof kycVcProfiles.$inferSelect;
+
+// ── KYC: Angel Investor Profile ────────────────────────────────────────────
+export const kycAngelProfiles = mysqlTable("kyc_angel_profiles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  displayName: varchar("displayName", { length: 256 }).notNull(),
+  title: varchar("title", { length: 256 }),
+  bio: text("bio"),
+  location: varchar("location", { length: 256 }),
+  regions: json("regions"),
+  stages: json("stages"),
+  sectors: json("sectors"),
+  checkSizeMin: float("checkSizeMin"),
+  checkSizeMax: float("checkSizeMax"),
+  notableInvestments: json("notableInvestments"),
+  linkedinUrl: varchar("linkedinUrl", { length: 512 }),
+  twitterUrl: varchar("twitterUrl", { length: 512 }),
+  angellistUrl: varchar("angellistUrl", { length: 512 }),
+  isPublic: boolean("isPublic").default(true).notNull(),
+  isVerified: boolean("isVerified").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type KycAngelProfile = typeof kycAngelProfiles.$inferSelect;
+
+// ── KYC: Venture Lawyer Profile ────────────────────────────────────────────
+export const kycLawyerProfiles = mysqlTable("kyc_lawyer_profiles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  displayName: varchar("displayName", { length: 256 }).notNull(),
+  firmName: varchar("firmName", { length: 256 }),
+  title: varchar("title", { length: 256 }),
+  bio: text("bio"),
+  location: varchar("location", { length: 256 }),
+  regions: json("regions"),
+  specializations: json("specializations"),
+  languages: json("languages"),
+  offersFreeConsult: boolean("offersFreeConsult").default(false).notNull(),
+  linkedinUrl: varchar("linkedinUrl", { length: 512 }),
+  websiteUrl: varchar("websiteUrl", { length: 512 }),
+  contactEmail: varchar("contactEmail", { length: 320 }),
+  isPublic: boolean("isPublic").default(true).notNull(),
+  isVerified: boolean("isVerified").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type KycLawyerProfile = typeof kycLawyerProfiles.$inferSelect;
+
+// ── KYC: Startup Profile ───────────────────────────────────────────────────
+export const kycStartupProfiles = mysqlTable("kyc_startup_profiles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  companyName: varchar("companyName", { length: 256 }).notNull(),
+  tagline: varchar("tagline", { length: 512 }),
+  description: text("description"),
+  website: varchar("website", { length: 512 }),
+  sector: varchar("sector", { length: 128 }),
+  stage: mysqlEnum("stage", ["idea", "pre-seed", "seed", "series-a", "series-b", "growth"]).default("idea").notNull(),
+  country: varchar("country", { length: 128 }),
+  city: varchar("city", { length: 128 }),
+  foundedYear: int("foundedYear"),
+  teamSize: int("teamSize"),
+  targetRaise: float("targetRaise"),
+  linkedinUrl: varchar("linkedinUrl", { length: 512 }),
+  twitterUrl: varchar("twitterUrl", { length: 512 }),
+  isPublic: boolean("isPublic").default(true).notNull(),
+  isVerified: boolean("isVerified").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type KycStartupProfile = typeof kycStartupProfiles.$inferSelect;
+
+// ── Startup Profiles (full, detailed) ─────────────────────────────────────
 export const startupProfiles = mysqlTable("startup_profiles", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-
-  // Identity
   name: varchar("name", { length: 256 }).notNull(),
   tagline: varchar("tagline", { length: 512 }),
   description: text("description"),
   logoUrl: varchar("logoUrl", { length: 1024 }),
   websiteUrl: varchar("websiteUrl", { length: 512 }),
   pitchDeckUrl: varchar("pitchDeckUrl", { length: 1024 }),
-
-  // Classification
   sector: varchar("sector", { length: 128 }),
   stage: mysqlEnum("stage", ["pre-seed", "seed", "series-a", "series-b", "growth"]),
   country: varchar("country", { length: 128 }),
   city: varchar("city", { length: 128 }),
   foundedYear: int("foundedYear"),
-
-  // Financials
   currentARR: float("currentARR"),
   monthlyBurnRate: float("monthlyBurnRate"),
   cashOnHand: float("cashOnHand"),
@@ -54,22 +150,15 @@ export const startupProfiles = mysqlTable("startup_profiles", {
   revenueGrowthRate: float("revenueGrowthRate"),
   grossMargin: float("grossMargin"),
   totalAddressableMarket: float("totalAddressableMarket"),
-
-  // Fundraising
   targetRaise: float("targetRaise"),
   useOfFunds: text("useOfFunds"),
-  investorType: varchar("investorType", { length: 128 }), // e.g. "Angel, VC, Strategic"
-
-  // Social
+  investorType: varchar("investorType", { length: 128 }),
   linkedinUrl: varchar("linkedinUrl", { length: 512 }),
   twitterUrl: varchar("twitterUrl", { length: 512 }),
-
-  // Status
   isPublic: boolean("isPublic").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
-
 export type StartupProfile = typeof startupProfiles.$inferSelect;
 export type InsertStartupProfile = typeof startupProfiles.$inferInsert;
 
@@ -87,7 +176,6 @@ export const teamMembers = mysqlTable("team_members", {
   sortOrder: int("sortOrder").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
-
 export type TeamMember = typeof teamMembers.$inferSelect;
 export type InsertTeamMember = typeof teamMembers.$inferInsert;
 
@@ -97,13 +185,12 @@ export const savedValuations = mysqlTable("saved_valuations", {
   userId: int("userId").notNull(),
   startupId: int("startupId"),
   label: varchar("label", { length: 256 }).notNull(),
-  inputs: json("inputs").notNull(),        // StartupInputs JSON
-  summary: json("summary").notNull(),      // ValuationSummary JSON
-  chatAnswers: json("chatAnswers"),         // Raw chat answers
+  inputs: json("inputs").notNull(),
+  summary: json("summary").notNull(),
+  chatAnswers: json("chatAnswers"),
   blendedValue: float("blendedValue"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
-
 export type SavedValuation = typeof savedValuations.$inferSelect;
 export type InsertSavedValuation = typeof savedValuations.$inferInsert;
 
@@ -118,7 +205,6 @@ export const milestones = mysqlTable("milestones", {
   category: mysqlEnum("category", ["product", "revenue", "team", "funding", "legal", "other"]).default("other").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
-
 export type Milestone = typeof milestones.$inferSelect;
 export type InsertMilestone = typeof milestones.$inferInsert;
 
@@ -131,14 +217,14 @@ export const vcFirms = mysqlTable("vc_firms", {
   logoUrl: varchar("logoUrl", { length: 1024 }),
   hqCity: varchar("hqCity", { length: 128 }),
   hqCountry: varchar("hqCountry", { length: 128 }),
-  regions: json("regions"),           // string[]
-  stages: json("stages"),             // e.g. ["pre-seed","seed","series-a"]
-  sectors: json("sectors"),           // e.g. ["fintech","saas"]
+  regions: json("regions"),
+  stages: json("stages"),
+  sectors: json("sectors"),
   checkSizeMin: float("checkSizeMin"),
   checkSizeMax: float("checkSizeMax"),
-  aum: float("aum"),                  // Assets under management $M
+  aum: float("aum"),
   portfolioCount: int("portfolioCount"),
-  notablePortfolio: json("notablePortfolio"), // string[]
+  notablePortfolio: json("notablePortfolio"),
   linkedinUrl: varchar("linkedinUrl", { length: 512 }),
   twitterUrl: varchar("twitterUrl", { length: 512 }),
   applyUrl: varchar("applyUrl", { length: 512 }),
@@ -160,7 +246,7 @@ export const angelInvestors = mysqlTable("angel_investors", {
   sectors: json("sectors"),
   checkSizeMin: float("checkSizeMin"),
   checkSizeMax: float("checkSizeMax"),
-  notableInvestments: json("notableInvestments"), // string[]
+  notableInvestments: json("notableInvestments"),
   linkedinUrl: varchar("linkedinUrl", { length: 512 }),
   twitterUrl: varchar("twitterUrl", { length: 512 }),
   angellistUrl: varchar("angellistUrl", { length: 512 }),
@@ -183,7 +269,7 @@ export const grants = mysqlTable("grants", {
   amountMin: float("amountMin"),
   amountMax: float("amountMax"),
   currency: varchar("currency", { length: 8 }).default("USD"),
-  deadline: varchar("deadline", { length: 128 }),  // e.g. "Rolling" or "2025-06-30"
+  deadline: varchar("deadline", { length: 128 }),
   isEquityFree: boolean("isEquityFree").default(true).notNull(),
   requirements: text("requirements"),
   applyUrl: varchar("applyUrl", { length: 512 }),
@@ -203,7 +289,7 @@ export const ventureLawyers = mysqlTable("venture_lawyers", {
   photoUrl: varchar("photoUrl", { length: 1024 }),
   location: varchar("location", { length: 256 }),
   regions: json("regions"),
-  specializations: json("specializations"), // e.g. ["term sheets","equity","ip","m&a"]
+  specializations: json("specializations"),
   languages: json("languages"),
   startupFriendly: boolean("startupFriendly").default(true).notNull(),
   offersFreeConsult: boolean("offersFreeConsult").default(false).notNull(),

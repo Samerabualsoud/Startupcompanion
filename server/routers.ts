@@ -6,6 +6,7 @@ import { profileRouter } from './profileRouter';
 import { feasibilityRouter } from './feasibilityRouter';
 import { inferenceRouter } from './inferenceRouter';
 import { resourcesRouter } from './resourcesRouter';
+import { kycRouter } from './kycRouter';
 
 export const appRouter = router({
   system: systemRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   feasibility: feasibilityRouter,
   inference: inferenceRouter,
   resources: resourcesRouter,
+  kyc: kycRouter,
 });
 
 export type AppRouter = typeof appRouter;

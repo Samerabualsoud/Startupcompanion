@@ -101,6 +101,24 @@
   .font-mono, .tabular-nums {
     font-family: 'JetBrains Mono', monospace;
   }
+  /* Arabic RTL font override */
+  html.font-arabic body,
+  html.font-arabic h1,
+  html.font-arabic h2,
+  html.font-arabic h3,
+  html.font-arabic h4,
+  html.font-arabic h5,
+  html.font-arabic h6,
+  html.font-arabic p,
+  html.font-arabic span,
+  html.font-arabic button,
+  html.font-arabic input,
+  html.font-arabic textarea,
+  html.font-arabic select,
+  html.font-arabic label {
+    font-family: 'Noto Kufi Arabic', 'DM Sans', sans-serif;
+    letter-spacing: 0;
+  }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   [type="button"]:not(:disabled),
