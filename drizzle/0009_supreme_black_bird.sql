@@ -1,0 +1,22 @@
+CREATE TABLE `valuation_history` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`userId` int NOT NULL,
+	`companyName` varchar(256) NOT NULL,
+	`valuationDate` timestamp NOT NULL,
+	`valuationType` enum('409a','priced-round','safe','convertible-note','internal','other') NOT NULL DEFAULT '409a',
+	`preMoneyValuation` float,
+	`postMoneyValuation` float,
+	`sharePrice` float,
+	`totalShares` int,
+	`stage` varchar(64),
+	`roundName` varchar(128),
+	`amountRaised` float,
+	`leadInvestor` varchar(256),
+	`notes` text,
+	`methodology` varchar(256),
+	`provider` varchar(256),
+	`isPublic` boolean NOT NULL DEFAULT false,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `valuation_history_id` PRIMARY KEY(`id`)
+);

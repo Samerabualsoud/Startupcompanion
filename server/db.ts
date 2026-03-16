@@ -13,6 +13,7 @@ import {
   investorContacts,
   type KycVcProfile, type KycAngelProfile, type KycLawyerProfile, type KycStartupProfile,
   type InvestorContact, type InsertInvestorContact,
+  valuationHistory, type InsertValuationHistory,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -335,6 +336,12 @@ export async function getKycStartupProfile(userId: number) {
   return result[0] ?? null;
 }
 
+export async function getPublicKycStartupProfiles() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(kycStartupProfiles).where(eq(kycStartupProfiles.isPublic, true));
+}
+
 // ── Password Reset Tokens ──────────────────────────────────────────────────
 
 export async function createPasswordResetToken(userId: number): Promise<string> {
@@ -445,4 +452,29 @@ export async function deleteCrmContact(id: number, userId: number): Promise<bool
   if (!existing) return false;
   await db.delete(investorContacts).where(and(eq(investorContacts.id, id), eq(investorContacts.userId, userId)));
   return true;
+}
+
+// ── 409A / Valuation History ───────────────────────────────────────────────
+export async function getValuationHistory(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(valuationHistory)
+    .where(eq(valuationHistory.userId, userId))
+    .orderBy(valuationHistory.valuationDate);
+}
+
+export async function addValuationHistoryEntry(userId: number, data: Omit<InsertValuationHistory, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(valuationHistory).values({ ...data, userId });
+  return db.select().from(valuationHistory)
+    .where(eq(valuationHistory.userId, userId))
+    .orderBy(valuationHistory.valuationDate);
+}
+
+export async function deleteValuationHistoryEntry(userId: number, entryId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(valuationHistory)
+    .where(and(eq(valuationHistory.id, entryId), eq(valuationHistory.userId, userId)));
 }

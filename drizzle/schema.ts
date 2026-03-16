@@ -339,3 +339,28 @@ export const investorContacts = mysqlTable("investor_contacts", {
 });
 export type InvestorContact = typeof investorContacts.$inferSelect;
 export type InsertInvestorContact = typeof investorContacts.$inferInsert;
+
+// ── 409A / Valuation History ───────────────────────────────────────────────
+export const valuationHistory = mysqlTable("valuation_history", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  companyName: varchar("companyName", { length: 256 }).notNull(),
+  valuationDate: timestamp("valuationDate").notNull(),
+  valuationType: mysqlEnum("valuationType", ["409a", "priced-round", "safe", "convertible-note", "internal", "other"]).default("409a").notNull(),
+  preMoneyValuation: float("preMoneyValuation"),
+  postMoneyValuation: float("postMoneyValuation"),
+  sharePrice: float("sharePrice"),
+  totalShares: int("totalShares"),
+  stage: varchar("stage", { length: 64 }),
+  roundName: varchar("roundName", { length: 128 }),
+  amountRaised: float("amountRaised"),
+  leadInvestor: varchar("leadInvestor", { length: 256 }),
+  notes: text("notes"),
+  methodology: varchar("methodology", { length: 256 }),
+  provider: varchar("provider", { length: 256 }),
+  isPublic: boolean("isPublic").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type ValuationHistory = typeof valuationHistory.$inferSelect;
+export type InsertValuationHistory = typeof valuationHistory.$inferInsert;

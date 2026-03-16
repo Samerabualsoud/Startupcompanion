@@ -613,4 +613,162 @@ Keep your response to 3-5 paragraphs. Be direct and specific.`,
         recommendation: response.choices[0].message.content as string,
       };
     }),
+
+  // ── 8. SAFE / Convertible Note Generator ─────────────────────────────────────
+  generateSAFENote: publicProcedure
+    .input(
+      z.object({
+        inputs: z.object({
+          instrumentType: z.enum(['safe', 'convertible-note']),
+          investorName: z.string(),
+          companyName: z.string(),
+          investmentAmount: z.number(),
+          valuationCap: z.number(),
+          discountRate: z.number(),
+          interestRate: z.number(),
+          maturityMonths: z.number(),
+          safeType: z.enum(['pre-money', 'post-money', 'mfn']),
+          proRataRights: z.boolean(),
+          mfnClause: z.boolean(),
+          governingLaw: z.string(),
+          closingDate: z.string(),
+        }),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { inputs: i } = input;
+      const isNote = i.instrumentType === 'convertible-note';
+      const prompt = isNote
+        ? `Draft a professional convertible note term sheet for:
+- Company: ${i.companyName}
+- Investor: ${i.investorName}
+- Investment Amount: $${i.investmentAmount.toLocaleString()}
+- Valuation Cap: $${i.valuationCap.toLocaleString()}
+- Discount Rate: ${i.discountRate}%
+- Interest Rate: ${i.interestRate}% per annum
+- Maturity: ${i.maturityMonths} months
+- Pro-Rata Rights: ${i.proRataRights ? 'Yes' : 'No'}
+- MFN Clause: ${i.mfnClause ? 'Yes' : 'No'}
+- Governing Law: ${i.governingLaw}
+- Closing Date: ${i.closingDate}
+
+Include: recitals, definitions, investment terms, conversion mechanics, representations, and signature blocks.`
+        : `Draft a professional SAFE (Simple Agreement for Future Equity) for:
+- Company: ${i.companyName}
+- Investor: ${i.investorName}
+- Investment Amount: $${i.investmentAmount.toLocaleString()}
+- Valuation Cap: $${i.valuationCap.toLocaleString()}
+- Discount Rate: ${i.discountRate}%
+- SAFE Type: ${i.safeType}
+- Pro-Rata Rights: ${i.proRataRights ? 'Yes' : 'No'}
+- MFN Clause: ${i.mfnClause ? 'Yes' : 'No'}
+- Governing Law: ${i.governingLaw}
+- Closing Date: ${i.closingDate}
+
+Include: recitals, definitions, investment terms, conversion events, dissolution events, representations, and signature blocks.`;
+
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: 'system',
+            content: `You are a startup lawyer specializing in early-stage financing documents. Draft professional, legally-sound term sheets and agreements. Use clear headings, numbered sections, and standard legal language. Include all standard clauses. Add a disclaimer at the end that this is a template and should be reviewed by qualified counsel.`,
+          },
+          { role: 'user', content: prompt },
+        ],
+      });
+
+      return { document: response.choices[0].message.content as string };
+    }),
+
+  // ── 9. NDA Generator ─────────────────────────────────────────────────────────
+  generateNDA: publicProcedure
+    .input(
+      z.object({
+        ndaType: z.enum(['mutual', 'one-way']),
+        disclosingParty: z.string(),
+        receivingParty: z.string(),
+        purpose: z.string(),
+        confidentialityPeriodYears: z.number(),
+        governingLaw: z.string(),
+        effectiveDate: z.string(),
+        includeNonSolicit: z.boolean(),
+        includeNonCompete: z.boolean(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: 'system',
+            content: `You are a startup lawyer. Draft professional, comprehensive NDA agreements. Use clear headings, numbered sections, and standard legal language. Include all standard clauses for the jurisdiction specified. Add a disclaimer at the end.`,
+          },
+          {
+            role: 'user',
+            content: `Draft a ${input.ndaType} Non-Disclosure Agreement:
+- Type: ${input.ndaType === 'mutual' ? 'Mutual (both parties share confidential info)' : 'One-Way (only disclosing party shares info)'}
+- Disclosing Party: ${input.disclosingParty}
+- Receiving Party: ${input.receivingParty}
+- Purpose: ${input.purpose}
+- Confidentiality Period: ${input.confidentialityPeriodYears} years
+- Governing Law: ${input.governingLaw}
+- Effective Date: ${input.effectiveDate}
+- Non-Solicitation Clause: ${input.includeNonSolicit ? 'Include' : 'Exclude'}
+- Non-Compete Clause: ${input.includeNonCompete ? 'Include (limited, reasonable)' : 'Exclude'}
+
+Include: recitals, definitions of confidential information, obligations, exclusions, term and termination, remedies, and signature blocks.`,
+          },
+        ],
+      });
+
+      return { document: response.choices[0].message.content as string };
+    }),
+
+  // ── 10. ESOP / Option Pool Recommendation ────────────────────────────────────
+  esopRecommendation: publicProcedure
+    .input(
+      z.object({
+        companyName: z.string(),
+        stage: z.string(),
+        totalShares: z.number(),
+        currentOptionPool: z.number(),
+        plannedHires: z.number(),
+        seniorHires: z.number(),
+        jurisdiction: z.string(),
+        nextRoundSize: z.number().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: 'system',
+            content: `You are a startup equity compensation expert. Provide specific, actionable advice on ESOP/option pool sizing, strike prices, and vesting structures. Be concise and practical.`,
+          },
+          {
+            role: 'user',
+            content: `Analyze this ESOP situation and provide recommendations:
+- Company: ${input.companyName}
+- Stage: ${input.stage}
+- Total Shares: ${input.totalShares.toLocaleString()}
+- Current Option Pool: ${input.currentOptionPool.toLocaleString()} shares (${((input.currentOptionPool / input.totalShares) * 100).toFixed(1)}%)
+- Planned Hires (12 months): ${input.plannedHires} people
+- Senior/Executive Hires: ${input.seniorHires}
+- Jurisdiction: ${input.jurisdiction}
+${input.nextRoundSize ? `- Next Round Size: $${input.nextRoundSize.toLocaleString()}` : ''}
+
+Provide:
+1. Is the current pool size adequate? What % is market standard for this stage?
+2. Recommended pool size and reasoning
+3. Suggested grant ranges by role (engineer, senior engineer, VP, C-suite)
+4. Strike price considerations for this stage
+5. Vesting structure recommendations
+6. Tax implications to be aware of in ${input.jurisdiction}
+7. Key risks and how to mitigate them`,
+          },
+        ],
+      });
+
+      return { analysis: response.choices[0].message.content as string };
+    }),
 });
+

@@ -307,4 +307,30 @@ export const resourcesRouter = router({
 
       return [...curated, ...userLawyers];
     }),
+
+  // ── Public Startup Directory ────────────────────────────────────────────────
+  getPublicStartups: publicProcedure
+    .query(async () => {
+      try {
+        const startups = await db.getPublicKycStartupProfiles();
+        return startups.map((s: any) => ({
+          id: s.id,
+          companyName: s.companyName,
+          tagline: s.tagline || '',
+          description: s.description || '',
+          website: s.website || '',
+          sector: s.sector || '',
+          stage: s.stage || '',
+          country: s.country || '',
+          city: s.city || '',
+          teamSize: s.teamSize || null,
+          targetRaise: s.targetRaise || null,
+          linkedinUrl: s.linkedinUrl || '',
+          twitterUrl: s.twitterUrl || '',
+          isVerified: s.isVerified || false,
+        }));
+      } catch {
+        return [];
+      }
+    }),
 });

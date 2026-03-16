@@ -48,7 +48,12 @@ import AICofounderAgreement from '@/components/AICofounderAgreement';
 import AIFundraisingAdvisor from '@/components/AIFundraisingAdvisor';
 import VestingScheduleBuilder from '@/components/VestingScheduleBuilder';
 import FreeZones from '@/components/FreeZones';
-type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'resources' | 'matching' | 'admin' | 'feasibility' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence';
+import SAFENoteBuilder from '@/components/SAFENoteBuilder';
+import NDAGenerator from '@/components/NDAGenerator';
+import ESOPPlanner from '@/components/ESOPPlanner';
+import StartupDirectory from '@/components/StartupDirectory';
+import ValuationTimeline from '@/components/ValuationTimeline';
+type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'resources' | 'matching' | 'admin' | 'feasibility' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'valuation-timeline';
 
 interface NavItem {
   id: ToolId;
@@ -86,6 +91,13 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'matching',      label: 'Investor Matching',     shortLabel: 'Matching',   navKey: 'navMatching',   icon: Target,      group: 'Database',     badge: 'AI' },
   // Admin
   { id: 'admin',         label: 'Admin Dashboard',       shortLabel: 'Admin',      icon: Gauge,       group: 'Admin' },
+  // Legal & Documents
+  { id: 'safe-note',         label: 'SAFE / Convertible Note', shortLabel: 'SAFE / Note',    navKey: 'navSAFENote',       icon: FileText,    group: 'Legal & Documents', badge: 'New' },
+  { id: 'nda',               label: 'NDA Generator',           shortLabel: 'NDA',            navKey: 'navNDA',            icon: ClipboardCheck, group: 'Legal & Documents', badge: 'New' },
+  { id: 'esop',              label: 'ESOP / Option Pool',      shortLabel: 'ESOP',           navKey: 'navESOP',           icon: Users2,      group: 'Equity & Cap Table', badge: 'New' },
+  // Community
+  { id: 'startup-directory', label: 'Startup Directory',       shortLabel: 'Directory',      navKey: 'navStartupDir',     icon: Globe,       group: 'Database',           badge: 'New' },
+  { id: 'valuation-timeline',label: '409A / Valuation History',shortLabel: '409A History',   navKey: 'navValuationTimeline', icon: BarChart3, group: 'My Startup',         badge: 'New' },
   // AI Tools
   { id: 'ai-fundraising-advisor', label: 'AI Fundraising Advisor', shortLabel: 'AI Advisor',   navKey: 'navAIAdvisor',    icon: MessageCircle, group: 'AI Tools', badge: 'AI' },
   { id: 'ai-market-research',     label: 'AI Market Research',     shortLabel: 'Market Research',   navKey: 'navAIMarketResearch', icon: BarChart3,    group: 'AI Tools', badge: 'AI' },
@@ -95,7 +107,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'ai-due-diligence',       label: 'AI Due Diligence',       shortLabel: 'Due Diligence',   navKey: 'navAIDueDiligence', icon: ClipboardCheck,group: 'AI Tools', badge: 'AI' },
 ];
 
-const GROUPS = ['Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources', 'Database', 'My Startup', 'AI Tools', 'Admin'];
+const GROUPS = ['Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources', 'Legal & Documents', 'Database', 'My Startup', 'AI Tools', 'Admin'];
 
 const TOOL_COLORS: Record<ToolId, string> = {
   feasibility: '#6366F1',
@@ -120,6 +132,11 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'ai-cofounder-agreement': '#14B8A6',
   'ai-fundraising-advisor': '#C4614A',
   'free-zones': '#0284C7',
+  'safe-note': '#7C3AED',
+  'nda': '#0284C7',
+  'esop': '#059669',
+  'startup-directory': '#C4614A',
+  'valuation-timeline': '#2D4A6B',
 };
 
 export default function Home() {
@@ -298,6 +315,11 @@ export default function Home() {
       case 'ai-term-sheet':             return <AITermSheetAnalyzer />;
       case 'ai-cofounder-agreement':    return <AICofounderAgreement />;
       case 'ai-fundraising-advisor':    return <AIFundraisingAdvisor />;
+      case 'safe-note':                  return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><SAFENoteBuilder /></div>;
+      case 'nda':                        return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><NDAGenerator /></div>;
+      case 'esop':                       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ESOPPlanner /></div>;
+      case 'startup-directory':          return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><StartupDirectory /></div>;
+      case 'valuation-timeline':         return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ValuationTimeline /></div>;
       default: return null;
     }
   };

@@ -191,3 +191,14 @@
 - [x] Add navFreeZones translation key (en: 'Free Zones', ar: 'المناطق الحرة')
 - [x] Add navAdmin translation key (en: 'Admin', ar: 'الإدارة')
 - [x] 0 TypeScript errors, 0 console errors
+
+## New Tools (Round 16)
+- [x] SAFE / Convertible Note Builder — form + AI-generated document, PDF download
+- [x] NDA Generator — mutual/one-way NDA with jurisdiction selection, AI-generated, PDF download
+- [x] ESOP / Option Pool Planner — option pool modeling, strike price, dilution impact, vesting
+- [x] Startup Directory — public DB-backed directory of startups, searchable/filterable
+- [x] 409A / Valuation History Timeline — visual timeline of saved valuations per startup
+- [x] Wire all 5 tools to sidebar nav
+- [x] Add Arabic translations for all 5 tools
+- [x] Run tests, 0 TypeScript errors (31 tests passing)
+- [x] Save checkpoint
