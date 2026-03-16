@@ -5,8 +5,9 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Check, X, Mail, Phone, ExternalLink, Users } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Mail, Phone, ExternalLink, Users, Download, Rocket, BookmarkCheck } from 'lucide-react';
 import { nanoid } from 'nanoid';
+import { useTrackedApplications } from '@/contexts/TrackedApplicationsContext';
 
 type Status = 'target' | 'contacted' | 'intro-requested' | 'meeting-scheduled' | 'due-diligence' | 'term-sheet' | 'passed' | 'invested';
 
@@ -63,6 +64,7 @@ export default function InvestorCRM() {
   const [showAdd, setShowAdd] = useState(false);
   const [newData, setNewData] = useState<Omit<Investor, 'id'>>(EMPTY_INVESTOR);
   const [filterStatus, setFilterStatus] = useState<Status | 'all'>('all');
+  const { tracked, untrack } = useTrackedApplications();
 
   const filtered = filterStatus === 'all' ? investors : investors.filter(i => i.status === filterStatus);
 
@@ -94,6 +96,24 @@ export default function InvestorCRM() {
     setInvestors(prev => prev.map(i => i.id === id ? { ...i, status } : i));
   };
 
+  const exportCSV = () => {
+    const headers = ['Name', 'Firm', 'Stage', 'Focus', 'Status', 'Last Contact', 'Email', 'LinkedIn', 'Notes'];
+    const rows = investors.map(inv => [
+      inv.name, inv.firm, inv.stage, inv.focus,
+      STATUS_CONFIG[inv.status].label,
+      inv.lastContact, inv.email, inv.linkedin,
+      `"${inv.notes.replace(/"/g, '""')}"`
+    ]);
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `investor-pipeline-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -104,14 +124,25 @@ export default function InvestorCRM() {
           </h2>
           <p className="text-sm text-muted-foreground">Track your investor outreach pipeline. Stay organized during fundraising.</p>
         </div>
-        <button
-          onClick={() => setShowAdd(v => !v)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white shrink-0 transition-all hover:opacity-90"
-          style={{ background: '#C4614A' }}
-        >
-          <Plus className="w-4 h-4" />
-          Add Investor
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
+            style={{ background: 'oklch(0.18 0.05 240)', color: '#FAF6EF', border: '1px solid oklch(0.28 0.04 240)' }}
+            title="Export to CSV"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Export CSV</span>
+          </button>
+          <button
+            onClick={() => setShowAdd(v => !v)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
+            style={{ background: '#C4614A' }}
+          >
+            <Plus className="w-4 h-4" />
+            Add Investor
+          </button>
+        </div>
       </div>
 
       {/* Pipeline funnel */}
@@ -282,6 +313,48 @@ export default function InvestorCRM() {
               )}
             </motion.div>
           ))}
+        </div>
+      )}
+
+      {/* Tracked Accelerator Applications */}
+      {tracked.length > 0 && (
+        <div className="border border-border rounded-xl overflow-hidden bg-card">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-secondary/30">
+            <Rocket className="w-4 h-4 text-green-600" />
+            <span className="text-sm font-semibold text-foreground">Tracked Accelerator Applications</span>
+            <span className="ml-auto text-[10px] font-mono text-muted-foreground border border-border px-2 py-0.5 rounded-full">{tracked.length} tracked</span>
+          </div>
+          <div className="divide-y divide-border">
+            {tracked.map(app => (
+              <div key={app.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                <div className="flex items-start gap-3 flex-1 min-w-0">
+                  <BookmarkCheck className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-foreground truncate">{app.acceleratorName}</div>
+                    <div className="text-[10px] text-muted-foreground">{app.organization} · Deadline: {app.deadline} · Equity: {app.equity}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <a
+                    href={app.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-all hover:opacity-90"
+                    style={{ background: 'oklch(0.18 0.05 240)', color: '#FAF6EF', border: '1px solid oklch(0.28 0.04 240)' }}
+                  >
+                    Apply
+                  </a>
+                  <button
+                    onClick={() => untrack(app.acceleratorName)}
+                    className="text-muted-foreground hover:text-destructive transition-colors"
+                    title="Remove from tracker"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

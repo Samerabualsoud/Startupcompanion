@@ -5,9 +5,11 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, MapPin, Clock, DollarSign, Percent, Star, ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { ExternalLink, MapPin, Clock, DollarSign, Percent, Star, ChevronDown, ChevronUp, Filter, BookmarkPlus, BookmarkCheck } from 'lucide-react';
 import { ACCELERATORS, COUNTRIES, recommendAccelerators, type Accelerator, type Stage } from '@/lib/accelerators';
 import { SECTOR_OPTIONS } from '@/lib/valuation';
+import { useTrackedApplications } from '@/contexts/TrackedApplicationsContext';
+import { nanoid } from 'nanoid';
 
 const STAGE_OPTIONS = [
   { value: 'pre-seed', label: 'Pre-Seed' },
@@ -39,6 +41,24 @@ const TIER_LABELS: Record<number, string> = {
 
 function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
   const [expanded, setExpanded] = useState(false);
+  const { trackApplication, isTracked, untrack } = useTrackedApplications();
+  const tracked = isTracked(acc.name);
+
+  const handleTrack = () => {
+    if (tracked) {
+      untrack(acc.name);
+    } else {
+      trackApplication({
+        id: nanoid(),
+        acceleratorName: acc.name,
+        organization: acc.location,
+        deadline: acc.deadline,
+        equity: acc.equity,
+        website: acc.applyUrl,
+        trackedAt: new Date().toISOString().split('T')[0],
+      });
+    }
+  };
 
   return (
     <motion.div
@@ -104,18 +124,32 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
           ))}
         </div>
 
-        {/* Deadline */}
-        <div className="flex items-center justify-between">
+        {/* Deadline + actions */}
+        <div className="flex items-center justify-between gap-2">
           <div className="text-[10px] text-muted-foreground">
             <span className="font-semibold text-foreground">Deadline:</span> {acc.deadline}
           </div>
-          <button
-            onClick={() => setExpanded(v => !v)}
-            className="text-[10px] text-accent flex items-center gap-1 hover:underline"
-          >
-            {expanded ? 'Less' : 'More details'}
-            {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleTrack}
+              className="flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-all hover:opacity-90"
+              style={tracked
+                ? { background: '#D1FAE5', color: '#059669', border: '1px solid #6EE7B7' }
+                : { background: 'oklch(0.18 0.05 240)', color: '#FAF6EF', border: '1px solid oklch(0.28 0.04 240)' }
+              }
+              title={tracked ? 'Remove from tracker' : 'Track this application'}
+            >
+              {tracked ? <BookmarkCheck className="w-3 h-3" /> : <BookmarkPlus className="w-3 h-3" />}
+              {tracked ? 'Tracked' : 'Track'}
+            </button>
+            <button
+              onClick={() => setExpanded(v => !v)}
+              className="text-[10px] text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors"
+            >
+              {expanded ? 'Less' : 'Details'}
+              {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
+          </div>
         </div>
       </div>
 

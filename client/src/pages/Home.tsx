@@ -4,16 +4,17 @@
  * Layout: Persistent left sidebar + content area
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, Sparkles, Rocket, Users, GitBranch, Target,
   BookOpen, BarChart3, DollarSign, Menu, X, ChevronRight,
-  Gauge, Layers, FileDown
+  Gauge, Layers, FileDown, Link2, Check
 } from 'lucide-react';
 import { buildInputsFromAnswers } from '@/lib/chatFlow';
 import { runValuation, type StartupInputs, type ValuationSummary } from '@/lib/valuation';
 import { generateFullReport } from '@/lib/fullReport';
+import { encodeAnswersToURL, decodeAnswersFromURL, copyToClipboard } from '@/lib/shareLink';
 import { useReport } from '@/contexts/ReportContext';
 import ChatInterface from '@/components/ChatInterface';
 import ValuationReport from '@/components/ValuationReport';
@@ -73,7 +74,31 @@ export default function Home() {
   const [chatAnswers, setChatAnswers] = useState<Record<string, any> | null>(null);
   const [chatComplete, setChatComplete] = useState(false);
   const [chatKey, setChatKey] = useState(0);
+  const [linkCopied, setLinkCopied] = useState(false);
   const { readiness, pitchScore, dilution } = useReport();
+
+  // Restore from shared URL on first load
+  useEffect(() => {
+    const restored = decodeAnswersFromURL();
+    if (restored) {
+      setChatAnswers(restored);
+      setChatComplete(true);
+      // Clean URL without reload
+      const url = new URL(window.location.href);
+      url.searchParams.delete('v');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
+
+  const handleShare = useCallback(async () => {
+    if (!chatAnswers) return;
+    const shareURL = encodeAnswersToURL(chatAnswers);
+    const ok = await copyToClipboard(shareURL);
+    if (ok) {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2500);
+    }
+  }, [chatAnswers]);
 
   const inputs: StartupInputs | null = useMemo(() => {
     if (!chatAnswers) return null;
@@ -235,6 +260,17 @@ export default function Home() {
             <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
             9 tools · Free
           </div>
+          {chatComplete && chatAnswers && (
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-90 active:scale-95"
+              style={{ background: linkCopied ? '#10B981' : 'oklch(0.24 0.04 240)', color: '#FAF6EF', border: '1px solid oklch(0.32 0.04 240)' }}
+              title="Copy shareable link"
+            >
+              {linkCopied ? <Check className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{linkCopied ? 'Copied!' : 'Share'}</span>
+            </button>
+          )}
           <button
             onClick={() => {
               generateFullReport({
