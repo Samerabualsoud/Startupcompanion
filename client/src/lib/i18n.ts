@@ -182,6 +182,8 @@ export const translations = {
     navIdeaCheck: "Idea Check",
     navDatabase: "Database",
     navMyStartup: "My Startup",
+    navVesting: "Vesting",
+    navMatching: "Matching",
 
     navGroupValuation: "Valuation",
     navGroupEquity: "Equity & Cap Table",
@@ -347,7 +349,7 @@ export const translations = {
 
     // CTA
     ctaTitle: "هل أنت مستعد للبناء بوضوح؟",
-    ctaSubtitle: "انضم إلى آلاف المؤسسين الذين يستخدمون مجموعة أدوات الشركات الناشئة بالذكاء الاصطناعي لاتخاذ قرارات أفضل وأسرع.",
+    ctaSubtitle: "انضم إلى آلاف المؤسسين الذين يستخدمون Polaris Arabia لاتخاذ قرارات أفضل وأسرع.",
 
     // Footer
     footerDisclaimer: "جميع الحسابات تقديرية فقط ولا تشكل مشورة مالية.",
@@ -366,7 +368,7 @@ export const translations = {
     invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
 
     registerTitle: "إنشاء حسابك",
-    registerSubtitle: "انضم إلى آلاف المؤسسين الذين يستخدمون مجموعة أدوات الشركات الناشئة",
+    registerSubtitle: "انضم إلى آلاف المؤسسين الذين يستخدمون Polaris Arabia",
     nameLabel: "الاسم الكامل",
     confirmPasswordLabel: "تأكيد كلمة المرور",
     registerBtn: "إنشاء الحساب",
@@ -464,6 +466,8 @@ export const translations = {
     navIdeaCheck: "تقييم الفكرة",
     navDatabase: "قاعدة البيانات",
     navMyStartup: "شركتي",
+    navVesting: "جدول الاستحقاق",
+    navMatching: "مطابقة المستثمرين",
 
     navGroupValuation: "التقييم",
     navGroupEquity: "الأسهم وجدول الرسملة",

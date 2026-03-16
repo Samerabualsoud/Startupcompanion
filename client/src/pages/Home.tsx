@@ -52,6 +52,7 @@ interface NavItem {
   id: ToolId;
   label: string;
   shortLabel: string;
+  navKey?: string;
   icon: React.ElementType;
   badge?: string;
   group: string;
@@ -59,35 +60,35 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   // Valuation
-  { id: 'valuation',     label: 'Valuation Calculator', shortLabel: 'Valuation',   icon: TrendingUp,  group: 'Valuation',    badge: '7 methods' },
+  { id: 'valuation',     label: 'Valuation Calculator', shortLabel: 'Valuation',   navKey: 'navValuation',   icon: TrendingUp,  group: 'Valuation',    badge: '7 methods' },
   // Equity & Funding
-  { id: 'equity-split',  label: 'Co-Founder Equity Split', shortLabel: 'Equity Split', icon: Users,    group: 'Equity & Cap Table' },
-  { id: 'dilution',      label: 'Dilution Simulator',   shortLabel: 'Dilution',    icon: GitBranch,   group: 'Equity & Cap Table' },
-  { id: 'vesting',       label: 'Vesting Schedule Builder', shortLabel: 'Vesting',  icon: Calendar,    group: 'Equity & Cap Table', badge: 'AI' },
+  { id: 'equity-split',  label: 'Co-Founder Equity Split', shortLabel: 'Equity Split',   navKey: 'navEquitySplit', icon: Users,    group: 'Equity & Cap Table' },
+  { id: 'dilution',      label: 'Dilution Simulator',   shortLabel: 'Dilution',   navKey: 'navDilution',    icon: GitBranch,   group: 'Equity & Cap Table' },
+  { id: 'vesting',       label: 'Vesting Schedule Builder', shortLabel: 'Vesting',   navKey: 'navVesting',  icon: Calendar,    group: 'Equity & Cap Table', badge: 'AI' },
   // Fundraising
-  { id: 'readiness',     label: 'Fundraising Readiness', shortLabel: 'Readiness',  icon: Gauge,       group: 'Fundraising',  badge: '20 checks' },
-  { id: 'pitch-deck',    label: 'Pitch Deck Scorecard',  shortLabel: 'Pitch Deck', icon: Layers,      group: 'Fundraising' },
-  { id: 'investor-crm',  label: 'Investor CRM',          shortLabel: 'Investors',  icon: Target,      group: 'Fundraising' },
+  { id: 'readiness',     label: 'Fundraising Readiness', shortLabel: 'Readiness',   navKey: 'navReadiness',  icon: Gauge,       group: 'Fundraising',  badge: '20 checks' },
+  { id: 'pitch-deck',    label: 'Pitch Deck Scorecard',  shortLabel: 'Pitch Deck',   navKey: 'navPitchDeck', icon: Layers,      group: 'Fundraising' },
+  { id: 'investor-crm',  label: 'Investor CRM',          shortLabel: 'Investors',   navKey: 'navInvestorCRM',  icon: Target,      group: 'Fundraising' },
   // Resources
-  { id: 'accelerators',  label: 'Accelerator Finder',    shortLabel: 'Accelerators', icon: Rocket,    group: 'Resources',    badge: 'New' },
-  { id: 'runway',        label: 'Runway Optimizer',      shortLabel: 'Runway',     icon: BarChart3,   group: 'Resources' },
-  { id: 'term-sheet',    label: 'Term Sheet Glossary',   shortLabel: 'Term Sheet', icon: BookOpen,    group: 'Resources',    badge: '75 terms' },
+  { id: 'accelerators',  label: 'Accelerator Finder',    shortLabel: 'Accelerators',   navKey: 'navAccelerators', icon: Rocket,    group: 'Resources',    badge: 'New' },
+  { id: 'runway',        label: 'Runway Optimizer',      shortLabel: 'Runway',   navKey: 'navRunway',     icon: BarChart3,   group: 'Resources' },
+  { id: 'term-sheet',    label: 'Term Sheet Glossary',   shortLabel: 'Term Sheet',   navKey: 'navTermSheet', icon: BookOpen,    group: 'Resources',    badge: '75 terms' },
   // Idea Evaluation
-  { id: 'feasibility',   label: 'Idea Evaluator',        shortLabel: 'Idea Check', icon: Sparkles,    group: 'Valuation',    badge: 'AI' },
+  { id: 'feasibility',   label: 'Idea Evaluator',        shortLabel: 'Idea Check',   navKey: 'navIdeaCheck', icon: Sparkles,    group: 'Valuation',    badge: 'AI' },
   // My Startup
-  { id: 'profile',       label: 'My Startup Profile',    shortLabel: 'My Startup', icon: Building2,   group: 'My Startup' },
+  { id: 'profile',       label: 'My Startup Profile',    shortLabel: 'My Startup',   navKey: 'navMyStartup', icon: Building2,   group: 'My Startup' },
   // Database
-  { id: 'resources',     label: 'Investor Database',     shortLabel: 'Database',   icon: Building2,   group: 'Database',     badge: 'New' },
-  { id: 'matching',      label: 'Investor Matching',     shortLabel: 'Matching',   icon: Target,      group: 'Database',     badge: 'AI' },
+  { id: 'resources',     label: 'Investor Database',     shortLabel: 'Database',   navKey: 'navDatabase',   icon: Building2,   group: 'Database',     badge: 'New' },
+  { id: 'matching',      label: 'Investor Matching',     shortLabel: 'Matching',   navKey: 'navMatching',   icon: Target,      group: 'Database',     badge: 'AI' },
   // Admin
   { id: 'admin',         label: 'Admin Dashboard',       shortLabel: 'Admin',      icon: Gauge,       group: 'Admin' },
   // AI Tools
-  { id: 'ai-fundraising-advisor', label: 'AI Fundraising Advisor', shortLabel: 'AI Advisor',    icon: MessageCircle, group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-market-research',     label: 'AI Market Research',     shortLabel: 'Market Research', icon: BarChart3,    group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-investor-email',      label: 'AI Investor Email',      shortLabel: 'Email Writer',  icon: Mail,          group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-term-sheet',          label: 'AI Term Sheet Analyzer', shortLabel: 'Term Analyzer', icon: FileText,      group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-cofounder-agreement', label: 'AI Co-founder Agreement',shortLabel: 'Co-founder AI', icon: Users2,        group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-due-diligence',       label: 'AI Due Diligence',       shortLabel: 'Due Diligence', icon: ClipboardCheck,group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-fundraising-advisor', label: 'AI Fundraising Advisor', shortLabel: 'AI Advisor',   navKey: 'navAIAdvisor',    icon: MessageCircle, group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-market-research',     label: 'AI Market Research',     shortLabel: 'Market Research',   navKey: 'navAIMarketResearch', icon: BarChart3,    group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-investor-email',      label: 'AI Investor Email',      shortLabel: 'Email Writer',   navKey: 'navAIEmailWriter',  icon: Mail,          group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-term-sheet',          label: 'AI Term Sheet Analyzer', shortLabel: 'Term Analyzer',   navKey: 'navAITermAnalyzer', icon: FileText,      group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-cofounder-agreement', label: 'AI Co-founder Agreement',shortLabel: 'Co-founder AI',   navKey: 'navAICofounder', icon: Users2,        group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-due-diligence',       label: 'AI Due Diligence',       shortLabel: 'Due Diligence',   navKey: 'navAIDueDiligence', icon: ClipboardCheck,group: 'AI Tools', badge: 'AI' },
 ];
 
 const GROUPS = ['Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources', 'Database', 'My Startup', 'AI Tools', 'Admin'];
@@ -122,7 +123,7 @@ export default function Home() {
   let { user, loading, error, isAuthenticated, logout } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [, navigate] = useLocation();
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
 
   const [activeTool, setActiveTool] = useState<ToolId>('valuation');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -401,7 +402,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 57px)' }}>
+      <div className="flex flex-1 overflow-hidden main-layout" style={{ height: 'calc(100vh - 57px)' }}>
 
         {/* ── Sidebar ── */}
         {/* Mobile overlay */}
@@ -424,7 +425,7 @@ export default function Home() {
             flex flex-col shrink-0
             border-r border-border
             transition-transform duration-300 ease-in-out
-            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            ${sidebarOpen ? 'translate-x-0' : isRTL ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0'}
             w-56 h-full
           `}
           style={{ background: 'oklch(0.993 0.003 80)', top: 57, height: 'calc(100vh - 57px)' }}
@@ -465,7 +466,7 @@ export default function Home() {
                         style={isActive ? { background: TOOL_COLORS[item.id] } : {}}
                       >
                         <Icon className="w-3.5 h-3.5 shrink-0" />
-                        <span className="text-xs font-medium flex-1 truncate">{item.shortLabel}</span>
+                        <span className="text-xs font-medium flex-1 truncate">{item.navKey ? t(item.navKey as any) : item.shortLabel}</span>
                         {item.badge && !isActive && (
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
                             isAI

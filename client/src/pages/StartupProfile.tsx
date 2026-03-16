@@ -505,25 +505,61 @@ export default function StartupProfile() {
       </Section>
 
       {/* ── Saved Valuations ── */}
-      <Section title={`Saved Valuations (${savedVals.length})`} icon={TrendingUp} color="oklch(0.55 0.13 30)" defaultOpen={false}>
+      <Section title={`Saved Valuations (${savedVals.length})`} icon={TrendingUp} color="oklch(0.55 0.13 30)" defaultOpen={savedVals.length > 0}>
         {savedVals.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-3">No saved valuations yet. Complete a valuation and save it from the report.</p>
+          <div className="text-center py-6">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: 'oklch(0.95 0.01 80)' }}>
+              <TrendingUp className="w-5 h-5" style={{ color: 'oklch(0.55 0.13 30)' }} />
+            </div>
+            <p className="text-sm font-medium text-foreground mb-1">No saved valuations yet</p>
+            <p className="text-xs text-muted-foreground">Complete a valuation in the Valuation Calculator and click “Save Scenario” to save it here.</p>
+          </div>
         ) : (
-          <div className="space-y-2">
-            {savedVals.map((v: any) => (
-              <div key={v.id} className="flex items-center gap-3 p-3 rounded-lg border border-border">
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-foreground">{v.label}</div>
-                  <div className="text-xs text-muted-foreground">{new Date(v.createdAt).toLocaleDateString()}</div>
-                </div>
-                {v.blendedValue && (
-                  <div className="text-sm font-bold font-mono" style={{ color: 'oklch(0.55 0.13 30)' }}>
-                    {fmt(v.blendedValue)}
+          <div className="space-y-3">
+            {savedVals.map((v: any, idx: number) => (
+              <div key={v.id} className="group relative p-4 rounded-xl border border-border hover:border-accent/40 hover:shadow-sm transition-all" style={{ background: 'oklch(0.995 0.002 80)' }}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-mono text-muted-foreground">#{idx + 1}</span>
+                      <div className="text-sm font-semibold text-foreground truncate">{v.label}</div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(v.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </div>
+                    {v.summary?.stage && (
+                      <span className="inline-block mt-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: 'oklch(0.92 0.02 240)', color: 'oklch(0.35 0.05 240)' }}>
+                        {v.summary.stage}
+                      </span>
+                    )}
                   </div>
-                )}
-                <button onClick={() => deleteValM.mutate({ id: v.id })} className="p-1 rounded hover:bg-red-50 hover:text-red-500 transition-colors text-muted-foreground">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                  <div className="text-right shrink-0">
+                    {v.blendedValue && (
+                      <div className="text-lg font-bold font-mono" style={{ color: 'oklch(0.55 0.13 30)' }}>
+                        {fmt(v.blendedValue)}
+                      </div>
+                    )}
+                    {v.summary?.weightedLow != null && v.summary?.weightedHigh != null && (
+                      <div className="text-[10px] text-muted-foreground font-mono">
+                        {fmt(v.summary.weightedLow)} – {fmt(v.summary.weightedHigh)}
+                      </div>
+                    )}
+                    {v.summary?.confidenceScore != null && (
+                      <div className="text-[10px] text-muted-foreground mt-0.5">
+                        {v.summary.confidenceScore}% confidence
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center justify-end gap-2 mt-3 pt-2 border-t border-border/50">
+                  <button
+                    onClick={() => deleteValM.mutate({ id: v.id })}
+                    className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-red-500 transition-colors px-2 py-1 rounded hover:bg-red-50"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>

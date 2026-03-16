@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileDown, BookmarkPlus, ChevronDown, ChevronRight, RotateCcw, PieChart, BarChart2, Layers } from 'lucide-react';
+import { FileDown, BookmarkPlus, ChevronDown, ChevronRight, RotateCcw, PieChart, BarChart2, Layers, Cloud, CloudOff } from 'lucide-react';
 import { formatCurrency, type StartupInputs, type ValuationSummary, type SavedScenario } from '@/lib/valuation';
 import { generatePDFReport } from '@/lib/pdfReport';
 import DilutionCalculator from './DilutionCalculator';
@@ -14,6 +14,8 @@ import ScenarioComparison from './ScenarioComparison';
 import { nanoid } from 'nanoid';
 import { toast } from 'sonner';
 import { AnimatePresence } from 'framer-motion';
+import { trpc } from '@/lib/trpc';
+import { useAuth } from '@/_core/hooks/useAuth';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartTooltip,
   ResponsiveContainer, Cell, ReferenceLine,
@@ -147,6 +149,16 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
   const [savedScenarios, setSavedScenarios] = useState<SavedScenario[]>([]);
   const [showSaveInput, setShowSaveInput] = useState(false);
   const [scenarioName, setScenarioName] = useState('');
+  const { isAuthenticated } = useAuth();
+
+  const saveValuationMutation = trpc.profile.saveValuation.useMutation({
+    onSuccess: () => {
+      toast.success('Scenario saved to your profile!');
+    },
+    onError: () => {
+      toast.error('Failed to save to profile. Saved locally only.');
+    },
+  });
 
   const riskColor = summary.riskLevel === 'Low' ? '#10B981' : summary.riskLevel === 'Moderate' ? '#F59E0B' : summary.riskLevel === 'High' ? '#EF4444' : '#7C3AED';
 
@@ -167,11 +179,22 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
 
   const handleSaveScenario = () => {
     const name = scenarioName.trim() || `Scenario ${savedScenarios.length + 1}`;
-    setSavedScenarios(prev => [...prev, { id: nanoid(), name, inputs, summary, savedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }]);
+    const newScenario: SavedScenario = { id: nanoid(), name, inputs, summary, savedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) };
+    setSavedScenarios(prev => [...prev, newScenario]);
     setScenarioName('');
     setShowSaveInput(false);
     setActiveTab('scenarios');
-    toast.success(`Scenario "${name}" saved!`);
+    // Also persist to database if logged in
+    if (isAuthenticated) {
+      saveValuationMutation.mutate({
+        label: name,
+        blendedValue: summary.blended,
+        inputs: inputs as any,
+        summary: summary as any,
+      });
+    } else {
+      toast.success(`Scenario "${name}" saved locally!`);
+    }
   };
 
   return (

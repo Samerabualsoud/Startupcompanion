@@ -173,3 +173,13 @@
 - [x] Ran pnpm db:push: migration 0008_woozy_polaris.sql applied successfully
 - [x] Verified: DB stage column now enum('idea','pre-seed','seed','series-a','series-b','growth')
 - [x] 0 TypeScript errors
+
+## Arabic RTL & Saved Valuations Fix (Round 14)
+- [x] Fix RTL: added missing nav translation keys to i18n.ts (navVesting, navMatching, navFeasibility, navAdmin, all AI tools)
+- [x] Fix RTL: Home.tsx sidebar now uses t(item.navKey) for translated labels
+- [x] Fix RTL: mobile sidebar translate direction fixed (translate-x-full in RTL)
+- [x] Fix RTL: added comprehensive RTL CSS rules (sidebar border flip, icon flip, text alignment, form fields)
+- [x] Fix: ValuationReport.tsx Save Scenario now persists to DB via trpc.profile.saveValuation
+- [x] Fix: Saved Valuations section in StartupProfile.tsx shows richer cards (range, confidence, stage)
+- [x] Fix: Saved Valuations section auto-opens when valuations exist
+- [x] 0 TypeScript errors
