@@ -5,12 +5,17 @@
  */
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useAuth } from '@/_core/hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, Sparkles, Rocket, Users, GitBranch, Target,
   BookOpen, BarChart3, DollarSign, Menu, X, ChevronRight,
-  Gauge, Layers, FileDown, Link2, Check
+  Gauge, Layers, FileDown, Link2, Check, Building2, CreditCard, LogIn, LogOut, UserCircle
 } from 'lucide-react';
+import { getLoginUrl } from '@/const';
+import { trpc } from '@/lib/trpc';
+import { toast } from 'sonner';
+import StartupProfile from './StartupProfile';
 import { buildInputsFromAnswers } from '@/lib/chatFlow';
 import { runValuation, type StartupInputs, type ValuationSummary } from '@/lib/valuation';
 import { generateFullReport } from '@/lib/fullReport';
@@ -27,7 +32,7 @@ import TermSheetGlossary from '@/components/TermSheetGlossary';
 import InvestorCRM from '@/components/InvestorCRM';
 import RunwayOptimizer from '@/components/RunwayOptimizer';
 
-type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway';
+type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile';
 
 interface NavItem {
   id: ToolId;
@@ -51,10 +56,12 @@ const NAV_ITEMS: NavItem[] = [
   // Resources
   { id: 'accelerators',  label: 'Accelerator Finder',    shortLabel: 'Accelerators', icon: Rocket,    group: 'Resources',    badge: 'New' },
   { id: 'runway',        label: 'Runway Optimizer',      shortLabel: 'Runway',     icon: BarChart3,   group: 'Resources' },
-  { id: 'term-sheet',    label: 'Term Sheet Glossary',   shortLabel: 'Term Sheet', icon: BookOpen,    group: 'Resources',    badge: '35 terms' },
+  { id: 'term-sheet',    label: 'Term Sheet Glossary',   shortLabel: 'Term Sheet', icon: BookOpen,    group: 'Resources',    badge: '75 terms' },
+  // My Startup
+  { id: 'profile',       label: 'My Startup Profile',    shortLabel: 'My Startup', icon: Building2,   group: 'My Startup' },
 ];
 
-const GROUPS = ['Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources'];
+const GROUPS = ['Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources', 'My Startup'];
 
 const TOOL_COLORS: Record<ToolId, string> = {
   valuation: '#C4614A',
@@ -66,9 +73,17 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'term-sheet': '#0F1B2D',
   'investor-crm': '#C4614A',
   runway: '#059669',
+  profile: '#2D4A6B',
 };
 
 export default function Home() {
+  // The userAuth hooks provides authentication state
+  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
+  let { user, loading, error, isAuthenticated, logout } = useAuth();
+  const { data: subStatus } = trpc.subscription.status.useQuery(undefined, { enabled: isAuthenticated });
+  const isPro = subStatus?.isActive;
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
   const [activeTool, setActiveTool] = useState<ToolId>('valuation');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatAnswers, setChatAnswers] = useState<Record<string, any> | null>(null);
@@ -221,9 +236,10 @@ export default function Home() {
       case 'dilution':        return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><AdvancedDilutionSimulator /></div>;
       case 'readiness':       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><FundraisingReadiness /></div>;
       case 'pitch-deck':      return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><PitchDeckScorecard /></div>;
+      case 'runway':          return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><RunwayOptimizer /></div>;
       case 'term-sheet':      return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><TermSheetGlossary /></div>;
       case 'investor-crm':    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><InvestorCRM /></div>;
-      case 'runway':          return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><RunwayOptimizer /></div>;
+      case 'profile':         return <StartupProfile />;
       default: return null;
     }
   };
@@ -256,10 +272,17 @@ export default function Home() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground border border-border px-2.5 py-1 rounded-full">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-            9 tools · Free
-          </div>
+          {isPro ? (
+            <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono border px-2.5 py-1 rounded-full" style={{ borderColor: 'oklch(0.55 0.13 30)', color: 'oklch(0.55 0.13 30)' }}>
+              <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'oklch(0.55 0.13 30)' }} />
+              Pro · Active
+            </div>
+          ) : (
+            <a href="/pricing" className="hidden sm:flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all hover:opacity-90" style={{ background: 'oklch(0.55 0.13 30)', color: 'white' }}>
+              <CreditCard className="w-3 h-3" />
+              Upgrade $9.99/mo
+            </a>
+          )}
           {chatComplete && chatAnswers && (
             <button
               onClick={handleShare}
@@ -271,6 +294,52 @@ export default function Home() {
               <span className="hidden sm:inline">{linkCopied ? 'Copied!' : 'Share'}</span>
             </button>
           )}
+          {/* User menu */}
+          <div className="relative">
+            <button
+              onClick={() => setUserMenuOpen(v => !v)}
+              className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-all hover:bg-secondary/60 text-muted-foreground"
+            >
+              <UserCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">{user?.name?.split(' ')[0] || 'Account'}</span>
+            </button>
+            <AnimatePresence>
+              {userMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  className="absolute right-0 top-full mt-1 w-44 rounded-xl border border-border bg-card shadow-lg z-50 overflow-hidden"
+                  onMouseLeave={() => setUserMenuOpen(false)}
+                >
+                  {isAuthenticated ? (
+                    <>
+                      <div className="px-3 py-2.5 border-b border-border">
+                        <div className="text-xs font-semibold text-foreground truncate">{user?.name}</div>
+                        <div className="text-[10px] text-muted-foreground truncate">{user?.email}</div>
+                      </div>
+                      <button onClick={() => { setActiveTool('profile'); setUserMenuOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary/50 transition-colors">
+                        <Building2 className="w-3.5 h-3.5" /> My Startup Profile
+                      </button>
+                      {!isPro && (
+                        <a href="/pricing" className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-secondary/50 transition-colors" style={{ color: 'oklch(0.55 0.13 30)' }}>
+                          <CreditCard className="w-3.5 h-3.5" /> Upgrade to Pro
+                        </a>
+                      )}
+                      <button onClick={() => { logout(); setUserMenuOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:bg-secondary/50 transition-colors border-t border-border">
+                        <LogOut className="w-3.5 h-3.5" /> Sign Out
+                      </button>
+                    </>
+                  ) : (
+                    <a href={getLoginUrl()} className="flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary/50 transition-colors">
+                      <LogIn className="w-3.5 h-3.5" /> Sign In
+                    </a>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           <button
             onClick={() => {
               generateFullReport({

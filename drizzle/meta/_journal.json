@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1773626745640,
+      "tag": "0000_groovy_lyja",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1773628104969,
+      "tag": "0001_perfect_tusk",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1773628482132,
+      "tag": "0002_condemned_kree",
+      "breakpoints": true
+    }
+  ]
+}

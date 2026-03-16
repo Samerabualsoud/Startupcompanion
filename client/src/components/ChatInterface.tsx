@@ -10,6 +10,8 @@ import { Send, ChevronRight, RotateCcw, Check, Sparkles } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { CHAT_QUESTIONS, formatAnswer, type ChatQuestion } from '@/lib/chatFlow';
 import { nanoid } from 'nanoid';
+import { trpc } from '@/lib/trpc';
+import { useAuth } from '@/_core/hooks/useAuth';
 
 interface Message {
   id: string;
@@ -257,8 +259,24 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
 // ─── Main Chat Interface ───────────────────────────────────────────────────────
 
 export default function ChatInterface({ onComplete }: Props) {
+  const { isAuthenticated } = useAuth();
+  const { data: profileData } = trpc.profile.get.useQuery(undefined, { enabled: isAuthenticated });
   const [messages, setMessages] = useState<Message[]>([]);
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+
+  // Pre-populate answers from startup profile if available
+  const p = profileData && 'name' in profileData ? profileData : (profileData as any)?.profile ?? null;
+  const profileDefaults = p ? {
+    companyName: p.name ?? undefined,
+    sector: p.sector ?? undefined,
+    stage: p.stage ?? undefined,
+    currentARR: p.annualRevenue ? Number(p.annualRevenue) : undefined,
+    monthlyBurnRate: p.monthlyBurn ? Number(p.monthlyBurn) : undefined,
+    cashOnHand: p.cashOnHand ? Number(p.cashOnHand) : undefined,
+    teamSize: p.teamSize ?? undefined,
+    country: p.country ?? undefined,
+  } : {};
+
+  const [answers, setAnswers] = useState<Record<string, any>>(profileDefaults);
   const [currentQIndex, setCurrentQIndex] = useState(-1); // -1 = intro
   const [isTyping, setIsTyping] = useState(false);
   const [isComplete, setIsComplete] = useState(false);

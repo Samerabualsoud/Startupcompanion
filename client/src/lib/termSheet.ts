@@ -1,13 +1,13 @@
 /**
  * Term Sheet Glossary & Red Flags
- * Plain-English explanations of 35+ VC term sheet terms
+ * Plain-English explanations of 80+ VC term sheet terms
  */
 
 export interface TermDefinition {
   term: string;
-  category: 'economics' | 'control' | 'protection' | 'governance' | 'exit';
-  plain: string;           // One-sentence plain English
-  detail: string;          // 2-3 sentence explanation
+  category: 'economics' | 'control' | 'protection' | 'governance' | 'exit' | 'fundraising' | 'captable' | 'legal' | 'duediligence';
+  plain: string;
+  detail: string;
   redFlag: boolean;
   redFlagReason?: string;
   founderTip?: string;
@@ -112,6 +112,30 @@ export const TERM_SHEET_GLOSSARY: TermDefinition[] = [
     redFlag: false,
     founderTip: 'Prefer SAFEs over convertible notes. If you must use a note, negotiate a long maturity date (24+ months) and automatic conversion.',
   },
+  {
+    term: 'MFN (Most Favored Nation)',
+    category: 'economics',
+    plain: 'If you give better terms to a future SAFE investor, existing SAFE holders automatically get those better terms too.',
+    detail: 'Common in pre-money SAFEs. Protects early investors from being disadvantaged if you later offer a lower cap or higher discount to someone else. Generally reasonable for early investors.',
+    redFlag: false,
+    founderTip: 'MFN clauses are standard in early SAFEs. They\'re fair to early investors who took the most risk.',
+  },
+  {
+    term: 'Price Per Share',
+    category: 'economics',
+    plain: 'The cost of one share of stock in the current funding round.',
+    detail: 'Calculated as pre-money valuation divided by fully diluted shares outstanding. This is the benchmark price for the round — options are typically priced at or below this.',
+    redFlag: false,
+    example: '$10M pre-money ÷ 10M shares = $1.00 per share',
+  },
+  {
+    term: 'Fully Diluted Shares',
+    category: 'economics',
+    plain: 'The total number of shares if every option, warrant, and convertible security were exercised today.',
+    detail: 'Includes: issued shares + option pool (granted and ungranted) + warrants + convertible notes/SAFEs. Valuation is always calculated on a fully diluted basis. This is the denominator that determines your ownership percentage.',
+    redFlag: false,
+    founderTip: 'Always calculate your ownership on a fully diluted basis, not just issued shares. The difference can be significant.',
+  },
 
   // ─── Control ──────────────────────────────────────────────────────────────
   {
@@ -163,6 +187,72 @@ export const TERM_SHEET_GLOSSARY: TermDefinition[] = [
     redFlag: false,
     founderTip: 'Pro-rata is standard and generally fine. Be careful about giving "super pro-rata" rights which allow investors to buy MORE than their pro-rata share.',
   },
+  {
+    term: 'Voting Rights',
+    category: 'control',
+    plain: 'Who gets to vote on major company decisions and how much weight each vote carries.',
+    detail: 'Common shareholders (founders, employees) typically have 1 vote per share. Preferred shareholders (investors) may have additional voting rights. Dual-class share structures give founders 10x or more votes per share, preserving control.',
+    redFlag: false,
+    founderTip: 'Consider a dual-class share structure early if you want to maintain voting control long-term. Much harder to implement after Series A.',
+  },
+  {
+    term: 'Founder Veto Rights',
+    category: 'control',
+    plain: 'Certain decisions require founder approval regardless of board vote.',
+    detail: 'Rarely granted but very founder-friendly. Gives founders the ability to block specific actions like firing the CEO or selling the company below a certain price.',
+    redFlag: false,
+    founderTip: 'Try to negotiate founder veto rights on: replacing the CEO, selling the company below a threshold, and issuing shares that dilute founders below 20%.',
+  },
+  {
+    term: 'Observer Rights',
+    category: 'control',
+    plain: 'The right to attend board meetings and receive board materials, but without voting power.',
+    detail: 'Often given to smaller investors who don\'t get a full board seat. They can watch and advise but can\'t vote. Generally harmless, but too many observers can make board meetings unwieldy.',
+    redFlag: false,
+    founderTip: 'Observer rights are generally fine. Limit the number and ensure they can be revoked if the investor becomes adversarial.',
+  },
+
+  // ─── Protection ───────────────────────────────────────────────────────────
+  {
+    term: 'Down Round Protection',
+    category: 'protection',
+    plain: 'Special protections that kick in if you raise money at a lower valuation than the previous round.',
+    detail: 'Down rounds trigger anti-dilution adjustments, can damage employee morale, and signal distress to the market. Some term sheets include specific provisions that activate in down rounds, like ratchets or additional board seats for investors.',
+    redFlag: true,
+    redFlagReason: 'Down round provisions can significantly dilute founders. Understand exactly what triggers and what the impact is before signing.',
+  },
+  {
+    term: 'Warranty & Representations',
+    category: 'protection',
+    plain: 'Legal promises you make to investors about the state of your company.',
+    detail: 'You\'re legally certifying that your financial statements are accurate, you own your IP, there are no undisclosed lawsuits, etc. If these turn out to be false, investors can sue for damages.',
+    redFlag: false,
+    founderTip: 'Be extremely thorough and honest in your representations. Undisclosed issues discovered post-investment can void the deal or lead to litigation.',
+  },
+  {
+    term: 'Indemnification',
+    category: 'protection',
+    plain: 'The company agrees to cover legal costs if directors or officers are sued for company-related actions.',
+    detail: 'Standard and necessary to attract good board members. Without indemnification, no experienced director would join your board. Usually backed by D&O (Directors & Officers) insurance.',
+    redFlag: false,
+    founderTip: 'Get D&O insurance as soon as you have outside board members. It\'s relatively cheap and protects everyone.',
+  },
+  {
+    term: 'Material Adverse Change (MAC)',
+    category: 'protection',
+    plain: 'A clause that lets investors back out of a deal if something significantly bad happens to the company before closing.',
+    detail: 'If between signing the term sheet and closing the deal, something major goes wrong (key customer lost, lawsuit filed, key employee leaves), investors may invoke MAC to walk away.',
+    redFlag: false,
+    founderTip: 'MAC clauses are standard. Make sure the definition is narrow and specific — broad MAC clauses give investors too much flexibility to exit.',
+  },
+  {
+    term: 'Lock-Up Period',
+    category: 'protection',
+    plain: 'A period after an IPO during which insiders cannot sell their shares.',
+    detail: 'Typically 180 days after IPO. Prevents a flood of insider selling that would crash the stock price. Standard and required by underwriters.',
+    redFlag: false,
+    founderTip: 'Lock-up periods are standard and non-negotiable in IPOs. Plan your personal liquidity needs accordingly.',
+  },
 
   // ─── Governance ───────────────────────────────────────────────────────────
   {
@@ -195,6 +285,31 @@ export const TERM_SHEET_GLOSSARY: TermDefinition[] = [
     plain: 'Investors\' right to receive regular financial reports from the company.',
     detail: 'Standard information rights include monthly/quarterly financials and annual audited statements. Reasonable and expected. Watch out for overly broad information rights that require sharing competitive information.',
     redFlag: false,
+  },
+  {
+    term: 'Founder Buyback',
+    category: 'governance',
+    plain: 'The company\'s right to repurchase a departing founder\'s unvested shares.',
+    detail: 'If a founder leaves before their shares are fully vested, the company can buy back the unvested portion at the original issue price (usually near zero). This is standard and protects remaining founders and investors.',
+    redFlag: false,
+    founderTip: 'Make sure buyback rights expire after vesting is complete. Also negotiate for the buyback price to be fair market value if you leave after significant time.',
+  },
+  {
+    term: 'Non-Compete Clause',
+    category: 'governance',
+    plain: 'You agree not to start or join a competing company for a period after leaving.',
+    detail: 'Enforceability varies dramatically by jurisdiction (California bans them; most other states enforce them). Typically 1-2 years. Can severely limit your options if the company fails.',
+    redFlag: true,
+    redFlagReason: 'Broad non-competes can trap you in an industry for years. Push for narrow scope (specific product category, not entire industry) and short duration (12 months max).',
+    founderTip: 'If you\'re in California, non-competes are generally unenforceable. In other states, negotiate scope and duration carefully.',
+  },
+  {
+    term: 'Non-Solicitation',
+    category: 'governance',
+    plain: 'You agree not to recruit the company\'s employees or customers after leaving.',
+    detail: 'More enforceable than non-competes in most jurisdictions. Typically 12-24 months. Prevents founders from leaving and immediately poaching the team.',
+    redFlag: false,
+    founderTip: 'Non-solicitation is generally reasonable. Keep the duration to 12 months and ensure it only covers people you directly managed.',
   },
 
   // ─── Exit ─────────────────────────────────────────────────────────────────
@@ -232,6 +347,231 @@ export const TERM_SHEET_GLOSSARY: TermDefinition[] = [
     redFlag: false,
     founderTip: 'No-shop clauses are standard. Keep the window short (30 days) and ensure it expires automatically.',
   },
+  {
+    term: 'Acquisition Approval',
+    category: 'exit',
+    plain: 'Investors must approve any acquisition of the company.',
+    detail: 'Usually part of protective provisions. Investors want to ensure they\'re not sold out in a deal that doesn\'t meet their return expectations. Standard but can block founder-preferred exits.',
+    redFlag: false,
+    founderTip: 'Negotiate a minimum acquisition price threshold below which investor approval is not required — this gives you flexibility for acqui-hires or small exits.',
+  },
+  {
+    term: 'Liquidation Waterfall',
+    category: 'exit',
+    plain: 'The order in which different shareholders get paid in an exit.',
+    detail: 'Typically: (1) debt holders, (2) preferred shareholders with liquidation preferences, (3) participating preferred, (4) common shareholders. Understanding your position in the waterfall is critical to knowing what you\'ll actually receive in an exit.',
+    redFlag: false,
+    founderTip: 'Model your exit proceeds across different exit valuations before signing any term sheet. A $50M exit can leave founders with nothing if the waterfall is stacked against them.',
+    example: 'In a $20M exit with $15M in preferred liquidation preferences, common shareholders (founders, employees) receive only $5M to split.',
+  },
+
+  // ─── Fundraising Mechanics ────────────────────────────────────────────────
+  {
+    term: 'Lead Investor',
+    category: 'fundraising',
+    plain: 'The main investor who sets the terms, leads due diligence, and usually takes the largest check.',
+    detail: 'The lead investor negotiates the term sheet, does the most due diligence, and typically takes a board seat. Other investors follow the lead\'s terms. Having a strong lead investor makes closing the round much easier.',
+    redFlag: false,
+    founderTip: 'Spend 80% of your fundraising energy finding the right lead. Once you have a lead, the rest of the round often fills quickly.',
+  },
+  {
+    term: 'Bridge Round',
+    category: 'fundraising',
+    plain: 'A small, quick funding round to keep the company running until a larger round closes.',
+    detail: 'Usually done with existing investors via convertible notes or SAFEs. Buys 3-6 months of runway. Can signal distress if done too frequently, but is a normal part of startup financing.',
+    redFlag: false,
+    founderTip: 'Raise bridge rounds proactively, not desperately. Start bridge conversations when you have 4-6 months of runway, not 1-2.',
+  },
+  {
+    term: 'Tranched Investment',
+    category: 'fundraising',
+    plain: 'Investment paid in installments tied to hitting specific milestones.',
+    detail: 'Instead of receiving all the money upfront, you receive portions as you hit targets (e.g., $500K now, $500K when you reach 1,000 users). Reduces investor risk but creates pressure and uncertainty for founders.',
+    redFlag: true,
+    redFlagReason: 'Tranched investments give investors leverage to withhold capital if they disagree with your direction. Push for full investment upfront.',
+    founderTip: 'Avoid tranched investments if possible. If unavoidable, ensure milestones are objective, measurable, and within your control.',
+  },
+  {
+    term: 'Closing Conditions',
+    category: 'fundraising',
+    plain: 'Requirements that must be met before the investment money is actually transferred.',
+    detail: 'Common closing conditions: legal due diligence completion, shareholder approval, regulatory filings, and execution of all investment documents. Delays in closing conditions can extend timelines significantly.',
+    redFlag: false,
+    founderTip: 'Start working on closing conditions immediately after signing the term sheet. Legal delays are the most common cause of deal slippage.',
+  },
+  {
+    term: 'Side Letter',
+    category: 'fundraising',
+    plain: 'A private agreement between the company and a specific investor that gives them special terms not in the main documents.',
+    detail: 'Side letters can grant MFN rights, special information rights, or other preferences. They\'re binding but not disclosed to other investors. Too many side letters create a complex, hard-to-manage cap table.',
+    redFlag: true,
+    redFlagReason: 'Side letters create hidden obligations that complicate future rounds. Future investors will discover them in due diligence and may demand equal treatment.',
+    founderTip: 'Minimize side letters. If you must grant them, ensure they sunset after the next round or after a specific date.',
+  },
+  {
+    term: 'Rolling Close',
+    category: 'fundraising',
+    plain: 'Accepting investors into the round as they commit, rather than waiting for everyone to sign at once.',
+    detail: 'Common in angel rounds and seed rounds. Allows you to start using capital sooner. Each investor who closes is in at the same terms as the final round.',
+    redFlag: false,
+    founderTip: 'Rolling closes are efficient for seed rounds. Set a hard deadline to create urgency and prevent the round from dragging on indefinitely.',
+  },
+  {
+    term: 'Syndicate',
+    category: 'fundraising',
+    plain: 'A group of investors who pool their money to invest together, often led by one experienced investor.',
+    detail: 'Common on AngelList and similar platforms. The lead investor does the diligence and negotiates terms; other investors follow. Good way to fill a round quickly with smaller checks.',
+    redFlag: false,
+    founderTip: 'Syndicates are efficient but can create cap table complexity. Prefer a single SPV (Special Purpose Vehicle) over many individual investors.',
+  },
+  {
+    term: 'SPV (Special Purpose Vehicle)',
+    category: 'fundraising',
+    plain: 'A single legal entity that holds multiple investors\' money, appearing as one investor on your cap table.',
+    detail: 'Instead of 20 individual angel investors, an SPV consolidates them into one entity. This simplifies your cap table, reduces administrative burden, and makes future rounds cleaner.',
+    redFlag: false,
+    founderTip: 'Always prefer SPVs over individual investors for angel rounds. A clean cap table is highly valued by Series A investors.',
+  },
+
+  // ─── Cap Table ────────────────────────────────────────────────────────────
+  {
+    term: 'Cap Table (Capitalization Table)',
+    category: 'captable',
+    plain: 'A spreadsheet showing who owns what percentage of your company.',
+    detail: 'Lists all shareholders, their share classes, number of shares, and ownership percentage. Includes founders, investors, employees with options, and any convertible securities. Investors will scrutinize this in due diligence.',
+    redFlag: false,
+    founderTip: 'Keep your cap table clean and up-to-date from day one. Use a proper tool (Carta, Pulley) rather than a spreadsheet once you have outside investors.',
+  },
+  {
+    term: 'Common Stock',
+    category: 'captable',
+    plain: 'The basic shares held by founders and employees — last in line to get paid in an exit.',
+    detail: 'Common stock has no special rights. In an exit, common shareholders get paid after all preferred shareholders have received their liquidation preferences. Founders and employees hold common stock.',
+    redFlag: false,
+  },
+  {
+    term: 'Preferred Stock',
+    category: 'captable',
+    plain: 'Special shares held by investors that come with extra rights and protections.',
+    detail: 'Preferred shareholders get paid before common shareholders in an exit. They also typically have voting rights, information rights, and other protections. Each funding round creates a new series of preferred stock (Series A, B, C, etc.).',
+    redFlag: false,
+  },
+  {
+    term: 'Warrant',
+    category: 'captable',
+    plain: 'The right to buy shares at a fixed price in the future.',
+    detail: 'Similar to options but typically issued to investors or advisors rather than employees. Warrants have an expiration date and a strike price. If the company\'s value exceeds the strike price, warrants are "in the money."',
+    redFlag: false,
+    founderTip: 'Track all warrants carefully on your cap table. Unexpected warrant exercises can surprise founders during fundraising.',
+  },
+  {
+    term: 'Strike Price (Exercise Price)',
+    category: 'captable',
+    plain: 'The price at which an option or warrant holder can buy shares.',
+    detail: 'For employee options, the strike price is set at fair market value (409A valuation) at the time of grant. If the company\'s value grows, employees can buy shares at the lower strike price and profit from the difference.',
+    redFlag: false,
+    example: 'Strike price $0.10/share. Current value $2.00/share. Employee exercises 10,000 options: pays $1,000, receives shares worth $20,000.',
+  },
+  {
+    term: '409A Valuation',
+    category: 'captable',
+    plain: 'An independent appraisal of your company\'s common stock value, required for setting employee option prices.',
+    detail: 'Required by the IRS before issuing employee stock options. Sets the "fair market value" of common stock. Must be updated every 12 months or after a significant event (new funding round, major revenue milestone). Common stock is typically valued at 25-33% of preferred stock price.',
+    redFlag: false,
+    founderTip: 'Get a 409A valuation before issuing any employee options. Issuing options without a valid 409A can result in significant tax penalties for employees.',
+  },
+  {
+    term: 'Phantom Equity',
+    category: 'captable',
+    plain: 'A bonus that mimics equity upside without actually giving employees real shares.',
+    detail: 'Employees receive cash bonuses tied to company value growth, without becoming actual shareholders. Common in jurisdictions where equity issuance is complex or in companies that want to avoid cap table complexity.',
+    redFlag: false,
+    founderTip: 'Phantom equity is useful in markets where equity issuance is legally complex. Be transparent with employees about the difference between phantom equity and real equity.',
+  },
+
+  // ─── Legal & Compliance ───────────────────────────────────────────────────
+  {
+    term: 'IP Assignment',
+    category: 'legal',
+    plain: 'Founders legally transfer ownership of all intellectual property they created to the company.',
+    detail: 'Critical to do before raising any money. If a founder created IP before the company was formed, or on the side, it must be formally assigned to the company. Investors will not fund a company where IP ownership is unclear.',
+    redFlag: false,
+    founderTip: 'Execute IP assignment agreements for all founders on day one. Also ensure any IP created at a previous employer is clearly excluded.',
+  },
+  {
+    term: 'Delaware C-Corp',
+    category: 'legal',
+    plain: 'The preferred legal structure for VC-backed startups in the US.',
+    detail: 'Most US VCs require companies to be incorporated as Delaware C-Corps before investing. Delaware has the most developed corporate law, predictable courts, and flexible charter options. If you\'re incorporated elsewhere, you\'ll likely need to reincorporate.',
+    redFlag: false,
+    founderTip: 'Incorporate as a Delaware C-Corp from day one if you plan to raise VC funding. Reincorporating later is expensive and time-consuming.',
+  },
+  {
+    term: 'Accredited Investor',
+    category: 'legal',
+    plain: 'An investor who meets minimum wealth or income thresholds set by the SEC, allowing them to invest in private companies.',
+    detail: 'In the US, an accredited investor has $1M+ net worth (excluding primary residence) or $200K+ annual income ($300K with spouse). Most startup investments are restricted to accredited investors under Regulation D.',
+    redFlag: false,
+    founderTip: 'Verify investor accreditation before accepting any investment. Accepting money from non-accredited investors can create serious legal issues.',
+  },
+  {
+    term: 'Regulation D (Reg D)',
+    category: 'legal',
+    plain: 'The SEC exemption that allows startups to raise money from accredited investors without registering as a public company.',
+    detail: 'Most startup fundraising happens under Reg D Rule 506(b) or 506(c). 506(b) allows up to 35 non-accredited investors but no general solicitation. 506(c) allows general solicitation but requires all investors to be verified accredited.',
+    redFlag: false,
+    founderTip: 'File your Form D with the SEC within 15 days of your first sale. Failure to file is a violation even if the underlying offering is exempt.',
+  },
+  {
+    term: 'Data Room',
+    category: 'legal',
+    plain: 'A secure online folder containing all the documents investors need to review during due diligence.',
+    detail: 'Typically includes: financial statements, cap table, incorporation documents, IP assignments, customer contracts, employee agreements, and product demos. A well-organized data room signals professionalism and speeds up closing.',
+    redFlag: false,
+    founderTip: 'Build your data room before starting fundraising, not during. Use Notion, Google Drive, or Docsend. Organize it logically and ensure all documents are current.',
+  },
+
+  // ─── Due Diligence ────────────────────────────────────────────────────────
+  {
+    term: 'Due Diligence',
+    category: 'duediligence',
+    plain: 'The process investors use to verify everything you\'ve told them before wiring money.',
+    detail: 'Covers financial, legal, technical, and commercial aspects of the business. Typically takes 2-8 weeks. Investors will check your financials, talk to customers, review contracts, verify IP ownership, and assess the team.',
+    redFlag: false,
+    founderTip: 'Be proactive in due diligence. Disclose issues early — investors always find them, and discovering problems late kills deals. Early disclosure shows integrity.',
+  },
+  {
+    term: 'Reference Checks',
+    category: 'duediligence',
+    plain: 'Investors call people who know you to verify your character, skills, and track record.',
+    detail: 'Investors will call your former colleagues, customers, and sometimes even people you didn\'t list as references. Be aware that your reputation precedes you — the startup world is small.',
+    redFlag: false,
+    founderTip: 'Prepare your references in advance. Brief them on your current company and what to emphasize. Also do reference checks on investors — call their portfolio founders.',
+  },
+  {
+    term: 'Customer Discovery Call',
+    category: 'duediligence',
+    plain: 'Investors talk directly to your customers to verify your claims about product-market fit.',
+    detail: 'One of the most important parts of due diligence. Investors want to hear from customers unprompted. If customers can\'t articulate your value proposition or wouldn\'t be upset if you shut down, that\'s a red flag.',
+    redFlag: false,
+    founderTip: 'Introduce investors to your best customers, but don\'t coach them. Authentic customer enthusiasm is your strongest fundraising asset.',
+  },
+  {
+    term: 'Technical Due Diligence',
+    category: 'duediligence',
+    plain: 'An expert review of your technology, code quality, architecture, and technical team.',
+    detail: 'Common for deep tech, AI, and developer tool companies. An independent technical expert reviews your codebase, architecture decisions, scalability, and security. Can surface hidden technical debt or IP issues.',
+    redFlag: false,
+    founderTip: 'Clean up your codebase and documentation before technical due diligence. Technical debt isn\'t disqualifying, but undisclosed critical vulnerabilities are.',
+  },
+  {
+    term: 'Representations & Warranties',
+    category: 'duediligence',
+    plain: 'Legal statements you certify as true about your company at the time of investment.',
+    detail: 'Cover areas like: accurate financial statements, no undisclosed litigation, valid IP ownership, no material omissions, compliance with laws. If any rep or warranty is false, investors can seek damages or rescind the investment.',
+    redFlag: false,
+    founderTip: 'Read every representation carefully before signing. If anything is not 100% accurate, disclose it in the disclosure schedule rather than signing a false warranty.',
+  },
 ];
 
 export const TERM_CATEGORIES = [
@@ -241,4 +581,8 @@ export const TERM_CATEGORIES = [
   { id: 'protection', label: 'Protection' },
   { id: 'governance', label: 'Governance' },
   { id: 'exit', label: 'Exit' },
+  { id: 'fundraising', label: 'Fundraising' },
+  { id: 'captable', label: 'Cap Table' },
+  { id: 'legal', label: 'Legal' },
+  { id: 'duediligence', label: 'Due Diligence' },
 ];

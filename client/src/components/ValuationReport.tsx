@@ -22,6 +22,64 @@ import {
 
 const METHOD_COLORS = ['#C4614A', '#0F1B2D', '#8B4A38', '#2D4A6B', '#A0522D', '#1B3A5C', '#D4845A'];
 
+// Rationale for each valuation method — plain English explanations
+const METHOD_RATIONALE: Record<string, {
+  why: string;
+  bestFor: string;
+  keyAssumption: string;
+  interpretation?: (r: any, inputs: StartupInputs) => string;
+}> = {
+  dcf: {
+    why: 'DCF values your company based on the cash it is expected to generate in the future, discounted back to today\'s dollars. It\'s the gold standard for companies with predictable revenue, because it ties valuation directly to business fundamentals rather than market sentiment.',
+    bestFor: 'Revenue-generating startups with 12+ months of history',
+    keyAssumption: 'Your projected revenue growth rate and profit margins hold over 5 years',
+    interpretation: (r, inputs) =>
+      `At ${inputs.revenueGrowthRate}% annual growth and a ${inputs.discountRate}% discount rate, your future cash flows are worth ${formatCurrency(r.value, true)} today. If growth slows, the value drops; if it accelerates, it rises.`,
+  },
+  scorecard: {
+    why: 'The Scorecard Method compares your startup to the "average" funded startup in your region and stage, then adjusts up or down based on how strong your team, market, and product are. It\'s widely used by angel investors who rely on qualitative judgment.',
+    bestFor: 'Pre-revenue or early-revenue startups seeking angel investment',
+    keyAssumption: 'The regional median pre-money valuation is an accurate market benchmark',
+    interpretation: (r, inputs) =>
+      `Your team, market, and product scores averaged to a ${r.breakdown['Composite Score'] || 'strong'} composite, placing you ${r.value > r.low + (r.high - r.low) / 2 ? 'above' : 'below'} the regional median of ${formatCurrency(r.breakdown['Regional Median'] || 0, true)}.`,
+  },
+  berkus: {
+    why: 'The Berkus Method assigns a dollar value to each major milestone you\'ve hit — like having a working prototype, a real customer, or a strong team. It\'s designed for pre-revenue startups where financial projections are unreliable.',
+    bestFor: 'Pre-revenue startups at idea or prototype stage',
+    keyAssumption: 'Each milestone reduces risk by a fixed, equal amount (up to $500K each)',
+    interpretation: (r, inputs) =>
+      `Based on your milestones, you\'ve de-risked your startup by ${formatCurrency(r.value, true)} of the maximum $2.5M. Each milestone you complete adds up to $500K in value.`,
+  },
+  vc: {
+    why: 'The VC Method works backwards from the exit: if a VC needs a 10x return and expects to sell the company for $50M, they\'ll only invest at a $5M pre-money valuation. This shows you exactly what a VC is thinking when they look at your deal.',
+    bestFor: 'Startups actively pitching institutional VCs',
+    keyAssumption: 'The projected exit multiple and required investor return are realistic',
+    interpretation: (r, inputs) =>
+      `To deliver a ${inputs.targetReturn}x return over ${inputs.yearsToExit} years, your company must exit at ${formatCurrency(r.breakdown['Required Exit Value'] || 0, true)}. This implies a current pre-money value of ${formatCurrency(r.value, true)}.`,
+  },
+  comps: {
+    why: 'Comparable Transactions values your company by looking at what similar companies in your sector are worth as a multiple of their revenue (ARR). It anchors your valuation to real market data, not projections.',
+    bestFor: 'Companies with measurable ARR in sectors with active M&A or public comps',
+    keyAssumption: 'Your sector\'s current revenue multiples reflect your company\'s growth profile',
+    interpretation: (r, inputs) =>
+      `At your ARR of ${formatCurrency(inputs.currentARR, true)}, applying a blended ${r.breakdown['Blended Multiple'] || 'sector'} multiple gives a valuation of ${formatCurrency(r.value, true)}. Higher ARR growth would justify a higher multiple.`,
+  },
+  riskfactor: {
+    why: 'The Risk-Factor Summation starts from a baseline valuation and adjusts it up or down based on 12 specific risk categories — like management quality, technology risk, and competitive environment. It makes risk explicit and quantifiable.',
+    bestFor: 'Any stage — particularly useful for identifying which risks to address first',
+    keyAssumption: 'Each risk category has equal weight and a symmetric ±$250K impact per unit',
+    interpretation: (r, inputs) =>
+      `Your risk profile resulted in a net adjustment of ${formatCurrency(r.value - (r.breakdown['Base Valuation'] || 0), true)} from the baseline. Improving your highest-risk areas could meaningfully increase your valuation.`,
+  },
+  firstchicago: {
+    why: 'The First Chicago Method runs three separate DCF scenarios — a pessimistic bear case, a realistic base case, and an optimistic bull case — then weights them by probability. This gives a more honest range than a single-point estimate.',
+    bestFor: 'Companies with high uncertainty or multiple possible growth trajectories',
+    keyAssumption: 'The probability weights assigned to bear/base/bull scenarios are realistic',
+    interpretation: (r, inputs) =>
+      `Your probability-weighted valuation of ${formatCurrency(r.value, true)} reflects a blend of outcomes. The gap between bear (${formatCurrency(r.breakdown['Bear Case'] || 0, true)}) and bull (${formatCurrency(r.breakdown['Bull Case'] || 0, true)}) shows the range of possible futures.`,
+  },
+};
+
 const TABS = [
   { id: 'report', label: 'Valuation Report', icon: BarChart2 },
   { id: 'scenarios', label: 'Scenarios', icon: Layers },
@@ -231,6 +289,57 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
               </h3>
               <div className="space-y-2">
                 {summary.results.map((r, i) => <MethodCard key={r.methodCode} result={r} index={i} />)}
+              </div>
+            </div>
+
+            {/* ── Valuation Rationale ── */}
+            <div className="border border-border rounded-xl overflow-hidden bg-card">
+              <div className="px-4 py-3 border-b border-border" style={{ background: 'oklch(0.18 0.05 240)' }}>
+                <h3 className="text-sm font-semibold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Why These Methods Were Used
+                </h3>
+                <p className="text-[10px] mt-0.5" style={{ color: 'oklch(0.62 0.02 240)' }}>
+                  Each method is selected and weighted based on your stage, sector, and available data.
+                </p>
+              </div>
+              <div className="divide-y divide-border">
+                {summary.results.map((r, i) => {
+                  const rationale = METHOD_RATIONALE[r.methodCode] || {};
+                  const color = METHOD_COLORS[i % METHOD_COLORS.length];
+                  return (
+                    <div key={r.methodCode} className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ background: color }} />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className="text-xs font-bold text-foreground">{r.method}</span>
+                            <span className="text-[10px] font-mono font-semibold shrink-0" style={{ color }}>
+                              {r.applicability}% weight
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed mb-2">
+                            {rationale.why || r.description}
+                          </p>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="rounded-md p-2 bg-secondary/50">
+                              <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Best For</div>
+                              <div className="text-[10px] text-foreground">{rationale.bestFor || '—'}</div>
+                            </div>
+                            <div className="rounded-md p-2 bg-secondary/50">
+                              <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Key Assumption</div>
+                              <div className="text-[10px] text-foreground">{rationale.keyAssumption || '—'}</div>
+                            </div>
+                          </div>
+                          {rationale.interpretation && (
+                            <div className="mt-2 text-[10px] rounded-md px-3 py-2 border-l-2 text-muted-foreground italic" style={{ borderColor: color, background: 'oklch(0.97 0.003 80)' }}>
+                              <strong className="text-foreground not-italic">Your result: </strong>{rationale.interpretation(r, inputs)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

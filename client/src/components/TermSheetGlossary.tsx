@@ -14,6 +14,10 @@ const CATEGORY_COLORS: Record<string, string> = {
   protection: '#F59E0B',
   governance: '#10B981',
   exit: '#8B4A38',
+  fundraising: '#6366F1',
+  captable: '#0EA5E9',
+  legal: '#8B5CF6',
+  duediligence: '#EC4899',
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -22,6 +26,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   protection: 'Protection',
   governance: 'Governance',
   exit: 'Exit',
+  fundraising: 'Fundraising',
+  captable: 'Cap Table',
+  legal: 'Legal',
+  duediligence: 'Due Diligence',
 };
 
 function TermCard({ term, index }: { term: TermDefinition; index: number }) {
