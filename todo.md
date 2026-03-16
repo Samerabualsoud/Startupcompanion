@@ -92,3 +92,9 @@
 - [ ] Audit and verify valuation calculator works end-to-end
 - [ ] Audit and verify idea evaluator works end-to-end
 - [ ] Promote owner account to admin role via SQL
+
+## Investor CRM Persistence (Round 5)
+- [ ] Add investor_contacts table to schema
+- [ ] Build crmRouter (getContacts, addContact, updateContact, deleteContact)
+- [ ] Rewrite InvestorCRM frontend with tRPC + optimistic updates
+- [ ] Write vitest tests for crmRouter

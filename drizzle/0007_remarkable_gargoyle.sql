@@ -1,0 +1,1 @@
+ALTER TABLE `investor_contacts` MODIFY COLUMN `notes` varchar(2048) NOT NULL DEFAULT '';

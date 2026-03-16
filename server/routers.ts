@@ -10,6 +10,7 @@ import { kycRouter } from './kycRouter';
 import { passwordResetRouter } from './passwordResetRouter';
 import { adminRouter } from './adminRouter';
 import { matchingRouter } from './matchingRouter';
+import { crmRouter } from './crmRouter';
 
 export const appRouter = router({
   system: systemRouter,
@@ -23,6 +24,7 @@ export const appRouter = router({
   passwordReset: passwordResetRouter,
   admin: adminRouter,
   matching: matchingRouter,
+  crm: crmRouter,
 });
 
 export type AppRouter = typeof appRouter;

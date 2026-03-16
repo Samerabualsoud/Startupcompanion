@@ -311,3 +311,31 @@ export const passwordResetTokens = mysqlTable("password_reset_tokens", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+
+// ── Investor CRM Contacts ──────────────────────────────────────────────────
+export const investorContacts = mysqlTable("investor_contacts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 256 }).notNull(),
+  firm: varchar("firm", { length: 256 }).notNull().default(""),
+  stageFocus: varchar("stageFocus", { length: 128 }).notNull().default(""),
+  sectorFocus: varchar("sectorFocus", { length: 256 }).notNull().default(""),
+  status: mysqlEnum("status", [
+    "target",
+    "contacted",
+    "intro-requested",
+    "meeting-scheduled",
+    "due-diligence",
+    "term-sheet",
+    "passed",
+    "invested",
+  ]).default("target").notNull(),
+  lastContact: varchar("lastContact", { length: 32 }).notNull().default(""),
+  notes: varchar("notes", { length: 2048 }).notNull().default(""),
+  email: varchar("email", { length: 320 }).notNull().default(""),
+  linkedin: varchar("linkedin", { length: 512 }).notNull().default(""),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type InvestorContact = typeof investorContacts.$inferSelect;
+export type InsertInvestorContact = typeof investorContacts.$inferInsert;

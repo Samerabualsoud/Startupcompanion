@@ -10,7 +10,9 @@ import {
   vcFirms, angelInvestors, grants, ventureLawyers,
   kycVcProfiles, kycAngelProfiles, kycLawyerProfiles, kycStartupProfiles,
   passwordResetTokens,
+  investorContacts,
   type KycVcProfile, type KycAngelProfile, type KycLawyerProfile, type KycStartupProfile,
+  type InvestorContact, type InsertInvestorContact,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -406,4 +408,41 @@ export async function setUserRole(userId: number, role: "user" | "admin") {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.update(users).set({ role }).where(eq(users.id, userId));
+}
+
+// ── Investor CRM Helpers ───────────────────────────────────────────────────
+export async function getCrmContacts(userId: number): Promise<InvestorContact[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(investorContacts).where(eq(investorContacts.userId, userId));
+}
+
+export async function addCrmContact(userId: number, data: Omit<InsertInvestorContact, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<InvestorContact> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(investorContacts).values({ ...data, userId });
+  const [inserted] = await db
+    .select()
+    .from(investorContacts)
+    .where(and(eq(investorContacts.userId, userId), eq(investorContacts.id, (result as any).insertId)));
+  return inserted;
+}
+
+export async function updateCrmContact(id: number, userId: number, data: Partial<Omit<InsertInvestorContact, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>): Promise<InvestorContact | null> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [existing] = await db.select().from(investorContacts).where(and(eq(investorContacts.id, id), eq(investorContacts.userId, userId)));
+  if (!existing) return null;
+  await db.update(investorContacts).set(data).where(and(eq(investorContacts.id, id), eq(investorContacts.userId, userId)));
+  const [updated] = await db.select().from(investorContacts).where(eq(investorContacts.id, id));
+  return updated ?? null;
+}
+
+export async function deleteCrmContact(id: number, userId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [existing] = await db.select().from(investorContacts).where(and(eq(investorContacts.id, id), eq(investorContacts.userId, userId)));
+  if (!existing) return false;
+  await db.delete(investorContacts).where(and(eq(investorContacts.id, id), eq(investorContacts.userId, userId)));
+  return true;
 }

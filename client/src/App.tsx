@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Router as WouterRouter, Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ReportProvider } from "./contexts/ReportContext";
@@ -15,7 +15,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import AdminDashboard from "./pages/AdminDashboard";
 
-function Router() {
+function AppRoutes() {
   return (
     <Switch>
       <Route path={"/"} component={LandingPage} />
@@ -41,19 +41,21 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
-        <TooltipProvider>
-          <ReportProvider>
-            <TrackedApplicationsProvider>
-              <Toaster />
-              <Router />
-            </TrackedApplicationsProvider>
-          </ReportProvider>
-        </TooltipProvider>
-      </ThemeProvider>
+      <WouterRouter>
+        <ThemeProvider
+          defaultTheme="light"
+          // switchable
+        >
+          <TooltipProvider>
+            <ReportProvider>
+              <TrackedApplicationsProvider>
+                <Toaster />
+                <AppRoutes />
+              </TrackedApplicationsProvider>
+            </ReportProvider>
+          </TooltipProvider>
+        </ThemeProvider>
+      </WouterRouter>
     </ErrorBoundary>
   );
 }

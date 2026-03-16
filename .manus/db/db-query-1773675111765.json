@@ -1,0 +1,114 @@
+{
+  "query": "SHOW COLUMNS FROM investor_contacts;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user TdNWm56gC61uQyK.bac7586e525f --database M2SxUioygz4pYLdarmBijQ --execute SHOW COLUMNS FROM investor_contacts;",
+  "rows": [
+    {
+      "Field": "id",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "PRI",
+      "Default": "NULL",
+      "Extra": "auto_increment"
+    },
+    {
+      "Field": "userId",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "name",
+      "Type": "varchar(256)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "firm",
+      "Type": "varchar(256)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "",
+      "Extra": ""
+    },
+    {
+      "Field": "stageFocus",
+      "Type": "varchar(128)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "",
+      "Extra": ""
+    },
+    {
+      "Field": "sectorFocus",
+      "Type": "varchar(256)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "",
+      "Extra": ""
+    },
+    {
+      "Field": "status",
+      "Type": "enum('target','contacted','intro-requested','meeting-scheduled','due-diligence','term-sheet','passed','invested')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "target",
+      "Extra": ""
+    },
+    {
+      "Field": "lastContact",
+      "Type": "varchar(32)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "",
+      "Extra": ""
+    },
+    {
+      "Field": "notes",
+      "Type": "varchar(2048)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "",
+      "Extra": ""
+    },
+    {
+      "Field": "email",
+      "Type": "varchar(320)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "",
+      "Extra": ""
+    },
+    {
+      "Field": "linkedin",
+      "Type": "varchar(512)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "",
+      "Extra": ""
+    },
+    {
+      "Field": "createdAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": ""
+    },
+    {
+      "Field": "updatedAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nuserId\tint\tNO\t\tNULL\t\nname\tvarchar(256)\tNO\t\tNULL\t\nfirm\tvarchar(256)\tNO\t\t\t\nstageFocus\tvarchar(128)\tNO\t\t\t\nsectorFocus\tvarchar(256)\tNO\t\t\t\nstatus\tenum('target','contacted','intro-requested','meeting-scheduled','due-diligence','term-sheet','passed','invested')\tNO\t\ttarget\t\nlastContact\tvarchar(32)\tNO\t\t\t\nnotes\tvarchar(2048)\tNO\t\t\t\nemail\tvarchar(320)\tNO\t\t\t\nlinkedin\tvarchar(512)\tNO\t\t\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\n",
+  "stderr": "",
+  "execution_time_ms": 1555
+}

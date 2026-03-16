@@ -1,22 +1,24 @@
 /**
- * InvestorCRM — Simple investor outreach tracker
+ * InvestorCRM — Database-backed investor outreach tracker
  * Design: "Venture Capital Clarity" — Editorial Finance
+ * Contacts are persisted per user via tRPC + MySQL.
  */
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Check, X, Mail, Phone, ExternalLink, Users, Download, Rocket, BookmarkCheck } from 'lucide-react';
-import { nanoid } from 'nanoid';
+import { Plus, Trash2, Edit2, Check, X, Users, Download, Rocket, BookmarkCheck, Loader2, RefreshCw } from 'lucide-react';
+import { trpc } from '@/lib/trpc';
+import { useAuth } from '@/_core/hooks/useAuth';
 import { useTrackedApplications } from '@/contexts/TrackedApplicationsContext';
+import { getLoginUrl } from '@/const';
 
 type Status = 'target' | 'contacted' | 'intro-requested' | 'meeting-scheduled' | 'due-diligence' | 'term-sheet' | 'passed' | 'invested';
 
-interface Investor {
-  id: string;
+interface ContactFormData {
   name: string;
   firm: string;
-  stage: string;
-  focus: string;
+  stageFocus: string;
+  sectorFocus: string;
   status: Status;
   lastContact: string;
   notes: string;
@@ -25,26 +27,21 @@ interface Investor {
 }
 
 const STATUS_CONFIG: Record<Status, { label: string; color: string; bg: string }> = {
-  'target':           { label: 'Target',             color: '#6B7280', bg: '#F3F4F6' },
-  'contacted':        { label: 'Contacted',           color: '#2D4A6B', bg: '#EFF6FF' },
-  'intro-requested':  { label: 'Intro Requested',     color: '#7C3AED', bg: '#F5F3FF' },
-  'meeting-scheduled':{ label: 'Meeting Scheduled',   color: '#D97706', bg: '#FFFBEB' },
-  'due-diligence':    { label: 'Due Diligence',       color: '#C4614A', bg: '#FFF5F3' },
-  'term-sheet':       { label: 'Term Sheet',          color: '#059669', bg: '#ECFDF5' },
-  'passed':           { label: 'Passed',              color: '#9CA3AF', bg: '#F9FAFB' },
-  'invested':         { label: 'Invested ✓',          color: '#10B981', bg: '#D1FAE5' },
+  'target':            { label: 'Target',           color: '#6B7280', bg: '#F3F4F6' },
+  'contacted':         { label: 'Contacted',         color: '#2D4A6B', bg: '#EFF6FF' },
+  'intro-requested':   { label: 'Intro Requested',   color: '#7C3AED', bg: '#F5F3FF' },
+  'meeting-scheduled': { label: 'Meeting Scheduled', color: '#D97706', bg: '#FFFBEB' },
+  'due-diligence':     { label: 'Due Diligence',     color: '#C4614A', bg: '#FFF5F3' },
+  'term-sheet':        { label: 'Term Sheet',        color: '#059669', bg: '#ECFDF5' },
+  'passed':            { label: 'Passed',            color: '#9CA3AF', bg: '#F9FAFB' },
+  'invested':          { label: 'Invested ✓',        color: '#10B981', bg: '#D1FAE5' },
 };
 
 const PIPELINE_STAGES: Status[] = ['target', 'contacted', 'intro-requested', 'meeting-scheduled', 'due-diligence', 'term-sheet', 'invested'];
 
-const DEFAULT_INVESTORS: Investor[] = [
-  { id: nanoid(), name: 'Sarah Chen', firm: 'Sequoia Capital', stage: 'Seed', focus: 'AI/ML, SaaS', status: 'meeting-scheduled', lastContact: '2026-03-10', notes: 'Warm intro from YC alum. Very interested in AI angle. Follow up with demo.', email: '', linkedin: '' },
-  { id: nanoid(), name: 'Marcus Williams', firm: 'a16z', stage: 'Series A', focus: 'Enterprise Software', status: 'contacted', lastContact: '2026-03-05', notes: 'Cold email. Opened 3x. Need warm intro.', email: '', linkedin: '' },
-  { id: nanoid(), name: 'Aisha Patel', firm: 'Techstars MENA', stage: 'Pre-Seed/Seed', focus: 'All sectors', status: 'intro-requested', lastContact: '2026-03-12', notes: 'Applied to Techstars batch. Awaiting response.', email: '', linkedin: '' },
-];
-
-const EMPTY_INVESTOR: Omit<Investor, 'id'> = {
-  name: '', firm: '', stage: 'Seed', focus: '', status: 'target', lastContact: new Date().toISOString().split('T')[0], notes: '', email: '', linkedin: '',
+const EMPTY_FORM: ContactFormData = {
+  name: '', firm: '', stageFocus: 'Seed', sectorFocus: '', status: 'target',
+  lastContact: new Date().toISOString().split('T')[0], notes: '', email: '', linkedin: '',
 };
 
 function StatusBadge({ status }: { status: Status }) {
@@ -58,51 +55,123 @@ function StatusBadge({ status }: { status: Status }) {
 }
 
 export default function InvestorCRM() {
-  const [investors, setInvestors] = useState<Investor[]>(DEFAULT_INVESTORS);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editData, setEditData] = useState<Omit<Investor, 'id'>>(EMPTY_INVESTOR);
-  const [showAdd, setShowAdd] = useState(false);
-  const [newData, setNewData] = useState<Omit<Investor, 'id'>>(EMPTY_INVESTOR);
-  const [filterStatus, setFilterStatus] = useState<Status | 'all'>('all');
+  const { isAuthenticated } = useAuth();
+  const utils = trpc.useUtils();
   const { tracked, untrack } = useTrackedApplications();
 
-  const filtered = filterStatus === 'all' ? investors : investors.filter(i => i.status === filterStatus);
+  // ── Queries ──────────────────────────────────────────────────────────────
+  const { data: contacts = [], isLoading, error } = trpc.crm.getContacts.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 30_000,
+  });
+
+  // ── Mutations ─────────────────────────────────────────────────────────────
+  const addMutation = trpc.crm.addContact.useMutation({
+    onSuccess: () => utils.crm.getContacts.invalidate(),
+  });
+
+  const updateMutation = trpc.crm.updateContact.useMutation({
+    onMutate: async ({ id, data }) => {
+      await utils.crm.getContacts.cancel();
+      const prev = utils.crm.getContacts.getData();
+      utils.crm.getContacts.setData(undefined, old =>
+        old?.map(c => c.id === id ? { ...c, ...data } : c) ?? []
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) utils.crm.getContacts.setData(undefined, ctx.prev);
+    },
+    onSettled: () => utils.crm.getContacts.invalidate(),
+  });
+
+  const statusMutation = trpc.crm.updateStatus.useMutation({
+    onMutate: async ({ id, status }) => {
+      await utils.crm.getContacts.cancel();
+      const prev = utils.crm.getContacts.getData();
+      utils.crm.getContacts.setData(undefined, old =>
+        old?.map(c => c.id === id ? { ...c, status } : c) ?? []
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) utils.crm.getContacts.setData(undefined, ctx.prev);
+    },
+    onSettled: () => utils.crm.getContacts.invalidate(),
+  });
+
+  const deleteMutation = trpc.crm.deleteContact.useMutation({
+    onMutate: async ({ id }) => {
+      await utils.crm.getContacts.cancel();
+      const prev = utils.crm.getContacts.getData();
+      utils.crm.getContacts.setData(undefined, old => old?.filter(c => c.id !== id) ?? []);
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) utils.crm.getContacts.setData(undefined, ctx.prev);
+    },
+    onSettled: () => utils.crm.getContacts.invalidate(),
+  });
+
+  // ── Local UI state ────────────────────────────────────────────────────────
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editData, setEditData] = useState<ContactFormData>(EMPTY_FORM);
+  const [showAdd, setShowAdd] = useState(false);
+  const [newData, setNewData] = useState<ContactFormData>(EMPTY_FORM);
+  const [filterStatus, setFilterStatus] = useState<Status | 'all'>('all');
+
+  const filtered = filterStatus === 'all' ? contacts : contacts.filter(c => c.status === filterStatus);
 
   const pipelineCounts = PIPELINE_STAGES.reduce((acc, s) => {
-    acc[s] = investors.filter(i => i.status === s).length;
+    acc[s] = contacts.filter(c => c.status === s).length;
     return acc;
   }, {} as Record<Status, number>);
 
-  const startEdit = (inv: Investor) => {
-    setEditingId(inv.id);
-    setEditData({ name: inv.name, firm: inv.firm, stage: inv.stage, focus: inv.focus, status: inv.status, lastContact: inv.lastContact, notes: inv.notes, email: inv.email, linkedin: inv.linkedin });
+  const startEdit = (c: typeof contacts[0]) => {
+    setEditingId(c.id);
+    setEditData({
+      name: c.name, firm: c.firm, stageFocus: c.stageFocus, sectorFocus: c.sectorFocus,
+      status: c.status as Status, lastContact: c.lastContact, notes: c.notes,
+      email: c.email, linkedin: c.linkedin,
+    });
   };
 
   const saveEdit = () => {
-    setInvestors(prev => prev.map(i => i.id === editingId ? { ...i, ...editData } : i));
+    if (!editingId) return;
+    updateMutation.mutate({
+      id: editingId,
+      data: {
+        name: editData.name, firm: editData.firm, stageFocus: editData.stageFocus,
+        sectorFocus: editData.sectorFocus, status: editData.status,
+        lastContact: editData.lastContact, notes: editData.notes,
+        email: editData.email, linkedin: editData.linkedin,
+      },
+    });
     setEditingId(null);
   };
 
-  const addInvestor = () => {
-    if (!newData.name) return;
-    setInvestors(prev => [...prev, { id: nanoid(), ...newData }]);
-    setNewData(EMPTY_INVESTOR);
-    setShowAdd(false);
-  };
-
-  const deleteInvestor = (id: string) => setInvestors(prev => prev.filter(i => i.id !== id));
-
-  const updateStatus = (id: string, status: Status) => {
-    setInvestors(prev => prev.map(i => i.id === id ? { ...i, status } : i));
+  const addContact = () => {
+    if (!newData.name.trim()) return;
+    addMutation.mutate({
+      name: newData.name, firm: newData.firm, stageFocus: newData.stageFocus,
+      sectorFocus: newData.sectorFocus, status: newData.status,
+      lastContact: newData.lastContact, notes: newData.notes,
+      email: newData.email, linkedin: newData.linkedin,
+    }, {
+      onSuccess: () => {
+        setNewData(EMPTY_FORM);
+        setShowAdd(false);
+      },
+    });
   };
 
   const exportCSV = () => {
-    const headers = ['Name', 'Firm', 'Stage', 'Focus', 'Status', 'Last Contact', 'Email', 'LinkedIn', 'Notes'];
-    const rows = investors.map(inv => [
-      inv.name, inv.firm, inv.stage, inv.focus,
-      STATUS_CONFIG[inv.status].label,
-      inv.lastContact, inv.email, inv.linkedin,
-      `"${inv.notes.replace(/"/g, '""')}"`
+    const headers = ['Name', 'Firm', 'Stage Focus', 'Sector Focus', 'Status', 'Last Contact', 'Email', 'LinkedIn', 'Notes'];
+    const rows = contacts.map(c => [
+      c.name, c.firm, c.stageFocus, c.sectorFocus,
+      STATUS_CONFIG[c.status as Status]?.label ?? c.status,
+      c.lastContact, c.email, c.linkedin,
+      `"${c.notes.replace(/"/g, '""')}"`,
     ]);
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -114,6 +183,44 @@ export default function InvestorCRM() {
     URL.revokeObjectURL(url);
   };
 
+  // ── Auth gate ─────────────────────────────────────────────────────────────
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+        <Users className="w-12 h-12 text-muted-foreground opacity-40" />
+        <div>
+          <div className="text-lg font-bold text-foreground mb-1">Sign in to use Investor CRM</div>
+          <div className="text-sm text-muted-foreground mb-4">Your contacts are saved securely per account across all sessions.</div>
+          <a href={getLoginUrl()} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
+            style={{ background: '#C4614A' }}>
+            Sign In to Continue
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20 gap-3 text-muted-foreground">
+        <Loader2 className="w-5 h-5 animate-spin" />
+        <span className="text-sm">Loading your contacts...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
+        <div className="text-sm text-destructive">Failed to load contacts. Please try again.</div>
+        <button onClick={() => utils.crm.getContacts.invalidate()}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm border border-border text-muted-foreground hover:bg-secondary/40">
+          <RefreshCw className="w-3.5 h-3.5" /> Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -122,23 +229,19 @@ export default function InvestorCRM() {
           <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
             Investor CRM
           </h2>
-          <p className="text-sm text-muted-foreground">Track your investor outreach pipeline. Stay organized during fundraising.</p>
+          <p className="text-sm text-muted-foreground">Track your investor outreach pipeline. Contacts are saved to your account.</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={exportCSV}
+          <button onClick={exportCSV}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
             style={{ background: 'oklch(0.18 0.05 240)', color: '#FAF6EF', border: '1px solid oklch(0.28 0.04 240)' }}
-            title="Export to CSV"
-          >
+            title="Export to CSV">
             <Download className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Export CSV</span>
           </button>
-          <button
-            onClick={() => setShowAdd(v => !v)}
+          <button onClick={() => setShowAdd(v => !v)}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
-            style={{ background: '#C4614A' }}
-          >
+            style={{ background: '#C4614A' }}>
             <Plus className="w-4 h-4" />
             Add Investor
           </button>
@@ -154,7 +257,7 @@ export default function InvestorCRM() {
             const count = pipelineCounts[stage] || 0;
             return (
               <div key={stage} className="flex-1 min-w-[70px] text-center">
-                <div className="text-lg font-black metric-value" style={{ color: cfg.color }}>{count}</div>
+                <div className="text-lg font-black" style={{ color: cfg.color }}>{count}</div>
                 <div className="text-[9px] text-muted-foreground leading-tight mt-0.5">{cfg.label}</div>
                 {i < PIPELINE_STAGES.length - 1 && (
                   <div className="text-muted-foreground text-xs mt-1">→</div>
@@ -175,8 +278,8 @@ export default function InvestorCRM() {
               {[
                 { key: 'name', label: 'Name', placeholder: 'Sarah Chen' },
                 { key: 'firm', label: 'Firm', placeholder: 'Sequoia Capital' },
-                { key: 'stage', label: 'Stage Focus', placeholder: 'Seed, Series A' },
-                { key: 'focus', label: 'Sector Focus', placeholder: 'AI/ML, SaaS' },
+                { key: 'stageFocus', label: 'Stage Focus', placeholder: 'Seed, Series A' },
+                { key: 'sectorFocus', label: 'Sector Focus', placeholder: 'AI/ML, SaaS' },
                 { key: 'email', label: 'Email', placeholder: 'sarah@sequoia.com' },
                 { key: 'linkedin', label: 'LinkedIn URL', placeholder: 'linkedin.com/in/...' },
               ].map(f => (
@@ -202,10 +305,14 @@ export default function InvestorCRM() {
                 className="vc-input w-full px-3 py-2 text-sm resize-none" rows={2} />
             </div>
             <div className="flex gap-2">
-              <button onClick={addInvestor} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white" style={{ background: '#C4614A' }}>
-                <Check className="w-3.5 h-3.5" /> Add
+              <button onClick={addContact} disabled={addMutation.isPending || !newData.name.trim()}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-60"
+                style={{ background: '#C4614A' }}>
+                {addMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                {addMutation.isPending ? 'Saving...' : 'Add'}
               </button>
-              <button onClick={() => setShowAdd(false)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm border border-border text-muted-foreground hover:bg-secondary/40">
+              <button onClick={() => { setShowAdd(false); setNewData(EMPTY_FORM); }}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm border border-border text-muted-foreground hover:bg-secondary/40">
                 <X className="w-3.5 h-3.5" /> Cancel
               </button>
             </div>
@@ -217,7 +324,7 @@ export default function InvestorCRM() {
       <div className="flex gap-2 flex-wrap">
         <button onClick={() => setFilterStatus('all')}
           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${filterStatus === 'all' ? 'bg-foreground text-background' : 'border border-border text-muted-foreground'}`}>
-          All ({investors.length})
+          All ({contacts.length})
         </button>
         {PIPELINE_STAGES.map(s => (
           <button key={s} onClick={() => setFilterStatus(s)}
@@ -228,11 +335,15 @@ export default function InvestorCRM() {
         ))}
       </div>
 
-      {/* Table */}
+      {/* Contact list */}
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <Users className="w-8 h-8 mx-auto mb-3 opacity-40" />
-          <div className="text-sm">No investors yet. Add your first target investor above.</div>
+          <div className="text-sm">
+            {contacts.length === 0
+              ? 'No investors yet. Add your first target investor above.'
+              : 'No investors match this filter.'}
+          </div>
         </div>
       ) : (
         <div className="space-y-2">
@@ -244,7 +355,8 @@ export default function InvestorCRM() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
                       { key: 'name', label: 'Name' }, { key: 'firm', label: 'Firm' },
-                      { key: 'stage', label: 'Stage' }, { key: 'focus', label: 'Focus' },
+                      { key: 'stageFocus', label: 'Stage Focus' }, { key: 'sectorFocus', label: 'Sector Focus' },
+                      { key: 'email', label: 'Email' }, { key: 'linkedin', label: 'LinkedIn' },
                     ].map(f => (
                       <div key={f.key}>
                         <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">{f.label}</label>
@@ -267,10 +379,14 @@ export default function InvestorCRM() {
                       className="vc-input w-full px-3 py-1.5 text-sm resize-none" rows={2} />
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={saveEdit} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white" style={{ background: '#10B981' }}>
-                      <Check className="w-3 h-3" /> Save
+                    <button onClick={saveEdit} disabled={updateMutation.isPending}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-60"
+                      style={{ background: '#10B981' }}>
+                      {updateMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                      Save
                     </button>
-                    <button onClick={() => setEditingId(null)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-border text-muted-foreground">
+                    <button onClick={() => setEditingId(null)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-border text-muted-foreground">
                       <X className="w-3 h-3" /> Cancel
                     </button>
                   </div>
@@ -282,17 +398,19 @@ export default function InvestorCRM() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-bold text-foreground">{inv.name}</span>
                         <span className="text-xs text-muted-foreground">@ {inv.firm}</span>
-                        <StatusBadge status={inv.status} />
+                        <StatusBadge status={inv.status as Status} />
                       </div>
                       <div className="text-[10px] text-muted-foreground mt-0.5">
-                        {inv.stage} · {inv.focus} · Last contact: {inv.lastContact}
+                        {inv.stageFocus} · {inv.sectorFocus} · Last contact: {inv.lastContact}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <button onClick={() => startEdit(inv)} className="text-muted-foreground hover:text-foreground transition-colors">
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
-                      <button onClick={() => deleteInvestor(inv.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                      <button onClick={() => deleteMutation.mutate({ id: inv.id })}
+                        disabled={deleteMutation.isPending}
+                        className="text-muted-foreground hover:text-destructive transition-colors disabled:opacity-40">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -303,8 +421,9 @@ export default function InvestorCRM() {
                   {/* Quick status update */}
                   <div className="flex gap-1.5 flex-wrap">
                     {PIPELINE_STAGES.filter(s => s !== inv.status).slice(0, 3).map(s => (
-                      <button key={s} onClick={() => updateStatus(inv.id, s)}
-                        className="text-[9px] px-2 py-1 rounded-full border border-border text-muted-foreground hover:border-accent hover:text-accent transition-all">
+                      <button key={s} onClick={() => statusMutation.mutate({ id: inv.id, status: s })}
+                        disabled={statusMutation.isPending}
+                        className="text-[9px] px-2 py-1 rounded-full border border-border text-muted-foreground hover:border-accent hover:text-accent transition-all disabled:opacity-40">
                         → {STATUS_CONFIG[s].label}
                       </button>
                     ))}
@@ -335,20 +454,13 @@ export default function InvestorCRM() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <a
-                    href={app.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <a href={app.website} target="_blank" rel="noopener noreferrer"
                     className="text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-all hover:opacity-90"
-                    style={{ background: 'oklch(0.18 0.05 240)', color: '#FAF6EF', border: '1px solid oklch(0.28 0.04 240)' }}
-                  >
+                    style={{ background: 'oklch(0.18 0.05 240)', color: '#FAF6EF', border: '1px solid oklch(0.28 0.04 240)' }}>
                     Apply
                   </a>
-                  <button
-                    onClick={() => untrack(app.acceleratorName)}
-                    className="text-muted-foreground hover:text-destructive transition-colors"
-                    title="Remove from tracker"
-                  >
+                  <button onClick={() => untrack(app.acceleratorName)}
+                    className="text-muted-foreground hover:text-destructive transition-colors" title="Remove from tracker">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
