@@ -10,8 +10,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, Sparkles, Rocket, Users, GitBranch, Target,
   BookOpen, BarChart3, Menu, X, ChevronRight,
-  Gauge, Layers, FileDown, Link2, Check, Building2, LogIn, LogOut, UserCircle
+  Gauge, Layers, FileDown, Link2, Check, Building2, LogIn, LogOut, UserCircle, Home as HomeIcon,
+  MessageCircle, Mail, FileText, Users2, ClipboardCheck
 } from 'lucide-react';
+import { useLocation } from 'wouter';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { getLoginUrl } from '@/const';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
@@ -35,8 +39,14 @@ import FeasibilityEvaluator from '@/components/FeasibilityEvaluator';
 import ResourceDatabase from '@/components/ResourceDatabase';
 import InvestorMatcher from '@/components/InvestorMatcher';
 import AdminDashboard from '@/pages/AdminDashboard';
+import AIMarketResearch from '@/components/AIMarketResearch';
+import AIDueDiligence from '@/components/AIDueDiligence';
+import AIInvestorEmail from '@/components/AIInvestorEmail';
+import AITermSheetAnalyzer from '@/components/AITermSheetAnalyzer';
+import AICofounderAgreement from '@/components/AICofounderAgreement';
+import AIFundraisingAdvisor from '@/components/AIFundraisingAdvisor';
 
-type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'feasibility' | 'resources' | 'matching' | 'admin';
+type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'feasibility' | 'resources' | 'matching' | 'admin' | 'ai-market-research' | 'ai-due-diligence' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-fundraising-advisor';
 
 interface NavItem {
   id: ToolId;
@@ -70,9 +80,16 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'matching',      label: 'Investor Matching',     shortLabel: 'Matching',   icon: Target,      group: 'Database',     badge: 'AI' },
   // Admin
   { id: 'admin',         label: 'Admin Dashboard',       shortLabel: 'Admin',      icon: Gauge,       group: 'Admin' },
+  // AI Tools
+  { id: 'ai-fundraising-advisor', label: 'AI Fundraising Advisor', shortLabel: 'AI Advisor',    icon: MessageCircle, group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-market-research',     label: 'AI Market Research',     shortLabel: 'Market Research', icon: BarChart3,    group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-investor-email',      label: 'AI Investor Email',      shortLabel: 'Email Writer',  icon: Mail,          group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-term-sheet',          label: 'AI Term Sheet Analyzer', shortLabel: 'Term Analyzer', icon: FileText,      group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-cofounder-agreement', label: 'AI Co-founder Agreement',shortLabel: 'Co-founder AI', icon: Users2,        group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-due-diligence',       label: 'AI Due Diligence',       shortLabel: 'Due Diligence', icon: ClipboardCheck,group: 'AI Tools', badge: 'AI' },
 ];
 
-const GROUPS = ['Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources', 'Database', 'My Startup', 'Admin'];
+const GROUPS = ['Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources', 'Database', 'My Startup', 'AI Tools', 'Admin'];
 
 const TOOL_COLORS: Record<ToolId, string> = {
   feasibility: '#6366F1',
@@ -89,6 +106,12 @@ const TOOL_COLORS: Record<ToolId, string> = {
   resources: '#10B981',
   matching: '#C4614A',
   admin: '#8B4A38',
+  'ai-market-research': '#0EA5E9',
+  'ai-due-diligence': '#8B5CF6',
+  'ai-investor-email': '#EC4899',
+  'ai-term-sheet': '#F97316',
+  'ai-cofounder-agreement': '#14B8A6',
+  'ai-fundraising-advisor': '#C4614A',
 };
 
 export default function Home() {
@@ -96,6 +119,8 @@ export default function Home() {
   // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
   let { user, loading, error, isAuthenticated, logout } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [, navigate] = useLocation();
+  const { t } = useLanguage();
 
   const [activeTool, setActiveTool] = useState<ToolId>('valuation');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -256,7 +281,13 @@ export default function Home() {
       case 'feasibility':     return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><FeasibilityEvaluator /></div>;
       case 'resources':       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ResourceDatabase /></div>;
       case 'matching':        return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><InvestorMatcher /></div>;
-      case 'admin':           return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><AdminDashboard /></div>;
+      case 'admin':                    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><AdminDashboard /></div>;
+      case 'ai-market-research':        return <AIMarketResearch />;
+      case 'ai-due-diligence':          return <AIDueDiligence />;
+      case 'ai-investor-email':         return <AIInvestorEmail />;
+      case 'ai-term-sheet':             return <AITermSheetAnalyzer />;
+      case 'ai-cofounder-agreement':    return <AICofounderAgreement />;
+      case 'ai-fundraising-advisor':    return <AIFundraisingAdvisor />;
       default: return null;
     }
   };
@@ -293,6 +324,7 @@ export default function Home() {
             <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
             13 tools · Free
           </div>
+          <LanguageSwitcher />
           {chatComplete && chatAnswers && (
             <button
               onClick={handleShare}
@@ -397,9 +429,19 @@ export default function Home() {
           <div className="flex-1 overflow-y-auto py-3 px-2">
             {GROUPS.map(group => {
               const groupItems = NAV_ITEMS.filter(n => n.group === group);
+              const groupLabel: Record<string, string> = {
+                'Valuation': t('navGroupValuation'),
+                'Equity & Cap Table': t('navGroupEquity'),
+                'Fundraising': t('navGroupFundraising'),
+                'Resources': t('navGroupResources'),
+                'Database': t('navGroupDatabase'),
+                'My Startup': t('navGroupMyStartup'),
+                'AI Tools': t('navGroupAITools'),
+                'Admin': 'Admin',
+              };
               return (
                 <div key={group} className="mb-4">
-                  <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest px-3 mb-1.5">{group}</div>
+                  <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest px-3 mb-1.5">{groupLabel[group] || group}</div>
                   {groupItems.map(item => {
                     const Icon = item.icon;
                     const isActive = activeTool === item.id;
@@ -431,7 +473,14 @@ export default function Home() {
           </div>
 
           {/* Sidebar footer */}
-          <div className="shrink-0 p-3 border-t border-border">
+          <div className="shrink-0 p-3 border-t border-border space-y-2">
+            <button
+              onClick={() => navigate('/')}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
+            >
+              <HomeIcon className="w-3.5 h-3.5 shrink-0" />
+              <span className="text-xs font-medium">{t('backToHome')}</span>
+            </button>
             <div className="text-[9px] text-muted-foreground text-center leading-relaxed">
               Built for early-stage founders.<br />
               All calculations are estimates only.

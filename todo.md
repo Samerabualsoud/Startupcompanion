@@ -89,12 +89,31 @@
 - [x] 15 tests passing, zero TypeScript errors
 
 ## Round 4 Tasks
-- [ ] Audit and verify valuation calculator works end-to-end
-- [ ] Audit and verify idea evaluator works end-to-end
-- [ ] Promote owner account to admin role via SQL
+- [x] Audit and verify valuation calculator works end-to-end
+- [x] Audit and verify idea evaluator works end-to-end
+- [x] Promote owner account to admin role via SQL
 
 ## Investor CRM Persistence (Round 5)
-- [ ] Add investor_contacts table to schema
-- [ ] Build crmRouter (getContacts, addContact, updateContact, deleteContact)
-- [ ] Rewrite InvestorCRM frontend with tRPC + optimistic updates
-- [ ] Write vitest tests for crmRouter
+- [x] Add investor_contacts table to schema
+- [x] Build crmRouter (getContacts, addContact, updateContact, deleteContact)
+- [x] Rewrite InvestorCRM frontend with tRPC + optimistic updates
+- [x] Write vitest tests for crmRouter (28 tests total passing)
+
+## Arabic & Navigation Fixes (Round 6)
+- [x] Complete Arabic translations for all pages and tool components
+- [x] Add missing Arabic keys to i18n.ts (tool names, headers, form labels, error messages)
+- [x] Add Home button to app sidebar to navigate back to landing page
+- [x] Add language switcher to app header (Home.tsx)
+- [x] Sidebar group labels translated (Valuation, Equity, Fundraising, Resources, Database, AI Tools)
+
+## AI Features (Round 7)
+- [x] AI Market Research tool (AIMarketResearch.tsx)
+- [x] AI Co-founder Agreement Drafter (AICofounderAgreement.tsx)
+- [x] AI Fundraising Advisor Chat (AIFundraisingAdvisor.tsx)
+- [x] AI Due Diligence Checklist (AIDueDiligence.tsx)
+- [x] AI Investor Email Writer (AIInvestorEmail.tsx)
+- [x] AI Term Sheet Analyzer (AITermSheetAnalyzer.tsx)
+- [x] Add all 6 AI tools to sidebar nav under 'AI Tools' group
+- [x] Add Arabic translations for all 6 AI tools (i18n.ts)
+- [x] All AI components use useLanguage() hook
+- [x] 28 tests passing, 0 TypeScript errors

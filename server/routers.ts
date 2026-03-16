@@ -11,6 +11,7 @@ import { passwordResetRouter } from './passwordResetRouter';
 import { adminRouter } from './adminRouter';
 import { matchingRouter } from './matchingRouter';
 import { crmRouter } from './crmRouter';
+import { aiRouter } from './aiRouter';
 
 export const appRouter = router({
   system: systemRouter,
@@ -25,6 +26,7 @@ export const appRouter = router({
   admin: adminRouter,
   matching: matchingRouter,
   crm: crmRouter,
+  ai: aiRouter,
 });
 
 export type AppRouter = typeof appRouter;

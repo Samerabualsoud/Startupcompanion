@@ -216,8 +216,73 @@ export const translations = {
     deadline: "Deadline",
     amount: "Amount",
     freeConsult: "Free consult",
-    createAccount: "Create free account",
+    createAccount: "Create Free Account",
     haveAccount: "Already have an account?",
+    backToHome: "Back to Home",
+
+    // ── AI Tools ──
+    navGroupAITools: "AI Tools",
+    navAIAdvisor: "AI Advisor",
+    navAIMarketResearch: "Market Research",
+    navAIEmailWriter: "Email Writer",
+    navAITermAnalyzer: "Term Analyzer",
+    navAICofounder: "Co-founder AI",
+    navAIDueDiligence: "Due Diligence",
+
+    // AI Fundraising Advisor
+    aiFundraisingTitle: "AI Fundraising Advisor",
+    aiFundraisingSubtitle: "Ask anything about fundraising, investors, term sheets, or startup strategy.",
+    aiFundraisingPlaceholder: "Ask me anything about fundraising…",
+    aiFundraisingContext: "Tell me about your startup (optional)",
+    aiFundraisingContextPlaceholder: "e.g. SaaS startup, pre-seed, fintech, $50K MRR",
+    aiFundraisingSend: "Send",
+    aiFundraisingClear: "Clear chat",
+
+    // AI Market Research
+    aiMarketResearchTitle: "AI Market Research",
+    aiMarketResearchSubtitle: "Generate a comprehensive market analysis for your startup sector.",
+    aiMarketResearchSector: "Sector / Industry",
+    aiMarketResearchSectorPlaceholder: "e.g. EdTech, HealthTech, B2B SaaS",
+    aiMarketResearchRegion: "Target Region",
+    aiMarketResearchRegionPlaceholder: "e.g. MENA, Global, Southeast Asia",
+    aiMarketResearchGenerate: "Generate Market Research",
+    aiMarketResearchGenerating: "Generating…",
+
+    // AI Investor Email Writer
+    aiEmailTitle: "AI Investor Email Writer",
+    aiEmailSubtitle: "Generate a personalized cold outreach email to a specific investor.",
+    aiEmailInvestorName: "Investor / VC name",
+    aiEmailInvestorFirm: "Firm name",
+    aiEmailStartupName: "Your startup name",
+    aiEmailStartupDesc: "One-line startup description",
+    aiEmailAsk: "Funding ask ($)",
+    aiEmailGenerate: "Generate Email",
+    aiEmailGenerating: "Generating…",
+    aiEmailCopy: "Copy to clipboard",
+    aiEmailCopied: "Copied!",
+
+    // AI Term Sheet Analyzer
+    aiTermTitle: "AI Term Sheet Analyzer",
+    aiTermSubtitle: "Paste your term sheet and get plain-English explanations, red flags, and negotiation tips.",
+    aiTermPaste: "Paste your term sheet here…",
+    aiTermAnalyze: "Analyze Term Sheet",
+    aiTermAnalyzing: "Analyzing…",
+
+    // AI Co-founder Agreement
+    aiCofounderTitle: "AI Co-founder Agreement Drafter",
+    aiCofounderSubtitle: "Generate a co-founder agreement based on your equity split, roles, and vesting schedule.",
+    aiCofounderGenerate: "Generate Agreement",
+    aiCofounderGenerating: "Generating…",
+    aiCofounderCopy: "Copy",
+    aiCofounderDownload: "Download",
+
+    // AI Due Diligence
+    aiDDTitle: "AI Due Diligence Checklist",
+    aiDDSubtitle: "Generate a customized due diligence checklist for your startup stage and sector.",
+    aiDDStage: "Funding stage",
+    aiDDSector: "Sector",
+    aiDDGenerate: "Generate Checklist",
+    aiDDGenerating: "Generating…",
   },
 
   ar: {
@@ -435,6 +500,71 @@ export const translations = {
     freeConsult: "استشارة مجانية",
     createAccount: "إنشاء حساب مجاني",
     haveAccount: "هل لديك حساب بالفعل؟",
+    backToHome: "العودة للرئيسية",
+
+    // ── AI Tools ──
+    navGroupAITools: "أدوات الذكاء الاصطناعي",
+    navAIAdvisor: "مستشار الذكاء الاصطناعي",
+    navAIMarketResearch: "أبحاث السوق",
+    navAIEmailWriter: "كاتب البريد الإلكتروني",
+    navAITermAnalyzer: "محلل الشروط",
+    navAICofounder: "اتفاقية المؤسسين",
+    navAIDueDiligence: "العناية الواجبة",
+
+    // AI Fundraising Advisor
+    aiFundraisingTitle: "مستشار جمع التمويل بالذكاء الاصطناعي",
+    aiFundraisingSubtitle: "اسأل أي شيء عن جمع التمويل والمستثمرين وشروط الاستثمار أو استراتيجية الشركة الناشئة.",
+    aiFundraisingPlaceholder: "اسألني أي شيء عن جمع التمويل…",
+    aiFundraisingContext: "أخبرني عن شركتك الناشئة (اختياري)",
+    aiFundraisingContextPlaceholder: "مثال: شركة SaaS، مرحلة ما قبل البذرة، تقنية مالية، إيرادات ٥٠ ألف دولار شهرياً",
+    aiFundraisingSend: "إرسال",
+    aiFundraisingClear: "مسح المحادثة",
+
+    // AI Market Research
+    aiMarketResearchTitle: "أبحاث السوق بالذكاء الاصطناعي",
+    aiMarketResearchSubtitle: "أنشئ تحليلاً شاملاً للسوق لقطاع شركتك الناشئة.",
+    aiMarketResearchSector: "القطاع / الصناعة",
+    aiMarketResearchSectorPlaceholder: "مثال: تقنية التعليم، تقنية الصحة، SaaS للشركات",
+    aiMarketResearchRegion: "المنطقة المستهدفة",
+    aiMarketResearchRegionPlaceholder: "مثال: الشرق الأوسط وشمال أفريقيا، عالمي، جنوب شرق آسيا",
+    aiMarketResearchGenerate: "إنشاء أبحاث السوق",
+    aiMarketResearchGenerating: "جارٍ الإنشاء…",
+
+    // AI Investor Email Writer
+    aiEmailTitle: "كاتب بريد المستثمرين بالذكاء الاصطناعي",
+    aiEmailSubtitle: "أنشئ بريداً إلكترونياً مخصصاً للتواصل البارد مع مستثمر محدد.",
+    aiEmailInvestorName: "اسم المستثمر / صندوق رأس المال المخاطر",
+    aiEmailInvestorFirm: "اسم الصندوق",
+    aiEmailStartupName: "اسم شركتك الناشئة",
+    aiEmailStartupDesc: "وصف مختصر لشركتك الناشئة",
+    aiEmailAsk: "طلب التمويل (دولار)",
+    aiEmailGenerate: "إنشاء البريد الإلكتروني",
+    aiEmailGenerating: "جارٍ الإنشاء…",
+    aiEmailCopy: "نسخ إلى الحافظة",
+    aiEmailCopied: "تم النسخ!",
+
+    // AI Term Sheet Analyzer
+    aiTermTitle: "محلل شروط الاستثمار بالذكاء الاصطناعي",
+    aiTermSubtitle: "الصق شروط الاستثمار واحصل على شرح بلغة بسيطة وتحذيرات ونصائح للتفاوض.",
+    aiTermPaste: "الصق شروط الاستثمار هنا…",
+    aiTermAnalyze: "تحليل الشروط",
+    aiTermAnalyzing: "جارٍ التحليل…",
+
+    // AI Co-founder Agreement
+    aiCofounderTitle: "مسودة اتفاقية المؤسسين بالذكاء الاصطناعي",
+    aiCofounderSubtitle: "أنشئ اتفاقية مؤسسين بناءً على تقسيم الأسهم والأدوار وجدول الاستحقاق.",
+    aiCofounderGenerate: "إنشاء الاتفاقية",
+    aiCofounderGenerating: "جارٍ الإنشاء…",
+    aiCofounderCopy: "نسخ",
+    aiCofounderDownload: "تنزيل",
+
+    // AI Due Diligence
+    aiDDTitle: "قائمة العناية الواجبة بالذكاء الاصطناعي",
+    aiDDSubtitle: "أنشئ قائمة عناية واجبة مخصصة لمرحلة تمويل شركتك الناشئة وقطاعها.",
+    aiDDStage: "مرحلة التمويل",
+    aiDDSector: "القطاع",
+    aiDDGenerate: "إنشاء القائمة",
+    aiDDGenerating: "جارٍ الإنشاء…",
   },
 } as const;
 
