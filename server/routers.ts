@@ -2,8 +2,10 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
-import { subscriptionRouter } from "./subscriptionRouter";
-import { profileRouter } from "./profileRouter";
+import { subscriptionRouter } from './subscriptionRouter';
+import { profileRouter } from './profileRouter';
+import { feasibilityRouter } from './feasibilityRouter';
+import { inferenceRouter } from './inferenceRouter';
 
 export const appRouter = router({
   system: systemRouter,
@@ -17,6 +19,8 @@ export const appRouter = router({
   }),
   subscription: subscriptionRouter,
   profile: profileRouter,
+  feasibility: feasibilityRouter,
+  inference: inferenceRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -6,7 +6,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ChevronRight, RotateCcw, Check, Sparkles } from 'lucide-react';
+import { Send, ChevronRight, RotateCcw, Check, Sparkles, Wand2, Info } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { CHAT_QUESTIONS, formatAnswer, type ChatQuestion } from '@/lib/chatFlow';
 import { nanoid } from 'nanoid';
@@ -262,6 +262,10 @@ export default function ChatInterface({ onComplete }: Props) {
   const { isAuthenticated } = useAuth();
   const { data: profileData } = trpc.profile.get.useQuery(undefined, { enabled: isAuthenticated });
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isInferring, setIsInferring] = useState(false);
+  const [aiInferredFields, setAiInferredFields] = useState<string[]>([]);
+
+  const fillMissing = trpc.inference.fillMissing.useMutation();
 
   // Pre-populate answers from startup profile if available
   const p = profileData && 'name' in profileData ? profileData : (profileData as any)?.profile ?? null;
@@ -327,6 +331,50 @@ export default function ChatInterface({ onComplete }: Props) {
     };
     ask();
   }, [currentQIndex]);
+
+  const handleSkipWithAI = useCallback(async () => {
+    const q = CHAT_QUESTIONS[currentQIndex];
+    setIsInferring(true);
+    addUserMessage("I'm not sure — can you estimate this for me?");
+    await addBotMessage("Sure! Let me estimate that based on your sector and stage... 🤖", 500);
+
+    try {
+      const result = await fillMissing.mutateAsync({
+        knownData: answers,
+        missingFields: [q.id],
+      });
+
+      const estimatedValue = result[q.id];
+      const reasoning = result.reasoning;
+
+      if (estimatedValue !== undefined && estimatedValue !== null) {
+        const displayText = formatAnswer(q, estimatedValue);
+        const newAnswers = { ...answers, [q.id]: estimatedValue };
+        setAnswers(newAnswers);
+        setAiInferredFields(prev => [...prev, q.id]);
+
+        await addBotMessage(`I estimated **${displayText}** for you. ${reasoning ? `\n\n*${reasoning}*` : ''}`, 400);
+        await addBotMessage("You can always come back and adjust this. Moving on! 👍", 500);
+
+        const nextIndex = currentQIndex + 1;
+        if (nextIndex >= CHAT_QUESTIONS.length) {
+          await addBotMessage("Perfect! I have everything I need. 🎉", 600);
+          await addBotMessage("Running your valuation now — using DCF, Scorecard, Berkus, VC Method, Comparables, Risk-Factor Summation, and First Chicago methods...", 800);
+          await addBotMessage("✅ Done! Your full valuation report is ready below.", 1200);
+          setIsComplete(true);
+          setTimeout(() => onComplete(newAnswers), 600);
+        } else {
+          setCurrentQIndex(nextIndex);
+        }
+      } else {
+        await addBotMessage("I couldn't estimate that one reliably. Could you give me a rough number? Even a guess is fine! 😊", 400);
+      }
+    } catch {
+      await addBotMessage("Hmm, I had trouble estimating that. Could you give me a rough number? 😊", 400);
+    } finally {
+      setIsInferring(false);
+    }
+  }, [currentQIndex, answers, fillMissing, onComplete]);
 
   const handleAnswer = useCallback(async (value: any) => {
     const q = CHAT_QUESTIONS[currentQIndex];
@@ -428,15 +476,42 @@ export default function ChatInterface({ onComplete }: Props) {
       </div>
 
       {/* Input Area */}
-      {!isComplete && currentQ && !isTyping && (
+      {!isComplete && currentQ && !isTyping && !isInferring && (
         <motion.div
           key={currentQ.id}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="border-t border-border p-4 bg-card"
+          className="border-t border-border p-4 bg-card space-y-2"
         >
           <QuestionInput question={currentQ} onSubmit={handleAnswer} />
+          {/* AI estimate button for numeric/financial questions */}
+          {['currency', 'percent', 'slider', 'number'].includes(currentQ.type) && (
+            <button
+              onClick={handleSkipWithAI}
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-dashed text-xs font-medium transition-all hover:bg-secondary/50"
+              style={{ borderColor: 'oklch(0.55 0.13 30)', color: 'oklch(0.55 0.13 30)' }}
+            >
+              <Wand2 className="w-3.5 h-3.5" />
+              I don't know — let AI estimate this for me
+            </button>
+          )}
         </motion.div>
+      )}
+
+      {/* AI inferring indicator */}
+      {isInferring && (
+        <div className="border-t border-border p-4 bg-card flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'oklch(0.55 0.13 30)', borderTopColor: 'transparent' }} />
+          AI is estimating a value for you...
+        </div>
+      )}
+
+      {/* AI inferred fields notice */}
+      {aiInferredFields.length > 0 && !isComplete && (
+        <div className="px-4 py-2 flex items-start gap-2 text-[10px] text-muted-foreground" style={{ background: 'oklch(0.55 0.13 30)10' }}>
+          <Info className="w-3 h-3 shrink-0 mt-0.5" style={{ color: 'oklch(0.55 0.13 30)' }} />
+          <span>{aiInferredFields.length} value{aiInferredFields.length > 1 ? 's were' : ' was'} estimated by AI. You can retake the chat to adjust them.</span>
+        </div>
       )}
 
       {/* Reset */}

@@ -9,8 +9,8 @@ import { useAuth } from '@/_core/hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, Sparkles, Rocket, Users, GitBranch, Target,
-  BookOpen, BarChart3, DollarSign, Menu, X, ChevronRight,
-  Gauge, Layers, FileDown, Link2, Check, Building2, CreditCard, LogIn, LogOut, UserCircle
+  BookOpen, BarChart3, Menu, X, ChevronRight,
+  Gauge, Layers, FileDown, Link2, Check, Building2, LogIn, LogOut, UserCircle
 } from 'lucide-react';
 import { getLoginUrl } from '@/const';
 import { trpc } from '@/lib/trpc';
@@ -31,8 +31,9 @@ import PitchDeckScorecard from '@/components/PitchDeckScorecard';
 import TermSheetGlossary from '@/components/TermSheetGlossary';
 import InvestorCRM from '@/components/InvestorCRM';
 import RunwayOptimizer from '@/components/RunwayOptimizer';
+import FeasibilityEvaluator from '@/components/FeasibilityEvaluator';
 
-type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile';
+type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'feasibility';
 
 interface NavItem {
   id: ToolId;
@@ -57,6 +58,8 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'accelerators',  label: 'Accelerator Finder',    shortLabel: 'Accelerators', icon: Rocket,    group: 'Resources',    badge: 'New' },
   { id: 'runway',        label: 'Runway Optimizer',      shortLabel: 'Runway',     icon: BarChart3,   group: 'Resources' },
   { id: 'term-sheet',    label: 'Term Sheet Glossary',   shortLabel: 'Term Sheet', icon: BookOpen,    group: 'Resources',    badge: '75 terms' },
+  // Idea Evaluation
+  { id: 'feasibility',   label: 'Idea Evaluator',        shortLabel: 'Idea Check', icon: Sparkles,    group: 'Valuation',    badge: 'AI' },
   // My Startup
   { id: 'profile',       label: 'My Startup Profile',    shortLabel: 'My Startup', icon: Building2,   group: 'My Startup' },
 ];
@@ -64,6 +67,7 @@ const NAV_ITEMS: NavItem[] = [
 const GROUPS = ['Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources', 'My Startup'];
 
 const TOOL_COLORS: Record<ToolId, string> = {
+  feasibility: '#6366F1',
   valuation: '#C4614A',
   accelerators: '#10B981',
   'equity-split': '#2D4A6B',
@@ -80,8 +84,6 @@ export default function Home() {
   // The userAuth hooks provides authentication state
   // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
   let { user, loading, error, isAuthenticated, logout } = useAuth();
-  const { data: subStatus } = trpc.subscription.status.useQuery(undefined, { enabled: isAuthenticated });
-  const isPro = subStatus?.isActive;
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const [activeTool, setActiveTool] = useState<ToolId>('valuation');
@@ -240,6 +242,7 @@ export default function Home() {
       case 'term-sheet':      return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><TermSheetGlossary /></div>;
       case 'investor-crm':    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><InvestorCRM /></div>;
       case 'profile':         return <StartupProfile />;
+      case 'feasibility':     return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><FeasibilityEvaluator /></div>;
       default: return null;
     }
   };
@@ -272,17 +275,10 @@ export default function Home() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {isPro ? (
-            <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono border px-2.5 py-1 rounded-full" style={{ borderColor: 'oklch(0.55 0.13 30)', color: 'oklch(0.55 0.13 30)' }}>
-              <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'oklch(0.55 0.13 30)' }} />
-              Pro · Active
-            </div>
-          ) : (
-            <a href="/pricing" className="hidden sm:flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all hover:opacity-90" style={{ background: 'oklch(0.55 0.13 30)', color: 'white' }}>
-              <CreditCard className="w-3 h-3" />
-              Upgrade $9.99/mo
-            </a>
-          )}
+          <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground border border-border px-2.5 py-1 rounded-full">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+            9 tools · Free
+          </div>
           {chatComplete && chatAnswers && (
             <button
               onClick={handleShare}
@@ -321,11 +317,7 @@ export default function Home() {
                       <button onClick={() => { setActiveTool('profile'); setUserMenuOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary/50 transition-colors">
                         <Building2 className="w-3.5 h-3.5" /> My Startup Profile
                       </button>
-                      {!isPro && (
-                        <a href="/pricing" className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-secondary/50 transition-colors" style={{ color: 'oklch(0.55 0.13 30)' }}>
-                          <CreditCard className="w-3.5 h-3.5" /> Upgrade to Pro
-                        </a>
-                      )}
+
                       <button onClick={() => { logout(); setUserMenuOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:bg-secondary/50 transition-colors border-t border-border">
                         <LogOut className="w-3.5 h-3.5" /> Sign Out
                       </button>
