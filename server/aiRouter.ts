@@ -567,4 +567,50 @@ Keep responses concise (3-5 paragraphs max) but highly actionable.${contextStr}`
         reply: response.choices[0].message.content as string,
       };
     }),
+
+  // ── 7. Vesting Schedule AI Review ──────────────────────────────────────────────
+  vestingRecommendation: publicProcedure
+    .input(
+      z.object({
+        stakeholders: z.array(
+          z.object({
+            name: z.string(),
+            role: z.string(),
+            shares: z.number(),
+            vestingMonths: z.number(),
+            cliffMonths: z.number(),
+            vestingType: z.string(),
+          })
+        ),
+        totalShares: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const stakeholderSummary = input.stakeholders
+        .map(
+          (s) =>
+            `- ${s.name} (${s.role}): ${s.shares.toLocaleString()} shares (${((s.shares / input.totalShares) * 100).toFixed(1)}%), ${s.vestingMonths}mo vesting, ${s.cliffMonths}mo cliff, ${s.vestingType} schedule`
+        )
+        .join('\n');
+
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: 'system',
+            content: `You are a startup equity and compensation expert with deep experience in VC-backed companies.
+You review vesting schedules and provide concise, actionable feedback.
+Focus on: fairness between founders, investor-friendliness, market norms, and red flags.
+Keep your response to 3-5 paragraphs. Be direct and specific.`,
+          },
+          {
+            role: 'user',
+            content: `Please review this vesting schedule and provide recommendations:\n\nTotal shares: ${input.totalShares.toLocaleString()}\n\nStakeholders:\n${stakeholderSummary}\n\nProvide:\n1. Overall assessment of the structure\n2. Any red flags or concerns\n3. Specific recommendations to improve fairness or investor-friendliness\n4. Market comparison (is this typical for VC-backed startups?)`,
+          },
+        ],
+      });
+
+      return {
+        recommendation: response.choices[0].message.content as string,
+      };
+    }),
 });

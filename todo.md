@@ -133,3 +133,11 @@
 - [x] FeasibilityEvaluator country dropdown
 - [x] LandingPage hero and CTA section polish
 - [x] Run tests and save checkpoint (28 tests passing, 0 TS errors)
+
+## Vesting Schedule Builder (Round 9)
+- [x] Build VestingScheduleBuilder.tsx component (interactive chart, cliff, custom schedules)
+- [x] Add vestingRecommendation procedure to aiRouter.ts (AI-powered schedule review)
+- [x] Add to sidebar nav under 'Equity & Cap Table' group with AI badge
+- [ ] Add Arabic translations for new tool
+- [x] 28 tests passing, 0 TypeScript errors
+- [x] Save checkpoint

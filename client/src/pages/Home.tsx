@@ -11,7 +11,7 @@ import {
   TrendingUp, Sparkles, Rocket, Users, GitBranch, Target,
   BookOpen, BarChart3, Menu, X, ChevronRight,
   Gauge, Layers, FileDown, Link2, Check, Building2, LogIn, LogOut, UserCircle, Home as HomeIcon,
-  MessageCircle, Mail, FileText, Users2, ClipboardCheck
+  MessageCircle, Mail, FileText, Users2, ClipboardCheck, Calendar
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -45,8 +45,8 @@ import AIInvestorEmail from '@/components/AIInvestorEmail';
 import AITermSheetAnalyzer from '@/components/AITermSheetAnalyzer';
 import AICofounderAgreement from '@/components/AICofounderAgreement';
 import AIFundraisingAdvisor from '@/components/AIFundraisingAdvisor';
-
-type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'feasibility' | 'resources' | 'matching' | 'admin' | 'ai-market-research' | 'ai-due-diligence' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-fundraising-advisor';
+import VestingScheduleBuilder from '@/components/VestingScheduleBuilder';
+type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'vesting' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'feasibility' | 'resources' | 'matching' | 'admin' | 'ai-market-research' | 'ai-due-diligence' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-fundraising-advisor';
 
 interface NavItem {
   id: ToolId;
@@ -63,6 +63,7 @@ const NAV_ITEMS: NavItem[] = [
   // Equity & Funding
   { id: 'equity-split',  label: 'Co-Founder Equity Split', shortLabel: 'Equity Split', icon: Users,    group: 'Equity & Cap Table' },
   { id: 'dilution',      label: 'Dilution Simulator',   shortLabel: 'Dilution',    icon: GitBranch,   group: 'Equity & Cap Table' },
+  { id: 'vesting',       label: 'Vesting Schedule Builder', shortLabel: 'Vesting',  icon: Calendar,    group: 'Equity & Cap Table', badge: 'AI' },
   // Fundraising
   { id: 'readiness',     label: 'Fundraising Readiness', shortLabel: 'Readiness',  icon: Gauge,       group: 'Fundraising',  badge: '20 checks' },
   { id: 'pitch-deck',    label: 'Pitch Deck Scorecard',  shortLabel: 'Pitch Deck', icon: Layers,      group: 'Fundraising' },
@@ -106,6 +107,7 @@ const TOOL_COLORS: Record<ToolId, string> = {
   resources: '#10B981',
   matching: '#C4614A',
   admin: '#8B4A38',
+  vesting: '#7C3AED',
   'ai-market-research': '#0EA5E9',
   'ai-due-diligence': '#8B5CF6',
   'ai-investor-email': '#EC4899',
@@ -272,6 +274,7 @@ export default function Home() {
       case 'accelerators':    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><AcceleratorRecommender /></div>;
       case 'equity-split':    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><CoFounderEquitySplit /></div>;
       case 'dilution':        return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><AdvancedDilutionSimulator /></div>;
+      case 'vesting':         return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><VestingScheduleBuilder /></div>;
       case 'readiness':       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><FundraisingReadiness /></div>;
       case 'pitch-deck':      return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><PitchDeckScorecard /></div>;
       case 'runway':          return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><RunwayOptimizer /></div>;
