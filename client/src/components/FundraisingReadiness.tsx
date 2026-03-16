@@ -3,10 +3,11 @@
  * Design: "Venture Capital Clarity" — Editorial Finance
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Circle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import { useReport } from '@/contexts/ReportContext';
 
 interface CheckItem {
   id: string;
@@ -59,6 +60,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 export default function FundraisingReadiness() {
   const [items, setItems] = useState<CheckItem[]>(INITIAL_ITEMS);
   const [expandedCat, setExpandedCat] = useState<string | null>('Product');
+  const { setReadiness } = useReport();
 
   const toggle = (id: string) => {
     setItems(prev => prev.map(item => item.id === id ? { ...item, checked: !item.checked } : item));
@@ -88,6 +90,17 @@ export default function FundraisingReadiness() {
   const radarData = categoryScores.map(c => ({ subject: c.category, score: c.pct, fullMark: 100 }));
 
   const categories = Array.from(new Set(INITIAL_ITEMS.map(i => i.category)));
+
+  // Publish to report context whenever score changes
+  useEffect(() => {
+    setReadiness({
+      score,
+      maxScore,
+      pct,
+      checkedItems: items.filter(i => i.checked).map(i => i.label),
+      totalItems: items.length,
+    });
+  }, [score, maxScore, pct, items, setReadiness]);
 
   return (
     <div className="space-y-5">

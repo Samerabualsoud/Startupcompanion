@@ -3,10 +3,11 @@
  * Design: "Venture Capital Clarity" — Editorial Finance
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import { useReport } from '@/contexts/ReportContext';
 
 interface Slide {
   id: string;
@@ -155,6 +156,7 @@ const INITIAL_SLIDES: Slide[] = [
 export default function PitchDeckScorecard() {
   const [slides, setSlides] = useState<Slide[]>(INITIAL_SLIDES);
   const [expandedId, setExpandedId] = useState<string | null>('problem');
+  const { setPitchScore } = useReport();
 
   const updateScore = (id: string, score: number) => {
     setSlides(prev => prev.map(s => s.id === id ? { ...s, score } : s));
@@ -174,6 +176,16 @@ export default function PitchDeckScorecard() {
     : { label: 'Major Gaps', color: '#EF4444' };
 
   const weakSlides = slides.filter(s => s.score < 6).sort((a, b) => (a.score * a.weight) - (b.score * b.weight));
+
+  // Publish to report context
+  useEffect(() => {
+    setPitchScore({
+      totalScore,
+      maxScore,
+      pct,
+      slideScores: slides.map(s => ({ slide: s.name, score: s.score * s.weight, max: 10 * s.weight })),
+    });
+  }, [totalScore, maxScore, pct, slides, setPitchScore]);
 
   return (
     <div className="space-y-5">

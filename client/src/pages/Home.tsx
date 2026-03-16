@@ -9,10 +9,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, Sparkles, Rocket, Users, GitBranch, Target,
   BookOpen, BarChart3, DollarSign, Menu, X, ChevronRight,
-  Gauge, Layers
+  Gauge, Layers, FileDown
 } from 'lucide-react';
 import { buildInputsFromAnswers } from '@/lib/chatFlow';
 import { runValuation, type StartupInputs, type ValuationSummary } from '@/lib/valuation';
+import { generateFullReport } from '@/lib/fullReport';
+import { useReport } from '@/contexts/ReportContext';
 import ChatInterface from '@/components/ChatInterface';
 import ValuationReport from '@/components/ValuationReport';
 import AcceleratorRecommender from '@/components/AcceleratorRecommender';
@@ -71,6 +73,7 @@ export default function Home() {
   const [chatAnswers, setChatAnswers] = useState<Record<string, any> | null>(null);
   const [chatComplete, setChatComplete] = useState(false);
   const [chatKey, setChatKey] = useState(0);
+  const { readiness, pitchScore, dilution } = useReport();
 
   const inputs: StartupInputs | null = useMemo(() => {
     if (!chatAnswers) return null;
@@ -232,6 +235,23 @@ export default function Home() {
             <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
             9 tools · Free
           </div>
+          <button
+            onClick={() => {
+              generateFullReport({
+                companyName: inputs?.companyName || chatAnswers?.companyName || 'My Startup',
+                valuation: inputs && summary ? { inputs, summary } : null,
+                readiness,
+                pitchScore,
+                dilution,
+              });
+            }}
+            className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-90 active:scale-95"
+            style={{ background: 'oklch(0.18 0.05 240)', color: '#FAF6EF', border: '1px solid oklch(0.28 0.04 240)' }}
+            title="Download Full Report (PDF)"
+          >
+            <FileDown className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Full Report</span>
+          </button>
         </div>
       </header>
 
