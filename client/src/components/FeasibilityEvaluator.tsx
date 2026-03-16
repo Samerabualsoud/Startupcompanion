@@ -5,6 +5,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { trpc } from '@/lib/trpc';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { COUNTRIES } from '@shared/dropdowns';
 import {
   Sparkles, Target, TrendingUp, DollarSign, Shield, Zap, Clock, Layers,
   AlertTriangle, CheckCircle, ChevronDown, ChevronUp, RotateCcw,
@@ -481,7 +483,6 @@ export default function FeasibilityEvaluator() {
             { key: 'revenueModel', label: 'How will you make money?', placeholder: 'e.g. SaaS subscription $500-2000/month per company' },
             { key: 'competitorAwareness', label: 'Who are your competitors?', placeholder: 'e.g. Coupa, Jaggaer, but they are expensive and complex for SMEs' },
             { key: 'founderBackground', label: 'Your relevant background', placeholder: 'e.g. 5 years in supply chain consulting at Deloitte' },
-            { key: 'country', label: 'Country / Region', placeholder: 'e.g. UAE, Saudi Arabia, USA' },
           ].map(({ key, label, placeholder }) => (
             <div key={key}>
               <label className="text-[11px] font-semibold text-muted-foreground mb-1.5 block">{label}</label>
@@ -494,6 +495,17 @@ export default function FeasibilityEvaluator() {
               />
             </div>
           ))}
+          {/* Country as dropdown */}
+          <div>
+            <label className="text-[11px] font-semibold text-muted-foreground mb-1.5 block">Country / Region</label>
+            <Select value={(form as any).country} onValueChange={v => setForm(f => ({ ...f, country: v }))}>
+              <SelectTrigger className="text-sm"><SelectValue placeholder="Select country…" /></SelectTrigger>
+              <SelectContent className="max-h-64 overflow-y-auto">
+                {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div>
             <label className="text-[11px] font-semibold text-muted-foreground mb-1.5 block">Current Stage</label>
             <select

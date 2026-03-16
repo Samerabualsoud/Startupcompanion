@@ -429,6 +429,8 @@ export default function Home() {
           <div className="flex-1 overflow-y-auto py-3 px-2">
             {GROUPS.map(group => {
               const groupItems = NAV_ITEMS.filter(n => n.group === group);
+              // Hide admin group from non-admins
+              if (group === 'Admin' && user?.role !== 'admin') return null;
               const groupLabel: Record<string, string> = {
                 'Valuation': t('navGroupValuation'),
                 'Equity & Cap Table': t('navGroupEquity'),
@@ -440,18 +442,21 @@ export default function Home() {
                 'Admin': 'Admin',
               };
               return (
-                <div key={group} className="mb-4">
-                  <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest px-3 mb-1.5">{groupLabel[group] || group}</div>
+                <div key={group} className="mb-3">
+                  <div className="text-[9px] font-bold uppercase tracking-widest px-3 mb-1" style={{ color: 'oklch(0.5 0.03 240)' }}>
+                    {groupLabel[group] || group}
+                  </div>
                   {groupItems.map(item => {
                     const Icon = item.icon;
                     const isActive = activeTool === item.id;
+                    const isAI = item.badge === 'AI';
                     return (
                       <button
                         key={item.id}
                         onClick={() => { setActiveTool(item.id); setSidebarOpen(false); }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg mb-0.5 text-left transition-all group ${
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg mb-0.5 text-left transition-all ${
                           isActive
-                            ? 'text-white'
+                            ? 'text-white shadow-sm'
                             : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
                         }`}
                         style={isActive ? { background: TOOL_COLORS[item.id] } : {}}
@@ -459,7 +464,13 @@ export default function Home() {
                         <Icon className="w-3.5 h-3.5 shrink-0" />
                         <span className="text-xs font-medium flex-1 truncate">{item.shortLabel}</span>
                         {item.badge && !isActive && (
-                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground shrink-0">
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
+                            isAI
+                              ? 'bg-violet-100 text-violet-700'
+                              : item.badge === 'New'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-secondary text-muted-foreground'
+                          }`}>
                             {item.badge}
                           </span>
                         )}
@@ -493,7 +504,7 @@ export default function Home() {
           {/* Tool header bar */}
           {activeTool !== 'valuation' && (
             <div className="shrink-0 px-5 py-3 border-b border-border bg-card flex items-center gap-3">
-              <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: TOOL_COLORS[activeTool] }}>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm" style={{ background: TOOL_COLORS[activeTool] }}>
                 {(() => { const Icon = activeItem.icon; return <Icon className="w-3.5 h-3.5 text-white" />; })()}
               </div>
               <div>

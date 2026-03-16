@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { SECTORS, COUNTRIES } from '@shared/dropdowns';
 
 const STAGE_OPTIONS = [
   { value: 'pre-seed', label: 'Pre-Seed' },
@@ -261,7 +262,12 @@ export default function StartupProfile() {
             <Input value={form.logoUrl} onChange={e => set('logoUrl', e.target.value)} placeholder="https://..." />
           </Field>
           <Field label="Sector">
-            <Input value={form.sector} onChange={e => set('sector', e.target.value)} placeholder="e.g. Supply Chain Tech" />
+            <Select value={form.sector} onValueChange={v => set('sector', v)}>
+              <SelectTrigger><SelectValue placeholder="Select sector…" /></SelectTrigger>
+              <SelectContent className="max-h-64 overflow-y-auto">
+                {SECTORS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </Field>
           <Field label="Stage">
             <Select value={form.stage} onValueChange={v => set('stage', v)}>
@@ -272,7 +278,12 @@ export default function StartupProfile() {
             </Select>
           </Field>
           <Field label="Country">
-            <Input value={form.country} onChange={e => set('country', e.target.value)} placeholder="e.g. Saudi Arabia" />
+            <Select value={form.country} onValueChange={v => set('country', v)}>
+              <SelectTrigger><SelectValue placeholder="Select country…" /></SelectTrigger>
+              <SelectContent className="max-h-64 overflow-y-auto">
+                {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </Field>
           <Field label="City">
             <Input value={form.city} onChange={e => set('city', e.target.value)} placeholder="e.g. Riyadh" />

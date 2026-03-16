@@ -92,53 +92,70 @@ export default function LandingPage() {
       </nav>
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden pt-20 pb-24 px-4 sm:px-6">
+      <section className="relative overflow-hidden pt-20 pb-28 px-4 sm:px-6">
+        {/* Background decorations */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full opacity-[0.06]" style={{ background: 'oklch(0.55 0.13 30)' }} />
-          <div className="absolute top-32 -left-16 w-64 h-64 rounded-full opacity-[0.04]" style={{ background: 'oklch(0.18 0.05 240)' }} />
+          <div className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full opacity-[0.07]" style={{ background: 'oklch(0.55 0.13 30)' }} />
+          <div className="absolute top-40 -left-20 w-80 h-80 rounded-full opacity-[0.05]" style={{ background: 'oklch(0.18 0.05 240)' }} />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-px" style={{ background: 'linear-gradient(90deg, transparent, oklch(0.88 0.01 80), transparent)' }} />
         </div>
 
         <div className="max-w-4xl mx-auto text-center relative">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-6"
-            style={{ background: 'oklch(0.96 0.02 30)', color: 'oklch(0.45 0.12 30)', border: '1px solid oklch(0.88 0.06 30)' }}>
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold mb-8"
+            style={{ background: 'oklch(0.96 0.02 30)', color: 'oklch(0.45 0.12 30)', border: '1px solid oklch(0.88 0.06 30)', boxShadow: '0 1px 3px oklch(0.55 0.13 30 / 0.15)' }}>
             <Sparkles className="w-3.5 h-3.5" />
             {t('heroBadge')}
           </div>
 
+          {/* Headline */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6"
-            style={{ fontFamily: isRTL ? 'Noto Kufi Arabic, sans-serif' : 'Playfair Display, serif', color: 'oklch(0.18 0.05 240)' }}>
+            style={{ fontFamily: isRTL ? 'Noto Kufi Arabic, sans-serif' : 'Playfair Display, serif', color: 'oklch(0.18 0.05 240)', letterSpacing: '-0.02em' }}>
             {t('heroTitle1')}{' '}
             <span style={{ color: 'oklch(0.55 0.13 30)' }}>{t('heroTitle2')}</span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed mb-10 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl leading-relaxed mb-10 max-w-2xl mx-auto" style={{ color: 'oklch(0.45 0.02 240)' }}>
             {t('heroSubtitle')}
           </p>
 
+          {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href={isAuthenticated ? APP_PATH : REGISTER_PATH}>
               <button className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-semibold text-white transition-all hover:opacity-90 hover:shadow-lg active:scale-[0.98]"
-                style={{ background: 'oklch(0.18 0.05 240)' }}>
+                style={{ background: 'oklch(0.18 0.05 240)', boxShadow: '0 4px 14px oklch(0.18 0.05 240 / 0.3)' }}>
                 {isAuthenticated ? t('openApp') : t('startForFree')}
                 <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
               </button>
             </Link>
             <Link href={isAuthenticated ? APP_PATH : LOGIN_PATH}>
-              <button className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-medium border border-border hover:bg-white transition-all"
+              <button className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-medium border border-border bg-white hover:shadow-sm transition-all"
                 style={{ color: 'oklch(0.3 0.04 240)' }}>
                 {isAuthenticated ? t('goToDashboard') : t('signIn')}
               </button>
             </Link>
           </div>
 
+          {/* Trust indicators */}
+          <div className="mt-8 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              {isRTL ? 'مجاني تماماً' : '100% Free'}
+            </div>
+            <span>·</span>
+            <span>{isRTL ? 'لا يلزم بطاقة ائتمان' : 'No credit card required'}</span>
+            <span>·</span>
+            <span>{isRTL ? 'ثنائي اللغة' : 'English & Arabic'}</span>
+          </div>
+
           {/* Stats */}
           <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-6">
             {STATS.map(stat => (
-              <div key={stat.label} className="text-center">
+              <div key={stat.label} className="text-center p-4 rounded-2xl" style={{ background: 'white', border: '1px solid oklch(0.92 0.01 80)' }}>
                 <div className="text-3xl font-bold mb-1" style={{ fontFamily: 'JetBrains Mono, monospace', color: 'oklch(0.55 0.13 30)' }}>
                   {stat.value}
                 </div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
+                <div className="text-xs text-muted-foreground font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -162,20 +179,22 @@ export default function LandingPage() {
             {TOOLS.map((tool) => {
               const Icon = tool.icon;
               return (
-                <div key={tool.label}
-                  className="group p-5 rounded-2xl border border-border hover:shadow-md transition-all hover:border-transparent cursor-pointer"
-                  style={{ background: 'oklch(0.993 0.003 80)' }}>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3"
-                    style={{ background: tool.color + '18' }}>
-                    <Icon className="w-4.5 h-4.5" style={{ color: tool.color }} />
+                <Link href={isAuthenticated ? APP_PATH : REGISTER_PATH} key={tool.label}>
+                  <div
+                    className="group p-5 rounded-2xl border border-border hover:shadow-lg transition-all hover:border-transparent cursor-pointer h-full"
+                    style={{ background: 'oklch(0.993 0.003 80)' }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-transform group-hover:scale-110"
+                      style={{ background: tool.color + '18' }}>
+                      <Icon className="w-5 h-5" style={{ color: tool.color }} />
+                    </div>
+                    <h3 className="font-bold text-sm mb-1.5" style={{ color: 'oklch(0.18 0.05 240)' }}>
+                      {isRTL ? tool.labelAr : tool.label}
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {isRTL ? tool.descAr : tool.desc}
+                    </p>
                   </div>
-                  <h3 className="font-bold text-sm mb-1.5" style={{ color: 'oklch(0.18 0.05 240)' }}>
-                    {isRTL ? tool.labelAr : tool.label}
-                  </h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {isRTL ? tool.descAr : tool.desc}
-                  </p>
-                </div>
+                </Link>
               );
             })}
           </div>
@@ -314,8 +333,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-24 px-4 sm:px-6">
+      <section className="py-24 px-4 sm:px-6" style={{ background: 'oklch(0.978 0.008 80)' }}>
         <div className="max-w-2xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold mb-6"
+            style={{ background: 'oklch(0.96 0.02 30)', color: 'oklch(0.45 0.12 30)', border: '1px solid oklch(0.88 0.06 30)' }}>
+            <Zap className="w-3.5 h-3.5" />
+            {isRTL ? 'ابدأ اليوم' : 'Get started today'}
+          </div>
           <h2 className="text-3xl sm:text-4xl font-bold mb-5"
             style={{ fontFamily: isRTL ? 'Noto Kufi Arabic, sans-serif' : 'Playfair Display, serif', color: 'oklch(0.18 0.05 240)' }}>
             {t('ctaTitle')}
@@ -326,11 +350,19 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href={isAuthenticated ? APP_PATH : REGISTER_PATH}>
               <button className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-semibold text-white transition-all hover:opacity-90 hover:shadow-lg"
-                style={{ background: 'oklch(0.18 0.05 240)' }}>
+                style={{ background: 'oklch(0.18 0.05 240)', boxShadow: '0 4px 14px oklch(0.18 0.05 240 / 0.3)' }}>
                 {isAuthenticated ? t('openApp') : t('createFreeAccount')}
                 <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
               </button>
             </Link>
+            {!isAuthenticated && (
+              <Link href={LOGIN_PATH}>
+                <button className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-medium border border-border bg-white hover:shadow-sm transition-all"
+                  style={{ color: 'oklch(0.3 0.04 240)' }}>
+                  {t('signIn')}
+                </button>
+              </Link>
+            )}
           </div>
           <p className="mt-4 text-xs text-muted-foreground">
             {t('freeForever')}

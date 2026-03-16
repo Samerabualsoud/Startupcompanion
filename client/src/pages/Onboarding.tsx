@@ -4,10 +4,17 @@ import { trpc } from '@/lib/trpc';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   TrendingUp, Building2, Users, Scale, Rocket, HelpCircle,
-  ChevronRight, ChevronLeft, Check, Loader2, Globe, Linkedin,
-  Mail, MapPin, DollarSign
+  ChevronRight, ChevronLeft, Check, Loader2
 } from 'lucide-react';
 import { APP_PATH } from '@/const';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from '@/components/ui/select';
+import {
+  SECTORS, STARTUP_STAGES, FUNDING_STAGES, CHECK_SIZES,
+  REGIONS, COUNTRIES, JURISDICTIONS, LEGAL_SPECIALIZATIONS,
+  COFOUNDER_ROLES, VESTING_SCHEDULES
+} from '@shared/dropdowns';
 
 type UserType = 'startup' | 'vc' | 'angel' | 'venture_lawyer' | 'other';
 
@@ -19,15 +26,59 @@ const USER_TYPES: { id: UserType; icon: React.ElementType; color: string }[] = [
   { id: 'other', icon: HelpCircle, color: '#6B7280' },
 ];
 
-const SECTORS = ['SaaS', 'FinTech', 'HealthTech', 'EdTech', 'E-commerce', 'AI/ML', 'CleanTech', 'DeepTech', 'Consumer', 'B2B', 'Marketplace', 'Web3', 'Other'];
-const STAGES = ['Pre-Idea', 'Idea', 'Pre-Seed', 'Seed', 'Series A', 'Series B', 'Series C+', 'Growth'];
-const REGIONS = ['North America', 'Europe', 'MENA', 'Africa', 'South Asia', 'Southeast Asia', 'Latin America', 'Global'];
+const INVESTMENT_STAGES = [...FUNDING_STAGES];
+const LANGS = ['English', 'Arabic', 'French', 'Spanish', 'German', 'Mandarin', 'Hindi', 'Portuguese', 'Turkish', 'Persian'];
 
-function TagSelector({ options, selected, onChange, max }: {
-  options: string[];
-  selected: string[];
-  onChange: (v: string[]) => void;
-  max?: number;
+// ── Reusable field components ──
+function InputField({ label, value, onChange, placeholder, type = 'text', required }: {
+  label: string; value: string; onChange: (v: string) => void;
+  placeholder?: string; type?: string; required?: boolean;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'oklch(0.45 0.04 240)' }}>
+        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none transition-all bg-white"
+        style={{ border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
+        onFocus={e => e.target.style.borderColor = 'oklch(0.55 0.13 30)'}
+        onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
+      />
+    </div>
+  );
+}
+
+function SelectField({ label, value, onChange, options, placeholder, required }: {
+  label: string; value: string; onChange: (v: string) => void;
+  options: readonly string[]; placeholder?: string; required?: boolean;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'oklch(0.45 0.04 240)' }}>
+        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
+      <Select value={value || ''} onValueChange={onChange}>
+        <SelectTrigger className="w-full rounded-xl text-sm h-10 bg-white" style={{ border: '1.5px solid oklch(0.88 0.02 240)' }}>
+          <SelectValue placeholder={placeholder || 'Select...'} />
+        </SelectTrigger>
+        <SelectContent className="max-h-64 overflow-y-auto">
+          {options.map(opt => (
+            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+function TagSelector({ label, options, selected, onChange, max }: {
+  label?: string; options: readonly string[]; selected: string[];
+  onChange: (v: string[]) => void; max?: number;
 }) {
   const toggle = (opt: string) => {
     if (selected.includes(opt)) {
@@ -37,39 +88,51 @@ function TagSelector({ options, selected, onChange, max }: {
     }
   };
   return (
-    <div className="flex flex-wrap gap-2">
-      {options.map(opt => (
-        <button
-          key={opt}
-          type="button"
-          onClick={() => toggle(opt)}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-            selected.includes(opt)
-              ? 'text-white'
-              : 'border border-border text-muted-foreground hover:border-foreground/30'
-          }`}
-          style={selected.includes(opt) ? { background: 'oklch(0.18 0.05 240)' } : {}}
-        >
-          {opt}
-        </button>
-      ))}
+    <div>
+      {label && (
+        <label className="block text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'oklch(0.45 0.04 240)' }}>
+          {label}
+        </label>
+      )}
+      <div className="flex flex-wrap gap-2">
+        {options.map(opt => (
+          <button
+            key={opt}
+            type="button"
+            onClick={() => toggle(opt)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+              selected.includes(opt)
+                ? 'text-white border-transparent'
+                : 'border-border text-muted-foreground hover:border-foreground/30 bg-white'
+            }`}
+            style={selected.includes(opt) ? { background: 'oklch(0.18 0.05 240)' } : {}}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+      {max && selected.length > 0 && (
+        <p className="text-xs text-muted-foreground mt-1.5">{selected.length}/{max} selected</p>
+      )}
     </div>
   );
 }
 
-function InputField({ label, value, onChange, placeholder, type = 'text' }: {
-  label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string;
+function TextareaField({ label, value, onChange, placeholder, rows = 3 }: {
+  label: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number;
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium mb-1.5" style={{ color: 'oklch(0.3 0.04 240)' }}>{label}</label>
-      <input
-        type={type}
+      <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'oklch(0.45 0.04 240)' }}>
+        {label}
+      </label>
+      <textarea
         value={value}
         onChange={e => onChange(e.target.value)}
+        rows={rows}
         placeholder={placeholder}
-        className="w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
-        style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
+        className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none transition-all resize-none bg-white"
+        style={{ border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
         onFocus={e => e.target.style.borderColor = 'oklch(0.55 0.13 30)'}
         onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
       />
@@ -78,94 +141,86 @@ function InputField({ label, value, onChange, placeholder, type = 'text' }: {
 }
 
 // ── VC Profile Form ──
-function VCForm({ data, onChange }: { data: Record<string, any>; onChange: (k: string, v: any) => void }) {
-  const { isRTL } = useLanguage();
+function VCForm({ data, onChange, isRTL }: { data: Record<string, any>; onChange: (k: string, v: any) => void; isRTL: boolean }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <InputField label={isRTL ? 'اسم الصندوق' : 'Firm name'} value={data.firmName || ''} onChange={v => onChange('firmName', v)} placeholder="Sequoia Capital" />
-        <InputField label={isRTL ? 'مسمّاك الوظيفي' : 'Your title'} value={data.title || ''} onChange={v => onChange('title', v)} placeholder="Partner" />
+        <InputField label={isRTL ? 'اسم الصندوق' : 'Firm Name'} value={data.firmName || ''} onChange={v => onChange('firmName', v)} placeholder="Sequoia Capital" required />
+        <InputField label={isRTL ? 'مسمّاك الوظيفي' : 'Your Title'} value={data.title || ''} onChange={v => onChange('title', v)} placeholder="Partner" />
       </div>
-      <div>
-        <label className="block text-sm font-medium mb-1.5" style={{ color: 'oklch(0.3 0.04 240)' }}>{isRTL ? 'الوصف' : 'Description'}</label>
-        <textarea
-          value={data.description || ''}
-          onChange={e => onChange('description', e.target.value)}
-          rows={3}
-          placeholder={isRTL ? 'صف صندوقك وتركيزه الاستثماري...' : 'Describe your fund and investment focus...'}
-          className="w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all resize-none"
-          style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-          onFocus={e => e.target.style.borderColor = 'oklch(0.55 0.13 30)'}
-          onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
-        />
-      </div>
+      <TextareaField label={isRTL ? 'الوصف' : 'Fund Description'} value={data.description || ''} onChange={v => onChange('description', v)} placeholder={isRTL ? 'صف صندوقك وتركيزه الاستثماري...' : 'Describe your fund and investment thesis...'} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <InputField label={isRTL ? 'الموقع الإلكتروني' : 'Website'} value={data.website || ''} onChange={v => onChange('website', v)} placeholder="https://sequoiacap.com" type="url" />
         <InputField label={isRTL ? 'رابط لينكد إن' : 'LinkedIn URL'} value={data.linkedinUrl || ''} onChange={v => onChange('linkedinUrl', v)} placeholder="https://linkedin.com/company/..." type="url" />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <InputField label={isRTL ? 'المدينة' : 'HQ city'} value={data.hqCity || ''} onChange={v => onChange('hqCity', v)} placeholder="San Francisco" />
-        <InputField label={isRTL ? 'الدولة' : 'HQ country'} value={data.hqCountry || ''} onChange={v => onChange('hqCountry', v)} placeholder="USA" />
+
+      <div className="border-t border-border pt-4">
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.45 0.04 240)' }}>
+          {isRTL ? 'الموقع الجغرافي' : 'Headquarters'}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <SelectField label={isRTL ? 'الدولة' : 'HQ Country'} value={data.hqCountry || ''} onChange={v => onChange('hqCountry', v)} options={COUNTRIES} placeholder={isRTL ? 'اختر الدولة' : 'Select country'} />
+          <InputField label={isRTL ? 'المدينة' : 'HQ City'} value={data.hqCity || ''} onChange={v => onChange('hqCity', v)} placeholder="San Francisco" />
+        </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <InputField label={isRTL ? 'الحد الأدنى للشيك ($K)' : 'Min check ($K)'} value={data.checkSizeMin || ''} onChange={v => onChange('checkSizeMin', v)} placeholder="100" type="number" />
-        <InputField label={isRTL ? 'الحد الأقصى للشيك ($K)' : 'Max check ($K)'} value={data.checkSizeMax || ''} onChange={v => onChange('checkSizeMax', v)} placeholder="5000" type="number" />
-        <InputField label={isRTL ? 'الأصول تحت الإدارة ($M)' : 'AUM ($M)'} value={data.aum || ''} onChange={v => onChange('aum', v)} placeholder="500" type="number" />
+
+      <div className="border-t border-border pt-4">
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.45 0.04 240)' }}>
+          {isRTL ? 'معلومات الاستثمار' : 'Investment Details'}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <SelectField label={isRTL ? 'الحد الأدنى للشيك' : 'Min Check Size'} value={data.checkSizeMin || ''} onChange={v => onChange('checkSizeMin', v)} options={CHECK_SIZES} placeholder="Min" />
+          <SelectField label={isRTL ? 'الحد الأقصى للشيك' : 'Max Check Size'} value={data.checkSizeMax || ''} onChange={v => onChange('checkSizeMax', v)} options={CHECK_SIZES} placeholder="Max" />
+          <InputField label={isRTL ? 'الأصول تحت الإدارة ($M)' : 'AUM ($M)'} value={data.aum || ''} onChange={v => onChange('aum', v)} placeholder="500" type="number" />
+        </div>
       </div>
-      <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: 'oklch(0.3 0.04 240)' }}>{isRTL ? 'مراحل الاستثمار' : 'Investment stages'}</label>
-        <TagSelector options={STAGES} selected={data.stages || []} onChange={v => onChange('stages', v)} />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: 'oklch(0.3 0.04 240)' }}>{isRTL ? 'القطاعات' : 'Sectors'}</label>
-        <TagSelector options={SECTORS} selected={data.sectors || []} onChange={v => onChange('sectors', v)} />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: 'oklch(0.3 0.04 240)' }}>{isRTL ? 'المناطق' : 'Regions'}</label>
-        <TagSelector options={REGIONS} selected={data.regions || []} onChange={v => onChange('regions', v)} />
-      </div>
-      <InputField label={isRTL ? 'المحفظة البارزة' : 'Notable portfolio (comma-separated)'} value={data.notablePortfolio || ''} onChange={v => onChange('notablePortfolio', v)} placeholder="Airbnb, Stripe, DoorDash" />
-      <InputField label={isRTL ? 'رابط التقديم' : 'Apply / contact URL'} value={data.applyUrl || ''} onChange={v => onChange('applyUrl', v)} placeholder="https://..." type="url" />
+
+      <TagSelector label={isRTL ? 'مراحل الاستثمار' : 'Investment Stages'} options={INVESTMENT_STAGES} selected={data.stages || []} onChange={v => onChange('stages', v)} />
+      <TagSelector label={isRTL ? 'القطاعات' : 'Sectors / Verticals'} options={SECTORS} selected={data.sectors || []} onChange={v => onChange('sectors', v)} />
+      <TagSelector label={isRTL ? 'المناطق الجغرافية' : 'Regions'} options={REGIONS} selected={data.regions || []} onChange={v => onChange('regions', v)} />
+
+      <InputField label={isRTL ? 'المحفظة البارزة (مفصولة بفاصلة)' : 'Notable Portfolio (comma-separated)'} value={data.notablePortfolio || ''} onChange={v => onChange('notablePortfolio', v)} placeholder="Airbnb, Stripe, DoorDash" />
+      <InputField label={isRTL ? 'رابط التقديم' : 'Apply / Contact URL'} value={data.applyUrl || ''} onChange={v => onChange('applyUrl', v)} placeholder="https://..." type="url" />
     </div>
   );
 }
 
 // ── Angel Profile Form ──
-function AngelForm({ data, onChange }: { data: Record<string, any>; onChange: (k: string, v: any) => void }) {
-  const { isRTL } = useLanguage();
+function AngelForm({ data, onChange, isRTL }: { data: Record<string, any>; onChange: (k: string, v: any) => void; isRTL: boolean }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <InputField label={isRTL ? 'الاسم المعروض' : 'Display name'} value={data.displayName || ''} onChange={v => onChange('displayName', v)} placeholder="John Smith" />
-        <InputField label={isRTL ? 'الموقع' : 'Location'} value={data.location || ''} onChange={v => onChange('location', v)} placeholder="New York, USA" />
+        <InputField label={isRTL ? 'الاسم المعروض' : 'Display Name'} value={data.displayName || ''} onChange={v => onChange('displayName', v)} placeholder="John Smith" required />
+        <InputField label={isRTL ? 'المسمى الوظيفي' : 'Title / Background'} value={data.title || ''} onChange={v => onChange('title', v)} placeholder="Ex-Founder, Serial Angel" />
       </div>
-      <div>
-        <label className="block text-sm font-medium mb-1.5" style={{ color: 'oklch(0.3 0.04 240)' }}>{isRTL ? 'نبذة شخصية' : 'Bio'}</label>
-        <textarea
-          value={data.bio || ''}
-          onChange={e => onChange('bio', e.target.value)}
-          rows={3}
-          placeholder={isRTL ? 'أخبرنا عن خلفيتك ومجالات اهتمامك...' : 'Tell us about your background and investment interests...'}
-          className="w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all resize-none"
-          style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-          onFocus={e => e.target.style.borderColor = 'oklch(0.55 0.13 30)'}
-          onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
-        />
+      <TextareaField label={isRTL ? 'نبذة شخصية' : 'Bio'} value={data.bio || ''} onChange={v => onChange('bio', v)} placeholder={isRTL ? 'أخبرنا عن خلفيتك ومجالات اهتمامك...' : 'Tell us about your background and investment interests...'} />
+
+      <div className="border-t border-border pt-4">
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.45 0.04 240)' }}>
+          {isRTL ? 'الموقع والتواصل' : 'Location & Contact'}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <SelectField label={isRTL ? 'الدولة' : 'Country'} value={data.country || ''} onChange={v => onChange('country', v)} options={COUNTRIES} placeholder={isRTL ? 'اختر الدولة' : 'Select country'} />
+          <InputField label={isRTL ? 'المدينة' : 'City'} value={data.city || ''} onChange={v => onChange('city', v)} placeholder="Dubai" />
+        </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <InputField label={isRTL ? 'الحد الأدنى للشيك ($K)' : 'Min check ($K)'} value={data.checkSizeMin || ''} onChange={v => onChange('checkSizeMin', v)} placeholder="10" type="number" />
-        <InputField label={isRTL ? 'الحد الأقصى للشيك ($K)' : 'Max check ($K)'} value={data.checkSizeMax || ''} onChange={v => onChange('checkSizeMax', v)} placeholder="250" type="number" />
-        <InputField label={isRTL ? 'عدد الاستثمارات' : 'Total investments'} value={data.totalInvestments || ''} onChange={v => onChange('totalInvestments', v)} placeholder="15" type="number" />
+
+      <div className="border-t border-border pt-4">
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.45 0.04 240)' }}>
+          {isRTL ? 'معلومات الاستثمار' : 'Investment Details'}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <SelectField label={isRTL ? 'الحد الأدنى للشيك' : 'Min Check Size'} value={data.checkSizeMin || ''} onChange={v => onChange('checkSizeMin', v)} options={CHECK_SIZES} placeholder="Min" />
+          <SelectField label={isRTL ? 'الحد الأقصى للشيك' : 'Max Check Size'} value={data.checkSizeMax || ''} onChange={v => onChange('checkSizeMax', v)} options={CHECK_SIZES} placeholder="Max" />
+          <InputField label={isRTL ? 'عدد الاستثمارات' : 'Total Investments'} value={data.totalInvestments || ''} onChange={v => onChange('totalInvestments', v)} placeholder="15" type="number" />
+        </div>
       </div>
-      <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: 'oklch(0.3 0.04 240)' }}>{isRTL ? 'القطاعات المفضلة' : 'Preferred sectors'}</label>
-        <TagSelector options={SECTORS} selected={data.sectors || []} onChange={v => onChange('sectors', v)} />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: 'oklch(0.3 0.04 240)' }}>{isRTL ? 'المناطق' : 'Regions'}</label>
-        <TagSelector options={REGIONS} selected={data.regions || []} onChange={v => onChange('regions', v)} />
-      </div>
-      <InputField label={isRTL ? 'الاستثمارات البارزة' : 'Notable investments (comma-separated)'} value={data.notableInvestments || ''} onChange={v => onChange('notableInvestments', v)} placeholder="Uber, Figma, Notion" />
+
+      <TagSelector label={isRTL ? 'مراحل الاستثمار المفضلة' : 'Preferred Stages'} options={INVESTMENT_STAGES} selected={data.stages || []} onChange={v => onChange('stages', v)} />
+      <TagSelector label={isRTL ? 'القطاعات المفضلة' : 'Preferred Sectors'} options={SECTORS} selected={data.sectors || []} onChange={v => onChange('sectors', v)} />
+      <TagSelector label={isRTL ? 'المناطق' : 'Regions'} options={REGIONS} selected={data.regions || []} onChange={v => onChange('regions', v)} />
+
+      <InputField label={isRTL ? 'الاستثمارات البارزة (مفصولة بفاصلة)' : 'Notable Investments (comma-separated)'} value={data.notableInvestments || ''} onChange={v => onChange('notableInvestments', v)} placeholder="Uber, Figma, Notion" />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <InputField label={isRTL ? 'رابط لينكد إن' : 'LinkedIn URL'} value={data.linkedinUrl || ''} onChange={v => onChange('linkedinUrl', v)} placeholder="https://linkedin.com/in/..." type="url" />
         <InputField label={isRTL ? 'رابط AngelList' : 'AngelList URL'} value={data.angellistUrl || ''} onChange={v => onChange('angellistUrl', v)} placeholder="https://angel.co/u/..." type="url" />
@@ -175,52 +230,43 @@ function AngelForm({ data, onChange }: { data: Record<string, any>; onChange: (k
 }
 
 // ── Lawyer Profile Form ──
-function LawyerForm({ data, onChange }: { data: Record<string, any>; onChange: (k: string, v: any) => void }) {
-  const { isRTL } = useLanguage();
-  const SPECS = ['Incorporation', 'Term Sheets', 'Cap Table', 'IP/Patents', 'Employment', 'Fundraising Docs', 'M&A', 'SAFE/Convertible Notes', 'Equity Compensation', 'International'];
-  const LANGS = ['English', 'Arabic', 'French', 'Spanish', 'German', 'Mandarin', 'Hindi', 'Portuguese'];
+function LawyerForm({ data, onChange, isRTL }: { data: Record<string, any>; onChange: (k: string, v: any) => void; isRTL: boolean }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <InputField label={isRTL ? 'اسم المكتب (اختياري)' : 'Firm name (optional)'} value={data.firmName || ''} onChange={v => onChange('firmName', v)} placeholder="Cooley LLP" />
-        <InputField label={isRTL ? 'مسمّاك الوظيفي' : 'Your title'} value={data.title || ''} onChange={v => onChange('title', v)} placeholder="Partner" />
+        <InputField label={isRTL ? 'اسم المكتب (اختياري)' : 'Firm Name (optional)'} value={data.firmName || ''} onChange={v => onChange('firmName', v)} placeholder="Cooley LLP" />
+        <InputField label={isRTL ? 'مسمّاك الوظيفي' : 'Your Title'} value={data.title || ''} onChange={v => onChange('title', v)} placeholder="Partner" />
       </div>
-      <div>
-        <label className="block text-sm font-medium mb-1.5" style={{ color: 'oklch(0.3 0.04 240)' }}>{isRTL ? 'نبذة' : 'Bio'}</label>
-        <textarea
-          value={data.bio || ''}
-          onChange={e => onChange('bio', e.target.value)}
-          rows={3}
-          placeholder={isRTL ? 'صف خبرتك في العمل مع الشركات الناشئة...' : 'Describe your experience working with startups...'}
-          className="w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all resize-none"
-          style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-          onFocus={e => e.target.style.borderColor = 'oklch(0.55 0.13 30)'}
-          onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
-        />
+      <TextareaField label={isRTL ? 'نبذة' : 'Bio'} value={data.bio || ''} onChange={v => onChange('bio', v)} placeholder={isRTL ? 'صف خبرتك في العمل مع الشركات الناشئة...' : 'Describe your experience working with startups...'} />
+
+      <div className="border-t border-border pt-4">
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.45 0.04 240)' }}>
+          {isRTL ? 'الموقع والاختصاص القانوني' : 'Location & Jurisdiction'}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <SelectField label={isRTL ? 'الدولة' : 'Country'} value={data.country || ''} onChange={v => onChange('country', v)} options={COUNTRIES} placeholder={isRTL ? 'اختر الدولة' : 'Select country'} />
+          <InputField label={isRTL ? 'المدينة' : 'City'} value={data.city || ''} onChange={v => onChange('city', v)} placeholder="Dubai" />
+        </div>
+        <div className="mt-4">
+          <SelectField label={isRTL ? 'الاختصاص القانوني الرئيسي' : 'Primary Jurisdiction'} value={data.jurisdiction || ''} onChange={v => onChange('jurisdiction', v)} options={JURISDICTIONS} placeholder={isRTL ? 'اختر الاختصاص القانوني' : 'Select jurisdiction'} />
+        </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <InputField label={isRTL ? 'المدينة' : 'City'} value={data.city || ''} onChange={v => onChange('city', v)} placeholder="Dubai" />
-        <InputField label={isRTL ? 'الدولة' : 'Country'} value={data.country || ''} onChange={v => onChange('country', v)} placeholder="UAE" />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: 'oklch(0.3 0.04 240)' }}>{isRTL ? 'التخصصات' : 'Specializations'}</label>
-        <TagSelector options={SPECS} selected={data.specializations || []} onChange={v => onChange('specializations', v)} />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: 'oklch(0.3 0.04 240)' }}>{isRTL ? 'اللغات' : 'Languages spoken'}</label>
-        <TagSelector options={LANGS} selected={data.languages || []} onChange={v => onChange('languages', v)} />
-      </div>
+
+      <TagSelector label={isRTL ? 'التخصصات القانونية' : 'Legal Specializations'} options={LEGAL_SPECIALIZATIONS} selected={data.specializations || []} onChange={v => onChange('specializations', v)} />
+      <TagSelector label={isRTL ? 'المناطق التي تخدمها' : 'Regions Served'} options={REGIONS} selected={data.regions || []} onChange={v => onChange('regions', v)} />
+      <TagSelector label={isRTL ? 'اللغات' : 'Languages Spoken'} options={LANGS} selected={data.languages || []} onChange={v => onChange('languages', v)} />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <InputField label={isRTL ? 'الموقع الإلكتروني' : 'Website'} value={data.website || ''} onChange={v => onChange('website', v)} placeholder="https://cooley.com" type="url" />
-        <InputField label={isRTL ? 'البريد الإلكتروني للتواصل' : 'Contact email'} value={data.contactEmail || ''} onChange={v => onChange('contactEmail', v)} placeholder="john@cooley.com" type="email" />
+        <InputField label={isRTL ? 'البريد الإلكتروني للتواصل' : 'Contact Email'} value={data.contactEmail || ''} onChange={v => onChange('contactEmail', v)} placeholder="john@cooley.com" type="email" />
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/40 border border-border">
         <input
           type="checkbox"
           id="freeConsult"
           checked={data.offersFreeConsult || false}
           onChange={e => onChange('offersFreeConsult', e.target.checked)}
-          className="w-4 h-4 rounded"
+          className="w-4 h-4 rounded accent-foreground"
         />
         <label htmlFor="freeConsult" className="text-sm text-muted-foreground cursor-pointer">
           {isRTL ? 'أقدم استشارة أولية مجانية للشركات الناشئة' : 'I offer a free initial consultation for startups'}
@@ -231,66 +277,49 @@ function LawyerForm({ data, onChange }: { data: Record<string, any>; onChange: (
 }
 
 // ── Startup Profile Form ──
-function StartupForm({ data, onChange }: { data: Record<string, any>; onChange: (k: string, v: any) => void }) {
-  const { isRTL } = useLanguage();
+function StartupForm({ data, onChange, isRTL }: { data: Record<string, any>; onChange: (k: string, v: any) => void; isRTL: boolean }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <InputField label={isRTL ? 'اسم الشركة' : 'Company name'} value={data.companyName || ''} onChange={v => onChange('companyName', v)} placeholder="Acme Inc." />
-        <InputField label={isRTL ? 'الشعار' : 'Tagline'} value={data.tagline || ''} onChange={v => onChange('tagline', v)} placeholder="One sentence about your startup" />
+        <InputField label={isRTL ? 'اسم الشركة' : 'Company Name'} value={data.companyName || ''} onChange={v => onChange('companyName', v)} placeholder="Acme Inc." required />
+        <InputField label={isRTL ? 'الشعار / الوصف المختصر' : 'Tagline'} value={data.tagline || ''} onChange={v => onChange('tagline', v)} placeholder="One sentence about your startup" />
       </div>
-      <div>
-        <label className="block text-sm font-medium mb-1.5" style={{ color: 'oklch(0.3 0.04 240)' }}>{isRTL ? 'الوصف' : 'Description'}</label>
-        <textarea
-          value={data.description || ''}
-          onChange={e => onChange('description', e.target.value)}
-          rows={3}
-          placeholder={isRTL ? 'صف ما تبنيه ومن تخدم...' : 'Describe what you\'re building and who you serve...'}
-          className="w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all resize-none"
-          style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-          onFocus={e => e.target.style.borderColor = 'oklch(0.55 0.13 30)'}
-          onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
-        />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: 'oklch(0.3 0.04 240)' }}>{isRTL ? 'القطاع' : 'Sector'}</label>
-          <select
-            value={data.sector || ''}
-            onChange={e => onChange('sector', e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
-            style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-          >
-            <option value="">{isRTL ? 'اختر...' : 'Select...'}</option>
-            {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
+      <TextareaField label={isRTL ? 'الوصف' : 'Description'} value={data.description || ''} onChange={v => onChange('description', v)} placeholder={isRTL ? 'صف ما تبنيه ومن تخدم...' : "Describe what you're building and who you serve..."} />
+
+      <div className="border-t border-border pt-4">
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.45 0.04 240)' }}>
+          {isRTL ? 'تفاصيل الشركة' : 'Company Details'}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <SelectField label={isRTL ? 'القطاع / الصناعة' : 'Sector / Vertical'} value={data.sector || ''} onChange={v => onChange('sector', v)} options={SECTORS} placeholder={isRTL ? 'اختر القطاع' : 'Select sector'} required />
+          <SelectField label={isRTL ? 'المرحلة' : 'Stage'} value={data.stage || ''} onChange={v => onChange('stage', v)} options={STARTUP_STAGES} placeholder={isRTL ? 'اختر المرحلة' : 'Select stage'} />
+          <InputField label={isRTL ? 'سنة التأسيس' : 'Founded Year'} value={data.foundedYear || ''} onChange={v => onChange('foundedYear', v)} placeholder="2024" type="number" />
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: 'oklch(0.3 0.04 240)' }}>{isRTL ? 'المرحلة' : 'Stage'}</label>
-          <select
-            value={data.stage || ''}
-            onChange={e => onChange('stage', e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
-            style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-          >
-            <option value="">{isRTL ? 'اختر...' : 'Select...'}</option>
-            {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
+      </div>
+
+      <div className="border-t border-border pt-4">
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.45 0.04 240)' }}>
+          {isRTL ? 'الموقع والفريق' : 'Location & Team'}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <SelectField label={isRTL ? 'الدولة' : 'Country'} value={data.country || ''} onChange={v => onChange('country', v)} options={COUNTRIES} placeholder={isRTL ? 'اختر الدولة' : 'Select country'} />
+          <InputField label={isRTL ? 'المدينة' : 'City'} value={data.city || ''} onChange={v => onChange('city', v)} placeholder="Dubai" />
+          <InputField label={isRTL ? 'حجم الفريق' : 'Team Size'} value={data.teamSize || ''} onChange={v => onChange('teamSize', v)} placeholder="5" type="number" />
         </div>
-        <InputField label={isRTL ? 'سنة التأسيس' : 'Founded year'} value={data.foundedYear || ''} onChange={v => onChange('foundedYear', v)} placeholder="2024" type="number" />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <InputField label={isRTL ? 'الدولة' : 'Country'} value={data.country || ''} onChange={v => onChange('country', v)} placeholder="UAE" />
-        <InputField label={isRTL ? 'المدينة' : 'City'} value={data.city || ''} onChange={v => onChange('city', v)} placeholder="Dubai" />
-        <InputField label={isRTL ? 'حجم الفريق' : 'Team size'} value={data.teamSize || ''} onChange={v => onChange('teamSize', v)} placeholder="5" type="number" />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <InputField label={isRTL ? 'التمويل المستهدف ($K)' : 'Target raise ($K)'} value={data.targetRaise || ''} onChange={v => onChange('targetRaise', v)} placeholder="500" type="number" />
-        <InputField label={isRTL ? 'الموقع الإلكتروني' : 'Website'} value={data.website || ''} onChange={v => onChange('website', v)} placeholder="https://acme.io" type="url" />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <InputField label={isRTL ? 'رابط لينكد إن' : 'LinkedIn URL'} value={data.linkedinUrl || ''} onChange={v => onChange('linkedinUrl', v)} placeholder="https://linkedin.com/company/..." type="url" />
-        <InputField label={isRTL ? 'رابط تويتر / X' : 'Twitter / X URL'} value={data.twitterUrl || ''} onChange={v => onChange('twitterUrl', v)} placeholder="https://twitter.com/..." type="url" />
+
+      <div className="border-t border-border pt-4">
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.45 0.04 240)' }}>
+          {isRTL ? 'التمويل والتواصل' : 'Funding & Links'}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <SelectField label={isRTL ? 'التمويل المستهدف' : 'Target Raise'} value={data.targetRaise || ''} onChange={v => onChange('targetRaise', v)} options={CHECK_SIZES} placeholder={isRTL ? 'اختر النطاق' : 'Select range'} />
+          <InputField label={isRTL ? 'الموقع الإلكتروني' : 'Website'} value={data.website || ''} onChange={v => onChange('website', v)} placeholder="https://acme.io" type="url" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <InputField label={isRTL ? 'رابط لينكد إن' : 'LinkedIn URL'} value={data.linkedinUrl || ''} onChange={v => onChange('linkedinUrl', v)} placeholder="https://linkedin.com/company/..." type="url" />
+          <InputField label={isRTL ? 'رابط تويتر / X' : 'Twitter / X URL'} value={data.twitterUrl || ''} onChange={v => onChange('twitterUrl', v)} placeholder="https://twitter.com/..." type="url" />
+        </div>
       </div>
     </div>
   );
@@ -302,16 +331,22 @@ export default function Onboarding() {
   const utils = trpc.useUtils();
   const { t, isRTL } = useLanguage();
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [userType, setUserType] = useState<UserType | null>(null);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [isPublic, setIsPublic] = useState(true);
   const [submitted, setSubmitted] = useState(false);
 
-  const submitVcKyc = trpc.kyc.submitVcKyc.useMutation({ onSuccess: async () => { await utils.auth.me.invalidate(); setSubmitted(true); setTimeout(() => navigate(APP_PATH), 2000); } });
-  const submitAngelKyc = trpc.kyc.submitAngelKyc.useMutation({ onSuccess: async () => { await utils.auth.me.invalidate(); setSubmitted(true); setTimeout(() => navigate(APP_PATH), 2000); } });
-  const submitLawyerKyc = trpc.kyc.submitLawyerKyc.useMutation({ onSuccess: async () => { await utils.auth.me.invalidate(); setSubmitted(true); setTimeout(() => navigate(APP_PATH), 2000); } });
-  const submitStartupKyc = trpc.kyc.submitStartupKyc.useMutation({ onSuccess: async () => { await utils.auth.me.invalidate(); setSubmitted(true); setTimeout(() => navigate(APP_PATH), 2000); } });
+  const onSuccess = async () => {
+    await utils.auth.me.invalidate();
+    setSubmitted(true);
+    setTimeout(() => navigate(APP_PATH), 2000);
+  };
+
+  const submitVcKyc = trpc.kyc.submitVcKyc.useMutation({ onSuccess });
+  const submitAngelKyc = trpc.kyc.submitAngelKyc.useMutation({ onSuccess });
+  const submitLawyerKyc = trpc.kyc.submitLawyerKyc.useMutation({ onSuccess });
+  const submitStartupKyc = trpc.kyc.submitStartupKyc.useMutation({ onSuccess });
   const skipKyc = trpc.kyc.skipKyc.useMutation({ onSuccess: async () => { await utils.auth.me.invalidate(); navigate(APP_PATH); } });
 
   const isPending = submitVcKyc.isPending || submitAngelKyc.isPending || submitLawyerKyc.isPending || submitStartupKyc.isPending;
@@ -350,10 +385,10 @@ export default function Onboarding() {
       });
     } else if (userType === 'angel') {
       submitAngelKyc.mutate({
-        displayName: fd.displayName || fd.name || 'Anonymous',
+        displayName: fd.displayName || 'Anonymous',
         title: fd.title,
         bio: fd.bio,
-        location: fd.location,
+        location: fd.city && fd.country ? `${fd.city}, ${fd.country}` : fd.city || fd.country,
         regions: fd.regions || [],
         stages: fd.stages || [],
         sectors: fd.sectors || [],
@@ -366,7 +401,7 @@ export default function Onboarding() {
       });
     } else if (userType === 'venture_lawyer') {
       submitLawyerKyc.mutate({
-        displayName: fd.displayName || fd.name || 'Anonymous',
+        displayName: fd.displayName || fd.firmName || 'Anonymous',
         firmName: fd.firmName,
         title: fd.title,
         bio: fd.bio,
@@ -387,7 +422,7 @@ export default function Onboarding() {
         description: fd.description,
         website: fd.website,
         sector: fd.sector,
-        stage: 'idea',
+        stage: fd.stage || 'idea',
         country: fd.country,
         city: fd.city,
         foundedYear: toNum(fd.foundedYear),
@@ -416,7 +451,7 @@ export default function Onboarding() {
           <p className="text-sm text-muted-foreground">
             {isRTL
               ? 'أنت الآن مدرج في قاعدة بيانات مجتمعنا. جارٍ التوجيه إلى التطبيق...'
-              : 'You\'re now listed in our community database. Redirecting to the app...'}
+              : "You're now listed in our community database. Redirecting to the app..."}
           </p>
         </div>
       </div>
@@ -475,7 +510,7 @@ export default function Onboarding() {
                     key={id}
                     onClick={() => setUserType(id)}
                     className={`flex items-start gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
-                      userType === id ? 'border-transparent shadow-md' : 'border-border hover:border-foreground/20'
+                      userType === id ? 'border-transparent shadow-md' : 'border-border hover:border-foreground/20 bg-white'
                     }`}
                     style={userType === id ? { background: color + '10', borderColor: color } : {}}
                   >
@@ -483,7 +518,7 @@ export default function Onboarding() {
                       style={{ background: color + '18' }}>
                       <Icon className="w-5 h-5" style={{ color }} />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <div className="font-semibold text-sm" style={{ color: 'oklch(0.18 0.05 240)' }}>
                         {t(labelKey as any)}
                       </div>
@@ -492,7 +527,7 @@ export default function Onboarding() {
                       </div>
                     </div>
                     {userType === id && (
-                      <div className="ml-auto shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
+                      <div className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
                         style={{ background: color }}>
                         <Check className="w-3 h-3 text-white" />
                       </div>
@@ -525,7 +560,7 @@ export default function Onboarding() {
         {/* Step 2: Profile form */}
         {step === 2 && userType && (
           <div>
-            <div className="mb-8">
+            <div className="mb-6">
               <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'oklch(0.18 0.05 240)' }}>
                 {t('kycStep2')}
               </h1>
@@ -536,18 +571,17 @@ export default function Onboarding() {
               </p>
             </div>
 
-            {/* Error */}
             {mutationError && (
               <div className="mb-4 p-3.5 rounded-xl text-sm" style={{ background: 'oklch(0.97 0.02 30)', border: '1px solid oklch(0.85 0.06 30)', color: 'oklch(0.45 0.12 30)' }}>
                 {mutationError.message}
               </div>
             )}
 
-            <div className="p-6 rounded-2xl border border-border bg-white mb-6">
-              {userType === 'vc' && <VCForm data={formData} onChange={handleFieldChange} />}
-              {userType === 'angel' && <AngelForm data={formData} onChange={handleFieldChange} />}
-              {userType === 'venture_lawyer' && <LawyerForm data={formData} onChange={handleFieldChange} />}
-              {(userType === 'startup' || userType === 'other') && <StartupForm data={formData} onChange={handleFieldChange} />}
+            <div className="p-6 rounded-2xl border border-border bg-white/60 backdrop-blur-sm mb-5 shadow-sm">
+              {userType === 'vc' && <VCForm data={formData} onChange={handleFieldChange} isRTL={isRTL} />}
+              {userType === 'angel' && <AngelForm data={formData} onChange={handleFieldChange} isRTL={isRTL} />}
+              {userType === 'venture_lawyer' && <LawyerForm data={formData} onChange={handleFieldChange} isRTL={isRTL} />}
+              {(userType === 'startup' || userType === 'other') && <StartupForm data={formData} onChange={handleFieldChange} isRTL={isRTL} />}
             </div>
 
             {/* Visibility toggle */}

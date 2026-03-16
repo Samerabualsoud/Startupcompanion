@@ -1,4 +1,3 @@
-import { useLanguage } from '@/contexts/LanguageContext';
 /**
  * AI Investor Email Writer
  * Generates personalized cold outreach emails to investors
@@ -6,16 +5,16 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Copy, Check, Loader2, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-
-const STAGES = ['Pre-seed', 'Seed', 'Series A', 'Series B'];
-const SECTORS = ['FinTech', 'HealthTech', 'EdTech', 'E-commerce', 'SaaS', 'AI/ML', 'CleanTech', 'AgriTech', 'Other'];
+import { SECTORS, STARTUP_STAGES, CHECK_SIZES } from '@shared/dropdowns';
 
 type EmailResult = {
   subjectLine: string;
@@ -94,17 +93,22 @@ export default function AIInvestorEmail() {
                 <Input value={form.founderName} onChange={e => setForm(f => ({ ...f, founderName: e.target.value }))} placeholder="e.g. Ahmed Al-Rashid" className="text-sm" />
               </div>
               <div>
-                <Label className="text-xs font-semibold mb-1.5 block">Sector *</Label>
-                <select value={form.sector} onChange={e => setForm(f => ({ ...f, sector: e.target.value }))} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
-                  <option value="">Select…</option>
-                  {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
+                <Label className="text-xs font-semibold mb-1.5 block">Sector / Vertical *</Label>
+                <Select value={form.sector} onValueChange={v => setForm(f => ({ ...f, sector: v }))}>
+                  <SelectTrigger className="text-sm h-9"><SelectValue placeholder="Select sector…" /></SelectTrigger>
+                  <SelectContent className="max-h-64 overflow-y-auto">
+                    {SECTORS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label className="text-xs font-semibold mb-1.5 block">Stage</Label>
-                <select value={form.stage} onChange={e => setForm(f => ({ ...f, stage: e.target.value }))} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
-                  {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
+                <Select value={form.stage} onValueChange={v => setForm(f => ({ ...f, stage: v }))}>
+                  <SelectTrigger className="text-sm h-9"><SelectValue placeholder="Select stage…" /></SelectTrigger>
+                  <SelectContent>
+                    {STARTUP_STAGES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="md:col-span-2">
                 <Label className="text-xs font-semibold mb-1.5 block">One-liner pitch *</Label>
@@ -116,7 +120,13 @@ export default function AIInvestorEmail() {
               </div>
               <div>
                 <Label className="text-xs font-semibold mb-1.5 block">Raise Amount (optional)</Label>
-                <Input value={form.askAmount} onChange={e => setForm(f => ({ ...f, askAmount: e.target.value }))} placeholder="e.g. $500K, $2M" className="text-sm" />
+                <Select value={form.askAmount} onValueChange={v => setForm(f => ({ ...f, askAmount: v }))}>
+                  <SelectTrigger className="text-sm h-9"><SelectValue placeholder="Select amount…" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Not specified</SelectItem>
+                    {CHECK_SIZES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>

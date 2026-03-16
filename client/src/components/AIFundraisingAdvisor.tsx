@@ -12,6 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Streamdown } from 'streamdown';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SECTORS, STARTUP_STAGES, COUNTRIES } from '@shared/dropdowns';
 
 type Message = { role: 'user' | 'assistant'; content: string };
 
@@ -98,9 +100,24 @@ export default function AIFundraisingAdvisor() {
               <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Optional: Tell me about your startup for personalized advice</div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 <Input value={startupContext.name} onChange={e => setStartupContext(c => ({ ...c, name: e.target.value }))} placeholder="Company name" className="text-xs h-7" />
-                <Input value={startupContext.sector} onChange={e => setStartupContext(c => ({ ...c, sector: e.target.value }))} placeholder="Sector (e.g. FinTech)" className="text-xs h-7" />
-                <Input value={startupContext.stage} onChange={e => setStartupContext(c => ({ ...c, stage: e.target.value }))} placeholder="Stage (e.g. Seed)" className="text-xs h-7" />
-                <Input value={startupContext.country} onChange={e => setStartupContext(c => ({ ...c, country: e.target.value }))} placeholder="Country (e.g. UAE)" className="text-xs h-7" />
+                <Select value={startupContext.sector} onValueChange={v => setStartupContext(c => ({ ...c, sector: v }))}>
+                  <SelectTrigger className="text-xs h-7"><SelectValue placeholder="Sector…" /></SelectTrigger>
+                  <SelectContent className="max-h-64 overflow-y-auto">
+                    {SECTORS.map(s => <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={startupContext.stage} onValueChange={v => setStartupContext(c => ({ ...c, stage: v }))}>
+                  <SelectTrigger className="text-xs h-7"><SelectValue placeholder="Stage…" /></SelectTrigger>
+                  <SelectContent>
+                    {STARTUP_STAGES.map(s => <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={startupContext.country} onValueChange={v => setStartupContext(c => ({ ...c, country: v }))}>
+                  <SelectTrigger className="text-xs h-7"><SelectValue placeholder="Country…" /></SelectTrigger>
+                  <SelectContent className="max-h-64 overflow-y-auto">
+                    {COUNTRIES.map(c => <SelectItem key={c} value={c} className="text-xs">{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </motion.div>

@@ -117,3 +117,19 @@
 - [x] Add Arabic translations for all 6 AI tools (i18n.ts)
 - [x] All AI components use useLanguage() hook
 - [x] 28 tests passing, 0 TypeScript errors
+
+## UI/UX Improvements & Dropdowns (Round 8)
+- [x] Create shared dropdown constants file (sectors, stages, jurisdictions, countries, check sizes)
+- [x] Update KYC onboarding wizard with proper dropdowns
+- [x] Update AI Market Research with sector/region dropdowns
+- [x] Update AI Due Diligence with stage/sector dropdowns
+- [x] Update AI Investor Email Writer with sector/stage dropdowns
+- [x] Update AI Co-founder Agreement with jurisdiction/role dropdowns
+- [x] Rebuild admin panel with stats cards, better tables, verification workflow
+- [x] Polish overall UI/UX: cards, spacing, typography, loading/empty states
+- [x] InvestorCRM sector/stage focus dropdowns
+- [x] StartupProfile sector/country dropdowns
+- [x] AIFundraisingAdvisor sector/stage/country dropdowns
+- [x] FeasibilityEvaluator country dropdown
+- [x] LandingPage hero and CTA section polish
+- [x] Run tests and save checkpoint (28 tests passing, 0 TS errors)

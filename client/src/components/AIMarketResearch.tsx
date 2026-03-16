@@ -1,4 +1,3 @@
-import { useLanguage } from '@/contexts/LanguageContext';
 /**
  * AI Market Research Tool
  * Generates comprehensive market research reports using AI
@@ -16,13 +15,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-
-const SECTORS = [
-  'FinTech', 'HealthTech', 'EdTech', 'E-commerce', 'SaaS', 'AI/ML',
-  'CleanTech', 'AgriTech', 'PropTech', 'LegalTech', 'InsurTech', 'FoodTech',
-  'Logistics', 'Cybersecurity', 'Web3/Blockchain', 'Gaming', 'Media', 'Other'
-];
+import { useLanguage } from '@/contexts/LanguageContext';
+import { SECTORS, REGIONS } from '@shared/dropdowns';
 
 type ResearchResult = {
   executiveSummary: string;
@@ -44,7 +40,7 @@ export default function AIMarketResearch() {
     sector: '',
     targetMarket: '',
     productDescription: '',
-    geography: 'Global',
+    geography: '',
   });
   const [result, setResult] = useState<ResearchResult | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>('marketSize');
@@ -135,15 +131,15 @@ export default function AIMarketResearch() {
               />
             </div>
             <div>
-              <Label className="text-xs font-semibold text-foreground mb-1.5 block">Sector *</Label>
-              <select
-                value={form.sector}
-                onChange={e => setForm(f => ({ ...f, sector: e.target.value }))}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
-              >
-                <option value="">Select sector…</option>
-                {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <Label className="text-xs font-semibold text-foreground mb-1.5 block">Sector / Vertical *</Label>
+              <Select value={form.sector} onValueChange={v => setForm(f => ({ ...f, sector: v }))}>
+                <SelectTrigger className="text-sm h-9">
+                  <SelectValue placeholder="Select sector…" />
+                </SelectTrigger>
+                <SelectContent className="max-h-64 overflow-y-auto">
+                  {SECTORS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label className="text-xs font-semibold text-foreground mb-1.5 block">Target Market *</Label>
@@ -155,13 +151,16 @@ export default function AIMarketResearch() {
               />
             </div>
             <div>
-              <Label className="text-xs font-semibold text-foreground mb-1.5 block">Geography</Label>
-              <Input
-                placeholder="e.g. MENA, Global, Southeast Asia"
-                value={form.geography}
-                onChange={e => setForm(f => ({ ...f, geography: e.target.value }))}
-                className="text-sm"
-              />
+              <Label className="text-xs font-semibold text-foreground mb-1.5 block">Geography / Region</Label>
+              <Select value={form.geography} onValueChange={v => setForm(f => ({ ...f, geography: v }))}>
+                <SelectTrigger className="text-sm h-9">
+                  <SelectValue placeholder="Select region…" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Global">Global</SelectItem>
+                  {REGIONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div>

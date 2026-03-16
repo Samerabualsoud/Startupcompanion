@@ -1,4 +1,3 @@
-import { useLanguage } from '@/contexts/LanguageContext';
 /**
  * AI Term Sheet Analyzer
  * Analyzes term sheets and explains clauses in plain English
@@ -12,9 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-
-const STAGES = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+'];
+import { useLanguage } from '@/contexts/LanguageContext';
+import { STARTUP_STAGES } from '@shared/dropdowns';
 
 type KeyTerm = {
   term: string; value: string; plainEnglish: string;
@@ -98,17 +98,23 @@ export default function AITermSheetAnalyzer() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label className="text-xs font-semibold mb-1.5 block">Company Stage</Label>
-              <select value={companyStage} onChange={e => setCompanyStage(e.target.value)} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
-                {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <Select value={companyStage} onValueChange={setCompanyStage}>
+                <SelectTrigger className="text-sm h-9"><SelectValue placeholder="Select stage…" /></SelectTrigger>
+                <SelectContent>
+                  {STARTUP_STAGES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label className="text-xs font-semibold mb-1.5 block">Your Experience Level</Label>
-              <select value={founderExperience} onChange={e => setFounderExperience(e.target.value as any)} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
-                <option value="first-time">First-time Founder</option>
-                <option value="experienced">Experienced Founder</option>
-                <option value="serial">Serial Entrepreneur</option>
-              </select>
+              <Select value={founderExperience} onValueChange={v => setFounderExperience(v as any)}>
+                <SelectTrigger className="text-sm h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="first-time">First-time Founder</SelectItem>
+                  <SelectItem value="experienced">Experienced Founder</SelectItem>
+                  <SelectItem value="serial">Serial Entrepreneur</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

@@ -1,4 +1,3 @@
-import { useLanguage } from '@/contexts/LanguageContext';
 /**
  * AI Due Diligence Checklist Tool
  * Generates customized due diligence checklists for startups
@@ -16,13 +15,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-
-const STAGES = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+'];
-const SECTORS = [
-  'FinTech', 'HealthTech', 'EdTech', 'E-commerce', 'SaaS', 'AI/ML',
-  'CleanTech', 'AgriTech', 'PropTech', 'LegalTech', 'Other'
-];
+import { useLanguage } from '@/contexts/LanguageContext';
+import { SECTORS, STARTUP_STAGES } from '@shared/dropdowns';
 
 type DDItem = { item: string; status: string; notes: string; redFlag: boolean };
 type DDCategory = { category: string; priority: string; items: DDItem[] };
@@ -35,7 +31,7 @@ type DDResult = {
 };
 
 export default function AIDueDiligence() {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const [form, setForm] = useState({ companyName: '', sector: '', stage: 'Seed', description: '' });
   const [result, setResult] = useState<DDResult | null>(null);
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
@@ -110,17 +106,22 @@ export default function AIDueDiligence() {
               <Input value={form.companyName} onChange={e => setForm(f => ({ ...f, companyName: e.target.value }))} placeholder="e.g. Acme Inc." className="text-sm" />
             </div>
             <div>
-              <Label className="text-xs font-semibold mb-1.5 block">Sector *</Label>
-              <select value={form.sector} onChange={e => setForm(f => ({ ...f, sector: e.target.value }))} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
-                <option value="">Select…</option>
-                {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <Label className="text-xs font-semibold mb-1.5 block">Sector / Vertical *</Label>
+              <Select value={form.sector} onValueChange={v => setForm(f => ({ ...f, sector: v }))}>
+                <SelectTrigger className="text-sm h-9"><SelectValue placeholder="Select sector…" /></SelectTrigger>
+                <SelectContent className="max-h-64 overflow-y-auto">
+                  {SECTORS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label className="text-xs font-semibold mb-1.5 block">Stage *</Label>
-              <select value={form.stage} onChange={e => setForm(f => ({ ...f, stage: e.target.value }))} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
-                {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <Select value={form.stage} onValueChange={v => setForm(f => ({ ...f, stage: v }))}>
+                <SelectTrigger className="text-sm h-9"><SelectValue placeholder="Select stage…" /></SelectTrigger>
+                <SelectContent>
+                  {STARTUP_STAGES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div>

@@ -1,17 +1,19 @@
-import { useLanguage } from '@/contexts/LanguageContext';
 /**
  * AI Co-founder Agreement Drafter
  * Drafts comprehensive co-founder agreements based on equity and roles
  */
 
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { trpc } from '@/lib/trpc';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Plus, Trash2, Loader2, RefreshCw, Copy, Check, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { JURISDICTIONS, VESTING_SCHEDULES, NON_COMPETE_PERIODS, DECISION_MAKING_OPTIONS } from '@shared/dropdowns';
 
 type Founder = { name: string; role: string; equityPercent: number; contribution: string };
 type Section = { title: string; content: string; notes: string };
@@ -99,19 +101,39 @@ export default function AICofounderAgreement() {
               </div>
               <div>
                 <Label className="text-xs font-semibold mb-1.5 block">Jurisdiction</Label>
-                <Input value={jurisdiction} onChange={e => setJurisdiction(e.target.value)} placeholder="e.g. Delaware, USA" className="text-sm" />
+                <Select value={jurisdiction} onValueChange={setJurisdiction}>
+                  <SelectTrigger className="text-sm h-9"><SelectValue placeholder="Select jurisdiction…" /></SelectTrigger>
+                  <SelectContent className="max-h-64 overflow-y-auto">
+                    {JURISDICTIONS.map(j => <SelectItem key={j} value={j}>{j}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label className="text-xs font-semibold mb-1.5 block">Vesting Schedule</Label>
-                <Input value={vestingSchedule} onChange={e => setVestingSchedule(e.target.value)} placeholder="e.g. 4 years with 1-year cliff" className="text-sm" />
+                <Select value={vestingSchedule} onValueChange={setVestingSchedule}>
+                  <SelectTrigger className="text-sm h-9"><SelectValue placeholder="Select schedule…" /></SelectTrigger>
+                  <SelectContent>
+                    {VESTING_SCHEDULES.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label className="text-xs font-semibold mb-1.5 block">Non-compete Period</Label>
-                <Input value={nonCompetePeriod} onChange={e => setNonCompetePeriod(e.target.value)} placeholder="e.g. 12 months" className="text-sm" />
+                <Select value={nonCompetePeriod} onValueChange={setNonCompetePeriod}>
+                  <SelectTrigger className="text-sm h-9"><SelectValue placeholder="Select period…" /></SelectTrigger>
+                  <SelectContent>
+                    {NON_COMPETE_PERIODS.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label className="text-xs font-semibold mb-1.5 block">Decision Making</Label>
-                <Input value={decisionMaking} onChange={e => setDecisionMaking(e.target.value)} placeholder="e.g. Majority vote, Unanimous for key decisions" className="text-sm" />
+                <Select value={decisionMaking} onValueChange={setDecisionMaking}>
+                  <SelectTrigger className="text-sm h-9"><SelectValue placeholder="Select model…" /></SelectTrigger>
+                  <SelectContent>
+                    {DECISION_MAKING_OPTIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex items-center gap-3 pt-5">
                 <input type="checkbox" id="ip" checked={ipAssignment} onChange={e => setIpAssignment(e.target.checked)} className="w-4 h-4 rounded" />

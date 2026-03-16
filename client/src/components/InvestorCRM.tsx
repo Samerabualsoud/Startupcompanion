@@ -11,6 +11,8 @@ import { trpc } from '@/lib/trpc';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { useTrackedApplications } from '@/contexts/TrackedApplicationsContext';
 import { getLoginUrl } from '@/const';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SECTORS, FUNDING_STAGES } from '@shared/dropdowns';
 
 type Status = 'target' | 'contacted' | 'intro-requested' | 'meeting-scheduled' | 'due-diligence' | 'term-sheet' | 'passed' | 'invested';
 
@@ -278,8 +280,6 @@ export default function InvestorCRM() {
               {[
                 { key: 'name', label: 'Name', placeholder: 'Sarah Chen' },
                 { key: 'firm', label: 'Firm', placeholder: 'Sequoia Capital' },
-                { key: 'stageFocus', label: 'Stage Focus', placeholder: 'Seed, Series A' },
-                { key: 'sectorFocus', label: 'Sector Focus', placeholder: 'AI/ML, SaaS' },
                 { key: 'email', label: 'Email', placeholder: 'sarah@sequoia.com' },
                 { key: 'linkedin', label: 'LinkedIn URL', placeholder: 'linkedin.com/in/...' },
               ].map(f => (
@@ -290,6 +290,26 @@ export default function InvestorCRM() {
                     className="vc-input w-full px-3 py-2 text-sm" />
                 </div>
               ))}
+              <div>
+                <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">Stage Focus</label>
+                <Select value={newData.stageFocus} onValueChange={v => setNewData(d => ({ ...d, stageFocus: v }))}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select stage…" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Any stage</SelectItem>
+                    {FUNDING_STAGES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">Sector Focus</label>
+                <Select value={newData.sectorFocus} onValueChange={v => setNewData(d => ({ ...d, sectorFocus: v }))}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select sector…" /></SelectTrigger>
+                  <SelectContent className="max-h-64 overflow-y-auto">
+                    <SelectItem value="">Any sector</SelectItem>
+                    {SECTORS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div>
               <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">Status</label>
