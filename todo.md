@@ -183,3 +183,11 @@
 - [x] Fix: Saved Valuations section in StartupProfile.tsx shows richer cards (range, confidence, stage)
 - [x] Fix: Saved Valuations section auto-opens when valuations exist
 - [x] 0 TypeScript errors
+
+## Free Zones & Jurisdictions Tool (Round 15)
+- [x] Research 10 jurisdictions: ADGM, DIFC, Delaware, Cayman Islands, BVI, Singapore, Saudi SEZs, Bahrain, Egypt, Jordan
+- [x] Build FreeZones.tsx component with filter tabs, detail cards, comparison table, and implications guide
+- [x] Wire to sidebar nav under Resources group with 'New' badge
+- [x] Add navFreeZones translation key (en: 'Free Zones', ar: 'المناطق الحرة')
+- [x] Add navAdmin translation key (en: 'Admin', ar: 'الإدارة')
+- [x] 0 TypeScript errors, 0 console errors

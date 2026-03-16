@@ -9,9 +9,10 @@ import { useAuth } from '@/_core/hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, Sparkles, Rocket, Users, GitBranch, Target,
-  BookOpen, BarChart3, Menu, X, ChevronRight,
-  Gauge, Layers, FileDown, Link2, Check, Building2, LogIn, LogOut, UserCircle, Home as HomeIcon,
-  MessageCircle, Mail, FileText, Users2, ClipboardCheck, Calendar
+  BookOpen, BarChart3, DollarSign, Menu, X, ChevronRight,
+  Gauge, Layers, FileDown, Link2, Check, Building2, MessageCircle,
+  Mail, FileText, Users2, ClipboardCheck, Calendar, Globe,
+  UserCircle, LogOut, LogIn, Home as HomeIcon
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -46,7 +47,8 @@ import AITermSheetAnalyzer from '@/components/AITermSheetAnalyzer';
 import AICofounderAgreement from '@/components/AICofounderAgreement';
 import AIFundraisingAdvisor from '@/components/AIFundraisingAdvisor';
 import VestingScheduleBuilder from '@/components/VestingScheduleBuilder';
-type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'vesting' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'feasibility' | 'resources' | 'matching' | 'admin' | 'ai-market-research' | 'ai-due-diligence' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-fundraising-advisor';
+import FreeZones from '@/components/FreeZones';
+type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'resources' | 'matching' | 'admin' | 'feasibility' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence';
 
 interface NavItem {
   id: ToolId;
@@ -77,6 +79,8 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'feasibility',   label: 'Idea Evaluator',        shortLabel: 'Idea Check',   navKey: 'navIdeaCheck', icon: Sparkles,    group: 'Valuation',    badge: 'AI' },
   // My Startup
   { id: 'profile',       label: 'My Startup Profile',    shortLabel: 'My Startup',   navKey: 'navMyStartup', icon: Building2,   group: 'My Startup' },
+  // Legal & Jurisdictions
+  { id: 'free-zones',    label: 'Free Zones & Jurisdictions', shortLabel: 'Free Zones', navKey: 'navFreeZones', icon: Globe,        group: 'Resources',    badge: 'New' },
   // Database
   { id: 'resources',     label: 'Investor Database',     shortLabel: 'Database',   navKey: 'navDatabase',   icon: Building2,   group: 'Database',     badge: 'New' },
   { id: 'matching',      label: 'Investor Matching',     shortLabel: 'Matching',   navKey: 'navMatching',   icon: Target,      group: 'Database',     badge: 'AI' },
@@ -115,6 +119,7 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'ai-term-sheet': '#F97316',
   'ai-cofounder-agreement': '#14B8A6',
   'ai-fundraising-advisor': '#C4614A',
+  'free-zones': '#0284C7',
 };
 
 export default function Home() {
@@ -276,6 +281,7 @@ export default function Home() {
       case 'equity-split':    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><CoFounderEquitySplit /></div>;
       case 'dilution':        return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><AdvancedDilutionSimulator /></div>;
       case 'vesting':         return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><VestingScheduleBuilder /></div>;
+      case 'free-zones':      return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><FreeZones /></div>;
       case 'readiness':       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><FundraisingReadiness /></div>;
       case 'pitch-deck':      return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><PitchDeckScorecard /></div>;
       case 'runway':          return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><RunwayOptimizer /></div>;

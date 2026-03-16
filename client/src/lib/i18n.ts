@@ -229,7 +229,9 @@ export const translations = {
     navAIEmailWriter: "Email Writer",
     navAITermAnalyzer: "Term Analyzer",
     navAICofounder: "Co-founder AI",
-    navAIDueDiligence: "Due Diligence",
+    navAIDueDiligence: 'Due Diligence',
+    navFreeZones: 'Free Zones',
+    navAdmin: 'Admin',
 
     // AI Fundraising Advisor
     aiFundraisingTitle: "AI Fundraising Advisor",
@@ -513,7 +515,9 @@ export const translations = {
     navAIEmailWriter: "كاتب البريد الإلكتروني",
     navAITermAnalyzer: "محلل الشروط",
     navAICofounder: "اتفاقية المؤسسين",
-    navAIDueDiligence: "العناية الواجبة",
+    navAIDueDiligence: 'العناية الواجبة',
+    navFreeZones: 'المناطق الحرة',
+    navAdmin: 'الإدارة',
 
     // AI Fundraising Advisor
     aiFundraisingTitle: "مستشار جمع التمويل بالذكاء الاصطناعي",
