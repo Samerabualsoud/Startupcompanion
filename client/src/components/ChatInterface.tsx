@@ -1,0 +1,435 @@
+/**
+ * ChatInterface — Conversational input flow for the valuation calculator
+ * Design: "Venture Capital Clarity" — Editorial Finance
+ * Guides users through plain-English questions, then triggers full valuation
+ */
+
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, ChevronRight, RotateCcw, Check, Sparkles } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { CHAT_QUESTIONS, formatAnswer, type ChatQuestion } from '@/lib/chatFlow';
+import { nanoid } from 'nanoid';
+
+interface Message {
+  id: string;
+  role: 'bot' | 'user';
+  text: string;
+  isTyping?: boolean;
+}
+
+interface Props {
+  onComplete: (answers: Record<string, any>) => void;
+}
+
+// ─── Typing animation component ───────────────────────────────────────────────
+
+function TypingDots() {
+  return (
+    <div className="flex items-center gap-1 py-1">
+      {[0, 1, 2].map(i => (
+        <motion.div
+          key={i}
+          className="w-2 h-2 rounded-full bg-current opacity-60"
+          animate={{ y: [0, -4, 0] }}
+          transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── Input widgets ─────────────────────────────────────────────────────────────
+
+function CurrencyInput({ q, onSubmit }: { q: ChatQuestion; onSubmit: (v: any) => void }) {
+  const [val, setVal] = useState(q.defaultValue ?? '');
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  const handleSubmit = () => {
+    const n = parseFloat(String(val).replace(/[^0-9.]/g, '')) || 0;
+    onSubmit(n);
+  };
+
+  return (
+    <div className="flex gap-2 items-center">
+      <div className="relative flex-1">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-mono text-muted-foreground">$</span>
+        <input
+          ref={inputRef}
+          type="number"
+          value={val}
+          min={q.min ?? 0}
+          step={q.step ?? 1000}
+          placeholder={q.placeholder}
+          onChange={e => setVal(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+          className="chat-input w-full pl-7 pr-3 py-2.5 text-sm font-mono"
+        />
+      </div>
+      <button onClick={handleSubmit} className="chat-send-btn">
+        <Send className="w-4 h-4" />
+      </button>
+    </div>
+  );
+}
+
+function PercentInput({ q, onSubmit }: { q: ChatQuestion; onSubmit: (v: any) => void }) {
+  const [val, setVal] = useState(q.defaultValue ?? '');
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  const handleSubmit = () => onSubmit(parseFloat(String(val)) || 0);
+
+  return (
+    <div className="flex gap-2 items-center">
+      <div className="relative flex-1">
+        <input
+          ref={inputRef}
+          type="number"
+          value={val}
+          min={q.min ?? 0}
+          max={q.max ?? 100}
+          step={q.step ?? 5}
+          placeholder={q.placeholder}
+          onChange={e => setVal(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+          className="chat-input w-full px-3 py-2.5 text-sm font-mono pr-8"
+        />
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-mono text-muted-foreground">%</span>
+      </div>
+      <button onClick={handleSubmit} className="chat-send-btn">
+        <Send className="w-4 h-4" />
+      </button>
+    </div>
+  );
+}
+
+function TextInput({ q, onSubmit }: { q: ChatQuestion; onSubmit: (v: any) => void }) {
+  const [val, setVal] = useState(q.defaultValue ?? '');
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  const handleSubmit = () => { if (String(val).trim()) onSubmit(String(val).trim()); };
+
+  return (
+    <div className="flex gap-2 items-center">
+      <input
+        ref={inputRef}
+        type="text"
+        value={val}
+        placeholder={q.placeholder}
+        onChange={e => setVal(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+        className="chat-input flex-1 px-3 py-2.5 text-sm"
+      />
+      <button onClick={handleSubmit} className="chat-send-btn">
+        <Send className="w-4 h-4" />
+      </button>
+    </div>
+  );
+}
+
+function SelectInput({ q, onSubmit }: { q: ChatQuestion; onSubmit: (v: any) => void }) {
+  const groups = q.options?.reduce((acc, o) => {
+    const g = o.group || 'Options';
+    if (!acc[g]) acc[g] = [];
+    acc[g].push(o);
+    return acc;
+  }, {} as Record<string, typeof q.options>) ?? {};
+
+  const hasGroups = Object.keys(groups).length > 1;
+
+  return (
+    <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+      {hasGroups
+        ? Object.entries(groups).map(([group, opts]) => (
+            <div key={group}>
+              <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1 py-1">{group}</div>
+              {opts?.map(o => (
+                <button key={o.value} onClick={() => onSubmit(o.value)}
+                  className="w-full text-left text-sm px-3 py-2 rounded-md border border-border bg-card hover:bg-accent hover:text-white hover:border-accent transition-all flex items-center justify-between group mb-1">
+                  <span>{o.label}</span>
+                  <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              ))}
+            </div>
+          ))
+        : q.options?.map(o => (
+            <button key={o.value} onClick={() => onSubmit(o.value)}
+              className="w-full text-left text-sm px-3 py-2 rounded-md border border-border bg-card hover:bg-accent hover:text-white hover:border-accent transition-all flex items-center justify-between group">
+              <span>{o.label}</span>
+              <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </button>
+          ))
+      }
+    </div>
+  );
+}
+
+function SliderInput({ q, onSubmit }: { q: ChatQuestion; onSubmit: (v: any) => void }) {
+  const [val, setVal] = useState<number>(q.defaultValue ?? 50);
+  const labels = ['Very Weak', 'Weak', 'Below Average', 'Average', 'Above Average', 'Strong', 'Very Strong', 'Excellent', 'Outstanding', 'World-Class', 'Exceptional'];
+  const labelIdx = Math.round((val / 100) * (labels.length - 1));
+  const color = val >= 70 ? '#10B981' : val >= 40 ? '#F59E0B' : '#EF4444';
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-muted-foreground">Weak</span>
+        <div className="text-center">
+          <span className="text-2xl font-bold metric-value" style={{ color }}>{val}</span>
+          <span className="text-xs text-muted-foreground ml-1">/100</span>
+          <div className="text-xs font-medium mt-0.5" style={{ color }}>{labels[labelIdx]}</div>
+        </div>
+        <span className="text-xs text-muted-foreground">Exceptional</span>
+      </div>
+      <Slider min={0} max={100} step={5} value={[val]} onValueChange={([v]) => setVal(v)} className="w-full" />
+      <button onClick={() => onSubmit(val)} className="w-full chat-send-btn justify-center gap-2">
+        <Check className="w-4 h-4" />
+        Confirm {val}/100
+      </button>
+    </div>
+  );
+}
+
+function MultiSelectInput({ q, onSubmit }: { q: ChatQuestion; onSubmit: (v: any) => void }) {
+  const [selected, setSelected] = useState<string[]>([]);
+
+  const toggle = (val: string) => setSelected(prev =>
+    prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]
+  );
+
+  return (
+    <div className="space-y-2">
+      {q.options?.map(o => (
+        <button key={o.value} onClick={() => toggle(o.value)}
+          className={`w-full text-left text-sm px-3 py-2.5 rounded-md border transition-all flex items-center gap-3 ${selected.includes(o.value) ? 'border-accent bg-accent/10 text-foreground' : 'border-border bg-card hover:border-accent/50'}`}>
+          <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all ${selected.includes(o.value) ? 'bg-accent border-accent' : 'border-border'}`}>
+            {selected.includes(o.value) && <Check className="w-2.5 h-2.5 text-white" />}
+          </div>
+          {o.label}
+        </button>
+      ))}
+      <button onClick={() => onSubmit(selected)} className="w-full chat-send-btn justify-center gap-2 mt-2">
+        <Check className="w-4 h-4" />
+        {selected.length === 0 ? 'None of these yet' : `Confirm ${selected.length} selected`}
+      </button>
+    </div>
+  );
+}
+
+function QuestionInput({ question, onSubmit }: { question: ChatQuestion; onSubmit: (v: any) => void }) {
+  switch (question.type) {
+    case 'text': return <TextInput q={question} onSubmit={onSubmit} />;
+    case 'currency': return <CurrencyInput q={question} onSubmit={onSubmit} />;
+    case 'percent': return <PercentInput q={question} onSubmit={onSubmit} />;
+    case 'select': return <SelectInput q={question} onSubmit={onSubmit} />;
+    case 'slider': return <SliderInput q={question} onSubmit={onSubmit} />;
+    case 'multiselect': return <MultiSelectInput q={question} onSubmit={onSubmit} />;
+    default: return <TextInput q={question} onSubmit={onSubmit} />;
+  }
+}
+
+// ─── Progress Bar ──────────────────────────────────────────────────────────────
+
+function ProgressBar({ current, total }: { current: number; total: number }) {
+  const pct = Math.round((current / total) * 100);
+  return (
+    <div className="px-4 py-2 border-b border-border bg-card">
+      <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1.5">
+        <span className="font-mono">Question {current} of {total}</span>
+        <span className="font-mono">{pct}% complete</span>
+      </div>
+      <div className="h-1 bg-secondary rounded-full overflow-hidden">
+        <motion.div
+          className="h-full rounded-full"
+          style={{ background: 'oklch(0.55 0.13 30)' }}
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Chat Interface ───────────────────────────────────────────────────────
+
+export default function ChatInterface({ onComplete }: Props) {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [currentQIndex, setCurrentQIndex] = useState(-1); // -1 = intro
+  const [isTyping, setIsTyping] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+  };
+
+  const addBotMessage = useCallback((text: string, delay = 600) => {
+    return new Promise<void>(resolve => {
+      setIsTyping(true);
+      setTimeout(() => {
+        setIsTyping(false);
+        setMessages(prev => [...prev, { id: nanoid(), role: 'bot', text }]);
+        scrollToBottom();
+        resolve();
+      }, delay);
+    });
+  }, []);
+
+  const addUserMessage = (text: string) => {
+    setMessages(prev => [...prev, { id: nanoid(), role: 'user', text }]);
+    scrollToBottom();
+  };
+
+  // Start the conversation
+  useEffect(() => {
+    const start = async () => {
+      await addBotMessage("👋 Hey! I'm your startup valuation assistant.", 400);
+      await addBotMessage("I'll ask you a few simple questions about your startup — no finance degree needed. At the end, I'll run a full professional valuation using 7 industry-standard methods.", 1000);
+      await addBotMessage("Ready? Let's start with the basics. This will take about 2 minutes. 🚀", 800);
+      setCurrentQIndex(0);
+    };
+    start();
+  }, []);
+
+  // Ask the current question
+  useEffect(() => {
+    if (currentQIndex < 0 || currentQIndex >= CHAT_QUESTIONS.length) return;
+    const q = CHAT_QUESTIONS[currentQIndex];
+    const ask = async () => {
+      const emoji = q.emoji ? `${q.emoji} ` : '';
+      await addBotMessage(`${emoji}${q.text}`, 500);
+      if (q.subtext) {
+        await addBotMessage(`💬 *${q.subtext}*`, 400);
+      }
+    };
+    ask();
+  }, [currentQIndex]);
+
+  const handleAnswer = useCallback(async (value: any) => {
+    const q = CHAT_QUESTIONS[currentQIndex];
+    const displayText = formatAnswer(q, value);
+
+    // Record answer
+    const newAnswers = { ...answers, [q.id]: value };
+    setAnswers(newAnswers);
+
+    // Show user message
+    addUserMessage(displayText);
+
+    // Advance
+    const nextIndex = currentQIndex + 1;
+
+    if (nextIndex >= CHAT_QUESTIONS.length) {
+      // Done!
+      await addBotMessage("Perfect! I have everything I need. 🎉", 600);
+      await addBotMessage("Running your valuation now — using DCF, Scorecard, Berkus, VC Method, Comparables, Risk-Factor Summation, and First Chicago methods...", 800);
+      await addBotMessage("✅ Done! Your full valuation report is ready below.", 1200);
+      setIsComplete(true);
+      setTimeout(() => onComplete(newAnswers), 600);
+    } else {
+      setCurrentQIndex(nextIndex);
+    }
+  }, [currentQIndex, answers, onComplete]);
+
+  const handleReset = () => {
+    setMessages([]);
+    setAnswers({});
+    setCurrentQIndex(-1);
+    setIsComplete(false);
+    setTimeout(() => {
+      const start = async () => {
+        await addBotMessage("👋 Let's start over!", 400);
+        await addBotMessage("I'll ask you the same questions again. Ready? 🚀", 600);
+        setCurrentQIndex(0);
+      };
+      start();
+    }, 100);
+  };
+
+  const currentQ = currentQIndex >= 0 && currentQIndex < CHAT_QUESTIONS.length
+    ? CHAT_QUESTIONS[currentQIndex]
+    : null;
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Progress */}
+      {currentQIndex >= 0 && !isComplete && (
+        <ProgressBar current={currentQIndex + 1} total={CHAT_QUESTIONS.length} />
+      )}
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <AnimatePresence initial={false}>
+          {messages.map(msg => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 10, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.25 }}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              {msg.role === 'bot' && (
+                <div className="w-7 h-7 rounded-full shrink-0 mr-2 flex items-center justify-center text-xs" style={{ background: 'oklch(0.18 0.05 240)', color: 'oklch(0.978 0.008 80)' }}>
+                  <Sparkles className="w-3.5 h-3.5" style={{ color: 'oklch(0.55 0.13 30)' }} />
+                </div>
+              )}
+              <div
+                className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                  msg.role === 'user'
+                    ? 'rounded-br-sm text-white font-medium'
+                    : 'rounded-bl-sm border border-border bg-card text-foreground'
+                }`}
+                style={msg.role === 'user' ? { background: 'oklch(0.55 0.13 30)' } : {}}
+              >
+                {msg.text.startsWith('💬 *') && msg.text.endsWith('*')
+                  ? <span className="text-muted-foreground text-xs italic">{msg.text.slice(4, -1)}</span>
+                  : msg.text
+                }
+              </div>
+            </motion.div>
+          ))}
+
+          {/* Typing indicator */}
+          {isTyping && (
+            <motion.div key="typing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex justify-start">
+              <div className="w-7 h-7 rounded-full shrink-0 mr-2 flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
+                <Sparkles className="w-3.5 h-3.5" style={{ color: 'oklch(0.55 0.13 30)' }} />
+              </div>
+              <div className="px-3.5 py-2.5 rounded-2xl rounded-bl-sm border border-border bg-card">
+                <TypingDots />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input Area */}
+      {!isComplete && currentQ && !isTyping && (
+        <motion.div
+          key={currentQ.id}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="border-t border-border p-4 bg-card"
+        >
+          <QuestionInput question={currentQ} onSubmit={handleAnswer} />
+        </motion.div>
+      )}
+
+      {/* Reset */}
+      {(isComplete || currentQIndex > 0) && (
+        <div className="border-t border-border px-4 py-2 flex justify-end">
+          <button onClick={handleReset} className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-accent transition-colors">
+            <RotateCcw className="w-3 h-3" />
+            Start over
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
