@@ -123,7 +123,7 @@ export default function AIInvestorEmail() {
                 <Select value={form.askAmount} onValueChange={v => setForm(f => ({ ...f, askAmount: v }))}>
                   <SelectTrigger className="text-sm h-9"><SelectValue placeholder="Select amount…" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Not specified</SelectItem>
+                    <SelectItem value="not-specified">Not specified</SelectItem>
                     {CHECK_SIZES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                   </SelectContent>
                 </Select>

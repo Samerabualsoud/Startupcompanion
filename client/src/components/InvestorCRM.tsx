@@ -295,7 +295,7 @@ export default function InvestorCRM() {
                 <Select value={newData.stageFocus} onValueChange={v => setNewData(d => ({ ...d, stageFocus: v }))}>
                   <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select stage…" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any stage</SelectItem>
+                    <SelectItem value="any-stage">Any stage</SelectItem>
                     {FUNDING_STAGES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -305,7 +305,7 @@ export default function InvestorCRM() {
                 <Select value={newData.sectorFocus} onValueChange={v => setNewData(d => ({ ...d, sectorFocus: v }))}>
                   <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select sector…" /></SelectTrigger>
                   <SelectContent className="max-h-64 overflow-y-auto">
-                    <SelectItem value="">Any sector</SelectItem>
+                    <SelectItem value="any-sector">Any sector</SelectItem>
                     {SECTORS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                   </SelectContent>
                 </Select>

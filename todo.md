@@ -158,3 +158,10 @@
 - [x] Generate sitemap.xml in client/public/ (6 URLs with priorities)
 - [x] Generate robots.txt in client/public/ (blocks /api, /admin, /onboarding)
 - [x] Save checkpoint
+
+## Bug Fixes (Round 12)
+- [x] Fix startup profile: added 'idea' stage to STAGE_OPTIONS to match backend enum
+- [x] Fix startup profile: targetRaise NaN - setNum now guards with isNaN check
+- [x] Fix AIInvestorEmail: SelectItem value="" → value="not-specified"
+- [x] Fix InvestorCRM: SelectItem value="" for Any stage/sector → non-empty values
+- [x] 0 TypeScript errors

@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { SECTORS, COUNTRIES } from '@shared/dropdowns';
 
 const STAGE_OPTIONS = [
+  { value: 'idea', label: 'Idea / Pre-launch' },
   { value: 'pre-seed', label: 'Pre-Seed' },
   { value: 'seed', label: 'Seed' },
   { value: 'series-a', label: 'Series A' },
@@ -181,7 +182,10 @@ export default function StartupProfile() {
   };
 
   const set = (key: string, val: any) => setForm(f => ({ ...f, [key]: val }));
-  const setNum = (key: string, val: string) => set(key, parseFloat(val) || 0);
+  const setNum = (key: string, val: string) => {
+    const n = parseFloat(val);
+    set(key, isNaN(n) ? 0 : n);
+  };
 
   if (authLoading || profileLoading) {
     return (
