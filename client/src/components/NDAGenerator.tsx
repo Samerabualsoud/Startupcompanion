@@ -17,7 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { FileText, Download, Copy, Check, Sparkles, Info, Shield, Users, Clock } from 'lucide-react';
+import { FileText, Download, Copy, Check, Sparkles, Info, Shield, Users, Clock, Globe } from 'lucide-react';
 import { Streamdown } from 'streamdown';
 
 interface NDAInputs {
@@ -67,6 +67,7 @@ export default function NDAGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'form' | 'preview'>('form');
+  const [docLanguage, setDocLanguage] = useState<'english' | 'arabic' | 'both'>('english');
 
   const generateMutation = trpc.ai.generateNDA.useMutation({
     onSuccess: (data: { document: string }) => {
@@ -87,7 +88,7 @@ export default function NDAGenerator() {
       return;
     }
     setIsGenerating(true);
-    generateMutation.mutate(inputs);
+    generateMutation.mutate({ ...inputs, language: docLanguage });
   };
 
   const handleCopy = async () => {
@@ -319,6 +320,26 @@ export default function NDAGenerator() {
                     <div className="flex items-center gap-1.5">
                       <div className={`w-1.5 h-1.5 rounded-full ${inputs.includeNonCompete ? 'bg-green-500' : 'bg-muted'}`} />
                       Non-Compete: {inputs.includeNonCompete ? 'Included' : 'Not included'}
+                    </div>
+                  </div>
+
+                  {/* Language Selector */}
+                  <div className="space-y-1.5">
+                    <Label className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5" /> Document Language</Label>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {(['english', 'arabic', 'both'] as const).map((lang) => (
+                        <button
+                          key={lang}
+                          onClick={() => setDocLanguage(lang)}
+                          className={`py-1.5 px-2 rounded-lg text-xs font-medium border transition-all ${
+                            docLanguage === lang
+                              ? 'border-primary bg-primary/10 text-primary'
+                              : 'border-border text-muted-foreground hover:border-primary/40'
+                          }`}
+                        >
+                          {lang === 'english' ? '🇺🇸 English' : lang === 'arabic' ? '🇸🇦 Arabic' : '🌐 Both'}
+                        </button>
+                      ))}
                     </div>
                   </div>
 

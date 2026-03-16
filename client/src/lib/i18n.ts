@@ -9,7 +9,7 @@ export const translations = {
     appTagline: "Valuation · Equity · Fundraising · Resources",
     signIn: "Sign in",
     signOut: "Sign out",
-    getStarted: "Get started free",
+    getStarted: "Get started",
     openApp: "Open App",
     goToDashboard: "Go to dashboard",
     account: "Account",
@@ -19,13 +19,13 @@ export const translations = {
     language: "Language",
 
     // ── Landing Page ──
-    heroBadge: "13 tools · Completely free · No credit card",
+    heroBadge: "14 tools · No fees · No credit card required",
     heroTitle1: "The complete toolkit for",
     heroTitle2: "early-stage founders",
     heroSubtitle: "Value your startup, split equity fairly, find investors, track fundraising, and evaluate your idea — all in one place. Built for founders, not financial advisors.",
-    startForFree: "Start for free",
-    createFreeAccount: "Create free account",
-    freeForever: "Free forever · No credit card · No financial advisor required",
+    startForFree: "Get started",
+    createFreeAccount: "Create your account",
+    freeForever: "No fees · No credit card · No financial advisor required",
 
     // Stats
     statTools: "Startup tools",
@@ -389,7 +389,7 @@ export const translations = {
     appTagline: "التقييم · حقوق الملكية · جمع التمويل · الموارد",
     signIn: "تسجيل الدخول",
     signOut: "تسجيل الخروج",
-    getStarted: "ابدأ مجاناً",
+    getStarted: "ابدأ الآن",
     openApp: "فتح التطبيق",
     goToDashboard: "الذهاب إلى لوحة التحكم",
     account: "الحساب",
@@ -399,13 +399,13 @@ export const translations = {
     language: "اللغة",
 
     // ── Landing Page ──
-    heroBadge: "١٣ أداة · مجاني تماماً · بدون بطاقة ائتمانية",
+    heroBadge: "١٤ أداة · بدون رسوم · بدون بطاقة ائتمانية",
     heroTitle1: "المجموعة الكاملة من الأدوات",
     heroTitle2: "للمؤسسين في المراحل المبكرة",
     heroSubtitle: "قيّم شركتك الناشئة، اقسم حقوق الملكية بعدالة، ابحث عن المستثمرين، وتابع جمع التمويل — كل ذلك في مكان واحد. مصمم للمؤسسين، لا للمستشارين الماليين.",
-    startForFree: "ابدأ مجاناً",
-    createFreeAccount: "إنشاء حساب مجاني",
-    freeForever: "مجاني للأبد · بدون بطاقة ائتمانية · بدون مستشار مالي",
+    startForFree: "ابدأ الآن",
+    createFreeAccount: "أنشئ حسابك",
+    freeForever: "بدون رسوم · بدون بطاقة ائتمانية · بدون مستشار مالي",
 
     // Stats
     statTools: "أدوات للشركات الناشئة",

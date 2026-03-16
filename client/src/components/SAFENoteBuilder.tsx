@@ -16,7 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
-import { FileText, Download, Copy, Check, Sparkles, Info, DollarSign, Percent, Calendar, Shield } from 'lucide-react';
+import { FileText, Download, Copy, Check, Sparkles, Info, DollarSign, Percent, Calendar, Shield, Globe } from 'lucide-react';
 import { Streamdown } from 'streamdown';
 
 interface SAFEInputs {
@@ -80,6 +80,7 @@ export default function SAFENoteBuilder() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'form' | 'preview'>('form');
+  const [docLanguage, setDocLanguage] = useState<'english' | 'arabic' | 'both'>('english');
 
   const generateMutation = trpc.ai.generateSAFENote.useMutation({
     onSuccess: (data) => {
@@ -100,7 +101,7 @@ export default function SAFENoteBuilder() {
       return;
     }
     setIsGenerating(true);
-    generateMutation.mutate({ inputs });
+    generateMutation.mutate({ inputs, language: docLanguage });
   };
 
   const handleCopy = async () => {
@@ -425,6 +426,26 @@ export default function SAFENoteBuilder() {
                     <div className="flex items-center gap-1.5">
                       <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                       Law: {GOVERNING_LAW_OPTIONS.find(o => o.value === inputs.governingLaw)?.label}
+                    </div>
+                  </div>
+
+                  {/* Language Selector */}
+                  <div className="space-y-1.5">
+                    <Label className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5" /> Document Language</Label>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {(['english', 'arabic', 'both'] as const).map((lang) => (
+                        <button
+                          key={lang}
+                          onClick={() => setDocLanguage(lang)}
+                          className={`py-1.5 px-2 rounded-lg text-xs font-medium border transition-all ${
+                            docLanguage === lang
+                              ? 'border-primary bg-primary/10 text-primary'
+                              : 'border-border text-muted-foreground hover:border-primary/40'
+                          }`}
+                        >
+                          {lang === 'english' ? '🇺🇸 English' : lang === 'arabic' ? '🇸🇦 Arabic' : '🌐 Both'}
+                        </button>
+                      ))}
                     </div>
                   </div>
 

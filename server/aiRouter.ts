@@ -440,9 +440,15 @@ Return JSON with exactly this structure:
         ipAssignment: z.boolean().default(true),
         nonCompetePeriod: z.string().default("12 months"),
         decisionMakingProcess: z.string().default("Majority vote"),
+        language: z.enum(['english', 'arabic', 'both']).default('english'),
       })
     )
     .mutation(async ({ input }) => {
+      const langNote = input.language === 'arabic'
+        ? 'IMPORTANT: Write the entire agreement in Arabic (العربية).'
+        : input.language === 'both'
+        ? 'IMPORTANT: Write the agreement in both English and Arabic. For each section, provide the English text first, then the Arabic translation immediately after.'
+        : '';
       const foundersText = input.founders
         .map((f, i) => `${i + 1}. ${f.name} - ${f.role} - ${f.equityPercent}% equity - Contribution: ${f.contribution}`)
         .join("\n");
@@ -468,6 +474,7 @@ Decision Making: ${input.decisionMakingProcess}
 
 Founders:
 ${foundersText}
+${langNote ? '\n' + langNote : ''}
 
 Return JSON with exactly this structure:
 {
@@ -633,10 +640,16 @@ Keep your response to 3-5 paragraphs. Be direct and specific.`,
           governingLaw: z.string(),
           closingDate: z.string(),
         }),
+        language: z.enum(['english', 'arabic', 'both']).default('english'),
       })
     )
     .mutation(async ({ input }) => {
-      const { inputs: i } = input;
+      const { inputs: i, language } = input;
+      const langInstruction = language === 'arabic'
+        ? ' Write the entire document in Arabic (العربية).'
+        : language === 'both'
+        ? ' Write the document in both English and Arabic: first the full English version, then a horizontal rule (---), then the full Arabic translation.'
+        : '';
       const isNote = i.instrumentType === 'convertible-note';
       const prompt = isNote
         ? `Draft a professional convertible note term sheet for:
@@ -652,7 +665,7 @@ Keep your response to 3-5 paragraphs. Be direct and specific.`,
 - Governing Law: ${i.governingLaw}
 - Closing Date: ${i.closingDate}
 
-Include: recitals, definitions, investment terms, conversion mechanics, representations, and signature blocks.`
+Include: recitals, definitions, investment terms, conversion mechanics, representations, and signature blocks.${langInstruction}`
         : `Draft a professional SAFE (Simple Agreement for Future Equity) for:
 - Company: ${i.companyName}
 - Investor: ${i.investorName}
@@ -665,7 +678,7 @@ Include: recitals, definitions, investment terms, conversion mechanics, represen
 - Governing Law: ${i.governingLaw}
 - Closing Date: ${i.closingDate}
 
-Include: recitals, definitions, investment terms, conversion events, dissolution events, representations, and signature blocks.`;
+Include: recitals, definitions, investment terms, conversion events, dissolution events, representations, and signature blocks.${langInstruction}`;
 
       const response = await invokeLLM({
         messages: [
@@ -693,14 +706,20 @@ Include: recitals, definitions, investment terms, conversion events, dissolution
         effectiveDate: z.string(),
         includeNonSolicit: z.boolean(),
         includeNonCompete: z.boolean(),
+        language: z.enum(['english', 'arabic', 'both']).default('english'),
       })
     )
     .mutation(async ({ input }) => {
+      const langInstruction = input.language === 'arabic'
+        ? ' Write the entire NDA in Arabic (العربية).'
+        : input.language === 'both'
+        ? ' Write the NDA in both English and Arabic: first the full English version, then a horizontal rule (---), then the full Arabic translation.'
+        : '';
       const response = await invokeLLM({
         messages: [
           {
             role: 'system',
-            content: `You are a startup lawyer. Draft professional, comprehensive NDA agreements. Use clear headings, numbered sections, and standard legal language. Include all standard clauses for the jurisdiction specified. Add a disclaimer at the end.`,
+            content: `You are a startup lawyer. Draft professional, comprehensive NDA agreements. Use clear headings, numbered sections, and standard legal language. Include all standard clauses for the jurisdiction specified. Add a disclaimer at the end.${langInstruction}`,
           },
           {
             role: 'user',
@@ -721,6 +740,62 @@ Include: recitals, definitions of confidential information, obligations, exclusi
       });
 
       return { document: response.choices[0].message.content as string };
+    }),
+
+  // ── 11. ESOP Grant Letter Generator ─────────────────────────────────────────────────────────────────────────────────
+  generateGrantLetter: publicProcedure
+    .input(
+      z.object({
+        companyName: z.string().min(1),
+        employeeName: z.string().min(1),
+        employeeRole: z.string().min(1),
+        grantDate: z.string(),
+        shares: z.number().int().positive(),
+        strikePrice: z.number().positive(),
+        vestingMonths: z.number().int().positive(),
+        cliffMonths: z.number().int().min(0),
+        jurisdiction: z.string(),
+        pricePerShare: z.number().positive(),
+        language: z.enum(['english', 'arabic', 'both']).default('english'),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const langInstruction = input.language === 'arabic'
+        ? ' Write the entire grant letter in Arabic (العربية).'
+        : input.language === 'both'
+        ? ' Write the grant letter in both English and Arabic: first the full English version, then a horizontal rule (---), then the full Arabic translation.'
+        : '';
+      const vestingDesc = input.cliffMonths > 0
+        ? `${input.vestingMonths}-month vesting with a ${input.cliffMonths}-month cliff`
+        : `${input.vestingMonths}-month straight-line vesting (no cliff)`;
+      const totalValue = (input.shares * input.pricePerShare).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: 'system',
+            content: `You are a startup equity compensation specialist. Draft professional, legally-appropriate stock option grant letters. Use a formal but warm tone. Include all required legal disclosures. Add a disclaimer at the end that this is a template and should be reviewed by qualified counsel.${langInstruction}`,
+          },
+          {
+            role: 'user',
+            content: `Draft a stock option grant letter with these details:
+- Company: ${input.companyName}
+- Employee: ${input.employeeName}
+- Role: ${input.employeeRole}
+- Grant Date: ${input.grantDate}
+- Number of Options: ${input.shares.toLocaleString()} shares
+- Exercise (Strike) Price: $${input.strikePrice.toFixed(4)} per share
+- Current Fair Market Value: $${input.pricePerShare.toFixed(4)} per share
+- Estimated Grant Value: ${totalValue}
+- Vesting Schedule: ${vestingDesc}
+- Governing Law / Jurisdiction: ${input.jurisdiction}
+
+Include: greeting, grant details table, vesting schedule explanation, exercise instructions, tax notice, expiry terms, acceptance signature block, and legal disclaimer.`,
+          },
+        ],
+      });
+
+      return { letter: response.choices[0].message.content as string };
     }),
 
   // ── 10. ESOP / Option Pool Recommendation ────────────────────────────────────

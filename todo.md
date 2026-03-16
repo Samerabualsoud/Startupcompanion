@@ -202,3 +202,15 @@
 - [x] Add Arabic translations for all 5 tools
 - [x] Run tests, 0 TypeScript errors (31 tests passing)
 - [x] Save checkpoint
+
+## Round 17 Tasks
+- [x] ESOP Planner: add "Generate Grant Letter" button per employee (AI-generated, EN/AR/Both)
+- [x] SAFE Note Builder: add language selector (English / Arabic / Both) before generation
+- [x] NDA Generator: add language selector (English / Arabic / Both) before generation
+- [x] AI Co-founder Agreement: add language selector (English / Arabic / Both)
+- [x] Update aiRouter.ts: accept language param in generateSAFENote, generateNDA, and cofounderAgreement procedures
+- [x] Add generateGrantLetter procedure to aiRouter.ts
+- [x] Landing page: change "Get started free" / "Start for free" button text to "Get Started"
+- [x] Add i18n keys for language selector and grant letter UI
+- [x] 0 TypeScript errors, 31 tests passing
+- [x] Save checkpoint

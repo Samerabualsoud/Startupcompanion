@@ -7,10 +7,10 @@ import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { trpc } from '@/lib/trpc';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Plus, Trash2, Loader2, RefreshCw, Copy, Check, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import { Users, Plus, Trash2, Loader2, RefreshCw, Copy, Check, ChevronDown, ChevronUp, AlertTriangle, Globe } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { JURISDICTIONS, VESTING_SCHEDULES, NON_COMPETE_PERIODS, DECISION_MAKING_OPTIONS } from '@shared/dropdowns';
@@ -50,6 +50,7 @@ export default function AICofounderAgreement() {
   ]);
   const [result, setResult] = useState<AgreementResult | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [docLanguage, setDocLanguage] = useState<'english' | 'arabic' | 'both'>('english');
 
   const mutation = trpc.ai.cofounderAgreement.useMutation({
     onSuccess: (data) => { setResult(data as AgreementResult); toast.success('Agreement drafted!'); },
@@ -68,7 +69,7 @@ export default function AICofounderAgreement() {
     if (!companyName) { toast.error('Enter company name'); return; }
     if (founders.some(f => !f.name || !f.contribution)) { toast.error('Fill in all founder details'); return; }
     if (!equityValid) { toast.error('Equity must total exactly 100%'); return; }
-    mutation.mutate({ companyName, founders, vestingSchedule, jurisdiction, ipAssignment, nonCompetePeriod, decisionMakingProcess: decisionMaking });
+    mutation.mutate({ companyName, founders, vestingSchedule, jurisdiction, ipAssignment, nonCompetePeriod, decisionMakingProcess: decisionMaking, language: docLanguage });
   };
 
   const fullDocumentText = result ? `${result.documentTitle}\n\nEffective Date: ${result.effectiveDate}\n\n${result.sections.map(s => `${s.title}\n\n${s.content}`).join('\n\n---\n\n')}\n\n${result.disclaimer}` : '';
@@ -185,6 +186,27 @@ export default function AICofounderAgreement() {
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Language Selector */}
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5 text-xs font-semibold"><Globe className="w-3.5 h-3.5" /> Document Language</Label>
+            <div className="grid grid-cols-3 gap-1.5">
+              {(['english', 'arabic', 'both'] as const).map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => setDocLanguage(lang)}
+                  className={`py-1.5 px-2 rounded-lg text-xs font-medium border transition-all ${
+                    docLanguage === lang
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border text-muted-foreground hover:border-primary/40'
+                  }`}
+                >
+                  {lang === 'english' ? '🇺🇸 English' : lang === 'arabic' ? '🇸🇦 Arabic' : '🌐 Both'}
+                </button>
               ))}
             </div>
           </div>

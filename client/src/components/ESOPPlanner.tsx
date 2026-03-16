@@ -15,7 +15,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, Users, TrendingUp, PieChart, Plus, Trash2, Info } from 'lucide-react';
+import { Sparkles, Users, TrendingUp, PieChart, Plus, Trash2, Info, FileText, Globe, Download, Copy, Check, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { Streamdown } from 'streamdown';
 import { PieChart as RechartsPieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { STARTUP_STAGES } from '@shared/dropdowns';
@@ -92,6 +94,65 @@ export default function ESOPPlanner() {
   const [aiAnalysis, setAiAnalysis] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [activeTab, setActiveTab] = useState<'planner' | 'grants' | 'ai'>('planner');
+
+  // Grant Letter state
+  const [grantLetterDialog, setGrantLetterDialog] = useState<{ open: boolean; grant: GrantRow | null }>({ open: false, grant: null });
+  const [grantLetterEmployeeName, setGrantLetterEmployeeName] = useState('');
+  const [grantLetterLanguage, setGrantLetterLanguage] = useState<'english' | 'arabic' | 'both'>('english');
+  const [generatedLetter, setGeneratedLetter] = useState<string>('');
+  const [isGeneratingLetter, setIsGeneratingLetter] = useState(false);
+  const [letterCopied, setLetterCopied] = useState(false);
+
+  const grantLetterMutation = trpc.ai.generateGrantLetter.useMutation({
+    onSuccess: (data: { letter: string }) => {
+      setGeneratedLetter(data.letter);
+      setIsGeneratingLetter(false);
+      toast.success('Grant letter generated!');
+    },
+    onError: (err: { message: string }) => {
+      setIsGeneratingLetter(false);
+      toast.error('Failed to generate letter: ' + err.message);
+    },
+  });
+
+  const handleGenerateLetter = () => {
+    const grant = grantLetterDialog.grant;
+    if (!grant || !grantLetterEmployeeName || !inputs.companyName) {
+      toast.error('Please fill in employee name and company name');
+      return;
+    }
+    setIsGeneratingLetter(true);
+    setGeneratedLetter('');
+    grantLetterMutation.mutate({
+      companyName: inputs.companyName,
+      employeeName: grantLetterEmployeeName,
+      employeeRole: grant.role || 'Employee',
+      grantDate: new Date().toISOString().split('T')[0],
+      shares: grant.shares,
+      strikePrice: grant.strikePrice,
+      vestingMonths: grant.vestingMonths,
+      cliffMonths: grant.cliffMonths,
+      jurisdiction: inputs.jurisdiction,
+      pricePerShare: inputs.pricePerShare,
+      language: grantLetterLanguage,
+    });
+  };
+
+  const handleCopyLetter = async () => {
+    await navigator.clipboard.writeText(generatedLetter);
+    setLetterCopied(true);
+    setTimeout(() => setLetterCopied(false), 2000);
+  };
+
+  const handleDownloadLetter = () => {
+    const blob = new Blob([generatedLetter], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `GrantLetter-${grantLetterEmployeeName || 'employee'}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const analysisMutation = trpc.ai.esopRecommendation.useMutation({
     onSuccess: (data: { analysis: string }) => {
@@ -457,10 +518,25 @@ export default function ESOPPlanner() {
                         />
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
-                      <span>{((grant.shares / inputs.totalShares) * 100).toFixed(3)}% ownership</span>
-                      <span>Value at current price: {fmtUSD(grant.shares * inputs.pricePerShare)}</span>
-                      <span>Benchmark: {LEVEL_GRANT_BENCHMARKS[grant.level]?.typical}</span>
+                    <div className="flex items-center justify-between pt-1">
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>{((grant.shares / inputs.totalShares) * 100).toFixed(3)}% ownership</span>
+                        <span>Value: {fmtUSD(grant.shares * inputs.pricePerShare)}</span>
+                        <span>Benchmark: {LEVEL_GRANT_BENCHMARKS[grant.level]?.typical}</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs h-7 px-2.5 gap-1.5"
+                        onClick={() => {
+                          setGrantLetterDialog({ open: true, grant });
+                          setGrantLetterEmployeeName('');
+                          setGeneratedLetter('');
+                          setGrantLetterLanguage('english');
+                        }}
+                      >
+                        <FileText className="w-3.5 h-3.5" /> Generate Letter
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -522,6 +598,110 @@ export default function ESOPPlanner() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Grant Letter Dialog */}
+      <Dialog open={grantLetterDialog.open} onOpenChange={(open) => setGrantLetterDialog(prev => ({ ...prev, open }))}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" /> Generate Option Grant Letter
+            </DialogTitle>
+            <DialogDescription>
+              {grantLetterDialog.grant && (
+                <span>{grantLetterDialog.grant.shares.toLocaleString()} shares · {grantLetterDialog.grant.vestingMonths}mo vesting · Strike ${grantLetterDialog.grant.strikePrice.toFixed(4)}</span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Employee Name */}
+            <div className="space-y-1.5">
+              <Label>Employee Full Name <span className="text-destructive">*</span></Label>
+              <Input
+                placeholder="e.g. Sarah Al-Rashidi"
+                value={grantLetterEmployeeName}
+                onChange={e => setGrantLetterEmployeeName(e.target.value)}
+              />
+            </div>
+
+            {/* Role (pre-filled) */}
+            <div className="space-y-1.5">
+              <Label>Role</Label>
+              <Input
+                value={grantLetterDialog.grant?.role || ''}
+                onChange={e => {
+                  if (grantLetterDialog.grant) {
+                    setGrantLetterDialog(prev => ({
+                      ...prev,
+                      grant: prev.grant ? { ...prev.grant, role: e.target.value } : null,
+                    }));
+                  }
+                }}
+                placeholder="e.g. CTO"
+              />
+            </div>
+
+            {/* Language Selector */}
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5" /> Letter Language</Label>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(['english', 'arabic', 'both'] as const).map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => setGrantLetterLanguage(lang)}
+                    className={`py-1.5 px-2 rounded-lg text-xs font-medium border transition-all ${
+                      grantLetterLanguage === lang
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border text-muted-foreground hover:border-primary/40'
+                    }`}
+                  >
+                    {lang === 'english' ? '🇺🇸 English' : lang === 'arabic' ? '🇸🇦 Arabic' : '🌐 Both'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Generate Button */}
+            <Button
+              className="w-full"
+              onClick={handleGenerateLetter}
+              disabled={isGeneratingLetter || !grantLetterEmployeeName || !inputs.companyName}
+              style={{ background: 'oklch(0.18 0.05 240)' }}
+            >
+              {isGeneratingLetter ? (
+                <><Sparkles className="w-4 h-4 mr-2 animate-spin" /> Generating…</>
+              ) : (
+                <><Sparkles className="w-4 h-4 mr-2" /> Generate Grant Letter</>
+              )}
+            </Button>
+
+            {/* Generated Letter Preview */}
+            {generatedLetter && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">Letter Ready</Badge>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={handleCopyLetter}>
+                      {letterCopied ? <Check className="w-4 h-4 mr-1.5" /> : <Copy className="w-4 h-4 mr-1.5" />}
+                      {letterCopied ? 'Copied!' : 'Copy'}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleDownloadLetter}>
+                      <Download className="w-4 h-4 mr-1.5" /> Download
+                    </Button>
+                  </div>
+                </div>
+                <div className="border rounded-lg p-4 bg-muted/20 prose prose-sm max-w-none max-h-80 overflow-y-auto">
+                  <Streamdown>{generatedLetter}</Streamdown>
+                </div>
+                <div className="flex items-start gap-1.5 text-xs text-muted-foreground p-2 bg-amber-50 rounded-lg border border-amber-200">
+                  <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-600" />
+                  <span>Template only. Have a qualified lawyer review before issuing.</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
