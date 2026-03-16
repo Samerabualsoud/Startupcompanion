@@ -214,3 +214,6 @@
 - [x] Add i18n keys for language selector and grant letter UI
 - [x] 0 TypeScript errors, 31 tests passing
 - [x] Save checkpoint
+
+## Round 18 — SEO Fixes
+- [x] Reduce homepage meta keywords from 13 to 6 focused keywords
