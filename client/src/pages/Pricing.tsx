@@ -53,7 +53,7 @@ export default function Pricing() {
             <TrendingUp className="w-4 h-4" style={{ color: 'oklch(0.55 0.13 30)' }} />
           </div>
           <span className="text-sm font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
-            AI Startup Toolkit
+            Polaris Arabia
           </span>
         </div>
       </header>

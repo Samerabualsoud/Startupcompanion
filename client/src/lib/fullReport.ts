@@ -348,7 +348,7 @@ export function generateFullReport(data: FullReportData): void {
   <div class="cover">
     <div class="eyebrow">Confidential Startup Report</div>
     <h1>${name}</h1>
-    <div class="subtitle">Generated ${date} · AI Startup Toolkit</div>
+    <div class="subtitle">Generated ${date} · Polaris Arabia</div>
     <div class="cover-metrics">${coverMetrics.join('')}</div>
   </div>
 
@@ -362,7 +362,7 @@ export function generateFullReport(data: FullReportData): void {
   </div>
 
   <div class="footer">
-    <span>AI Startup Toolkit</span>
+    <span>Polaris Arabia</span>
     <span>${name} · ${date}</span>
     <span>CONFIDENTIAL</span>
   </div>

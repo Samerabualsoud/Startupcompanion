@@ -37,7 +37,7 @@ export default function ForgotPassword() {
             <TrendingUp className="w-4 h-4" style={{ color: 'oklch(0.55 0.13 30)' }} />
           </div>
           <span className="font-bold text-lg" style={{ fontFamily, color: 'oklch(0.18 0.05 240)' }}>
-            {isRTL ? 'أداة الشركات الناشئة' : 'AI Startup Toolkit'}
+            {isRTL ? 'أداة الشركات الناشئة' : 'Polaris Arabia'}
           </span>
         </div>
 

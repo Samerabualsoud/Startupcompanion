@@ -1,5 +1,5 @@
 /**
- * Valuation Engine — AI Startup Valuation Calculator
+ * Valuation Engine — Polaris Arabia
  * Design: "Venture Capital Clarity" — Editorial Finance
  *
  * Implements 7 industry-standard valuation methods:

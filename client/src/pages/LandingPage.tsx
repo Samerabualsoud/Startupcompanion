@@ -382,7 +382,7 @@ export default function LandingPage() {
             </span>
           </div>
           <div className="text-xs text-muted-foreground text-center">
-            © {new Date().getFullYear()} AI Startup Toolkit. {t('footerDisclaimer')}
+            © {new Date().getFullYear()} Polaris Arabia. {t('footerDisclaimer')}
           </div>
           <div className="flex gap-4 text-xs text-muted-foreground items-center">
             <span className="cursor-pointer hover:text-foreground transition-colors">{t('privacy')}</span>

@@ -5,7 +5,7 @@ export type Lang = "en" | "ar";
 export const translations = {
   en: {
     // ── Nav / Global ──
-    appName: "AI Startup Toolkit",
+    appName: "Polaris Arabia",
     appTagline: "Valuation · Equity · Fundraising · Resources",
     signIn: "Sign in",
     signOut: "Sign out",
@@ -65,7 +65,7 @@ export const translations = {
 
     // CTA
     ctaTitle: "Ready to build with clarity?",
-    ctaSubtitle: "Join thousands of founders using AI Startup Toolkit to make better decisions, faster.",
+    ctaSubtitle: "Join thousands of founders using Polaris Arabia to make better decisions, faster.",
 
     // Footer
     footerDisclaimer: "All calculations are estimates only and do not constitute financial advice.",
@@ -84,7 +84,7 @@ export const translations = {
     invalidCredentials: "Invalid email or password",
 
     registerTitle: "Create your account",
-    registerSubtitle: "Join thousands of founders using AI Startup Toolkit",
+    registerSubtitle: "Join thousands of founders using Polaris Arabia",
     nameLabel: "Full name",
     confirmPasswordLabel: "Confirm password",
     registerBtn: "Create account",
@@ -287,7 +287,7 @@ export const translations = {
 
   ar: {
     // ── Nav / Global ──
-    appName: "أدوات الشركات الناشئة بالذكاء الاصطناعي",
+    appName: "Polaris Arabia",
     appTagline: "التقييم · حقوق الملكية · جمع التمويل · الموارد",
     signIn: "تسجيل الدخول",
     signOut: "تسجيل الخروج",

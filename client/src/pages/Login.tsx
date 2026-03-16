@@ -79,7 +79,7 @@ export default function Login() {
         </div>
 
         <div className="text-xs" style={{ color: 'oklch(0.4 0.03 240)' }}>
-          © {new Date().getFullYear()} AI Startup Toolkit. {t('footerDisclaimer')}
+          © {new Date().getFullYear()} Polaris Arabia. {t('footerDisclaimer')}
         </div>
       </div>
 

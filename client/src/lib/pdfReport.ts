@@ -1,5 +1,5 @@
 /**
- * PDF Report Generator — AI Startup Valuation Calculator
+ * PDF Report Generator — Polaris Arabia
  * Uses browser's print-to-PDF via a hidden iframe with styled HTML
  * Design: "Venture Capital Clarity" — Editorial Finance
  */
@@ -270,7 +270,7 @@ export function generatePDFReport(inputs: StartupInputs, summary: ValuationSumma
 
   <!-- Footer -->
   <div class="footer">
-    <span>AI Startup Valuation Calculator</span>
+    <span>Polaris Arabia</span>
     <span>${inputs.companyName} · ${date}</span>
     <span>CONFIDENTIAL</span>
   </div>

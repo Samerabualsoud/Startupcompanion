@@ -1,5 +1,5 @@
 /**
- * Chat Flow Definition — AI Startup Valuation Calculator
+ * Chat Flow Definition — Polaris Arabia
  * Plain-English conversational questions that map to StartupInputs
  * Design: "Venture Capital Clarity" — Editorial Finance
  */

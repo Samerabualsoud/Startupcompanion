@@ -148,3 +148,13 @@
 - [x] Update page title to "Polaris Arabia — Startup Toolkit for MENA Founders"
 - [x] Add Open Graph and Twitter Card meta tags
 - [x] Add robots and author meta tags
+
+## Rebrand & SEO Infrastructure (Round 11)
+- [x] Rebrand UI: i18n.ts appName → "Polaris Arabia" (en + ar)
+- [x] Rebrand UI: LandingPage.tsx footer to "Polaris Arabia"
+- [x] Rebrand UI: Home.tsx app header to "Polaris Arabia"
+- [x] Rebrand UI: Login/Register/ForgotPassword/ResetPassword/Pricing pages
+- [x] Rebrand UI: PDF report and full report generators
+- [x] Generate sitemap.xml in client/public/ (6 URLs with priorities)
+- [x] Generate robots.txt in client/public/ (blocks /api, /admin, /onboarding)
+- [x] Save checkpoint

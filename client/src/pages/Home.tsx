@@ -1,5 +1,5 @@
 /**
- * Home Page — AI Startup Toolkit (Full Sidebar Navigation)
+ * Home Page — Polaris Arabia (Full Sidebar Navigation)
  * Design: "Venture Capital Clarity" — Editorial Finance
  * Layout: Persistent left sidebar + content area
  */
@@ -314,7 +314,7 @@ export default function Home() {
             </div>
             <div>
               <div className="text-sm font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
-                AI Startup Toolkit
+                Polaris Arabia
               </div>
               <div className="text-[10px] text-muted-foreground font-mono hidden sm:block">
                 Valuation · Equity · Fundraising · Resources
