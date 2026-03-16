@@ -33,8 +33,10 @@ import InvestorCRM from '@/components/InvestorCRM';
 import RunwayOptimizer from '@/components/RunwayOptimizer';
 import FeasibilityEvaluator from '@/components/FeasibilityEvaluator';
 import ResourceDatabase from '@/components/ResourceDatabase';
+import InvestorMatcher from '@/components/InvestorMatcher';
+import AdminDashboard from '@/pages/AdminDashboard';
 
-type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'feasibility' | 'resources';
+type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'feasibility' | 'resources' | 'matching' | 'admin';
 
 interface NavItem {
   id: ToolId;
@@ -65,9 +67,12 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'profile',       label: 'My Startup Profile',    shortLabel: 'My Startup', icon: Building2,   group: 'My Startup' },
   // Database
   { id: 'resources',     label: 'Investor Database',     shortLabel: 'Database',   icon: Building2,   group: 'Database',     badge: 'New' },
+  { id: 'matching',      label: 'Investor Matching',     shortLabel: 'Matching',   icon: Target,      group: 'Database',     badge: 'AI' },
+  // Admin
+  { id: 'admin',         label: 'Admin Dashboard',       shortLabel: 'Admin',      icon: Gauge,       group: 'Admin' },
 ];
 
-const GROUPS = ['Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources', 'Database', 'My Startup'];
+const GROUPS = ['Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources', 'Database', 'My Startup', 'Admin'];
 
 const TOOL_COLORS: Record<ToolId, string> = {
   feasibility: '#6366F1',
@@ -82,6 +87,8 @@ const TOOL_COLORS: Record<ToolId, string> = {
   runway: '#059669',
   profile: '#2D4A6B',
   resources: '#10B981',
+  matching: '#C4614A',
+  admin: '#8B4A38',
 };
 
 export default function Home() {
@@ -248,6 +255,8 @@ export default function Home() {
       case 'profile':         return <StartupProfile />;
       case 'feasibility':     return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><FeasibilityEvaluator /></div>;
       case 'resources':       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ResourceDatabase /></div>;
+      case 'matching':        return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><InvestorMatcher /></div>;
+      case 'admin':           return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><AdminDashboard /></div>;
       default: return null;
     }
   };

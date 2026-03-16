@@ -77,3 +77,13 @@
 - [ ] Save valuations to database
 - [ ] Admin panel to verify KYC community members
 - [ ] Startup-to-investor matching engine
+
+## Bug Fixes
+- [x] Fix sign in / sign up auth issues (missing cookie-parser middleware)
+
+## New Features (Round 3)
+- [x] Forgot password flow (/forgot-password, /reset-password, passwordResetRouter)
+- [x] Startup-to-investor matching engine (matchingRouter + InvestorMatcher UI)
+- [x] Admin dashboard for reviewing/verifying community KYC submissions (/admin, adminRouter)
+- [x] Admin tool added to sidebar nav (access-gated to admin role)
+- [x] 15 tests passing, zero TypeScript errors

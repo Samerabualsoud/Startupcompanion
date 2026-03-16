@@ -7,6 +7,9 @@ import { feasibilityRouter } from './feasibilityRouter';
 import { inferenceRouter } from './inferenceRouter';
 import { resourcesRouter } from './resourcesRouter';
 import { kycRouter } from './kycRouter';
+import { passwordResetRouter } from './passwordResetRouter';
+import { adminRouter } from './adminRouter';
+import { matchingRouter } from './matchingRouter';
 
 export const appRouter = router({
   system: systemRouter,
@@ -17,6 +20,9 @@ export const appRouter = router({
   inference: inferenceRouter,
   resources: resourcesRouter,
   kyc: kycRouter,
+  passwordReset: passwordResetRouter,
+  admin: adminRouter,
+  matching: matchingRouter,
 });
 
 export type AppRouter = typeof appRouter;

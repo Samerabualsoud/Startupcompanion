@@ -1,5 +1,6 @@
 import { eq, and, or, like, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
+import crypto from "crypto";
 import {
   users, InsertUser,
   startupProfiles, InsertStartupProfile,
@@ -7,6 +8,9 @@ import {
   savedValuations, InsertSavedValuation,
   milestones, InsertMilestone,
   vcFirms, angelInvestors, grants, ventureLawyers,
+  kycVcProfiles, kycAngelProfiles, kycLawyerProfiles, kycStartupProfiles,
+  passwordResetTokens,
+  type KycVcProfile, type KycAngelProfile, type KycLawyerProfile, type KycStartupProfile,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -220,10 +224,6 @@ export async function getVentureLawyers(filters?: { region?: string; specializat
 }
 
 // ── KYC Helpers ────────────────────────────────────────────────────────────
-import {
-  kycVcProfiles, kycAngelProfiles, kycLawyerProfiles, kycStartupProfiles,
-  KycVcProfile, KycAngelProfile, KycLawyerProfile, KycStartupProfile
-} from "../drizzle/schema";
 
 export async function setUserKycCompleted(userId: number, userType: "startup" | "vc" | "angel" | "venture_lawyer" | "other") {
   const db = await getDb();
@@ -331,4 +331,79 @@ export async function getKycStartupProfile(userId: number) {
   if (!db) return null;
   const result = await db.select().from(kycStartupProfiles).where(eq(kycStartupProfiles.userId, userId)).limit(1);
   return result[0] ?? null;
+}
+
+// ── Password Reset Tokens ──────────────────────────────────────────────────
+
+export async function createPasswordResetToken(userId: number): Promise<string> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Invalidate any existing tokens for this user
+  await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, userId));
+  const token = crypto.randomBytes(48).toString("hex");
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+  await db.insert(passwordResetTokens).values({ userId, token, expiresAt });
+  return token;
+}
+
+export async function getPasswordResetToken(token: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(passwordResetTokens).where(eq(passwordResetTokens.token, token)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function markPasswordResetTokenUsed(token: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(passwordResetTokens).set({ usedAt: new Date() }).where(eq(passwordResetTokens.token, token));
+}
+
+export async function updateUserPassword(userId: number, passwordHash: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(users).set({ passwordHash }).where(eq(users.id, userId));
+}
+
+// ── Admin: KYC Review ──────────────────────────────────────────────────────
+export async function getAllKycSubmissions() {
+  const db = await getDb();
+  if (!db) return { vcs: [], angels: [], lawyers: [], startups: [] };
+  const [vcs, angels, lawyers, startups] = await Promise.all([
+    db.select().from(kycVcProfiles),
+    db.select().from(kycAngelProfiles),
+    db.select().from(kycLawyerProfiles),
+    db.select().from(kycStartupProfiles),
+  ]);
+  return { vcs, angels, lawyers, startups };
+}
+
+export async function verifyKycSubmission(type: "vc" | "angel" | "lawyer" | "startup", id: number, verified: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  if (type === "vc") await db.update(kycVcProfiles).set({ isVerified: verified }).where(eq(kycVcProfiles.id, id));
+  else if (type === "angel") await db.update(kycAngelProfiles).set({ isVerified: verified }).where(eq(kycAngelProfiles.id, id));
+  else if (type === "lawyer") await db.update(kycLawyerProfiles).set({ isVerified: verified }).where(eq(kycLawyerProfiles.id, id));
+  else if (type === "startup") await db.update(kycStartupProfiles).set({ isVerified: verified }).where(eq(kycStartupProfiles.id, id));
+}
+
+export async function setKycPublicStatus(type: "vc" | "angel" | "lawyer" | "startup", id: number, isPublic: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  if (type === "vc") await db.update(kycVcProfiles).set({ isPublic }).where(eq(kycVcProfiles.id, id));
+  else if (type === "angel") await db.update(kycAngelProfiles).set({ isPublic }).where(eq(kycAngelProfiles.id, id));
+  else if (type === "lawyer") await db.update(kycLawyerProfiles).set({ isPublic }).where(eq(kycLawyerProfiles.id, id));
+  else if (type === "startup") await db.update(kycStartupProfiles).set({ isPublic }).where(eq(kycStartupProfiles.id, id));
+}
+
+export async function getAllUsers(limit = 50, offset = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(users).limit(limit).offset(offset);
+}
+
+export async function setUserRole(userId: number, role: "user" | "admin") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(users).set({ role }).where(eq(users.id, userId));
 }
