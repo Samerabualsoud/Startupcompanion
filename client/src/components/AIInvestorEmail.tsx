@@ -39,7 +39,7 @@ function CopyButton({ text }: { text: string }) {
 }
 
 export default function AIInvestorEmail() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [form, setForm] = useState({
     startupName: '', founderName: '', sector: '', stage: 'Seed',
     oneLiner: '', traction: '', askAmount: '',
@@ -60,7 +60,7 @@ export default function AIInvestorEmail() {
       toast.error('Please fill in all required fields');
       return;
     }
-    mutation.mutate(form);
+    mutation.mutate({ ...form, language: lang === 'ar' ? 'arabic' : 'english' });
   };
 
   return (

@@ -78,7 +78,7 @@ const newGrant = (): GrantRow => ({
 });
 
 export default function ESOPPlanner() {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, lang } = useLanguage();
   const [inputs, setInputs] = useState<ESOPInputs>({
     companyName: '',
     stage: 'seed',
@@ -220,6 +220,7 @@ export default function ESOPPlanner() {
       seniorHires: inputs.seniorHires,
       jurisdiction: inputs.jurisdiction,
       nextRoundSize: inputs.nextRoundSize,
+      language: lang === 'ar' ? 'arabic' : 'english',
     });
   };
 

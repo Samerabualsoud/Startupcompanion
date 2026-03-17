@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -131,6 +132,7 @@ const fmtPct = (n: number) => `${n.toFixed(1)}%`;
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function VestingScheduleBuilder() {
+  const { lang } = useLanguage();
   const [stakeholders, setStakeholders] = useState<Stakeholder[]>(DEFAULT_STAKEHOLDERS);
   const [milestones, setMilestones] = useState<MilestoneEvent[]>([]);
   const [showAdd, setShowAdd] = useState(false);
@@ -173,6 +175,7 @@ export default function VestingScheduleBuilder() {
         vestingType: s.vestingType,
       })),
       totalShares,
+      language: lang === 'ar' ? 'arabic' : 'english',
     });
   };
 

@@ -31,7 +31,7 @@ type DDResult = {
 };
 
 export default function AIDueDiligence() {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, lang } = useLanguage();
   const [form, setForm] = useState({ companyName: '', sector: '', stage: 'Seed', description: '' });
   const [result, setResult] = useState<DDResult | null>(null);
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
@@ -99,7 +99,7 @@ export default function AIDueDiligence() {
 
       {/* Form */}
       {!result && (
-        <form onSubmit={e => { e.preventDefault(); if (!form.companyName || !form.sector || !form.description) { toast.error('Fill all fields'); return; } mutation.mutate(form); }} className="space-y-4 mb-6">
+        <form onSubmit={e => { e.preventDefault(); if (!form.companyName || !form.sector || !form.description) { toast.error('Fill all fields'); return; } mutation.mutate({ ...form, language: lang === 'ar' ? 'arabic' : 'english' }); }} className="space-y-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label className="text-xs font-semibold mb-1.5 block">Company Name *</Label>

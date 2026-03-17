@@ -23,16 +23,20 @@ export const aiRouter = router({
         targetMarket: z.string().min(1),
         productDescription: z.string().min(10),
         geography: z.string().default("Global"),
+        language: z.enum(['english', 'arabic']).default('english'),
       })
     )
     .mutation(async ({ input }) => {
+      const langNote = input.language === 'arabic'
+        ? ' IMPORTANT: Write ALL text values in the JSON response in Arabic (العربية). Keep JSON keys in English.'
+        : '';
       const response = await invokeLLM({
         messages: [
           {
             role: "system",
             content: `You are a senior market research analyst at a top-tier venture capital firm. 
 You produce comprehensive, data-driven market research reports for startups. 
-Always respond with valid JSON only — no markdown, no code fences, no extra text.`,
+Always respond with valid JSON only — no markdown, no code fences, no extra text.${langNote}`,
           },
           {
             role: "user",
@@ -159,16 +163,20 @@ Return a JSON object with exactly this structure:
         sector: z.string().min(1),
         stage: z.string().min(1),
         description: z.string().min(10),
+        language: z.enum(['english', 'arabic']).default('english'),
       })
     )
     .mutation(async ({ input }) => {
+      const langNote = input.language === 'arabic'
+        ? ' IMPORTANT: Write ALL text values in the JSON response in Arabic (العربية). Keep JSON keys in English.'
+        : '';
       const response = await invokeLLM({
         messages: [
           {
             role: "system",
             content: `You are a venture capital due diligence expert. 
 Generate comprehensive, stage-appropriate due diligence checklists for startups.
-Always respond with valid JSON only.`,
+Always respond with valid JSON only.${langNote}`,
           },
           {
             role: "user",
@@ -266,16 +274,20 @@ Return JSON with exactly this structure:
         investorFirm: z.string().optional().default(""),
         investorFocus: z.string().optional().default(""),
         emailTone: z.enum(["formal", "conversational", "bold"]).default("conversational"),
+        language: z.enum(['english', 'arabic']).default('english'),
       })
     )
     .mutation(async ({ input }) => {
+      const langNote = input.language === 'arabic'
+        ? ' IMPORTANT: Write ALL text values in the JSON response in Arabic (العربية). Keep JSON keys in English.'
+        : '';
       const response = await invokeLLM({
         messages: [
           {
             role: "system",
             content: `You are an expert startup fundraising advisor who has helped founders raise over $500M. 
 You write highly personalized, compelling investor outreach emails that get responses.
-Always respond with valid JSON only.`,
+Always respond with valid JSON only.${langNote}`,
           },
           {
             role: "user",
@@ -339,16 +351,20 @@ Return JSON with exactly this structure:
         termSheetText: z.string().min(50),
         companyStage: z.string().default("Seed"),
         founderExperience: z.enum(["first-time", "experienced", "serial"]).default("first-time"),
+        language: z.enum(['english', 'arabic']).default('english'),
       })
     )
     .mutation(async ({ input }) => {
+      const langNote = input.language === 'arabic'
+        ? ' IMPORTANT: Write ALL text values in the JSON response in Arabic (العربية). Keep JSON keys in English.'
+        : '';
       const response = await invokeLLM({
         messages: [
           {
             role: "system",
             content: `You are a top-tier venture lawyer and startup advisor who has reviewed thousands of term sheets.
 You explain complex legal terms in plain English and identify founder-unfriendly clauses.
-Always respond with valid JSON only.`,
+Always respond with valid JSON only.${langNote}`,
           },
           {
             role: "user",
@@ -549,12 +565,16 @@ Return JSON with exactly this structure:
           stage: z.string().optional().default(""),
           country: z.string().optional().default(""),
         }).optional(),
+        language: z.enum(['english', 'arabic']).default('english'),
       })
     )
     .mutation(async ({ input }) => {
       const contextStr = input.startupContext
         ? `\nStartup context: ${JSON.stringify(input.startupContext)}`
         : "";
+      const langNote = input.language === 'arabic'
+        ? '\nIMPORTANT: Respond entirely in Arabic (العربية).'
+        : '';
 
       const response = await invokeLLM({
         messages: [
@@ -564,7 +584,7 @@ Return JSON with exactly this structure:
 You have helped hundreds of founders raise from pre-seed to Series C.
 You give specific, actionable, honest advice — not generic platitudes.
 You know the MENA, US, European, and Asian VC ecosystems deeply.
-Keep responses concise (3-5 paragraphs max) but highly actionable.${contextStr}`,
+Keep responses concise (3-5 paragraphs max) but highly actionable.${contextStr}${langNote}`,
           },
           ...input.messages,
         ],
@@ -590,9 +610,13 @@ Keep responses concise (3-5 paragraphs max) but highly actionable.${contextStr}`
           })
         ),
         totalShares: z.number(),
+        language: z.enum(['english', 'arabic']).default('english'),
       })
     )
     .mutation(async ({ input }) => {
+      const langNote = input.language === 'arabic'
+        ? '\nIMPORTANT: Respond entirely in Arabic (العربية).'
+        : '';
       const stakeholderSummary = input.stakeholders
         .map(
           (s) =>
@@ -607,7 +631,7 @@ Keep responses concise (3-5 paragraphs max) but highly actionable.${contextStr}`
             content: `You are a startup equity and compensation expert with deep experience in VC-backed companies.
 You review vesting schedules and provide concise, actionable feedback.
 Focus on: fairness between founders, investor-friendliness, market norms, and red flags.
-Keep your response to 3-5 paragraphs. Be direct and specific.`,
+Keep your response to 3-5 paragraphs. Be direct and specific.${langNote}`,
           },
           {
             role: 'user',
@@ -810,14 +834,18 @@ Include: greeting, grant details table, vesting schedule explanation, exercise i
         seniorHires: z.number(),
         jurisdiction: z.string(),
         nextRoundSize: z.number().optional(),
+        language: z.enum(['english', 'arabic']).default('english'),
       })
     )
     .mutation(async ({ input }) => {
+      const langNote = input.language === 'arabic'
+        ? '\nIMPORTANT: Respond entirely in Arabic (العربية).'
+        : '';
       const response = await invokeLLM({
         messages: [
           {
             role: 'system',
-            content: `You are a startup equity compensation expert. Provide specific, actionable advice on ESOP/option pool sizing, strike prices, and vesting structures. Be concise and practical.`,
+            content: `You are a startup equity compensation expert. Provide specific, actionable advice on ESOP/option pool sizing, strike prices, and vesting structures. Be concise and practical.${langNote}`,
           },
           {
             role: 'user',

@@ -27,7 +27,7 @@ const STARTER_QUESTIONS = [
 ];
 
 export default function AIFundraisingAdvisor() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -61,6 +61,7 @@ export default function AIFundraisingAdvisor() {
     mutation.mutate({
       messages: newMessages,
       startupContext: startupContext.name || startupContext.sector ? startupContext : undefined,
+      language: lang === 'ar' ? 'arabic' : 'english',
     });
   };
 

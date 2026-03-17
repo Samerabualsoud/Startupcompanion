@@ -46,7 +46,7 @@ No-shop Period: 45 days
 Closing Conditions: Satisfactory due diligence, legal documentation`;
 
 export default function AITermSheetAnalyzer() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [termSheetText, setTermSheetText] = useState('');
   const [companyStage, setCompanyStage] = useState('Seed');
   const [founderExperience, setFounderExperience] = useState<'first-time' | 'experienced' | 'serial'>('first-time');
@@ -136,7 +136,7 @@ export default function AITermSheetAnalyzer() {
           <Button
             onClick={() => {
               if (termSheetText.length < 50) { toast.error('Please paste a term sheet (at least 50 characters)'); return; }
-              mutation.mutate({ termSheetText, companyStage, founderExperience });
+              mutation.mutate({ termSheetText, companyStage, founderExperience, language: lang === 'ar' ? 'arabic' : 'english' });
             }}
             disabled={mutation.isPending}
             className="w-full h-11 text-sm font-semibold"

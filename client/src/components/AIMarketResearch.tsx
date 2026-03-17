@@ -34,7 +34,7 @@ type ResearchResult = {
 };
 
 export default function AIMarketResearch() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [form, setForm] = useState({
     companyName: '',
     sector: '',
@@ -61,7 +61,7 @@ export default function AIMarketResearch() {
       toast.error('Please fill in all required fields');
       return;
     }
-    mutation.mutate(form);
+    mutation.mutate({ ...form, language: lang === 'ar' ? 'arabic' : 'english' });
   };
 
   const impactColor = (impact: string) => {
