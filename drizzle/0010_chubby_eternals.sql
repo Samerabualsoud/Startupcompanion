@@ -1,0 +1,21 @@
+CREATE TABLE `cogs_calculations` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`userId` int NOT NULL,
+	`name` varchar(256) NOT NULL,
+	`businessModel` enum('saas','ecommerce','marketplace','hardware','services','manufacturing','other') NOT NULL DEFAULT 'saas',
+	`currency` varchar(8) NOT NULL DEFAULT 'USD',
+	`revenuePerUnit` float NOT NULL DEFAULT 0,
+	`unitsPerMonth` float NOT NULL DEFAULT 0,
+	`directCostsJson` json NOT NULL,
+	`indirectCostsJson` json NOT NULL,
+	`totalCOGS` float,
+	`grossProfit` float,
+	`grossMarginPct` float,
+	`totalOpEx` float,
+	`ebitda` float,
+	`breakEvenUnits` float,
+	`notes` text,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `cogs_calculations_id` PRIMARY KEY(`id`)
+);

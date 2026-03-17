@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { AnimatePresence } from 'framer-motion';
 import { trpc } from '@/lib/trpc';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { useStartup } from '@/contexts/StartupContext';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartTooltip,
   ResponsiveContainer, Cell, ReferenceLine,
@@ -159,10 +160,12 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
   const { isAuthenticated } = useAuth();
   const { isRTL } = useLanguage();
   const TABS = isRTL ? TABS_AR : TABS_EN;
+  const { refresh: refreshStartupContext } = useStartup();
 
   const saveValuationMutation = trpc.profile.saveValuation.useMutation({
     onSuccess: () => {
       toast.success(isRTL ? 'تم حفظ السيناريو في ملفك الشخصي!' : 'Scenario saved to your profile!');
+      refreshStartupContext();
     },
     onError: () => {
       toast.error(isRTL ? 'فشل الحفظ في الملف الشخصي. تم الحفظ محلياً فقط.' : 'Failed to save to profile. Saved locally only.');

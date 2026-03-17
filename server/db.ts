@@ -14,6 +14,7 @@ import {
   type KycVcProfile, type KycAngelProfile, type KycLawyerProfile, type KycStartupProfile,
   type InvestorContact, type InsertInvestorContact,
   valuationHistory, type InsertValuationHistory,
+  cogsCalculations, type InsertCogsCalculation,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -477,4 +478,45 @@ export async function deleteValuationHistoryEntry(userId: number, entryId: numbe
   if (!db) throw new Error("Database not available");
   await db.delete(valuationHistory)
     .where(and(eq(valuationHistory.id, entryId), eq(valuationHistory.userId, userId)));
+}
+
+// ── COGS & Cost Calculations ───────────────────────────────────────────────
+export async function getCogsCalculations(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(cogsCalculations)
+    .where(eq(cogsCalculations.userId, userId))
+    .orderBy(cogsCalculations.updatedAt);
+}
+
+export async function saveCogsCalculation(userId: number, data: Omit<InsertCogsCalculation, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(cogsCalculations).values({ ...data, userId });
+  const inserted = await db.select().from(cogsCalculations)
+    .where(eq(cogsCalculations.userId, userId))
+    .orderBy(cogsCalculations.createdAt)
+    .limit(1);
+  // Return the last inserted row
+  const all = await db.select().from(cogsCalculations).where(eq(cogsCalculations.userId, userId));
+  return all[all.length - 1] ?? null;
+}
+
+export async function updateCogsCalculation(userId: number, id: number, data: Partial<Omit<InsertCogsCalculation, 'id' | 'userId' | 'createdAt'>>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(cogsCalculations)
+    .set({ ...data, updatedAt: new Date() })
+    .where(and(eq(cogsCalculations.id, id), eq(cogsCalculations.userId, userId)));
+  const result = await db.select().from(cogsCalculations)
+    .where(and(eq(cogsCalculations.id, id), eq(cogsCalculations.userId, userId)))
+    .limit(1);
+  return result[0] ?? null;
+}
+
+export async function deleteCogsCalculation(userId: number, id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(cogsCalculations)
+    .where(and(eq(cogsCalculations.id, id), eq(cogsCalculations.userId, userId)));
 }

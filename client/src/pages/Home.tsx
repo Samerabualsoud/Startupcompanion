@@ -53,7 +53,9 @@ import NDAGenerator from '@/components/NDAGenerator';
 import ESOPPlanner from '@/components/ESOPPlanner';
 import StartupDirectory from '@/components/StartupDirectory';
 import ValuationTimeline from '@/components/ValuationTimeline';
-type ToolId = 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'resources' | 'matching' | 'admin' | 'feasibility' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'valuation-timeline';
+import FounderDashboard from '@/components/FounderDashboard';
+import COGSCalculator from '@/components/COGSCalculator';
+type ToolId = 'dashboard' | 'cogs' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'resources' | 'matching' | 'admin' | 'feasibility' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'valuation-timeline';
 
 interface NavItem {
   id: ToolId;
@@ -66,6 +68,9 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  // Overview
+  { id: 'dashboard',     label: 'Founder Dashboard',     shortLabel: 'Dashboard',   navKey: 'navDashboard',   icon: Gauge,       group: 'Overview',     badge: undefined },
+  { id: 'cogs',          label: 'COGS Calculator',        shortLabel: 'COGS',        navKey: 'navCOGS',        icon: DollarSign,  group: 'Overview',     badge: 'New' },
   // Valuation
   { id: 'valuation',     label: 'Valuation Calculator', shortLabel: 'Valuation',   navKey: 'navValuation',   icon: TrendingUp,  group: 'Valuation',    badge: '7 methods' },
   // Equity & Funding
@@ -107,9 +112,10 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'ai-due-diligence',       label: 'AI Due Diligence',       shortLabel: 'Due Diligence',   navKey: 'navAIDueDiligence', icon: ClipboardCheck,group: 'AI Tools', badge: 'AI' },
 ];
 
-const GROUPS = ['Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources', 'Legal & Documents', 'Database', 'My Startup', 'AI Tools', 'Admin'];
-
+const GROUPS = ['Overview', 'Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources', 'Legal & Documents', 'Database', 'My Startup', 'AI Tools', 'Admin'];
 const TOOL_COLORS: Record<ToolId, string> = {
+  dashboard: '#0F1B2D',
+  cogs: '#059669',
   feasibility: '#6366F1',
   valuation: '#C4614A',
   accelerators: '#10B981',
@@ -147,7 +153,7 @@ export default function Home() {
   const [, navigate] = useLocation();
   const { t, isRTL } = useLanguage();
 
-  const [activeTool, setActiveTool] = useState<ToolId>('valuation');
+  const [activeTool, setActiveTool] = useState<ToolId>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatAnswers, setChatAnswers] = useState<Record<string, any> | null>(null);
   const [chatComplete, setChatComplete] = useState(false);
@@ -328,6 +334,8 @@ export default function Home() {
       case 'esop':                       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ESOPPlanner /></div>;
       case 'startup-directory':          return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><StartupDirectory /></div>;
       case 'valuation-timeline':         return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ValuationTimeline /></div>;
+      case 'dashboard':                  return <FounderDashboard onNavigate={(id) => setActiveTool(id as ToolId)} />;
+      case 'cogs':                       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><COGSCalculator /></div>;
       default: return null;
     }
   };
@@ -438,7 +446,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden main-layout" style={{ height: 'calc(100vh - 57px)' }}>
+      <div className={`flex flex-1 overflow-hidden main-layout ${isRTL ? 'flex-row-reverse' : 'flex-row'}`} style={{ height: 'calc(100vh - 57px)' }}>
 
         {/* ── Sidebar ── */}
         {/* Mobile overlay */}
@@ -459,10 +467,10 @@ export default function Home() {
           className={`
             fixed lg:relative z-40 lg:z-auto
             flex flex-col shrink-0
-            border-r border-border
             transition-transform duration-300 ease-in-out
-            ${sidebarOpen ? 'translate-x-0' : isRTL ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0'}
             w-56 h-full
+            ${isRTL ? 'right-0 border-l border-border' : 'left-0 border-r border-border'}
+            ${sidebarOpen ? 'translate-x-0' : isRTL ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}
           style={{ background: 'oklch(0.993 0.003 80)', top: 57, height: 'calc(100vh - 57px)' }}
         >
@@ -472,6 +480,7 @@ export default function Home() {
               // Hide admin group from non-admins
               if (group === 'Admin' && user?.role !== 'admin') return null;
               const groupLabel: Record<string, string> = {
+                'Overview': isRTL ? 'نظرة عامة' : 'Overview',
                 'Valuation': t('navGroupValuation'),
                 'Equity & Cap Table': t('navGroupEquity'),
                 'Fundraising': t('navGroupFundraising'),
@@ -495,7 +504,7 @@ export default function Home() {
                       <button
                         key={item.id}
                         onClick={() => { setActiveTool(item.id); setSidebarOpen(false); }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg mb-0.5 text-left transition-all ${
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg mb-0.5 transition-all ${isRTL ? 'text-right flex-row-reverse' : 'text-left'} ${
                           isActive
                             ? 'text-white shadow-sm'
                             : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
@@ -515,7 +524,7 @@ export default function Home() {
                             {item.badge}
                           </span>
                         )}
-                        {isActive && <ChevronRight className="w-3 h-3 shrink-0 opacity-70" />}
+                        {isActive && <ChevronRight className={`w-3 h-3 shrink-0 opacity-70 ${isRTL ? 'rotate-180' : ''}`} />}
                       </button>
                     );
                   })}
@@ -543,7 +552,7 @@ export default function Home() {
         {/* ── Main Content ── */}
         <main className="flex flex-col flex-1 overflow-hidden">
           {/* Tool header bar */}
-          {activeTool !== 'valuation' && (
+          {activeTool !== 'valuation' && activeTool !== 'dashboard' && (
             <div className="shrink-0 px-5 py-3 border-b border-border bg-card flex items-center gap-3">
               <div className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm" style={{ background: TOOL_COLORS[activeTool] }}>
                 {(() => { const Icon = activeItem.icon; return <Icon className="w-3.5 h-3.5 text-white" />; })()}

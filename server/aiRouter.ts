@@ -873,5 +873,81 @@ Provide:
 
       return { analysis: response.choices[0].message.content as string };
     }),
+
+  // ── COGS AI Analysis ─────────────────────────────────────────────────────────
+  analyzeCOGS: protectedProcedure
+    .input(
+      z.object({
+        businessModel: z.string(),
+        revenuePerUnit: z.number(),
+        unitsPerMonth: z.number(),
+        totalRevenue: z.number(),
+        totalCOGS: z.number(),
+        grossMarginPct: z.number(),
+        totalOpEx: z.number(),
+        ebitda: z.number(),
+        breakEvenUnits: z.number(),
+        directCosts: z.array(z.object({ name: z.string(), amount: z.number(), type: z.string() })),
+        indirectCosts: z.array(z.object({ name: z.string(), amount: z.number(), category: z.string() })),
+        currency: z.string().default('USD'),
+        language: z.enum(['english', 'arabic']).default('english'),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const langNote = input.language === 'arabic'
+        ? '\nIMPORTANT: Respond entirely in Arabic (\u0627\u0644\u0639\u0631\u0628\u064a\u0629). Use Arabic financial terminology.'
+        : '';
+
+      const topDirectCosts = input.directCosts
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, 5)
+        .map(c => `  - ${c.name}: ${input.currency} ${c.amount.toLocaleString()} (${c.type})`)
+        .join('\n');
+
+      const topIndirectCosts = input.indirectCosts
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, 5)
+        .map(c => `  - ${c.name}: ${input.currency} ${c.amount.toLocaleString()} (${c.category})`)
+        .join('\n');
+
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: 'system',
+            content: `You are a CFO-level financial advisor specializing in startup unit economics and cost structure optimization. Provide specific, actionable, data-driven analysis. Use industry benchmarks relevant to the business model. Be direct and practical.${langNote}`,
+          },
+          {
+            role: 'user',
+            content: `Analyze this startup's cost structure and provide optimization recommendations:
+
+Business Model: ${input.businessModel}
+Monthly Revenue: ${input.currency} ${input.totalRevenue.toLocaleString()}
+Monthly COGS: ${input.currency} ${input.totalCOGS.toLocaleString()}
+Gross Margin: ${input.grossMarginPct.toFixed(1)}%
+Monthly OpEx: ${input.currency} ${input.totalOpEx.toLocaleString()}
+EBITDA: ${input.currency} ${input.ebitda.toLocaleString()}
+Break-even Units: ${input.breakEvenUnits.toFixed(0)}
+Current Units/Month: ${input.unitsPerMonth}
+Revenue per Unit: ${input.currency} ${input.revenuePerUnit}
+
+Top Direct Costs (COGS):
+${topDirectCosts || '  (none entered)'}
+
+Top Indirect Costs (OpEx):
+${topIndirectCosts || '  (none entered)'}
+
+Provide:
+1. **Gross Margin Assessment**: Is ${input.grossMarginPct.toFixed(1)}% healthy for a ${input.businessModel} business? What is the industry benchmark?
+2. **Top 3 Cost Reduction Opportunities**: Specific, actionable ways to reduce COGS
+3. **Unit Economics Health**: Is the current revenue-per-unit vs cost-per-unit ratio sustainable?
+4. **Break-even Analysis**: At ${input.breakEvenUnits.toFixed(0)} units, how realistic is this target?
+5. **OpEx Efficiency**: Are the indirect costs proportionate to revenue?
+6. **Path to Profitability**: What specific changes would move EBITDA to positive?
+7. **Red Flags**: Any concerning cost patterns that need immediate attention?`,
+          },
+        ],
+      });
+      return { analysis: response.choices[0].message.content as string };
+    }),
 });
 

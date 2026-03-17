@@ -364,3 +364,31 @@ export const valuationHistory = mysqlTable("valuation_history", {
 });
 export type ValuationHistory = typeof valuationHistory.$inferSelect;
 export type InsertValuationHistory = typeof valuationHistory.$inferInsert;
+
+// ── COGS & Cost Calculations ───────────────────────────────────────────────
+export const cogsCalculations = mysqlTable("cogs_calculations", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 256 }).notNull(),
+  businessModel: mysqlEnum("businessModel", ["saas", "ecommerce", "marketplace", "hardware", "services", "manufacturing", "other"]).default("saas").notNull(),
+  currency: varchar("currency", { length: 8 }).notNull().default("USD"),
+  // Revenue
+  revenuePerUnit: float("revenuePerUnit").notNull().default(0),
+  unitsPerMonth: float("unitsPerMonth").notNull().default(0),
+  // Direct Costs (COGS) - stored as JSON array
+  directCostsJson: json("directCostsJson").notNull(),
+  // Indirect / Operating Costs (OpEx) - stored as JSON array
+  indirectCostsJson: json("indirectCostsJson").notNull(),
+  // Computed results (stored for history/trending)
+  totalCOGS: float("totalCOGS"),
+  grossProfit: float("grossProfit"),
+  grossMarginPct: float("grossMarginPct"),
+  totalOpEx: float("totalOpEx"),
+  ebitda: float("ebitda"),
+  breakEvenUnits: float("breakEvenUnits"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type CogsCalculation = typeof cogsCalculations.$inferSelect;
+export type InsertCogsCalculation = typeof cogsCalculations.$inferInsert;

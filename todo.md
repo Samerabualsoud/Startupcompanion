@@ -243,3 +243,26 @@
 - [x] Cleared stale Vite cache causing false Babel error
 - [x] 0 TypeScript errors, 31 tests passing
 - [x] Save checkpoint
+
+## Round 21 — COGS & Cost Calculator
+- [x] Add cogsCalculations table to drizzle/schema.ts and push migration
+- [x] Add COGS DB helpers to server/db.ts
+- [x] Create server/cogsRouter.ts with save/load/delete procedures
+- [x] Add AI cost analysis procedure to server/aiRouter.ts
+- [x] Build COGSCalculator.tsx component (direct costs, indirect costs, gross margin, unit economics, break-even, AI analysis)
+- [x] Add full Arabic/English translations to i18n.ts
+- [x] Wire into sidebar nav (Overview group) in Home.tsx
+- [x] 0 TypeScript errors, all tests passing
+- [x] Save checkpoint
+
+## Round 22 — Connected Founder Workspace & Dashboard
+- [x] Audit current data flow between tools and identify shared data points
+- [x] Create StartupContext: React context that holds all shared startup data (valuation, COGS, ESOP, profile)
+- [x] Build FounderDashboard page with KPI cards, valuation snapshot, COGS summary, ESOP pool, fundraising readiness score, recent activity feed
+- [x] Wire Valuation tool: on save, refresh StartupContext
+- [x] Set FounderDashboard as default active tool (opens on app load)
+- [x] Add Dashboard + COGS to sidebar as first items (Overview group)
+- [x] Make sidebar RTL-aware: switch to right side for Arabic, flip nav button layout and chevron
+- [x] Add i18n keys for dashboard and COGS strings (EN + AR)
+- [x] 0 TypeScript errors, all tests passing
+- [ ] Save checkpoint

@@ -71,6 +71,13 @@
       "when": 1773697595533,
       "tag": "0009_supreme_black_bird",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1773785622894,
+      "tag": "0010_chubby_eternals",
+      "breakpoints": true
     }
   ]
 }

@@ -13,6 +13,7 @@ import { matchingRouter } from './matchingRouter';
 import { crmRouter } from './crmRouter';
 import { aiRouter } from './aiRouter';
 import { valuationHistoryRouter } from './valuationHistoryRouter';
+import { cogsRouter } from './cogsRouter';
 
 export const appRouter = router({
   system: systemRouter,
@@ -29,6 +30,7 @@ export const appRouter = router({
   crm: crmRouter,
   ai: aiRouter,
   valuationHistory: valuationHistoryRouter,
+  cogs: cogsRouter,
 });
 
 export type AppRouter = typeof appRouter;
