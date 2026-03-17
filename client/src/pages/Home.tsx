@@ -12,7 +12,7 @@ import {
   BookOpen, BarChart3, DollarSign, Menu, X, ChevronRight,
   Gauge, Layers, FileDown, Link2, Check, Building2, MessageCircle,
   Mail, FileText, Users2, ClipboardCheck, Calendar, Globe,
-  UserCircle, LogOut, LogIn, Home as HomeIcon
+  UserCircle, LogOut, LogIn, Home as HomeIcon, ShoppingCart, FolderOpen
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -55,7 +55,9 @@ import StartupDirectory from '@/components/StartupDirectory';
 import ValuationTimeline from '@/components/ValuationTimeline';
 import FounderDashboard from '@/components/FounderDashboard';
 import COGSCalculator from '@/components/COGSCalculator';
-type ToolId = 'dashboard' | 'cogs' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'resources' | 'matching' | 'admin' | 'feasibility' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'valuation-timeline';
+import SalesTracker from '@/components/SalesTracker';
+import DataRoom from '@/components/DataRoom';
+type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'resources' | 'matching' | 'admin' | 'feasibility' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'valuation-timeline';
 
 interface NavItem {
   id: ToolId;
@@ -71,6 +73,8 @@ const NAV_ITEMS: NavItem[] = [
   // Overview
   { id: 'dashboard',     label: 'Founder Dashboard',     shortLabel: 'Dashboard',   navKey: 'navDashboard',   icon: Gauge,       group: 'Overview',     badge: undefined },
   { id: 'cogs',          label: 'COGS Calculator',        shortLabel: 'COGS',        navKey: 'navCOGS',        icon: DollarSign,  group: 'Overview',     badge: 'New' },
+  { id: 'sales',         label: 'Sales Tracker',          shortLabel: 'Sales',       navKey: 'navSales',       icon: ShoppingCart, group: 'Overview',    badge: 'New' },
+  { id: 'data-room',     label: 'Data Room',              shortLabel: 'Data Room',   navKey: 'navDataRoom',    icon: FolderOpen,  group: 'My Startup',   badge: 'New' },
   // Valuation
   { id: 'valuation',     label: 'Valuation Calculator', shortLabel: 'Valuation',   navKey: 'navValuation',   icon: TrendingUp,  group: 'Valuation',    badge: '7 methods' },
   // Equity & Funding
@@ -143,6 +147,8 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'esop': '#059669',
   'startup-directory': '#C4614A',
   'valuation-timeline': '#2D4A6B',
+  'sales': '#F59E0B',
+  'data-room': '#2D4A6B',
 };
 
 export default function Home() {
@@ -336,6 +342,8 @@ export default function Home() {
       case 'valuation-timeline':         return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ValuationTimeline /></div>;
       case 'dashboard':                  return <FounderDashboard onNavigate={(id) => setActiveTool(id as ToolId)} />;
       case 'cogs':                       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><COGSCalculator /></div>;
+      case 'sales':                      return <SalesTracker />;
+      case 'data-room':                  return <DataRoom />;
       default: return null;
     }
   };

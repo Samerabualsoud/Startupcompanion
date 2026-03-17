@@ -14,6 +14,9 @@ import { crmRouter } from './crmRouter';
 import { aiRouter } from './aiRouter';
 import { valuationHistoryRouter } from './valuationHistoryRouter';
 import { cogsRouter } from './cogsRouter';
+import { dataRoomRouter } from './dataRoomRouter';
+import { salesRouter } from './salesRouter';
+import { esopRouter } from './esopRouter';
 
 export const appRouter = router({
   system: systemRouter,
@@ -31,6 +34,9 @@ export const appRouter = router({
   ai: aiRouter,
   valuationHistory: valuationHistoryRouter,
   cogs: cogsRouter,
+  dataRoom: dataRoomRouter,
+  sales: salesRouter,
+  esop: esopRouter,
 });
 
 export type AppRouter = typeof appRouter;

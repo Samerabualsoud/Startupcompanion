@@ -78,6 +78,41 @@
       "when": 1773785622894,
       "tag": "0010_chubby_eternals",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1773788749600,
+      "tag": "0011_hard_forgotten_one",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1773789389093,
+      "tag": "0012_thin_marten_broadcloak",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1773790019597,
+      "tag": "0013_sweet_major_mapleleaf",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1773790289373,
+      "tag": "0014_sloppy_cloak",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "5",
+      "when": 1773790320616,
+      "tag": "0015_square_talon",
+      "breakpoints": true
     }
   ]
 }

@@ -265,4 +265,34 @@
 - [x] Make sidebar RTL-aware: switch to right side for Arabic, flip nav button layout and chevron
 - [x] Add i18n keys for dashboard and COGS strings (EN + AR)
 - [x] 0 TypeScript errors, all tests passing
+- [x] Save checkpoint
+
+## Round 23 — Data Room + Sales Tracker + Dashboard Rebuild
+- [x] Add data_rooms, data_room_files, data_room_views tables to schema + push migration
+- [x] Build dataRoomRouter.ts: createRoom, listRooms, uploadFile, deleteFile, generateShareLink, trackView, getActivity
+- [x] Build DataRoom.tsx: file upload, folder view, share modal with link copy, activity log panel
+- [x] Add sales_entries and sales_targets tables to schema + push migration
+- [x] Build salesRouter.ts: addEntry, listEntries, updateEntry, deleteEntry, getAnalytics, setTarget, analyzeSales (AI)
+- [x] Build SalesTracker.tsx: entry log table, revenue trend chart, MoM growth chart, product/channel breakdown, AI sales analysis
+- [x] Rebuild FounderDashboard: equity split pie, ESOP donut, sales KPIs, workspace checklist, all-tools grid
+- [x] Wire Data Room + Sales Tracker to sidebar nav (Overview + My Startup groups)
+- [x] Add i18n keys for Data Room and Sales Tracker (EN + AR)
+- [x] 0 TypeScript errors, all tests passing
+- [ ] Save checkpoint
+
+## Round 23 Bugs & Additions
+- [x] Fix valuation history DB insert error (totalShares int overflow → bigint)
+- [x] AICofounderAgreement.tsx Label error confirmed stale HMR cache — no fix needed
+- [x] Add founder equity split pie chart to FounderDashboard
+- [x] Add ESOP fields (option pool %, vesting schedule) to startup profile team section
+- [x] Add esop_plans table to schema + push migration
+- [x] Build esopRouter.ts: save/load ESOP plan (pool size, grants, vesting)
+- [x] Add Save button to ESOP Planner frontend, persist to DB
+- [x] Wire ESOP data into StartupContext (currentOptionPool, totalShares)
+- [x] Add cap table fields to startup profile (total shares, authorized shares, par value)
+- [x] Fix totalShares overflow: change int to bigint in schema + push migration
+- [x] Add back/edit navigation to valuation chat (go back to any question, change answer, re-run)
+- [x] Build shared FieldInfo tooltip component (info icon + popover with explanation text)
+- [x] Add FieldInfo tooltips to ValuationTimeline and COGSCalculator
+- [x] 0 TypeScript errors, 31 tests passing
 - [ ] Save checkpoint

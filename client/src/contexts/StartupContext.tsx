@@ -18,6 +18,15 @@ import { trpc } from '@/lib/trpc';
 
 // ── Shared types ────────────────────────────────────────────────────────────
 
+export interface TeamMemberEquity {
+  id: number;
+  name: string;
+  role: string;
+  equityPercent: number | null;
+  esopShares: number | null;
+  isFounder: boolean;
+}
+
 export interface StartupSnapshot {
   // Identity
   companyName: string;
@@ -32,8 +41,13 @@ export interface StartupSnapshot {
   grossMargin: number | null;
   revenueGrowthRate: number | null;
   targetRaise: number | null;
-  // Equity
+  // Cap table
   totalShares: number | null;
+  authorizedShares: number | null;
+  parValue: number | null;
+  esopPoolPct: number | null;
+  // Team equity
+  teamMembers: TeamMemberEquity[];
   // Latest valuation
   latestValuation: number | null;
   latestValuationDate: Date | null;
@@ -41,8 +55,16 @@ export interface StartupSnapshot {
   latestGrossMarginPct: number | null;
   latestMonthlyRevenue: number | null;
   latestMonthlyCOGS: number | null;
-  // ESOP
+  // ESOP (from saved plan)
   currentOptionPool: number | null;
+  esopPlanId: number | null;
+  esopTotalShares: number | null;
+  esopPricePerShare: number | null;
+  // Sales
+  totalSalesRevenue: number | null;
+  salesThisMonth: number | null;
+  salesLastMonth: number | null;
+  salesMoMGrowth: number | null;
   // Fundraising readiness score (0–100)
   readinessScore: number | null;
   // Pitch deck score (0–100)
@@ -71,12 +93,23 @@ const DEFAULT_SNAPSHOT: StartupSnapshot = {
   revenueGrowthRate: null,
   targetRaise: null,
   totalShares: null,
+  authorizedShares: null,
+  parValue: null,
+  esopPoolPct: null,
+  teamMembers: [],
   latestValuation: null,
   latestValuationDate: null,
   latestGrossMarginPct: null,
   latestMonthlyRevenue: null,
   latestMonthlyCOGS: null,
   currentOptionPool: null,
+  esopPlanId: null,
+  esopTotalShares: null,
+  esopPricePerShare: null,
+  totalSalesRevenue: null,
+  salesThisMonth: null,
+  salesLastMonth: null,
+  salesMoMGrowth: null,
   readinessScore: null,
   pitchScore: null,
 };
@@ -96,13 +129,18 @@ export function StartupProvider({ children }: { children: ReactNode }) {
     retry: false,
   });
 
+  // Load team members
+  const { data: teamData, isLoading: teamLoading } = trpc.profile.getTeam.useQuery(undefined, {
+    retry: false,
+  });
+
   // Load saved valuations
   const { data: savedValuations, isLoading: valuationsLoading } = trpc.profile.getSavedValuations.useQuery(undefined, {
     retry: false,
   });
 
   // Load COGS calculations
-  const { data: cogsData, isLoading: cogsLoading } = trpc.cogs.list.useQuery(undefined, {  // 'list' is correct
+  const { data: cogsData, isLoading: cogsLoading } = trpc.cogs.list.useQuery(undefined, {
     retry: false,
   });
 
@@ -111,7 +149,17 @@ export function StartupProvider({ children }: { children: ReactNode }) {
     retry: false,
   });
 
-  const isLoading = profileLoading || valuationsLoading || cogsLoading || historyLoading;
+  // Load active ESOP plan
+  const { data: esopPlan, isLoading: esopLoading } = trpc.esop.getActive.useQuery(undefined, {
+    retry: false,
+  });
+
+  // Load sales summary
+  const { data: salesSummary, isLoading: salesLoading } = trpc.sales.summary.useQuery(undefined, {
+    retry: false,
+  });
+
+  const isLoading = profileLoading || valuationsLoading || cogsLoading || historyLoading || teamLoading || esopLoading || salesLoading;
 
   // Derive the latest valuation from saved valuations or history
   const latestValuation = (() => {
@@ -149,6 +197,29 @@ export function StartupProvider({ children }: { children: ReactNode }) {
     )[0];
   })();
 
+  // Derive sales metrics
+  const now = new Date();
+  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).getTime();
+  const lastMonthEnd = thisMonthStart - 1;
+
+  const salesThisMonth = salesSummary?.thisMonth ?? null;
+  const salesLastMonth = salesSummary?.lastMonth ?? null;
+  const salesMoMGrowth = (() => {
+    if (!salesThisMonth || !salesLastMonth || salesLastMonth === 0) return null;
+    return ((salesThisMonth - salesLastMonth) / salesLastMonth) * 100;
+  })();
+
+  // Team members equity
+  const teamMembers: TeamMemberEquity[] = (teamData ?? []).map((m: any) => ({
+    id: m.id,
+    name: m.name,
+    role: m.role ?? '',
+    equityPercent: m.equityPercent ?? null,
+    esopShares: m.esopShares ?? null,
+    isFounder: m.isFounder ?? false,
+  }));
+
   const snapshot: StartupSnapshot = {
     companyName: profile?.name ?? '',
     sector: profile?.sector ?? '',
@@ -161,7 +232,11 @@ export function StartupProvider({ children }: { children: ReactNode }) {
     grossMargin: profile?.grossMargin ?? null,
     revenueGrowthRate: profile?.revenueGrowthRate ?? null,
     targetRaise: profile?.targetRaise ?? null,
-    totalShares: null, // not in startupProfiles table yet
+    totalShares: (profile as any)?.totalShares ?? null,
+    authorizedShares: (profile as any)?.authorizedShares ?? null,
+    parValue: (profile as any)?.parValue ?? null,
+    esopPoolPct: (profile as any)?.esopPoolPct ?? null,
+    teamMembers,
     latestValuation,
     latestValuationDate,
     latestGrossMarginPct: latestCogs?.grossMarginPct ?? null,
@@ -169,23 +244,30 @@ export function StartupProvider({ children }: { children: ReactNode }) {
       ? (latestCogs.revenuePerUnit ?? 0) * (latestCogs.unitsPerMonth ?? 0)
       : null,
     latestMonthlyCOGS: latestCogs?.totalCOGS ?? null,
-    currentOptionPool: null, // from ESOP planner (in-memory only for now)
-    readinessScore: null, // set by FundraisingReadiness tool
-    pitchScore: null, // set by PitchDeckScorecard tool
+    currentOptionPool: esopPlan ? Number(esopPlan.currentOptionPool) : null,
+    esopPlanId: esopPlan?.id ?? null,
+    esopTotalShares: esopPlan ? Number(esopPlan.totalShares) : null,
+    esopPricePerShare: esopPlan?.pricePerShare ?? null,
+    totalSalesRevenue: salesSummary?.total ?? null,
+    salesThisMonth,
+    salesLastMonth,
+    salesMoMGrowth,
+    readinessScore: null,
+    pitchScore: null,
   };
 
   const refresh = useCallback(() => {
     utils.profile.get.invalidate();
     utils.profile.getSavedValuations.invalidate();
-    utils.cogs.list.invalidate();  // 'list' is correct
+    utils.profile.getTeam.invalidate();
+    utils.cogs.list.invalidate();
     utils.valuationHistory.getAll.invalidate();
+    utils.esop.getActive.invalidate();
+    utils.sales.summary.invalidate();
   }, [utils]);
 
-  // In-memory partial update (for tools that haven't saved to DB yet)
   const updateSnapshot = useCallback((_partial: Partial<StartupSnapshot>) => {
-    // This is handled by the DB-backed queries above; in-memory updates
-    // are not needed since all tools save to DB and we invalidate on save.
-    // Kept for future use if needed.
+    // DB-backed; invalidate on save instead
   }, []);
 
   return (

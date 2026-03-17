@@ -3,7 +3,7 @@
  * Models option pool size, strike price, vesting, and dilution impact
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
@@ -102,6 +102,64 @@ export default function ESOPPlanner() {
   const [generatedLetter, setGeneratedLetter] = useState<string>('');
   const [isGeneratingLetter, setIsGeneratingLetter] = useState(false);
   const [letterCopied, setLetterCopied] = useState(false);
+  const [savedPlanId, setSavedPlanId] = useState<number | undefined>(undefined);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Load active plan on mount
+  const { data: activePlan } = trpc.esop.getActive.useQuery(undefined, {
+    onSuccess: (plan: any) => {
+      if (plan && !inputs.companyName) {
+        setInputs({
+          companyName: plan.label || '',
+          stage: 'seed',
+          totalShares: plan.totalShares,
+          currentOptionPool: plan.currentOptionPool,
+          pricePerShare: plan.pricePerShare,
+          plannedHires: 5,
+          seniorHires: 2,
+          jurisdiction: 'delaware',
+          nextRoundSize: 2_000_000,
+          grants: (plan.grants as GrantRow[]) || [newGrant()],
+        });
+        setSavedPlanId(plan.id);
+      }
+    },
+  } as any);
+
+  const savePlanMutation = trpc.esop.save.useMutation({
+    onSuccess: (plan: any) => {
+      setSavedPlanId(plan?.id);
+      setIsSaving(false);
+      toast.success('ESOP plan saved!');
+    },
+    onError: (err: { message: string }) => {
+      setIsSaving(false);
+      toast.error('Save failed: ' + err.message);
+    },
+  });
+
+  const handleSavePlan = () => {
+    setIsSaving(true);
+    savePlanMutation.mutate({
+      id: savedPlanId,
+      label: inputs.companyName || 'ESOP Plan',
+      totalShares: inputs.totalShares,
+      currentOptionPool: inputs.currentOptionPool,
+      pricePerShare: inputs.pricePerShare,
+      vestingMonths: inputs.grants[0]?.vestingMonths ?? 48,
+      cliffMonths: inputs.grants[0]?.cliffMonths ?? 12,
+      grants: inputs.grants.map(g => ({
+        id: g.id,
+        name: g.role,
+        role: g.role,
+        shares: g.shares,
+        vestingMonths: g.vestingMonths,
+        cliffMonths: g.cliffMonths,
+        startDate: new Date().toISOString().slice(0, 10),
+        strikePrice: g.strikePrice,
+      })),
+    });
+  };
 
   const grantLetterMutation = trpc.ai.generateGrantLetter.useMutation({
     onSuccess: (data: { letter: string }) => {
@@ -230,19 +288,31 @@ export default function ESOPPlanner() {
   return (
     <div className="max-w-5xl mx-auto space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
-            <PieChart className="w-4 h-4 text-white" />
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
+              <PieChart className="w-4 h-4 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
+              ESOP / Option Pool Planner
+            </h1>
+            <Badge variant="secondary" className="text-xs">AI</Badge>
+            {savedPlanId && <Badge variant="outline" className="text-xs text-green-600 border-green-300">Saved</Badge>}
           </div>
-          <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
-            ESOP / Option Pool Planner
-          </h1>
-          <Badge variant="secondary" className="text-xs">AI</Badge>
+          <p className="text-sm text-muted-foreground">
+            Model your option pool size, grant allocations, dilution impact, and get AI-powered recommendations.
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Model your option pool size, grant allocations, dilution impact, and get AI-powered recommendations.
-        </p>
+        <Button
+          onClick={handleSavePlan}
+          disabled={isSaving}
+          className="shrink-0 flex items-center gap-1.5"
+          style={{ background: 'oklch(0.18 0.05 240)', color: 'white' }}
+        >
+          {isSaving ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+          Save Plan
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'planner' | 'grants' | 'ai')}>

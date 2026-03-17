@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { FieldInfo } from '@/components/ui/field-info';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -180,7 +181,7 @@ export default function ValuationTimeline() {
             <div className="space-y-4 py-2">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <Label>{t('valuationTimelineCompanyName')} *</Label>
+                  <div className="flex items-center gap-1.5 mb-1"><Label>{t('valuationTimelineCompanyName')} *</Label><FieldInfo text="The legal or trading name of your startup as it appears in official documents." /></div>
                   <Input
                     value={form.companyName}
                     onChange={e => setForm(f => ({ ...f, companyName: e.target.value }))}
@@ -188,7 +189,7 @@ export default function ValuationTimeline() {
                   />
                 </div>
                 <div>
-                  <Label>{t('valuationTimelineDate')} *</Label>
+                  <div className="flex items-center gap-1.5 mb-1"><Label>{t('valuationTimelineDate')} *</Label><FieldInfo text="The date this valuation was formally determined or the funding round closed." /></div>
                   <Input
                     type="date"
                     value={form.valuationDate}
@@ -196,7 +197,7 @@ export default function ValuationTimeline() {
                   />
                 </div>
                 <div>
-                  <Label>{t('valuationTimelineType')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1"><Label>{t('valuationTimelineType')}</Label><FieldInfo text="409A: IRS-compliant independent appraisal. Priced Round: valuation set by investors. SAFE/Note: convertible instruments with a cap. Internal: management estimate." /></div>
                   <Select value={form.valuationType} onValueChange={v => setForm(f => ({ ...f, valuationType: v }))}>
                     <SelectTrigger>
                       <SelectValue />
@@ -209,7 +210,7 @@ export default function ValuationTimeline() {
                   </Select>
                 </div>
                 <div>
-                  <Label>{t('valuationTimelinePreMoney')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1"><Label>{t('valuationTimelinePreMoney')}</Label><FieldInfo text="Company value BEFORE new investment. Formula: Post-money valuation minus the amount raised." /></div>
                   <Input
                     type="number"
                     value={form.preMoneyValuation}
@@ -218,7 +219,7 @@ export default function ValuationTimeline() {
                   />
                 </div>
                 <div>
-                  <Label>{t('valuationTimelinePostMoney')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1"><Label>{t('valuationTimelinePostMoney')}</Label><FieldInfo text="Company value AFTER new investment. Formula: Pre-money valuation plus amount raised." /></div>
                   <Input
                     type="number"
                     value={form.postMoneyValuation}
@@ -227,7 +228,7 @@ export default function ValuationTimeline() {
                   />
                 </div>
                 <div>
-                  <Label>{t('valuationTimelineAmountRaised')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1"><Label>{t('valuationTimelineAmountRaised')}</Label><FieldInfo text="Total cash received from investors in this round (USD). Includes all tranches if the round closes in multiple closings." /></div>
                   <Input
                     type="number"
                     value={form.amountRaised}
@@ -236,7 +237,7 @@ export default function ValuationTimeline() {
                   />
                 </div>
                 <div>
-                  <Label>{t('valuationTimelineStage')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1"><Label>{t('valuationTimelineStage')}</Label><FieldInfo text="Funding stage at the time of this valuation: Pre-seed, Seed, Series A, B, C, etc." /></div>
                   <Input
                     value={form.stage}
                     onChange={e => setForm(f => ({ ...f, stage: e.target.value }))}
@@ -244,7 +245,7 @@ export default function ValuationTimeline() {
                   />
                 </div>
                 <div>
-                  <Label>{t('valuationTimelineRoundName')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1"><Label>{t('valuationTimelineRoundName')}</Label><FieldInfo text="A short name for this round, e.g. 'Seed Round', 'Series A', 'Bridge Note'. Used in charts and reports." /></div>
                   <Input
                     value={form.roundName}
                     onChange={e => setForm(f => ({ ...f, roundName: e.target.value }))}
@@ -252,7 +253,7 @@ export default function ValuationTimeline() {
                   />
                 </div>
                 <div>
-                  <Label>{t('valuationTimelineLeadInvestor')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1"><Label>{t('valuationTimelineLeadInvestor')}</Label><FieldInfo text="The primary investor who led this round and set the terms. E.g. 'Sequoia Capital', 'Flat6Labs'." /></div>
                   <Input
                     value={form.leadInvestor}
                     onChange={e => setForm(f => ({ ...f, leadInvestor: e.target.value }))}
@@ -260,7 +261,7 @@ export default function ValuationTimeline() {
                   />
                 </div>
                 <div>
-                  <Label>{t('valuationTimelineSharePrice')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1"><Label>{t('valuationTimelineSharePrice')}</Label><FieldInfo text="Price per share in USD at which this round was priced. Formula: Post-money valuation ÷ total shares outstanding." /></div>
                   <Input
                     type="number"
                     value={form.sharePrice}
@@ -270,7 +271,7 @@ export default function ValuationTimeline() {
                   />
                 </div>
                 <div>
-                  <Label>{t('valuationTimelineTotalShares')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1"><Label>{t('valuationTimelineTotalShares')}</Label><FieldInfo text="Total shares outstanding after this round closes — includes common, preferred, and ESOP pool shares." /></div>
                   <Input
                     type="number"
                     value={form.totalShares}
@@ -279,7 +280,7 @@ export default function ValuationTimeline() {
                   />
                 </div>
                 <div>
-                  <Label>{t('valuationTimelineMethodology')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1"><Label>{t('valuationTimelineMethodology')}</Label><FieldInfo text="The valuation method(s) used: DCF, Scorecard, Berkus, VC Method, Comparables, Risk-Factor Summation, or a combination." /></div>
                   <Input
                     value={form.methodology}
                     onChange={e => setForm(f => ({ ...f, methodology: e.target.value }))}
@@ -287,7 +288,7 @@ export default function ValuationTimeline() {
                   />
                 </div>
                 <div>
-                  <Label>{t('valuationTimelineProvider')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1"><Label>{t('valuationTimelineProvider')}</Label><FieldInfo text="The firm or person who performed this valuation. E.g. 'Carta', 'Andersen Tax', 'Internal Finance Team'." /></div>
                   <Input
                     value={form.provider}
                     onChange={e => setForm(f => ({ ...f, provider: e.target.value }))}
@@ -295,7 +296,7 @@ export default function ValuationTimeline() {
                   />
                 </div>
                 <div className="col-span-2">
-                  <Label>{t('valuationTimelineNotes')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1"><Label>{t('valuationTimelineNotes')}</Label><FieldInfo text="Any additional context: key assumptions, board approval date, special conditions, or investor names." /></div>
                   <Textarea
                     value={form.notes}
                     onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}

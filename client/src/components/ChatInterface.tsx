@@ -6,7 +6,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ChevronRight, RotateCcw, Check, Sparkles, Wand2, Info } from 'lucide-react';
+import { Send, ChevronRight, RotateCcw, Check, Sparkles, Wand2, Info, Pencil, ChevronDown } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { CHAT_QUESTIONS, CHAT_QUESTIONS_AR, formatAnswer, type ChatQuestion } from '@/lib/chatFlow';
 import { nanoid } from 'nanoid';
@@ -285,6 +285,7 @@ export default function ChatInterface({ onComplete }: Props) {
   const [currentQIndex, setCurrentQIndex] = useState(-1); // -1 = intro
   const [isTyping, setIsTyping] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [showAnsweredPanel, setShowAnsweredPanel] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -414,6 +415,21 @@ export default function ChatInterface({ onComplete }: Props) {
     }
   }, [currentQIndex, answers, onComplete]);
 
+  // Go back to a specific question to edit the answer
+  const handleEditAnswer = useCallback((qIndex: number) => {
+    setCurrentQIndex(qIndex);
+    setIsComplete(false);
+    setShowAnsweredPanel(false);
+    // Trim messages back to before that question was asked
+    // We keep all messages up to (but not including) the bot message for that question
+    // A simple approach: just add a bot message indicating we're going back
+    setMessages(prev => [
+      ...prev,
+      { id: nanoid(), role: 'bot', text: isRTL ? `🔄 حسناً، لنعدّل إجابتك على هذا السؤال.` : `🔄 Sure, let's update your answer to that question.` }
+    ]);
+    scrollToBottom();
+  }, [isRTL]);
+
   const handleReset = () => {
     setMessages([]);
     setAnswers({});
@@ -523,6 +539,48 @@ export default function ChatInterface({ onComplete }: Props) {
         <div className="px-4 py-2 flex items-start gap-2 text-[10px] text-muted-foreground" style={{ background: 'oklch(0.55 0.13 30)10' }}>
           <Info className="w-3 h-3 shrink-0 mt-0.5" style={{ color: 'oklch(0.55 0.13 30)' }} />
           <span>{isRTL ? `تم تقدير ${aiInferredFields.length} قيمة بواسطة الذكاء الاصطناعي. يمكنك إعادة المحادثة لتعديلها.` : `${aiInferredFields.length} value${aiInferredFields.length > 1 ? 's were' : ' was'} estimated by AI. You can retake the chat to adjust them.`}</span>
+        </div>
+      )}
+
+      {/* Answered Questions Panel */}
+      {currentQIndex > 0 && !isComplete && (
+        <div className="border-t border-border bg-card">
+          <button
+            onClick={() => setShowAnsweredPanel(v => !v)}
+            className="w-full flex items-center justify-between px-4 py-2 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <span className="flex items-center gap-1.5">
+              <Pencil className="w-3 h-3" />
+              {isRTL ? `تعديل إجابة سابقة (${currentQIndex} تمت)` : `Edit a previous answer (${currentQIndex} answered)`}
+            </span>
+            <ChevronDown className={`w-3 h-3 transition-transform ${showAnsweredPanel ? 'rotate-180' : ''}`} />
+          </button>
+          <AnimatePresence>
+            {showAnsweredPanel && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="px-4 pb-3 flex flex-wrap gap-1.5">
+                  {questions.slice(0, currentQIndex).map((q, idx) => (
+                    <button
+                      key={q.id}
+                      onClick={() => handleEditAnswer(idx)}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium border border-border bg-secondary/50 hover:bg-secondary hover:border-accent transition-all"
+                      title={isRTL ? 'انقر للتعديل' : 'Click to edit'}
+                    >
+                      <span className="text-muted-foreground">{q.emoji ?? '•'}</span>
+                      <span className="max-w-[120px] truncate">{formatAnswer(q, answers[q.id])}</span>
+                      <Pencil className="w-2.5 h-2.5 text-muted-foreground" />
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
 

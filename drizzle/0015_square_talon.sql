@@ -1,0 +1,1 @@
+ALTER TABLE `esop_plans` MODIFY COLUMN `grants` json;

@@ -1,4 +1,4 @@
-import { boolean, int, mysqlEnum, mysqlTable, text, timestamp, varchar, json, float } from "drizzle-orm/mysql-core";
+import { boolean, int, bigint, mysqlEnum, mysqlTable, text, timestamp, varchar, json, float } from "drizzle-orm/mysql-core";
 
 // ── Users ──────────────────────────────────────────────────────────────────
 export const users = mysqlTable("users", {
@@ -147,6 +147,11 @@ export const startupProfiles = mysqlTable("startup_profiles", {
   monthlyBurnRate: float("monthlyBurnRate"),
   cashOnHand: float("cashOnHand"),
   totalRaised: float("totalRaised"),
+  // Cap table fields
+  totalSharesOutstanding: bigint("totalSharesOutstanding", { mode: 'number' }),
+  authorizedShares: bigint("authorizedShares", { mode: 'number' }),
+  parValuePerShare: float("parValuePerShare"),
+  esopPoolPercent: float("esopPoolPercent"),
   revenueGrowthRate: float("revenueGrowthRate"),
   grossMargin: float("grossMargin"),
   totalAddressableMarket: float("totalAddressableMarket"),
@@ -172,6 +177,10 @@ export const teamMembers = mysqlTable("team_members", {
   avatarUrl: varchar("avatarUrl", { length: 1024 }),
   linkedinUrl: varchar("linkedinUrl", { length: 512 }),
   equityPercent: float("equityPercent"),
+  esopShares: bigint("esopShares", { mode: 'number' }),
+  esopVestingMonths: int("esopVestingMonths"),
+  esopCliffMonths: int("esopCliffMonths"),
+  esopStartDate: timestamp("esopStartDate"),
   isFounder: boolean("isFounder").default(false).notNull(),
   sortOrder: int("sortOrder").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -350,7 +359,7 @@ export const valuationHistory = mysqlTable("valuation_history", {
   preMoneyValuation: float("preMoneyValuation"),
   postMoneyValuation: float("postMoneyValuation"),
   sharePrice: float("sharePrice"),
-  totalShares: int("totalShares"),
+  totalShares: bigint("totalShares", { mode: 'number' }),
   stage: varchar("stage", { length: 64 }),
   roundName: varchar("roundName", { length: 128 }),
   amountRaised: float("amountRaised"),
@@ -392,3 +401,99 @@ export const cogsCalculations = mysqlTable("cogs_calculations", {
 });
 export type CogsCalculation = typeof cogsCalculations.$inferSelect;
 export type InsertCogsCalculation = typeof cogsCalculations.$inferInsert;
+
+// ── Data Rooms ────────────────────────────────────────────────────────────
+export const dataRooms = mysqlTable('data_rooms', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('userId').notNull(),
+  name: varchar('name', { length: 256 }).notNull(),
+  description: text('description'),
+  shareToken: varchar('shareToken', { length: 128 }).unique(),
+  isShared: boolean('isShared').default(false).notNull(),
+  requireEmail: boolean('requireEmail').default(false).notNull(),
+  expiresAt: timestamp('expiresAt'),
+  viewCount: int('viewCount').default(0).notNull(),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+});
+export type DataRoom = typeof dataRooms.$inferSelect;
+export type InsertDataRoom = typeof dataRooms.$inferInsert;
+
+export const dataRoomFiles = mysqlTable('data_room_files', {
+  id: int('id').autoincrement().primaryKey(),
+  dataRoomId: int('dataRoomId').notNull(),
+  userId: int('userId').notNull(),
+  name: varchar('name', { length: 256 }).notNull(),
+  fileKey: varchar('fileKey', { length: 512 }).notNull(),
+  fileUrl: varchar('fileUrl', { length: 1024 }).notNull(),
+  mimeType: varchar('mimeType', { length: 128 }).notNull().default('application/octet-stream'),
+  sizeBytes: int('sizeBytes').notNull().default(0),
+  folder: varchar('folder', { length: 128 }).notNull().default('General'),
+  sortOrder: int('sortOrder').default(0).notNull(),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+});
+export type DataRoomFile = typeof dataRoomFiles.$inferSelect;
+export type InsertDataRoomFile = typeof dataRoomFiles.$inferInsert;
+
+export const dataRoomViews = mysqlTable('data_room_views', {
+  id: int('id').autoincrement().primaryKey(),
+  dataRoomId: int('dataRoomId').notNull(),
+  fileId: int('fileId'),
+  viewerEmail: varchar('viewerEmail', { length: 320 }),
+  viewerName: varchar('viewerName', { length: 256 }),
+  ipAddress: varchar('ipAddress', { length: 64 }),
+  userAgent: varchar('userAgent', { length: 512 }),
+  action: mysqlEnum('action', ['room_opened', 'file_viewed', 'file_downloaded']).default('room_opened').notNull(),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+});
+export type DataRoomView = typeof dataRoomViews.$inferSelect;
+export type InsertDataRoomView = typeof dataRoomViews.$inferInsert;
+
+// ── Sales Tracking ────────────────────────────────────────────────────────
+export const salesEntries = mysqlTable('sales_entries', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('userId').notNull(),
+  date: timestamp('date').notNull(),
+  amount: float('amount').notNull(),
+  currency: varchar('currency', { length: 8 }).notNull().default('USD'),
+  channel: mysqlEnum('channel', ['direct', 'online', 'referral', 'partner', 'inbound', 'outbound', 'other']).default('direct').notNull(),
+  product: varchar('product', { length: 256 }).notNull().default(''),
+  customer: varchar('customer', { length: 256 }).notNull().default(''),
+  dealStage: mysqlEnum('dealStage', ['lead', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost']).default('closed_won').notNull(),
+  notes: text('notes'),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+});
+export type SalesEntry = typeof salesEntries.$inferSelect;
+export type InsertSalesEntry = typeof salesEntries.$inferInsert;
+
+export const salesTargets = mysqlTable('sales_targets', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('userId').notNull(),
+  month: varchar('month', { length: 7 }).notNull(), // YYYY-MM
+  targetAmount: float('targetAmount').notNull(),
+  currency: varchar('currency', { length: 8 }).notNull().default('USD'),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+});
+export type SalesTarget = typeof salesTargets.$inferSelect;
+export type InsertSalesTarget = typeof salesTargets.$inferInsert;
+
+// ── ESOP Plans ────────────────────────────────────────────────────────────
+export const esopPlans = mysqlTable('esop_plans', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('userId').notNull(),
+  startupId: int('startupId'),
+  label: varchar('label', { length: 256 }).notNull().default('ESOP Plan'),
+  totalShares: bigint('totalShares', { mode: 'number' }).notNull().default(10000000),
+  currentOptionPool: bigint('currentOptionPool', { mode: 'number' }).notNull().default(1000000),
+  pricePerShare: float('pricePerShare').notNull().default(1),
+  vestingMonths: int('vestingMonths').notNull().default(48),
+  cliffMonths: int('cliffMonths').notNull().default(12),
+  grants: json('grants'),
+  isActive: boolean('isActive').default(true).notNull(),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+});
+export type EsopPlan = typeof esopPlans.$inferSelect;
+export type InsertEsopPlan = typeof esopPlans.$inferInsert;

@@ -101,7 +101,7 @@ export default function StartupProfile() {
   });
 
   const addMember = trpc.profile.addTeamMember.useMutation({
-    onSuccess: (data) => { utils.profile.getTeam.invalidate(); setAddingMember(false); setNewMember({ name: '', role: '', bio: '', equityPercent: 0, isFounder: false }); toast.success('Team member added'); },
+    onSuccess: (data) => { utils.profile.getTeam.invalidate(); setAddingMember(false); setNewMember({ name: '', role: '', bio: '', equityPercent: 0, isFounder: false, esopShares: 0, esopVestingMonths: 48, esopCliffMonths: 12 }); toast.success('Team member added'); },
     onError: (e) => toast.error(e.message),
   });
 
@@ -133,13 +133,17 @@ export default function StartupProfile() {
     name: '', tagline: '', description: '', logoUrl: '', websiteUrl: '', pitchDeckUrl: '',
     sector: '', stage: '' as any, country: '', city: '', foundedYear: new Date().getFullYear(),
     currentARR: 0, monthlyBurnRate: 0, cashOnHand: 0, totalRaised: 0,
+    totalSharesOutstanding: 0, authorizedShares: 0, parValuePerShare: 0, esopPoolPercent: 0,
     revenueGrowthRate: 0, grossMargin: 0, totalAddressableMarket: 0,
     targetRaise: 0, useOfFunds: '', investorType: '',
     linkedinUrl: '', twitterUrl: '', isPublic: false,
   });
 
   const [addingMember, setAddingMember] = useState(false);
-  const [newMember, setNewMember] = useState({ name: '', role: '', bio: '', equityPercent: 0, isFounder: false });
+  const [newMember, setNewMember] = useState({
+    name: '', role: '', bio: '', equityPercent: 0, isFounder: false,
+    esopShares: 0, esopVestingMonths: 48, esopCliffMonths: 12,
+  });
   const [addingMilestone, setAddingMilestone] = useState(false);
   const [newMilestone, setNewMilestone] = useState({ title: '', category: 'product' as any, description: '' });
 
@@ -162,6 +166,10 @@ export default function StartupProfile() {
         monthlyBurnRate: profile.monthlyBurnRate || 0,
         cashOnHand: profile.cashOnHand || 0,
         totalRaised: profile.totalRaised || 0,
+        totalSharesOutstanding: profile.totalSharesOutstanding || 0,
+        authorizedShares: profile.authorizedShares || 0,
+        parValuePerShare: profile.parValuePerShare || 0,
+        esopPoolPercent: profile.esopPoolPercent || 0,
         revenueGrowthRate: profile.revenueGrowthRate || 0,
         grossMargin: profile.grossMargin || 0,
         totalAddressableMarket: profile.totalAddressableMarket || 0,
@@ -356,6 +364,41 @@ export default function StartupProfile() {
         )}
       </Section>
 
+      {/* ── Cap Table ── */}
+      <Section title="Cap Table" icon={BarChart3} color="#8B5CF6" defaultOpen={false}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <Field label="Total Shares Outstanding" hint="Current total issued shares">
+            <Input type="number" value={form.totalSharesOutstanding || ''} onChange={e => setNum('totalSharesOutstanding', e.target.value)} placeholder="e.g. 10,000,000" />
+          </Field>
+          <Field label="Authorized Shares" hint="Maximum shares the company can issue">
+            <Input type="number" value={form.authorizedShares || ''} onChange={e => setNum('authorizedShares', e.target.value)} placeholder="e.g. 100,000,000" />
+          </Field>
+          <Field label="Par Value per Share ($)" hint="Nominal value per share (often $0.0001)">
+            <Input type="number" value={form.parValuePerShare || ''} onChange={e => setNum('parValuePerShare', e.target.value)} placeholder="0.0001" step="0.0001" />
+          </Field>
+          <Field label="ESOP Pool (%)" hint="Percentage of total shares reserved for employee stock options">
+            <Input type="number" value={form.esopPoolPercent || ''} onChange={e => setNum('esopPoolPercent', e.target.value)} placeholder="10" min="0" max="100" />
+          </Field>
+        </div>
+        {(form.totalSharesOutstanding > 0 && form.esopPoolPercent > 0) && (
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            {[
+              { label: 'ESOP Shares', value: Math.round(form.totalSharesOutstanding * form.esopPoolPercent / 100).toLocaleString() },
+              { label: 'Available Shares', value: form.authorizedShares > 0 ? (form.authorizedShares - form.totalSharesOutstanding).toLocaleString() : '—' },
+              { label: 'Dilution Headroom', value: form.authorizedShares > 0 ? `${((form.authorizedShares - form.totalSharesOutstanding) / form.authorizedShares * 100).toFixed(1)}%` : '—' },
+            ].map(m => (
+              <div key={m.label} className="rounded-lg p-3 text-center" style={{ background: 'oklch(0.97 0.005 80)' }}>
+                <div className="text-lg font-bold text-foreground font-mono">{m.value}</div>
+                <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{m.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground mt-3">
+          When you raise funds, new shares are auto-calculated: New Shares = Amount Raised ÷ (Pre-Money Valuation ÷ Current Shares Outstanding)
+        </p>
+      </Section>
+
       {/* ── Social ── */}
       <Section title="Social & Links" icon={Globe} color="#6366F1" defaultOpen={false}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -390,7 +433,10 @@ export default function StartupProfile() {
                     <span className="text-sm font-semibold text-foreground truncate">{m.name}</span>
                     {m.isFounder && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Founder</Badge>}
                   </div>
-                  <div className="text-xs text-muted-foreground">{m.role}{m.equityPercent ? ` · ${m.equityPercent}% equity` : ''}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {m.role}{m.equityPercent ? ` · ${m.equityPercent}% equity` : ''}
+                    {m.esopShares > 0 ? ` · ${m.esopShares.toLocaleString()} ESOP (${m.esopVestingMonths}mo vest, ${m.esopCliffMonths}mo cliff)` : ''}
+                  </div>
                 </div>
                 <button onClick={() => deleteMember.mutate({ id: m.id })} className="p-1.5 rounded hover:bg-red-50 hover:text-red-500 transition-colors text-muted-foreground">
                   <Trash2 className="w-3.5 h-3.5" />
@@ -409,7 +455,7 @@ export default function StartupProfile() {
               <Field label="Role *">
                 <Input value={newMember.role} onChange={e => setNewMember(m => ({ ...m, role: e.target.value }))} placeholder="e.g. CEO, CTO" />
               </Field>
-              <Field label="Equity %">
+              <Field label="Equity %" hint="Percentage of total company equity">
                 <Input type="number" value={newMember.equityPercent || ''} onChange={e => setNewMember(m => ({ ...m, equityPercent: parseFloat(e.target.value) || 0 }))} placeholder="0" />
               </Field>
               <Field label="Is Founder?">
@@ -418,6 +464,21 @@ export default function StartupProfile() {
                   <span className="text-sm text-foreground">Yes, this is a founder</span>
                 </div>
               </Field>
+            </div>
+            {/* ESOP Grant Fields */}
+            <div className="rounded-lg border border-border p-3 bg-purple-50/30 space-y-3">
+              <p className="text-xs font-semibold text-purple-700">ESOP Grant (optional)</p>
+              <div className="grid grid-cols-3 gap-3">
+                <Field label="ESOP Shares" hint="Number of options/shares granted">
+                  <Input type="number" value={newMember.esopShares || ''} onChange={e => setNewMember(m => ({ ...m, esopShares: parseInt(e.target.value) || 0 }))} placeholder="0" />
+                </Field>
+                <Field label="Vesting (months)" hint="Total vesting period (e.g. 48 = 4 years)">
+                  <Input type="number" value={newMember.esopVestingMonths || ''} onChange={e => setNewMember(m => ({ ...m, esopVestingMonths: parseInt(e.target.value) || 48 }))} placeholder="48" />
+                </Field>
+                <Field label="Cliff (months)" hint="Months before first vesting (e.g. 12 = 1 year cliff)">
+                  <Input type="number" value={newMember.esopCliffMonths || ''} onChange={e => setNewMember(m => ({ ...m, esopCliffMonths: parseInt(e.target.value) || 12 }))} placeholder="12" />
+                </Field>
+              </div>
             </div>
             <Field label="Bio">
               <Textarea value={newMember.bio} onChange={e => setNewMember(m => ({ ...m, bio: e.target.value }))} placeholder="Short bio..." rows={2} />

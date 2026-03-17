@@ -17,6 +17,7 @@ import { useStartup } from '@/contexts/StartupContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { FieldInfo } from '@/components/ui/field-info';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
@@ -314,7 +315,7 @@ export default function COGSCalculator() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs font-semibold mb-1.5 block">{t('cogsBusinessModel')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1.5"><Label className="text-xs font-semibold">{t('cogsBusinessModel')}</Label><FieldInfo text="Your primary revenue model. Pre-fills typical cost categories for your industry (e.g. SaaS: hosting, support; E-commerce: product cost, shipping)." /></div>
                   <Select value={businessModel} onValueChange={(v) => setBusinessModel(v as BusinessModel)}>
                     <SelectTrigger className="h-9 text-sm">
                       <SelectValue />
@@ -327,7 +328,7 @@ export default function COGSCalculator() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs font-semibold mb-1.5 block">{t('cogsCurrency')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1.5"><Label className="text-xs font-semibold">{t('cogsCurrency')}</Label><FieldInfo text="The currency used for all cost and revenue figures in this calculation." /></div>
                   <Select value={currency} onValueChange={setCurrency}>
                     <SelectTrigger className="h-9 text-sm">
                       <SelectValue />
@@ -343,7 +344,7 @@ export default function COGSCalculator() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs font-semibold mb-1.5 block">{t('cogsRevenuePerUnit')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1.5"><Label className="text-xs font-semibold">{t('cogsRevenuePerUnit')}</Label><FieldInfo text="Average revenue per unit sold or per customer (MRR for SaaS, average order value for e-commerce). Used to calculate gross margin and break-even point." /></div>
                   <Input
                     type="number"
                     min={0}
@@ -354,7 +355,7 @@ export default function COGSCalculator() {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs font-semibold mb-1.5 block">{t('cogsUnitsPerMonth')}</Label>
+                  <div className="flex items-center gap-1.5 mb-1.5"><Label className="text-xs font-semibold">{t('cogsUnitsPerMonth')}</Label><FieldInfo text="Number of units sold or customers served per month. Combined with revenue per unit to calculate total monthly revenue." /></div>
                   <Input
                     type="number"
                     min={0}

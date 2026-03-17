@@ -1,0 +1,1 @@
+ALTER TABLE `valuation_history` MODIFY COLUMN `totalShares` bigint;
