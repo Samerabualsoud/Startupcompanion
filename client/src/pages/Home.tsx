@@ -214,10 +214,10 @@ export default function Home() {
                   <Sparkles className="w-3.5 h-3.5 text-white" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-white">Valuation Assistant</div>
+                  <div className="text-sm font-semibold text-white">{t('valuationAssistantTitle')}</div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-[10px]" style={{ color: 'oklch(0.62 0.02 240)' }}>Online · 7 valuation methods</span>
+                    <span className="text-[10px]" style={{ color: 'oklch(0.62 0.02 240)' }}>{t('valuationAssistantStatus')}</span>
                   </div>
                 </div>
               </div>
@@ -263,14 +263,22 @@ export default function Home() {
                   <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: 'oklch(0.22 0.05 240)', border: '1px solid oklch(0.28 0.04 240)' }}>
                     <TrendingUp className="w-8 h-8" style={{ color: 'oklch(0.55 0.13 30)' }} />
                   </div>
-                  <h2 className="text-2xl font-bold text-white mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
-                    Your Report Will Appear Here
+                  <h2 className="text-2xl font-bold text-white mb-3" style={{ fontFamily: isRTL ? 'inherit' : 'Playfair Display, serif' }}>
+                    {t('valuationReportWillAppear')}
                   </h2>
                   <p className="text-sm leading-relaxed mb-6" style={{ color: 'oklch(0.62 0.02 240)' }}>
-                    Answer the questions on the left and we'll instantly generate a professional valuation report using 7 industry-standard methods.
+                    {t('valuationReportWillAppearDesc')}
                   </p>
                   <div className="space-y-2">
-                    {[
+                    {(isRTL ? [
+                      { label: 'التدفق النقدي المخصوم (DCF)', desc: 'تحليل التدفقات النقدية المستقبلية', color: '#C4614A' },
+                      { label: 'طريقة بطاقة الأداء', desc: 'تقييم جودة الفريق والسوق', color: '#8B4A38' },
+                      { label: 'طريقة بيركوس', desc: 'التقييم القائم على المعالم', color: '#2D4A6B' },
+                      { label: 'طريقة رأس المال المخاطر', desc: 'حساب العائد على الاستثمار', color: '#A0522D' },
+                      { label: 'المعاملات المماثلة', desc: 'مضاعفات معيار الصناعة', color: '#1B3A5C' },
+                      { label: 'جمع عوامل المخاطرة', desc: 'تعديل بـ 12 عامل مخاطرة', color: '#D4845A' },
+                      { label: 'طريقة شيكاغو الأولى', desc: 'سيناريوهات متفائلة / متوسطة / متشائمة', color: '#C4614A' },
+                    ] : [
                       { label: 'Discounted Cash Flow (DCF)', desc: 'Future cash flow analysis', color: '#C4614A' },
                       { label: 'Scorecard Method', desc: 'Team & market quality scoring', color: '#8B4A38' },
                       { label: 'Berkus Method', desc: 'Milestone-based valuation', color: '#2D4A6B' },
@@ -278,7 +286,7 @@ export default function Home() {
                       { label: 'Comparable Transactions', desc: 'Industry benchmark multiples', color: '#1B3A5C' },
                       { label: 'Risk-Factor Summation', desc: '12-factor risk adjustment', color: '#D4845A' },
                       { label: 'First Chicago Method', desc: 'Bear / base / bull scenarios', color: '#C4614A' },
-                    ].map((m, i) => (
+                    ]).map((m, i) => (
                       <motion.div key={m.label} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }}
                         className="flex items-center gap-3 text-left p-2.5 rounded-lg" style={{ background: 'oklch(0.22 0.04 240)' }}>
                         <div className="w-2 h-2 rounded-full shrink-0" style={{ background: m.color }} />
@@ -471,6 +479,7 @@ export default function Home() {
                 'Database': t('navGroupDatabase'),
                 'My Startup': t('navGroupMyStartup'),
                 'AI Tools': t('navGroupAITools'),
+                'Legal & Documents': t('navGroupLegal'),
                 'Admin': 'Admin',
               };
               return (

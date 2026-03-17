@@ -8,10 +8,11 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, ChevronRight, RotateCcw, Check, Sparkles, Wand2, Info } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
-import { CHAT_QUESTIONS, formatAnswer, type ChatQuestion } from '@/lib/chatFlow';
+import { CHAT_QUESTIONS, CHAT_QUESTIONS_AR, formatAnswer, type ChatQuestion } from '@/lib/chatFlow';
 import { nanoid } from 'nanoid';
 import { trpc } from '@/lib/trpc';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Message {
   id: string;
@@ -307,21 +308,30 @@ export default function ChatInterface({ onComplete }: Props) {
     scrollToBottom();
   };
 
+  const { isRTL } = useLanguage();
+  const questions = isRTL ? CHAT_QUESTIONS_AR : CHAT_QUESTIONS;
+
   // Start the conversation
   useEffect(() => {
-    const start = async () => {
-      await addBotMessage("👋 Hey! I'm your startup valuation assistant.", 400);
-      await addBotMessage("I'll ask you a few simple questions about your startup — no finance degree needed. At the end, I'll run a full professional valuation using 7 industry-standard methods.", 1000);
-      await addBotMessage("Ready? Let's start with the basics. This will take about 2 minutes. 🚀", 800);
+  const start = async () => {
+      if (isRTL) {
+        await addBotMessage('👋 مرحباً! أنا مساعد تقييم شركتك الناشئة.', 400);
+        await addBotMessage('سأطرح عليك بعض الأسئلة البسيطة عن شركتك — لا تحتاج إلى خبرة مالية. في النهاية، سأجري تقييماً احترافياً كاملاً باستخدام 7 طرق معيارية في الصناعة.', 1000);
+        await addBotMessage('مستعد؟ لنبدأ بالأساسيات. سيستغرق هذا حوالي دقيقتين. 🚀', 800);
+      } else {
+        await addBotMessage("👋 Hey! I'm your startup valuation assistant.", 400);
+        await addBotMessage("I'll ask you a few simple questions about your startup — no finance degree needed. At the end, I'll run a full professional valuation using 7 industry-standard methods.", 1000);
+        await addBotMessage("Ready? Let's start with the basics. This will take about 2 minutes. 🚀", 800);
+      }
       setCurrentQIndex(0);
     };
     start();
-  }, []);
+  }, [isRTL]);
 
   // Ask the current question
   useEffect(() => {
-    if (currentQIndex < 0 || currentQIndex >= CHAT_QUESTIONS.length) return;
-    const q = CHAT_QUESTIONS[currentQIndex];
+    if (currentQIndex < 0 || currentQIndex >= questions.length) return;
+    const q = questions[currentQIndex];
     const ask = async () => {
       const emoji = q.emoji ? `${q.emoji} ` : '';
       await addBotMessage(`${emoji}${q.text}`, 500);
@@ -333,10 +343,10 @@ export default function ChatInterface({ onComplete }: Props) {
   }, [currentQIndex]);
 
   const handleSkipWithAI = useCallback(async () => {
-    const q = CHAT_QUESTIONS[currentQIndex];
+    const q = questions[currentQIndex];
     setIsInferring(true);
-    addUserMessage("I'm not sure — can you estimate this for me?");
-    await addBotMessage("Sure! Let me estimate that based on your sector and stage... 🤖", 500);
+    addUserMessage(isRTL ? 'لست متأكداً — هل يمكنك تقدير هذا لي؟' : "I'm not sure — can you estimate this for me?");
+    await addBotMessage(isRTL ? 'بالتأكيد! دعني أقدّر ذلك بناءً على قطاعك ومرحلتك... 🤖' : "Sure! Let me estimate that based on your sector and stage... 🤖", 500);
 
     try {
       const result = await fillMissing.mutateAsync({
@@ -353,31 +363,33 @@ export default function ChatInterface({ onComplete }: Props) {
         setAnswers(newAnswers);
         setAiInferredFields(prev => [...prev, q.id]);
 
-        await addBotMessage(`I estimated **${displayText}** for you. ${reasoning ? `\n\n*${reasoning}*` : ''}`, 400);
-        await addBotMessage("You can always come back and adjust this. Moving on! 👍", 500);
+        await addBotMessage(isRTL ? `قدّرت **${displayText}** لك. ${reasoning ? `\n\n*${reasoning}*` : ''}` : `I estimated **${displayText}** for you. ${reasoning ? `\n\n*${reasoning}*` : ''}`, 400);
+        await addBotMessage(isRTL ? 'يمكنك دائماً العودة وتعديل هذا. نكمل المسير! 👍' : "You can always come back and adjust this. Moving on! 👍", 500);
 
         const nextIndex = currentQIndex + 1;
-        if (nextIndex >= CHAT_QUESTIONS.length) {
-          await addBotMessage("Perfect! I have everything I need. 🎉", 600);
-          await addBotMessage("Running your valuation now — using DCF, Scorecard, Berkus, VC Method, Comparables, Risk-Factor Summation, and First Chicago methods...", 800);
-          await addBotMessage("✅ Done! Your full valuation report is ready below.", 1200);
+        if (nextIndex >= questions.length) {
+          await addBotMessage(isRTL ? '✅ ℹفضل! لديّ كل ما أحتاجه. 🎉' : "Perfect! I have everything I need. 🎉", 600);
+          await addBotMessage(isRTL ? 'جاري تشغيل تقييمك الآن — باستخدام DCF وبطاقة الأداء وبيركوس وطريقة رأس المال المخاطر والمعاملات المماثلة وجمع عوامل المخاطرة وطريقة شيكاغو الأولى...' : "Running your valuation now — using DCF, Scorecard, Berkus, VC Method, Comparables, Risk-Factor Summation, and First Chicago methods...", 800);
+          await addBotMessage(isRTL ? '✅ تم! تقرير التقييم الكامل جاهز أدناه.' : "✅ Done! Your full valuation report is ready below.", 1200);
           setIsComplete(true);
           setTimeout(() => onComplete(newAnswers), 600);
         } else {
           setCurrentQIndex(nextIndex);
         }
       } else {
-        await addBotMessage("I couldn't estimate that one reliably. Could you give me a rough number? Even a guess is fine! 😊", 400);
+        await addBotMessage(isRTL ? 'لم أتمكن من تقدير هذا بشكل موثوق. هل يمكنك إعطائي رقماً تقريبياً؟ حتى التخمين مقبول! 😊' : "I couldn't estimate that one reliably. Could you give me a rough number? Even a guess is fine! 😊", 400);
       }
     } catch {
-      await addBotMessage("Hmm, I had trouble estimating that. Could you give me a rough number? 😊", 400);
+      await addBotMessage(isRTL ? 'حدثت مشكلة في التقدير. هل يمكنك إعطائي رقماً تقريبياً؟ 😊' : "Hmm, I had trouble estimating that. Could you give me a rough number? 😊", 400);
     } finally {
       setIsInferring(false);
     }
   }, [currentQIndex, answers, fillMissing, onComplete]);
 
   const handleAnswer = useCallback(async (value: any) => {
-    const q = CHAT_QUESTIONS[currentQIndex];
+    const q = questions[currentQIndex];
+
+    // Format the answer for display
     const displayText = formatAnswer(q, value);
 
     // Record answer
@@ -390,11 +402,11 @@ export default function ChatInterface({ onComplete }: Props) {
     // Advance
     const nextIndex = currentQIndex + 1;
 
-    if (nextIndex >= CHAT_QUESTIONS.length) {
+    if (nextIndex >= questions.length) {
       // Done!
-      await addBotMessage("Perfect! I have everything I need. 🎉", 600);
-      await addBotMessage("Running your valuation now — using DCF, Scorecard, Berkus, VC Method, Comparables, Risk-Factor Summation, and First Chicago methods...", 800);
-      await addBotMessage("✅ Done! Your full valuation report is ready below.", 1200);
+      await addBotMessage(isRTL ? '✅ ℹفضل! لديّ كل ما أحتاجه. 🎉' : "Perfect! I have everything I need. 🎉", 600);
+      await addBotMessage(isRTL ? 'جاري تشغيل تقييمك الآن — باستخدام DCF وبطاقة الأداء وبيركوس وطريقة رأس المال المخاطر والمعاملات المماثلة وجمع عوامل المخاطرة وطريقة شيكاغو الأولى...' : "Running your valuation now — using DCF, Scorecard, Berkus, VC Method, Comparables, Risk-Factor Summation, and First Chicago methods...", 800);
+      await addBotMessage(isRTL ? '✅ تم! تقرير التقييم الكامل جاهز أدناه.' : "✅ Done! Your full valuation report is ready below.", 1200);
       setIsComplete(true);
       setTimeout(() => onComplete(newAnswers), 600);
     } else {
@@ -409,23 +421,23 @@ export default function ChatInterface({ onComplete }: Props) {
     setIsComplete(false);
     setTimeout(() => {
       const start = async () => {
-        await addBotMessage("👋 Let's start over!", 400);
-        await addBotMessage("I'll ask you the same questions again. Ready? 🚀", 600);
+        await addBotMessage(isRTL ? '👋 لنبدأ من جديد!' : "👋 Let's start over!", 400);
+        await addBotMessage(isRTL ? 'سأطرح عليك نفس الأسئلة مرة أخرى. مستعد؟ 🚀' : "I'll ask you the same questions again. Ready? 🚀", 600);
         setCurrentQIndex(0);
       };
       start();
     }, 100);
   };
 
-  const currentQ = currentQIndex >= 0 && currentQIndex < CHAT_QUESTIONS.length
-    ? CHAT_QUESTIONS[currentQIndex]
+  const currentQ = currentQIndex >= 0 && currentQIndex < questions.length
+    ? questions[currentQIndex]
     : null;
 
   return (
     <div className="flex flex-col h-full">
       {/* Progress */}
       {currentQIndex >= 0 && !isComplete && (
-        <ProgressBar current={currentQIndex + 1} total={CHAT_QUESTIONS.length} />
+        <ProgressBar current={currentQIndex + 1} total={questions.length} />
       )}
 
       {/* Messages */}
@@ -492,7 +504,7 @@ export default function ChatInterface({ onComplete }: Props) {
               style={{ borderColor: 'oklch(0.55 0.13 30)', color: 'oklch(0.55 0.13 30)' }}
             >
               <Wand2 className="w-3.5 h-3.5" />
-              I don't know — let AI estimate this for me
+              {isRTL ? 'لا أعرف — دع الذكاء الاصطناعي يقدّر هذا لي' : "I don't know — let AI estimate this for me"}
             </button>
           )}
         </motion.div>
@@ -502,7 +514,7 @@ export default function ChatInterface({ onComplete }: Props) {
       {isInferring && (
         <div className="border-t border-border p-4 bg-card flex items-center gap-2 text-xs text-muted-foreground">
           <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'oklch(0.55 0.13 30)', borderTopColor: 'transparent' }} />
-          AI is estimating a value for you...
+          {isRTL ? 'الذكاء الاصطناعي يقدّر قيمة لك...' : 'AI is estimating a value for you...'}
         </div>
       )}
 
@@ -510,7 +522,7 @@ export default function ChatInterface({ onComplete }: Props) {
       {aiInferredFields.length > 0 && !isComplete && (
         <div className="px-4 py-2 flex items-start gap-2 text-[10px] text-muted-foreground" style={{ background: 'oklch(0.55 0.13 30)10' }}>
           <Info className="w-3 h-3 shrink-0 mt-0.5" style={{ color: 'oklch(0.55 0.13 30)' }} />
-          <span>{aiInferredFields.length} value{aiInferredFields.length > 1 ? 's were' : ' was'} estimated by AI. You can retake the chat to adjust them.</span>
+          <span>{isRTL ? `تم تقدير ${aiInferredFields.length} قيمة بواسطة الذكاء الاصطناعي. يمكنك إعادة المحادثة لتعديلها.` : `${aiInferredFields.length} value${aiInferredFields.length > 1 ? 's were' : ' was'} estimated by AI. You can retake the chat to adjust them.`}</span>
         </div>
       )}
 
@@ -519,7 +531,7 @@ export default function ChatInterface({ onComplete }: Props) {
         <div className="border-t border-border px-4 py-2 flex justify-end">
           <button onClick={handleReset} className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-accent transition-colors">
             <RotateCcw className="w-3 h-3" />
-            Start over
+            {isRTL ? 'ابدأ من جديد' : 'Start over'}
           </button>
         </div>
       )}

@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { FileDown, BookmarkPlus, ChevronDown, ChevronRight, RotateCcw, PieChart, BarChart2, Layers, Cloud, CloudOff } from 'lucide-react';
 import { formatCurrency, type StartupInputs, type ValuationSummary, type SavedScenario } from '@/lib/valuation';
 import { generatePDFReport } from '@/lib/pdfReport';
@@ -82,14 +83,20 @@ const METHOD_RATIONALE: Record<string, {
   },
 };
 
-const TABS = [
+const TABS_EN = [
   { id: 'report', label: 'Valuation Report', icon: BarChart2 },
   { id: 'scenarios', label: 'Scenarios', icon: Layers },
   { id: 'dilution', label: 'Dilution', icon: PieChart },
 ];
+const TABS_AR = [
+  { id: 'report', label: 'تقرير التقييم', icon: BarChart2 },
+  { id: 'scenarios', label: 'السيناريوهات', icon: Layers },
+  { id: 'dilution', label: 'التخفيف', icon: PieChart },
+];
 
 function MethodCard({ result, index }: { result: any; index: number }) {
   const [expanded, setExpanded] = useState(false);
+  const { isRTL } = useLanguage();
   const color = METHOD_COLORS[index % METHOD_COLORS.length];
   return (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}
@@ -116,7 +123,7 @@ function MethodCard({ result, index }: { result: any; index: number }) {
               <p className="text-xs text-muted-foreground leading-relaxed mb-3">{result.description}</p>
               <div className="mb-3">
                 <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-                  <span>Confidence Score</span><span className="font-mono font-semibold">{result.confidence}%</span>
+                  <span>{isRTL ? 'درجة الثقة' : 'Confidence Score'}</span><span className="font-mono font-semibold">{result.confidence}%</span>
                 </div>
                 <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                   <div className="h-full rounded-full" style={{ width: `${result.confidence}%`, backgroundColor: color }} />
@@ -150,13 +157,15 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
   const [showSaveInput, setShowSaveInput] = useState(false);
   const [scenarioName, setScenarioName] = useState('');
   const { isAuthenticated } = useAuth();
+  const { isRTL } = useLanguage();
+  const TABS = isRTL ? TABS_AR : TABS_EN;
 
   const saveValuationMutation = trpc.profile.saveValuation.useMutation({
     onSuccess: () => {
-      toast.success('Scenario saved to your profile!');
+      toast.success(isRTL ? 'تم حفظ السيناريو في ملفك الشخصي!' : 'Scenario saved to your profile!');
     },
     onError: () => {
-      toast.error('Failed to save to profile. Saved locally only.');
+      toast.error(isRTL ? 'فشل الحفظ في الملف الشخصي. تم الحفظ محلياً فقط.' : 'Failed to save to profile. Saved locally only.');
     },
   });
 
@@ -210,14 +219,14 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
               {formatCurrency(summary.blended, true)}
             </div>
             <div className="text-xs mt-1" style={{ color: 'oklch(0.62 0.02 240)' }}>
-              Range: {formatCurrency(summary.weightedLow, true)} — {formatCurrency(summary.weightedHigh, true)}
+              {isRTL ? 'النطاق' : 'Range'}: {formatCurrency(summary.weightedLow, true)} — {formatCurrency(summary.weightedHigh, true)}
             </div>
             <div className="flex items-center gap-3 mt-2">
               <div className="text-[10px] font-mono" style={{ color: 'oklch(0.62 0.02 240)' }}>
-                Confidence: <span className="font-semibold" style={{ color: 'oklch(0.978 0.008 80)' }}>{summary.confidenceScore}%</span>
+                {isRTL ? 'الثقة' : 'Confidence'}: <span className="font-semibold" style={{ color: 'oklch(0.978 0.008 80)' }}>{summary.confidenceScore}%</span>
               </div>
               <div className="text-[10px] font-mono" style={{ color: 'oklch(0.62 0.02 240)' }}>
-                Stage: <span className="font-semibold" style={{ color: 'oklch(0.978 0.008 80)' }}>{summary.stage}</span>
+                {isRTL ? 'المرحلة' : 'Stage'}: <span className="font-semibold" style={{ color: 'oklch(0.978 0.008 80)' }}>{summary.stage}</span>
               </div>
             </div>
           </div>
@@ -225,12 +234,12 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
             <button onClick={() => { generatePDFReport(inputs, summary); toast.success('Opening print dialog…'); }}
               className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-md border border-white/20 text-white/80 hover:bg-white/10 transition-all whitespace-nowrap">
               <FileDown className="w-3.5 h-3.5" />
-              PDF Report
+              {isRTL ? 'تقرير PDF' : 'PDF Report'}
             </button>
             <button onClick={() => setShowSaveInput(v => !v)}
               className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-md border border-accent/50 text-accent hover:bg-accent/10 transition-all whitespace-nowrap">
               <BookmarkPlus className="w-3.5 h-3.5" />
-              Save Scenario
+              {isRTL ? 'حفظ السيناريو' : 'Save Scenario'}
             </button>
           </div>
         </div>
@@ -241,10 +250,10 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
               <div className="flex gap-2">
                 <input value={scenarioName} onChange={e => setScenarioName(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSaveScenario()}
-                  placeholder="Name this scenario…"
+                  placeholder={isRTL ? 'سمّ هذا السيناريو…' : 'Name this scenario…'}
                   className="flex-1 text-xs px-3 py-2 rounded-md border border-white/20 bg-white/10 text-white placeholder:text-white/40 outline-none focus:border-accent"
                   autoFocus />
-                <button onClick={handleSaveScenario} className="text-xs px-3 py-2 rounded-md bg-accent text-white font-medium hover:bg-accent/80 transition-colors">Save</button>
+                <button onClick={handleSaveScenario} className="text-xs px-3 py-2 rounded-md bg-accent text-white font-medium hover:bg-accent/80 transition-colors">{isRTL ? 'حفظ' : 'Save'}</button>
               </div>
             </motion.div>
           )}
@@ -253,10 +262,10 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
         {/* Key metrics strip */}
         <div className="grid grid-cols-4 gap-2 mt-4">
           {[
-            { label: 'Runway', value: summary.runway === 999 ? '∞' : `${summary.runway}mo` },
-            { label: 'Burn Multiple', value: `${summary.burnMultiple}x`, warn: summary.burnMultiple > 2 },
-            { label: 'ARR Multiple', value: `${summary.impliedARRMultiple}x` },
-            { label: 'Risk', value: summary.riskLevel, color: riskColor },
+            { label: isRTL ? 'مدة البقاء' : 'Runway', value: summary.runway === 999 ? '∞' : `${summary.runway}${isRTL ? 'شهر' : 'mo'}` },
+            { label: isRTL ? 'مضاعف الحرق' : 'Burn Multiple', value: `${summary.burnMultiple}x`, warn: summary.burnMultiple > 2 },
+            { label: isRTL ? 'مضاعف ARR' : 'ARR Multiple', value: `${summary.impliedARRMultiple}x` },
+            { label: isRTL ? 'المخاطرة' : 'Risk', value: summary.riskLevel, color: riskColor },
           ].map(m => (
             <div key={m.label} className="rounded-md p-2 text-center" style={{ background: 'oklch(0.22 0.04 240)' }}>
               <div className="text-[9px] font-mono uppercase tracking-wider mb-0.5" style={{ color: 'oklch(0.45 0.04 240)' }}>{m.label}</div>
@@ -287,8 +296,8 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
             {/* Bar Chart */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>Valuation by Method</h3>
-                <span className="text-[10px] text-muted-foreground font-mono">Values in $M</span>
+                <h3 className="text-sm font-semibold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>{isRTL ? 'التقييم حسب الطريقة' : 'Valuation by Method'}</h3>
+                <span className="text-[10px] text-muted-foreground font-mono">{isRTL ? 'القيم بالمليون $' : 'Values in $M'}</span>
               </div>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 55 }}>
@@ -308,7 +317,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
             {/* Method Cards */}
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Method Breakdown <span className="text-xs font-normal text-muted-foreground ml-1">— tap to expand</span>
+                {isRTL ? 'تفصيل الطرق' : 'Method Breakdown'} <span className="text-xs font-normal text-muted-foreground ml-1">— {isRTL ? 'اضغط للتوسيع' : 'tap to expand'}</span>
               </h3>
               <div className="space-y-2">
                 {summary.results.map((r, i) => <MethodCard key={r.methodCode} result={r} index={i} />)}
@@ -319,10 +328,10 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
             <div className="border border-border rounded-xl overflow-hidden bg-card">
               <div className="px-4 py-3 border-b border-border" style={{ background: 'oklch(0.18 0.05 240)' }}>
                 <h3 className="text-sm font-semibold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  Why These Methods Were Used
+                  {isRTL ? 'لماذا استخدمنا هذه الطرق' : 'Why These Methods Were Used'}
                 </h3>
                 <p className="text-[10px] mt-0.5" style={{ color: 'oklch(0.62 0.02 240)' }}>
-                  Each method is selected and weighted based on your stage, sector, and available data.
+                  {isRTL ? 'يتم اختيار كل طريقة وترجيحها بناءً على مرحلتك وقطاعك والبيانات المتاحة.' : 'Each method is selected and weighted based on your stage, sector, and available data.'}
                 </p>
               </div>
               <div className="divide-y divide-border">
@@ -345,17 +354,17 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
                           </p>
                           <div className="grid grid-cols-2 gap-2">
                             <div className="rounded-md p-2 bg-secondary/50">
-                              <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Best For</div>
+                              <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">{isRTL ? 'الأنسب لـ' : 'Best For'}</div>
                               <div className="text-[10px] text-foreground">{rationale.bestFor || '—'}</div>
                             </div>
                             <div className="rounded-md p-2 bg-secondary/50">
-                              <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Key Assumption</div>
+                              <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">{isRTL ? 'الافتراض الرئيسي' : 'Key Assumption'}</div>
                               <div className="text-[10px] text-foreground">{rationale.keyAssumption || '—'}</div>
                             </div>
                           </div>
                           {rationale.interpretation && (
                             <div className="mt-2 text-[10px] rounded-md px-3 py-2 border-l-2 text-muted-foreground italic" style={{ borderColor: color, background: 'oklch(0.97 0.003 80)' }}>
-                              <strong className="text-foreground not-italic">Your result: </strong>{rationale.interpretation(r, inputs)}
+                              <strong className="text-foreground not-italic">{isRTL ? 'نتيجتك: ' : 'Your result: '}</strong>{rationale.interpretation(r, inputs)}
                             </div>
                           )}
                         </div>
@@ -368,7 +377,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
 
             {/* Scorecard Radar */}
             <div className="border border-border rounded-lg p-4 bg-card">
-              <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>Team & Product Scorecard</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>{isRTL ? 'بطاقة أداء الفريق والمنتج' : 'Team & Product Scorecard'}</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="oklch(0.88 0.01 80)" />
@@ -381,32 +390,35 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
 
             {/* Analyst Summary */}
             <div className="border border-border rounded-lg p-4 bg-card">
-              <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>What This Means For You</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>{isRTL ? 'ماذا يعني هذا بالنسبة لك' : 'What This Means For You'}</h3>
               <div className="space-y-2.5 text-sm text-muted-foreground leading-relaxed">
-                <p>
-                  <strong className="text-foreground">Your blended valuation is {formatCurrency(summary.blended, true)}</strong>, calculated by combining 7 different methods and weighting each by how relevant it is to your stage and sector.
-                </p>
-                <p>
-                  <strong className="text-foreground">Runway:</strong> {summary.runway === 999 ? "You're profitable — no immediate funding pressure." : `At your current burn rate, you have ${summary.runway} months of cash. ${summary.runway < 12 ? "⚠️ You should start fundraising soon." : summary.runway < 18 ? "Consider starting your fundraise in the next few months." : "You have a comfortable runway."}`}
-                </p>
-                <p>
-                  <strong className="text-foreground">Capital Efficiency:</strong> Your burn multiple is {summary.burnMultiple}x — {summary.burnMultiple < 1 ? "excellent. You're growing faster than you're spending." : summary.burnMultiple < 2 ? "good. Investors will view this favorably." : summary.burnMultiple < 4 ? "moderate. There's room to improve efficiency." : "high. Investors may push back on this — focus on reducing burn or accelerating growth."}
-                </p>
-                <p>
-                  <strong className="text-foreground">Valuation Range:</strong> The spread from {formatCurrency(summary.weightedLow, true)} to {formatCurrency(summary.weightedHigh, true)} reflects uncertainty at your stage. In a negotiation, aim for the upper half of this range.
-                </p>
+                {isRTL ? (
+                  <>
+                    <p><strong className="text-foreground">تقييمك المدمج هو {formatCurrency(summary.blended, true)}</strong>، محسوب بدمج 7 طرق مختلفة وترجيح كل منها حسب مدى ملاءمتها لمرحلتك وقطاعك.</p>
+                    <p><strong className="text-foreground">مدة البقاء:</strong> {summary.runway === 999 ? 'أنت رابح — لا ضغط تمويلي فوري.' : `بمعدل حرقك الحالي، لديك ${summary.runway} شهراً من السيولة. ${summary.runway < 12 ? '⚠️ يجب أن تبدأ جمع التمويل قريباً.' : summary.runway < 18 ? 'فكّر في بدء جمع التمويل خلال الأشهر القادمة.' : 'لديك مدة بقاء مريحة.'}`}</p>
+                    <p><strong className="text-foreground">كفاءة رأس المال:</strong> مضاعف الحرق لديك {summary.burnMultiple}x — {summary.burnMultiple < 1 ? 'ممتاز. أنت تنمو أسرع مما تنفق.' : summary.burnMultiple < 2 ? 'جيد. سينظر إليه المستثمرون بإيجابية.' : summary.burnMultiple < 4 ? 'معتدل. هناك مجال لتحسين الكفاءة.' : 'مرتفع. قد يعترض المستثمرون — ركّز على تقليل الحرق أو تسريع النمو.'}</p>
+                    <p><strong className="text-foreground">نطاق التقييم:</strong> الفارق من {formatCurrency(summary.weightedLow, true)} إلى {formatCurrency(summary.weightedHigh, true)} يعكس عدم اليقين في مرحلتك. في التفاوض، استهدف النصف الأعلى من هذا النطاق.</p>
+                  </>
+                ) : (
+                  <>
+                    <p><strong className="text-foreground">Your blended valuation is {formatCurrency(summary.blended, true)}</strong>, calculated by combining 7 different methods and weighting each by how relevant it is to your stage and sector.</p>
+                    <p><strong className="text-foreground">Runway:</strong> {summary.runway === 999 ? "You're profitable — no immediate funding pressure." : `At your current burn rate, you have ${summary.runway} months of cash. ${summary.runway < 12 ? "⚠️ You should start fundraising soon." : summary.runway < 18 ? "Consider starting your fundraise in the next few months." : "You have a comfortable runway."}`}</p>
+                    <p><strong className="text-foreground">Capital Efficiency:</strong> Your burn multiple is {summary.burnMultiple}x — {summary.burnMultiple < 1 ? "excellent. You're growing faster than you're spending." : summary.burnMultiple < 2 ? "good. Investors will view this favorably." : summary.burnMultiple < 4 ? "moderate. There's room to improve efficiency." : "high. Investors may push back on this — focus on reducing burn or accelerating growth."}</p>
+                    <p><strong className="text-foreground">Valuation Range:</strong> The spread from {formatCurrency(summary.weightedLow, true)} to {formatCurrency(summary.weightedHigh, true)} reflects uncertainty at your stage. In a negotiation, aim for the upper half of this range.</p>
+                  </>
+                )}
               </div>
             </div>
 
             {/* Disclaimer */}
             <div className="p-3 rounded-md bg-secondary/60 text-[10px] text-muted-foreground leading-relaxed">
-              <strong>Disclaimer:</strong> This valuation is for planning and educational purposes only. Actual valuations depend on investor negotiations, market conditions, and due diligence. Consult a qualified financial advisor before making investment decisions.
+              {isRTL ? <><strong>تنبيه:</strong> هذا التقييم لأغراض التخطيط والتعليم فقط. تعتمد التقييمات الفعلية على مفاوضات المستثمرين وظروف السوق والعناية الواجبة. استشر مستشاراً مالياً مؤهلاً قبل اتخاذ قرارات الاستثمار.</> : <><strong>Disclaimer:</strong> This valuation is for planning and educational purposes only. Actual valuations depend on investor negotiations, market conditions, and due diligence. Consult a qualified financial advisor before making investment decisions.</>}
             </div>
 
             {/* Start Over */}
             <button onClick={onReset} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-accent transition-colors">
               <RotateCcw className="w-3.5 h-3.5" />
-              Start a new valuation
+              {isRTL ? 'بدء تقييم جديد' : 'Start a new valuation'}
             </button>
           </div>
         )}

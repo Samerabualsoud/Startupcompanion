@@ -15,6 +15,7 @@ const FeasibilityInputSchema = z.object({
   founderBackground: z.string().optional(),
   country: z.string().optional(),
   stage: z.string().optional(),
+  language: z.enum(['english', 'arabic']).default('english'),
 });
 
 export const feasibilityRouter = router({
@@ -31,7 +32,11 @@ export const feasibilityRouter = router({
         input.stage ? `Current Stage: ${input.stage}` : '',
       ].filter(Boolean).join('\n');
 
-      const systemPrompt = `You are a senior venture capital analyst and startup advisor with 20+ years of experience evaluating early-stage startups. Your job is to evaluate startup ideas objectively, honestly, and constructively — like a trusted advisor, not a cheerleader.
+      const langNote = input.language === 'arabic'
+        ? ' IMPORTANT: Write ALL text values in the JSON response in Arabic (العربية). Keep JSON keys in English. Use Arabic verdicts: فرصة قوية | مفهوم واعد | يحتاج تحسيناً | مخاطر عالية | غير قابل للتطبيق'
+        : '';
+
+      const systemPrompt = `You are a senior venture capital analyst and startup advisor with 20+ years of experience evaluating early-stage startups. Your job is to evaluate startup ideas objectively, honestly, and constructively — like a trusted advisor, not a cheerleader.${langNote}
 
 You must return a JSON object with EXACTLY this structure (no extra fields, no markdown, just raw JSON):
 {

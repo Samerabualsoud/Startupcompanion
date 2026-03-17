@@ -231,3 +231,15 @@
 - [x] Fix ESOPPlanner: AI analysis in Arabic when Arabic is active
 - [x] 0 TypeScript errors, 31 tests passing
 - [x] Save checkpoint
+
+## Round 20 — Arabic RTL Full Fix
+- [x] Fix FeasibilityEvaluator: all text, labels, placeholders, section headers in Arabic when lang=ar
+- [x] Fix FeasibilityEvaluator: RTL layout (dir=rtl, text-right, mirrored layout)
+- [x] Fix sidebar group label "LEGAL & DOCUMENTS" → translate to Arabic
+- [x] Fix all tool content areas: enforce dir=rtl and Arabic font when lang=ar
+- [x] Fix ChatInterface (valuation assistant): all UI strings translated
+- [x] Fix ValuationReport: all labels, tabs, metrics, analyst summary, disclaimer in Arabic
+- [x] Fix chat questions: Arabic questions array added, used when lang=ar
+- [x] Cleared stale Vite cache causing false Babel error
+- [x] 0 TypeScript errors, 31 tests passing
+- [x] Save checkpoint
