@@ -247,10 +247,14 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
             },
             {
               label: 'ARR',
-              value: fmtCurrency(snapshot.currentARR),
+              value: fmtCurrency(snapshot.currentARR ?? snapshot.salesARR),
               icon: Zap,
               color: '#7C3AED',
-              sub: snapshot.revenueGrowthRate ? `+${snapshot.revenueGrowthRate}% growth` : 'No data',
+              sub: snapshot.currentARR
+                ? (snapshot.revenueGrowthRate ? `+${snapshot.revenueGrowthRate}% growth` : 'From profile')
+                : snapshot.salesARR
+                  ? 'Annualized from Sales'
+                  : 'No data',
               action: 'cogs',
             },
             {

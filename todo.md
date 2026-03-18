@@ -278,7 +278,7 @@
 - [x] Wire Data Room + Sales Tracker to sidebar nav (Overview + My Startup groups)
 - [x] Add i18n keys for Data Room and Sales Tracker (EN + AR)
 - [x] 0 TypeScript errors, all tests passing
-- [ ] Save checkpoint
+- [x] Save checkpoint
 
 ## Round 23 Bugs & Additions
 - [x] Fix valuation history DB insert error (totalShares int overflow → bigint)
@@ -295,4 +295,24 @@
 - [x] Build shared FieldInfo tooltip component (info icon + popover with explanation text)
 - [x] Add FieldInfo tooltips to ValuationTimeline and COGSCalculator
 - [x] 0 TypeScript errors, 31 tests passing
-- [ ] Save checkpoint
+- [x] Save checkpoint
+
+## Round 24 — Full Platform Data Wiring Audit
+- [x] Fix StartupContext: totalShares → totalSharesOutstanding, parValue → parValuePerShare, esopPoolPct → esopPoolPercent
+- [x] Fix sales.summary endpoint: add annualizedRevenue (trailing-3-month avg × 12)
+- [x] Wire salesARR into StartupContext snapshot
+- [x] Fix ChatInterface: pre-fill currentARR from salesARR when profile ARR is 0/null
+- [x] Add sales-sync banner in ChatInterface when revenue is pre-filled from Sales Tracker
+- [x] Fix ValuationTimeline: auto-calculate newShares when amountRaised + preMoneyValuation + existingShares are all set
+- [x] Show computed newShares, newSharePrice, dilution% in ValuationTimeline form preview
+- [x] On ValuationTimeline save: update profile totalSharesOutstanding with (existing + newShares)
+- [x] Fix FounderDashboard: wire totalShares from profile (not ESOP plan) for cap table display
+- [x] Fix COGS: latestMonthlyRevenue should use revenuePerUnit × unitsPerMonth from latest COGS entry
+- [x] Fix profile.get router: ensure all cap table fields (totalSharesOutstanding, authorizedShares, parValuePerShare, esopPoolPercent) are returned
+- [x] Fix StartupProfile page: wire cap table fields correctly to profile.save mutation
+- [x] Wire FounderDashboard runway: use monthlyBurnRate and cashOnHand from profile
+- [x] Wire readinessScore from FundraisingReadiness into StartupContext
+- [x] Wire pitchScore from PitchDeckScorecard into StartupContext
+- [x] 0 TypeScript errors, all tests passing (31 tests)
+- [x] Save checkpoint
+- [x] Push all changes to GitHub repo Samerabualsoud/Startupcompanion

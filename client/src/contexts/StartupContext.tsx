@@ -65,6 +65,7 @@ export interface StartupSnapshot {
   salesThisMonth: number | null;
   salesLastMonth: number | null;
   salesMoMGrowth: number | null;
+  salesARR: number | null; // Annualized from last 3 months of closed-won revenue
   // Fundraising readiness score (0–100)
   readinessScore: number | null;
   // Pitch deck score (0–100)
@@ -110,6 +111,7 @@ const DEFAULT_SNAPSHOT: StartupSnapshot = {
   salesThisMonth: null,
   salesLastMonth: null,
   salesMoMGrowth: null,
+  salesARR: null,
   readinessScore: null,
   pitchScore: null,
 };
@@ -232,10 +234,10 @@ export function StartupProvider({ children }: { children: ReactNode }) {
     grossMargin: profile?.grossMargin ?? null,
     revenueGrowthRate: profile?.revenueGrowthRate ?? null,
     targetRaise: profile?.targetRaise ?? null,
-    totalShares: (profile as any)?.totalShares ?? null,
+    totalShares: (profile as any)?.totalSharesOutstanding ?? null,
     authorizedShares: (profile as any)?.authorizedShares ?? null,
-    parValue: (profile as any)?.parValue ?? null,
-    esopPoolPct: (profile as any)?.esopPoolPct ?? null,
+    parValue: (profile as any)?.parValuePerShare ?? null,
+    esopPoolPct: (profile as any)?.esopPoolPercent ?? null,
     teamMembers,
     latestValuation,
     latestValuationDate,
@@ -252,6 +254,7 @@ export function StartupProvider({ children }: { children: ReactNode }) {
     salesThisMonth,
     salesLastMonth,
     salesMoMGrowth,
+    salesARR: salesSummary?.annualizedRevenue ?? null,
     readinessScore: null,
     pitchScore: null,
   };

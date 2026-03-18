@@ -30,7 +30,45 @@ export const valuationHistoryRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return db.addValuationHistoryEntry(ctx.user.id, input);
+      // 1. Insert the valuation history entry
+      const entries = await db.addValuationHistoryEntry(ctx.user.id, input);
+
+      // 2. Auto-update profile cap table for priced rounds
+      //    Condition: priced-round AND amountRaised AND preMoneyValuation are provided
+      if (
+        input.valuationType === "priced-round" &&
+        input.amountRaised &&
+        input.preMoneyValuation
+      ) {
+        const profile = await db.getProfileByUserId(ctx.user.id);
+        const existingShares = profile?.totalSharesOutstanding ?? 0;
+
+        if (existingShares > 0) {
+          // newShares = amountRaised / (preMoneyValuation / existingShares)
+          const pricePerShare = input.preMoneyValuation / existingShares;
+          const newShares = Math.round(input.amountRaised / pricePerShare);
+          const postRoundShares = existingShares + newShares;
+          const postMoneyVal = input.preMoneyValuation + input.amountRaised;
+          const computedSharePrice = postMoneyVal / postRoundShares;
+
+          await db.upsertProfile(ctx.user.id, {
+            ...profile,
+            name: profile?.name ?? input.companyName,
+            totalSharesOutstanding: postRoundShares,
+            parValuePerShare: profile?.parValuePerShare ?? computedSharePrice,
+          });
+        } else if (input.totalShares) {
+          // No existing shares in profile — seed the cap table from the form value
+          const profile2 = await db.getProfileByUserId(ctx.user.id);
+          await db.upsertProfile(ctx.user.id, {
+            ...profile2,
+            name: profile2?.name ?? input.companyName,
+            totalSharesOutstanding: input.totalShares!,
+          });
+        }
+      }
+
+      return entries;
     }),
 
   // Delete a valuation history entry

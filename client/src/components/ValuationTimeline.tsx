@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { trpc } from '@/lib/trpc';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import {
   TrendingUp, Plus, Trash2, Calendar, DollarSign, Building2,
-  BarChart3, Clock, ChevronRight, Info, Layers
+  BarChart3, Clock, ChevronRight, Info, Layers, Zap, Users
 } from 'lucide-react';
 
 const VALUATION_TYPES = [
@@ -92,6 +92,25 @@ export default function ValuationTimeline() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const { data: entries = [], isLoading, refetch } = trpc.valuationHistory.getAll.useQuery();
+  // Load profile to get existing shares for auto-calculation
+  const { data: profileData, refetch: refetchProfile } = trpc.profile.get.useQuery();
+  const existingShares = (profileData as any)?.totalSharesOutstanding ?? 0;
+
+  // Auto-calculate new shares for priced rounds
+  const shareCalc = useMemo(() => {
+    if (form.valuationType !== 'priced-round') return null;
+    const preMoney = parseFloat(form.preMoneyValuation);
+    const raised = parseFloat(form.amountRaised);
+    if (!preMoney || !raised || preMoney <= 0 || raised <= 0) return null;
+    if (existingShares <= 0) return null;
+    const pricePerShare = preMoney / existingShares;
+    const newShares = Math.round(raised / pricePerShare);
+    const postRoundShares = existingShares + newShares;
+    const postMoney = preMoney + raised;
+    const newSharePrice = postMoney / postRoundShares;
+    const dilutionPct = (newShares / postRoundShares) * 100;
+    return { newShares, postRoundShares, newSharePrice, dilutionPct, postMoney };
+  }, [form.valuationType, form.preMoneyValuation, form.amountRaised, existingShares]);
 
   const addMutation = trpc.valuationHistory.add.useMutation({
     onSuccess: () => {
@@ -99,6 +118,8 @@ export default function ValuationTimeline() {
       setDialogOpen(false);
       setForm(EMPTY_FORM);
       refetch();
+      // Refetch profile so cap table reflects new shares
+      refetchProfile();
     },
     onError: (err) => {
       toast.error(err.message);
@@ -305,6 +326,37 @@ export default function ValuationTimeline() {
                   />
                 </div>
               </div>
+              {/* Auto-Calculate Shares Preview — shown for priced rounds when inputs are ready */}
+              {shareCalc && (
+                <div className="col-span-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
+                    <Zap className="w-3.5 h-3.5" />
+                    Auto-Calculated Share Issuance
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div>
+                      <div className="text-[10px] text-emerald-600 font-medium">New Shares Issued</div>
+                      <div className="text-sm font-bold text-emerald-900">{shareCalc.newShares.toLocaleString()}</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-emerald-600 font-medium">Post-Round Total</div>
+                      <div className="text-sm font-bold text-emerald-900">{shareCalc.postRoundShares.toLocaleString()}</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-emerald-600 font-medium">New Share Price</div>
+                      <div className="text-sm font-bold text-emerald-900">${shareCalc.newSharePrice.toFixed(4)}</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-emerald-600 font-medium">Investor Dilution</div>
+                      <div className="text-sm font-bold text-amber-700">{shareCalc.dilutionPct.toFixed(1)}%</div>
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-emerald-700 flex items-center gap-1">
+                    <Users className="w-3 h-3" />
+                    Cap table will be updated automatically on save.
+                  </div>
+                </div>
+              )}
               <div className="flex justify-end gap-2 pt-2">
                 <Button variant="outline" onClick={() => setDialogOpen(false)}>
                   {t('back')}

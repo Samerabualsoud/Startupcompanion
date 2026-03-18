@@ -6,7 +6,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ChevronRight, RotateCcw, Check, Sparkles, Wand2, Info, Pencil, ChevronDown } from 'lucide-react';
+import { Send, ChevronRight, RotateCcw, Check, Sparkles, Wand2, Info, Pencil, ChevronDown, TrendingUp } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { CHAT_QUESTIONS, CHAT_QUESTIONS_AR, formatAnswer, type ChatQuestion } from '@/lib/chatFlow';
 import { nanoid } from 'nanoid';
@@ -270,14 +270,20 @@ export default function ChatInterface({ onComplete }: Props) {
 
   // Pre-populate answers from startup profile if available
   const p = profileData && 'name' in profileData ? profileData : (profileData as any)?.profile ?? null;
+  // Sales-to-valuation bridge: load sales summary to derive ARR when profile ARR is not set
+  const { data: salesSummaryData } = trpc.sales.summary.useQuery(undefined, { enabled: isAuthenticated });
+  const salesARR = (salesSummaryData as any)?.annualizedRevenue ?? null;
+  // Use profile ARR if set; otherwise fall back to sales-derived ARR
+  const profileARR = p?.currentARR ? Number(p.currentARR) : null;
+  const bridgedARR = profileARR ?? (salesARR && salesARR > 0 ? salesARR : undefined);
+  const arrFromSalesBridge = !profileARR && salesARR && salesARR > 0;
   const profileDefaults = p ? {
     companyName: p.name ?? undefined,
     sector: p.sector ?? undefined,
     stage: p.stage ?? undefined,
-    currentARR: p.annualRevenue ? Number(p.annualRevenue) : undefined,
-    monthlyBurnRate: p.monthlyBurn ? Number(p.monthlyBurn) : undefined,
+    currentARR: bridgedARR,
+    monthlyBurnRate: p.monthlyBurnRate ? Number(p.monthlyBurnRate) : undefined,
     cashOnHand: p.cashOnHand ? Number(p.cashOnHand) : undefined,
-    teamSize: p.teamSize ?? undefined,
     country: p.country ?? undefined,
   } : {};
 
@@ -454,6 +460,19 @@ export default function ChatInterface({ onComplete }: Props) {
       {/* Progress */}
       {currentQIndex >= 0 && !isComplete && (
         <ProgressBar current={currentQIndex + 1} total={questions.length} />
+      )}
+
+      {/* Sales-to-Valuation Bridge Banner */}
+      {arrFromSalesBridge && !isComplete && (
+        <div className="flex items-center gap-2 px-4 py-2 text-[11px] font-medium" style={{ background: 'oklch(0.22 0.05 240)', color: 'oklch(0.85 0.04 240)', borderBottom: '1px solid oklch(0.28 0.04 240)' }}>
+          <TrendingUp className="w-3.5 h-3.5 shrink-0" style={{ color: '#10B981' }} />
+          <span>
+            {isRTL
+              ? `تم ربط الإيرادات من متتبع المبيعات: ARR المقدّر $${(salesARR! / 1000).toFixed(0)}K`
+              : `Revenue synced from Sales Tracker — estimated ARR $${salesARR! >= 1_000_000 ? (salesARR! / 1_000_000).toFixed(1) + 'M' : (salesARR! / 1_000).toFixed(0) + 'K'} pre-filled`
+            }
+          </span>
+        </div>
       )}
 
       {/* Messages */}

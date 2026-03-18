@@ -269,15 +269,24 @@ export const salesRouter = router({
     const thisMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthKey = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
+    // Build monthly revenue map for all closed_won entries
+    const monthlyRevMap: Record<string, number> = {};
     let total = 0, thisMonth = 0, lastMonth = 0;
     for (const e of entries) {
       if (e.dealStage !== 'closed_won') continue;
       const m = new Date(e.date).toISOString().slice(0, 7);
       total += e.amount;
+      monthlyRevMap[m] = (monthlyRevMap[m] ?? 0) + e.amount;
       if (m === thisMonthKey) thisMonth += e.amount;
       if (m === lastMonthKey) lastMonth += e.amount;
     }
-    return { total, thisMonth, lastMonth };
+    // Annualized revenue: average of last 3 months with data × 12
+    const sortedMonths = Object.keys(monthlyRevMap).sort().reverse();
+    const last3 = sortedMonths.slice(0, 3);
+    const annualizedRevenue = last3.length > 0
+      ? (last3.reduce((s, m) => s + monthlyRevMap[m], 0) / last3.length) * 12
+      : 0;
+    return { total, thisMonth, lastMonth, annualizedRevenue };
   }),
 
   analyzeAI: protectedProcedure
