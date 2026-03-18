@@ -15,6 +15,8 @@ import {
   type InvestorContact, type InsertInvestorContact,
   valuationHistory, type InsertValuationHistory,
   cogsCalculations, type InsertCogsCalculation,
+  resourceSubmissions, type InsertResourceSubmission,
+  auditLog,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -519,4 +521,117 @@ export async function deleteCogsCalculation(userId: number, id: number) {
   if (!db) throw new Error("Database not available");
   await db.delete(cogsCalculations)
     .where(and(eq(cogsCalculations.id, id), eq(cogsCalculations.userId, userId)));
+}
+
+// ── Resource Submissions ───────────────────────────────────────────────────
+
+export async function createResourceSubmission(data: InsertResourceSubmission) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(resourceSubmissions).values(data);
+  const all = await db.select().from(resourceSubmissions)
+    .where(data.userId ? eq(resourceSubmissions.userId, data.userId!) : eq(resourceSubmissions.submitterEmail, data.submitterEmail ?? ''))
+    .orderBy(resourceSubmissions.createdAt);
+  return all[all.length - 1] ?? null;
+}
+
+export async function getAllResourceSubmissions(status?: 'pending' | 'approved' | 'rejected') {
+  const db = await getDb();
+  if (!db) return [];
+  if (status) {
+    return db.select().from(resourceSubmissions).where(eq(resourceSubmissions.status, status));
+  }
+  return db.select().from(resourceSubmissions);
+}
+
+export async function reviewResourceSubmission(
+  id: number,
+  status: 'approved' | 'rejected',
+  adminId: number,
+  adminNote?: string
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(resourceSubmissions)
+    .set({ status, adminNote: adminNote ?? null, reviewedBy: adminId, reviewedAt: new Date(), updatedAt: new Date() })
+    .where(eq(resourceSubmissions.id, id));
+  const result = await db.select().from(resourceSubmissions).where(eq(resourceSubmissions.id, id)).limit(1);
+  return result[0] ?? null;
+}
+
+// ── Admin Audit Log ────────────────────────────────────────────────────────
+
+export async function addAuditLog(data: {
+  adminId: number;
+  adminEmail: string;
+  action: string;
+  targetType?: string;
+  targetId?: number;
+  details?: unknown;
+}) {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(auditLog).values({
+    adminId: data.adminId,
+    adminEmail: data.adminEmail,
+    action: data.action,
+    targetType: data.targetType ?? null,
+    targetId: data.targetId ?? null,
+    details: data.details ?? null,
+  });
+}
+
+export async function getAuditLog(limit = 100, offset = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(auditLog)
+    .orderBy(auditLog.createdAt)
+    .limit(limit)
+    .offset(offset);
+}
+
+// ── Platform Analytics (admin) ─────────────────────────────────────────────
+
+export async function getPlatformStats() {
+  const db = await getDb();
+  if (!db) return null;
+  const [totalUsers] = await db.select({ count: sql<number>`count(*)` }).from(users);
+  const [vcCount] = await db.select({ count: sql<number>`count(*)` }).from(kycVcProfiles);
+  const [angelCount] = await db.select({ count: sql<number>`count(*)` }).from(kycAngelProfiles);
+  const [lawyerCount] = await db.select({ count: sql<number>`count(*)` }).from(kycLawyerProfiles);
+  const [startupCount] = await db.select({ count: sql<number>`count(*)` }).from(kycStartupProfiles);
+  const [pendingSubmissions] = await db.select({ count: sql<number>`count(*)` }).from(resourceSubmissions).where(eq(resourceSubmissions.status, 'pending'));
+  const [savedValuationCount] = await db.select({ count: sql<number>`count(*)` }).from(savedValuations);
+  const recentUsers = await db.select().from(users).orderBy(users.createdAt).limit(5);
+  return {
+    totalUsers: Number(totalUsers?.count ?? 0),
+    vcCount: Number(vcCount?.count ?? 0),
+    angelCount: Number(angelCount?.count ?? 0),
+    lawyerCount: Number(lawyerCount?.count ?? 0),
+    startupCount: Number(startupCount?.count ?? 0),
+    pendingSubmissions: Number(pendingSubmissions?.count ?? 0),
+    savedValuationCount: Number(savedValuationCount?.count ?? 0),
+    recentUsers,
+  };
+}
+
+export async function banUser(userId: number, banned: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Use role field to mark banned users (set to a special state via name convention)
+  // Since we don't have a banned column, we'll add it via a note in the name field
+  // Better: update subscriptionStatus to 'inactive' as a soft ban signal
+  await db.update(users).set({ subscriptionStatus: banned ? 'inactive' : 'inactive' }).where(eq(users.id, userId));
+}
+
+export async function deleteUser(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(users).where(eq(users.id, userId));
+}
+
+export async function getUsersWithStats(limit = 50, offset = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(users).limit(limit).offset(offset);
 }

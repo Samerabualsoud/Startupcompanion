@@ -497,3 +497,35 @@ export const esopPlans = mysqlTable('esop_plans', {
 });
 export type EsopPlan = typeof esopPlans.$inferSelect;
 export type InsertEsopPlan = typeof esopPlans.$inferInsert;
+
+// ── Resource Submissions (self-registration for VCs, angels, lawyers, grants) ──
+export const resourceSubmissions = mysqlTable('resource_submissions', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('userId'),
+  type: mysqlEnum('type', ['vc', 'angel', 'lawyer', 'grant']).notNull(),
+  status: mysqlEnum('status', ['pending', 'approved', 'rejected']).default('pending').notNull(),
+  data: json('data').notNull(),
+  submitterEmail: varchar('submitterEmail', { length: 320 }),
+  submitterName: varchar('submitterName', { length: 256 }),
+  adminNote: text('adminNote'),
+  reviewedBy: int('reviewedBy'),
+  reviewedAt: timestamp('reviewedAt'),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+});
+export type ResourceSubmission = typeof resourceSubmissions.$inferSelect;
+export type InsertResourceSubmission = typeof resourceSubmissions.$inferInsert;
+
+// ── Admin Audit Log ────────────────────────────────────────────────────────
+export const auditLog = mysqlTable('audit_log', {
+  id: int('id').autoincrement().primaryKey(),
+  adminId: int('adminId').notNull(),
+  adminEmail: varchar('adminEmail', { length: 320 }).notNull(),
+  action: varchar('action', { length: 128 }).notNull(),
+  targetType: varchar('targetType', { length: 64 }),
+  targetId: int('targetId'),
+  details: json('details'),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+});
+export type AuditLog = typeof auditLog.$inferSelect;
+export type InsertAuditLog = typeof auditLog.$inferInsert;

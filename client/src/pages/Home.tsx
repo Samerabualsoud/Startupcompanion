@@ -21,6 +21,7 @@ import { getLoginUrl } from '@/const';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import StartupProfile from './StartupProfile';
+import { StartupProvider } from '@/contexts/StartupContext';
 import { buildInputsFromAnswers } from '@/lib/chatFlow';
 import { runValuation, type StartupInputs, type ValuationSummary } from '@/lib/valuation';
 import { generateFullReport } from '@/lib/fullReport';
@@ -151,7 +152,7 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'data-room': '#2D4A6B',
 };
 
-export default function Home() {
+function HomeInner() {
   // The userAuth hooks provides authentication state
   // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
   let { user, loading, error, isAuthenticated, logout } = useAuth();
@@ -376,7 +377,15 @@ export default function Home() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground border border-border px-2.5 py-1 rounded-full">
+            <button
+            onClick={() => navigate('/')}
+            className="hidden sm:flex items-center gap-1.5 text-[10px] font-medium px-2.5 py-1 rounded-full border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
+            title="Back to Home"
+          >
+            <HomeIcon className="w-3 h-3" />
+            <span>Home</span>
+          </button>
+          <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground border border-border px-2.5 py-1 rounded-full">
             <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
             13 tools · Free
           </div>
@@ -577,5 +586,13 @@ export default function Home() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <StartupProvider>
+      <HomeInner />
+    </StartupProvider>
   );
 }

@@ -20,6 +20,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
 } from 'recharts';
 import { useStartup } from '@/contexts/StartupContext';
+import { useReport } from '@/contexts/ReportContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
@@ -56,7 +57,11 @@ interface FounderDashboardProps {
 
 export default function FounderDashboard({ onNavigate }: FounderDashboardProps) {
   const { snapshot, isLoading } = useStartup();
+  const { readiness, pitchScore: reportPitchScore } = useReport();
   const { t, lang } = useLanguage();
+  // Wire readiness and pitch scores from ReportContext (session-based, populated when tools are used)
+  const readinessScore = readiness?.score ?? snapshot.readinessScore;
+  const pitchScore = reportPitchScore?.totalScore ?? snapshot.pitchScore;
   const isRTL = lang === 'ar';
 
   // Load sales analytics for the trend chart
@@ -110,8 +115,8 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
     { id: 'cogs',           label: t('navCOGS'),              done: snapshot.latestMonthlyCOGS !== null },
     { id: 'esop',           label: t('navESOP'),              done: snapshot.currentOptionPool !== null },
     { id: 'sales',          label: 'Sales Tracker',           done: snapshot.totalSalesRevenue !== null && snapshot.totalSalesRevenue > 0 },
-    { id: 'readiness',      label: t('navReadiness'),         done: snapshot.readinessScore !== null },
-    { id: 'pitch-deck',     label: t('navPitchDeck'),         done: snapshot.pitchScore !== null },
+    { id: 'readiness',      label: t('navReadiness'),         done: readinessScore !== null },
+    { id: 'pitch-deck',     label: t('navPitchDeck'),         done: pitchScore !== null },
     { id: 'investor-crm',   label: t('navInvestorCRM'),       done: false },
     { id: 'data-room',      label: 'Data Room',               done: false },
   ];

@@ -316,3 +316,50 @@
 - [x] 0 TypeScript errors, all tests passing (31 tests)
 - [x] Save checkpoint
 - [x] Push all changes to GitHub repo Samerabualsoud/Startupcompanion
+
+## Round 25 — Bug Fixes, UX, Database Expansion & Field Wiring
+- [ ] Fix login redirect loop: landing page (/) should NOT require auth; only /app routes should redirect to login
+- [ ] Add "Home" / "Back to Home" button in app sidebar and all tool screens
+- [ ] Expand VC database: add 30+ more VC firms (MENA-focused + global)
+- [ ] Expand Angel Investors database: add 20+ more angels
+- [ ] Expand Venture Lawyers database: add 15+ more firms
+- [ ] Expand Grants & Programs database: add 15+ more grants
+- [ ] Expand Accelerators database: add 20+ more programs
+- [ ] Audit and wire remaining disconnected fields (DilutionSimulator, FundraisingReadiness, PitchDeckScorecard, RunwayOptimizer)
+- [ ] Wire DilutionSimulator: pre-fill totalShares, esopPoolPct from snapshot
+- [ ] Wire FundraisingReadiness: publish readinessScore back to StartupContext
+- [ ] Wire PitchDeckScorecard: publish pitchScore back to StartupContext
+- [ ] Wire RunwayOptimizer: pre-fill cashOnHand, monthlyBurnRate from snapshot
+- [ ] 0 TypeScript errors, 31 tests passing
+- [ ] Save checkpoint and push to GitHub
+
+## Round 25 — Resource Database Expansion + Self-Registration
+- [x] Fix login redirect loop on public pages (main.tsx)
+- [x] Add Home button to top header bar
+- [ ] Expand VC database: add 20 more firms (MENA, Africa, SEA, India, LatAm, specialized)
+- [ ] Expand Angel database: add 15 more investors
+- [ ] Expand Grants database: add 15 more grants (MENA, Africa, EU, government)
+- [ ] Expand Venture Lawyers database: add 10 more firms
+- [ ] Add DB schema: resource_submissions table (type, data JSON, status, userId, createdAt)
+- [ ] Add tRPC procedures: resources.submitProfile, resources.getMySubmissions, resources.adminApprove/Reject
+- [ ] Add "List Your Firm" button in ResourceDatabase for each tab (VC, Angel, Lawyer, Grant)
+- [ ] Add ResourceSubmissionForm modal component with fields per type
+- [ ] Show pending submissions in ResourceDatabase with "Pending Review" badge for submitter
+- [ ] Add admin panel tab for reviewing and approving/rejecting submissions
+- [ ] Wire approved submissions into the live data feed alongside curated entries
+- [ ] 0 TypeScript errors, all tests passing
+- [ ] Save checkpoint and push to GitHub
+
+## Round 25 (continued) — Full Admin Panel Rebuild
+- [ ] Admin: Platform Overview dashboard (total users, signups/day, active tools, KYC pending)
+- [ ] Admin: User Management table (search, filter by role/type, promote/demote, ban/unban, view profile)
+- [ ] Admin: KYC Submissions tab (VC, Angel, Lawyer, Startup) with approve/reject + view details
+- [ ] Admin: Resource Submissions tab (review self-registered VCs/lawyers/angels/grants, approve/reject)
+- [ ] Admin: Startup Directory moderation (approve/reject/feature startups)
+- [ ] Admin: Investor CRM data view (see all contacts across users for analytics)
+- [ ] Admin: Platform Analytics (signups over time, tool usage counts, top sectors/regions)
+- [ ] Admin: Content Management (edit platform announcements, featured resources)
+- [ ] Admin: System Settings (maintenance mode toggle, feature flags)
+- [ ] Admin: Audit Log (recent admin actions with timestamps)
+- [ ] adminRouter.ts: add getStats, getUsers, updateUserRole, banUser, getAuditLog, getToolUsage procedures
+- [ ] Wire admin panel to all new procedures

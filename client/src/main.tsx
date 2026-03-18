@@ -7,20 +7,29 @@ import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
 import { LanguageProvider } from "./contexts/LanguageContext";
-import { StartupProvider } from "./contexts/StartupContext";
 import "./index.css";
 
 const queryClient = new QueryClient();
 
+// Public routes that should NOT trigger a redirect to login on auth failure
+const PUBLIC_PATHS = ['/', '/login', '/register', '/forgot-password', '/reset-password'];
+
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
 
   const isUnauthorized = error.message === UNAUTHED_ERR_MSG;
-
   if (!isUnauthorized) return;
 
-  window.location.href = getLoginUrl();
+  // Only redirect when on a protected route — never on public pages
+  const currentPath = window.location.pathname;
+  const isPublicPath = PUBLIC_PATHS.some(p => currentPath === p || currentPath.startsWith(p + '?'));
+  if (isPublicPath) return;
+
+  // Avoid redirect loop: don't redirect if already heading to login
+  if (currentPath.startsWith('/login') || currentPath.startsWith('/register')) return;
+
+  window.location.href = getLoginUrl(currentPath);
 };
 
 queryClient.getQueryCache().subscribe(event => {
@@ -58,9 +67,7 @@ createRoot(document.getElementById("root")!).render(
   <trpc.Provider client={trpcClient} queryClient={queryClient}>
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <StartupProvider>
-          <App />
-        </StartupProvider>
+        <App />
       </LanguageProvider>
     </QueryClientProvider>
   </trpc.Provider>

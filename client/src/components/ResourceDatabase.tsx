@@ -2,8 +2,10 @@ import { useState, useMemo } from 'react';
 import { trpc } from '@/lib/trpc';
 import {
   Building2, Users, Gift, Scale, Search, ExternalLink,
-  MapPin, DollarSign, ChevronDown, Globe, Star, CheckCircle2, Filter, X
+  MapPin, DollarSign, ChevronDown, Globe, Star, CheckCircle2, Filter, X,
+  Plus, Loader2, Send
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 type Tab = 'vc' | 'angel' | 'grants' | 'lawyers';
 
@@ -313,6 +315,18 @@ export default function ResourceDatabase() {
   const [equityFreeOnly, setEquityFreeOnly] = useState(false);
   const [freeConsultOnly, setFreeConsultOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showListModal, setShowListModal] = useState(false);
+  const [listForm, setListForm] = useState<Record<string, string>>({
+    name: '', email: '', website: '', description: '', location: '', type: 'vc'
+  });
+  const submitListingMutation = trpc.resources.submitListing.useMutation({
+    onSuccess: () => {
+      toast.success('Your listing has been submitted! Our team will review it within 2-3 business days.');
+      setShowListModal(false);
+      setListForm({ name: '', email: '', website: '', description: '', location: '', type: activeTab === 'grants' ? 'grant' : activeTab === 'lawyers' ? 'lawyer' : activeTab === 'angel' ? 'angel' : 'vc' });
+    },
+    onError: (e) => toast.error(e.message),
+  });
 
   const vcQuery = trpc.resources.getVcFirms.useQuery(
     { search: search || undefined, stage: stage || undefined, sector: sector || undefined, region: region || undefined },
@@ -351,14 +365,116 @@ export default function ResourceDatabase() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div>
-        <h2 className="text-xl font-bold" style={{ fontFamily: 'Playfair Display, serif', color: 'oklch(0.18 0.05 240)' }}>
-          Investor & Resources Database
-        </h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Curated directory of VCs, angels, grants, and startup lawyers — searchable and filterable.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-bold" style={{ fontFamily: 'Playfair Display, serif', color: 'oklch(0.18 0.05 240)' }}>
+            Investor & Resources Database
+          </h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Curated directory of VCs, angels, grants, and startup lawyers — searchable and filterable.
+          </p>
+        </div>
+        <button
+          onClick={() => { setShowListModal(true); setListForm(f => ({ ...f, type: activeTab === 'grants' ? 'grant' : activeTab === 'lawyers' ? 'lawyer' : activeTab === 'angel' ? 'angel' : 'vc' })); }}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-white shrink-0 hover:opacity-90 transition-opacity"
+          style={{ background: 'oklch(0.55 0.13 30)' }}
+        >
+          <Plus className="w-3.5 h-3.5" />
+          List Your Firm
+        </button>
       </div>
+
+      {/* List Your Firm Modal */}
+      {showListModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="p-5 border-b border-border flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-base" style={{ fontFamily: 'Playfair Display, serif', color: 'oklch(0.18 0.05 240)' }}>List Your Firm</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Submit your listing for review. Our team will verify and publish within 2-3 business days.</p>
+              </div>
+              <button onClick={() => setShowListModal(false)} className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              {/* Type selector */}
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Listing Type</label>
+                <div className="flex gap-1 p-1 rounded-lg bg-secondary/40">
+                  {(['vc', 'angel', 'lawyer', 'grant'] as const).map(t => (
+                    <button key={t} onClick={() => setListForm(f => ({ ...f, type: t }))}
+                      className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all capitalize ${
+                        listForm.type === t ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'
+                      }`}>
+                      {t === 'vc' ? 'VC Firm' : t === 'angel' ? 'Angel' : t === 'lawyer' ? 'Lawyer' : 'Grant'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Common fields */}
+              {[
+                { key: 'name', label: listForm.type === 'vc' ? 'Firm Name' : listForm.type === 'angel' ? 'Your Name' : listForm.type === 'lawyer' ? 'Your Name / Firm' : 'Grant / Program Name', placeholder: 'e.g. Sequoia Capital' },
+                { key: 'email', label: 'Contact Email', placeholder: 'contact@yourfirm.com' },
+                { key: 'website', label: 'Website / LinkedIn URL', placeholder: 'https://...' },
+                { key: 'location', label: 'Location / HQ City', placeholder: 'e.g. Dubai, UAE' },
+              ].map(field => (
+                <div key={field.key}>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">{field.label}</label>
+                  <input
+                    type={field.key === 'email' ? 'email' : 'text'}
+                    value={listForm[field.key] ?? ''}
+                    onChange={e => setListForm(f => ({ ...f, [field.key]: e.target.value }))}
+                    placeholder={field.placeholder}
+                    className="w-full px-3 py-2 rounded-lg text-sm border border-border bg-white outline-none focus:border-[oklch(0.55_0.13_30)] transition-colors"
+                  />
+                </div>
+              ))}
+              {/* Type-specific fields */}
+              {(listForm.type === 'vc' || listForm.type === 'angel') && (
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Investment Stages (comma-separated)</label>
+                  <input value={listForm.stages ?? ''} onChange={e => setListForm(f => ({ ...f, stages: e.target.value }))}
+                    placeholder="e.g. pre-seed, seed, series-a"
+                    className="w-full px-3 py-2 rounded-lg text-sm border border-border bg-white outline-none focus:border-[oklch(0.55_0.13_30)] transition-colors" />
+                </div>
+              )}
+              {listForm.type === 'grant' && (
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Grant Amount (USD)</label>
+                  <input value={listForm.amount ?? ''} onChange={e => setListForm(f => ({ ...f, amount: e.target.value }))}
+                    placeholder="e.g. 50000"
+                    className="w-full px-3 py-2 rounded-lg text-sm border border-border bg-white outline-none focus:border-[oklch(0.55_0.13_30)] transition-colors" />
+                </div>
+              )}
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Description / Bio</label>
+                <textarea
+                  value={listForm.description ?? ''}
+                  onChange={e => setListForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="Brief description of your firm, focus areas, and what you offer to startups..."
+                  rows={4}
+                  className="w-full px-3 py-2 rounded-lg text-sm border border-border bg-white outline-none focus:border-[oklch(0.55_0.13_30)] transition-colors resize-none"
+                />
+              </div>
+              <button
+                disabled={!listForm.name || !listForm.email || submitListingMutation.isPending}
+                onClick={() => submitListingMutation.mutate({
+                  type: listForm.type as any,
+                  data: { ...listForm },
+                  submitterEmail: listForm.email,
+                  submitterName: listForm.name,
+                })}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                style={{ background: 'oklch(0.18 0.05 240)' }}
+              >
+                {submitListingMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                Submit for Review
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'oklch(0.93 0.01 240)' }}>
