@@ -47,7 +47,7 @@ function computeRunway(cashOnHand: number | null, burnRate: number | null): numb
   return Math.floor(cashOnHand / burnRate);
 }
 
-const CHART_COLORS = ['#C4614A', '#2D4A6B', '#10B981', '#F59E0B', '#6366F1', '#8B5CF6', '#EC4899', '#0EA5E9'];
+const CHART_COLORS = ['#5B4EFF', '#22C55E', '#F59E0B', '#EC4899', '#0EA5E9', '#8B5CF6', '#C4614A', '#2D4A6B'];
 
 // ── Component ──────────────────────────────────────────────────────────────
 
@@ -85,16 +85,17 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
     }));
   }, [snapshot.teamMembers]);
 
-  // ESOP pool data
+  // ESOP pool data — allocated = sum of individual grants, available = pool - allocated
   const esopData = useMemo(() => {
-    if (!snapshot.esopTotalShares || !snapshot.currentOptionPool) return null;
-    const allocated = snapshot.currentOptionPool;
-    const remaining = snapshot.esopTotalShares - allocated;
+    if (!snapshot.currentOptionPool) return null;
+    const allocated = snapshot.esopAllocatedShares ?? 0;
+    const available = Math.max(0, snapshot.currentOptionPool - allocated);
+    if (allocated === 0 && available === 0) return null;
     return [
-      { name: 'Allocated', value: allocated, color: '#C4614A' },
-      { name: 'Available', value: Math.max(0, remaining), color: '#10B981' },
-    ].filter(d => d.value > 0);
-  }, [snapshot.esopTotalShares, snapshot.currentOptionPool]);
+      ...(allocated > 0 ? [{ name: 'Allocated', value: allocated, color: '#5B4EFF' }] : []),
+      ...(available > 0 ? [{ name: 'Available', value: available, color: '#10B981' }] : []),
+    ];
+  }, [snapshot.currentOptionPool, snapshot.esopAllocatedShares]);
 
   // Monthly sales trend (last 6 months)
   const salesTrend = useMemo(() => {
@@ -125,7 +126,7 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
   const progressPct = Math.round((completedCount / toolProgress.length) * 100);
 
   const quickActions = [
-    { id: 'valuation',    label: 'Valuation',        icon: TrendingUp,   color: '#C4614A', bg: 'oklch(0.97 0.01 30)' },
+    { id: 'valuation',    label: 'Valuation',        icon: TrendingUp,   color: '#5B4EFF', bg: 'oklch(0.97 0.01 265)' },
     { id: 'cogs',         label: 'COGS',             icon: Calculator,   color: '#059669', bg: 'oklch(0.97 0.01 160)' },
     { id: 'esop',         label: 'ESOP',             icon: Users,        color: '#2D4A6B', bg: 'oklch(0.97 0.01 240)' },
     { id: 'sales',        label: 'Sales',            icon: ShoppingCart, color: '#F59E0B', bg: 'oklch(0.97 0.02 80)' },
@@ -150,16 +151,16 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
     <div
       className="flex-1 overflow-y-auto"
       dir={isRTL ? 'rtl' : 'ltr'}
-      style={{ background: 'oklch(0.978 0.008 80)' }}
+      style={{ background: 'var(--background)' }}
     >
       {/* ── Header ── */}
-      <div className="px-6 py-5 border-b border-border" style={{ background: 'oklch(0.18 0.05 240)' }}>
+      <div className="px-6 py-5 border-b border-border" style={{ background: 'oklch(0.13 0.04 265)' }}>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h1 className="text-2xl font-bold text-white">
               {hasProfile ? snapshot.companyName : t('dashboardTitle')}
             </h1>
-            <p className="text-sm mt-0.5" style={{ color: 'oklch(0.62 0.02 240)' }}>
+            <p className="text-sm mt-0.5" style={{ color: 'oklch(0.65 0.03 265)' }}>
               {hasProfile
                 ? `${snapshot.sector || ''}${snapshot.sector && snapshot.stage ? ' · ' : ''}${snapshot.stage || ''}`
                 : t('dashboardSubtitle')}
@@ -189,15 +190,15 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
         {/* Workspace progress bar in header */}
         <div className="mt-4">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-medium" style={{ color: 'oklch(0.62 0.02 240)' }}>
+            <span className="text-xs font-medium" style={{ color: 'oklch(0.65 0.03 265)' }}>
               Workspace Completion
             </span>
             <span className="text-xs font-semibold text-white">{progressPct}%</span>
           </div>
-          <div className="h-1.5 rounded-full" style={{ background: 'oklch(0.28 0.04 240)' }}>
+          <div className="h-1.5 rounded-full" style={{ background: 'oklch(0.24 0.04 265)' }}>
             <div
               className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${progressPct}%`, background: progressPct >= 80 ? '#10B981' : progressPct >= 50 ? '#F59E0B' : '#C4614A' }}
+              style={{ width: `${progressPct}%`, background: progressPct >= 80 ? '#22C55E' : progressPct >= 50 ? '#F59E0B' : '#5B4EFF' }}
             />
           </div>
         </div>
@@ -236,7 +237,7 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
               label: 'Valuation',
               value: fmtCurrency(snapshot.latestValuation),
               icon: TrendingUp,
-              color: '#C4614A',
+              color: '#5B4EFF',
               sub: snapshot.latestValuationDate
                 ? new Date(snapshot.latestValuationDate).toLocaleDateString()
                 : 'Not set',
@@ -304,7 +305,7 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
                   <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-2" style={{ background: `${card.color}18` }}>
                     <card.icon className="w-3.5 h-3.5" style={{ color: card.color }} />
                   </div>
-                  <div className="text-lg font-bold" style={{ color: 'oklch(0.18 0.05 240)' }}>{card.value}</div>
+                  <div className="text-lg font-bold text-foreground">{card.value}</div>
                   <div className="text-xs font-medium text-foreground mt-0.5">{card.label}</div>
                   <div className="text-[10px] text-muted-foreground mt-0.5 truncate">{card.sub}</div>
                 </CardContent>
@@ -463,15 +464,15 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
                     <AreaChart data={salesTrend} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                       <defs>
                         <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#C4614A" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#C4614A" stopOpacity={0} />
+                          <stop offset="5%" stopColor="#5B4EFF" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#5B4EFF" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.9 0 0)" />
                       <XAxis dataKey="month" tick={{ fontSize: 9 }} tickFormatter={v => v.slice(5)} />
                       <YAxis tick={{ fontSize: 9 }} tickFormatter={v => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'K' : v}`} />
                       <Tooltip formatter={(v: any) => [`$${Number(v).toLocaleString()}`, 'Revenue']} labelFormatter={l => `Month: ${l}`} />
-                      <Area type="monotone" dataKey="revenue" stroke="#C4614A" strokeWidth={2} fill="url(#salesGrad)" />
+                      <Area type="monotone" dataKey="revenue" stroke="#5B4EFF" strokeWidth={2} fill="url(#salesGrad)" />
                     </AreaChart>
                   </ResponsiveContainer>
                   <div className="flex items-center justify-between text-xs mt-1">
@@ -599,7 +600,7 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
 // ── Static tool catalog ────────────────────────────────────────────────────
 
 const ALL_TOOLS = [
-  { id: 'valuation',              label: 'Valuation Calculator',        desc: '7 methods: DCF, Scorecard, Berkus…',    icon: TrendingUp,     color: '#C4614A', badge: '7 methods' },
+  { id: 'valuation',              label: 'Valuation Calculator',        desc: '7 methods: DCF, Scorecard, Berkus…',    icon: TrendingUp,     color: '#5B4EFF', badge: '7 methods' },
   { id: 'equity-split',           label: 'Co-Founder Equity Split',     desc: 'Fair equity allocation for founders',   icon: Users,          color: '#2D4A6B', badge: undefined },
   { id: 'dilution',               label: 'Dilution Simulator',          desc: 'Model funding rounds & dilution',       icon: GitBranch,      color: '#8B4A38', badge: undefined },
   { id: 'vesting',                label: 'Vesting Schedule Builder',    desc: 'Design vesting for your team',          icon: BarChart3,      color: '#7C3AED', badge: undefined },
@@ -609,7 +610,7 @@ const ALL_TOOLS = [
   { id: 'data-room',              label: 'Data Room',                   desc: 'Share docs with investors securely',   icon: FolderOpen,     color: '#0284C7', badge: 'New' },
   { id: 'readiness',              label: 'Fundraising Readiness',       desc: '20-point investor readiness check',     icon: Target,         color: '#F59E0B', badge: '20 checks' },
   { id: 'pitch-deck',             label: 'Pitch Deck Scorecard',        desc: 'Score your pitch deck',                 icon: ClipboardCheck, color: '#6366F1', badge: undefined },
-  { id: 'investor-crm',           label: 'Investor CRM',                desc: 'Track your investor pipeline',          icon: Building2,      color: '#C4614A', badge: undefined },
+  { id: 'investor-crm',           label: 'Investor CRM',                desc: 'Track your investor pipeline',          icon: Building2,      color: '#5B4EFF', badge: undefined },
   { id: 'safe-note',              label: 'SAFE / Convertible Note',     desc: 'Build SAFE or note agreements',         icon: FileText,       color: '#7C3AED', badge: 'New' },
   { id: 'nda',                    label: 'NDA Generator',               desc: 'Generate NDAs for your startup',        icon: FileText,       color: '#0284C7', badge: 'New' },
   { id: 'free-zones',             label: 'Free Zones & Jurisdictions',  desc: 'MENA & global incorporation guide',     icon: Globe,          color: '#0284C7', badge: undefined },
@@ -617,7 +618,7 @@ const ALL_TOOLS = [
   { id: 'term-sheet',             label: 'Term Sheet Glossary',         desc: '75+ terms explained simply',            icon: BookOpen,       color: '#0F1B2D', badge: '75 terms' },
   { id: 'runway',                 label: 'Runway Optimizer',            desc: 'Optimize your cash runway',             icon: BarChart3,      color: '#059669', badge: undefined },
   { id: 'valuation-timeline',     label: '409A / Valuation History',    desc: 'Track your valuation over time',        icon: TrendingUp,     color: '#2D4A6B', badge: undefined },
-  { id: 'ai-fundraising-advisor', label: 'AI Fundraising Advisor',      desc: 'Chat with an AI fundraising expert',   icon: Sparkles,       color: '#C4614A', badge: 'AI' },
+  { id: 'ai-fundraising-advisor', label: 'AI Fundraising Advisor',      desc: 'Chat with an AI fundraising expert',   icon: Sparkles,       color: '#5B4EFF', badge: 'AI' },
   { id: 'ai-market-research',     label: 'AI Market Research',          desc: 'Generate market analysis reports',      icon: BarChart3,      color: '#0EA5E9', badge: 'AI' },
   { id: 'ai-investor-email',      label: 'AI Investor Email Writer',    desc: 'Write personalized investor emails',    icon: FileText,       color: '#EC4899', badge: 'AI' },
   { id: 'ai-term-sheet',          label: 'AI Term Sheet Analyzer',      desc: 'Analyze term sheets with AI',           icon: FileText,       color: '#F97316', badge: 'AI' },

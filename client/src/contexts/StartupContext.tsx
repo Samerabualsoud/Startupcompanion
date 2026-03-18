@@ -59,7 +59,14 @@ export interface StartupSnapshot {
   currentOptionPool: number | null;
   esopPlanId: number | null;
   esopTotalShares: number | null;
-  esopPricePerShare: number | null;
+  esopPricePerShare: number | null;   // strike price
+  esopFmvPerShare: number | null;     // 409A FMV
+  esopAllocatedShares: number | null; // sum of active grant shares (not cancelled)
+  esopAvailablePool: number | null;   // pool - allocated
+  esopVestedShares: number | null;    // vested as of today
+  esopGrantCount: number | null;      // number of active grants
+  esopJurisdiction: string | null;
+  esopPlanType: string | null;
   // Sales
   totalSalesRevenue: number | null;
   salesThisMonth: number | null;
@@ -107,6 +114,13 @@ const DEFAULT_SNAPSHOT: StartupSnapshot = {
   esopPlanId: null,
   esopTotalShares: null,
   esopPricePerShare: null,
+  esopFmvPerShare: null,
+  esopAllocatedShares: null,
+  esopAvailablePool: null,
+  esopVestedShares: null,
+  esopGrantCount: null,
+  esopJurisdiction: null,
+  esopPlanType: null,
   totalSalesRevenue: null,
   salesThisMonth: null,
   salesLastMonth: null,
@@ -250,6 +264,45 @@ export function StartupProvider({ children }: { children: ReactNode }) {
     esopPlanId: esopPlan?.id ?? null,
     esopTotalShares: esopPlan ? Number(esopPlan.totalShares) : null,
     esopPricePerShare: esopPlan?.pricePerShare ?? null,
+    esopFmvPerShare: esopPlan?.fmvPerShare ?? null,
+    esopAllocatedShares: (() => {
+      if (!esopPlan) return null;
+      const grants = (esopPlan.grants as any[] | null) ?? [];
+      return grants
+        .filter((g: any) => g?.status !== 'cancelled')
+        .reduce((sum: number, g: any) => sum + (Number(g?.shares) || 0), 0);
+    })(),
+    esopAvailablePool: (() => {
+      if (!esopPlan) return null;
+      const pool = Number(esopPlan.currentOptionPool);
+      const grants = (esopPlan.grants as any[] | null) ?? [];
+      const allocated = grants
+        .filter((g: any) => g?.status !== 'cancelled')
+        .reduce((sum: number, g: any) => sum + (Number(g?.shares) || 0), 0);
+      return Math.max(0, pool - allocated);
+    })(),
+    esopVestedShares: (() => {
+      if (!esopPlan) return null;
+      const grants = (esopPlan.grants as any[] | null) ?? [];
+      const now = Date.now();
+      return grants
+        .filter((g: any) => g?.status !== 'cancelled')
+        .reduce((sum: number, g: any) => {
+          if (!g?.startDate || !g?.vestingMonths || !g?.cliffMonths) return sum;
+          const start = new Date(g.startDate).getTime();
+          const monthsElapsed = Math.floor((now - start) / (1000 * 60 * 60 * 24 * 30.44));
+          if (monthsElapsed < g.cliffMonths) return sum;
+          const fraction = Math.min(monthsElapsed / g.vestingMonths, 1);
+          return sum + Math.floor((Number(g.shares) || 0) * fraction);
+        }, 0);
+    })(),
+    esopGrantCount: (() => {
+      if (!esopPlan) return null;
+      const grants = (esopPlan.grants as any[] | null) ?? [];
+      return grants.filter((g: any) => g?.status !== 'cancelled').length;
+    })(),
+    esopJurisdiction: esopPlan?.jurisdiction ?? null,
+    esopPlanType: esopPlan?.planType ?? null,
     totalSalesRevenue: salesSummary?.total ?? null,
     salesThisMonth,
     salesLastMonth,

@@ -37,7 +37,6 @@ import PitchDeckScorecard from '@/components/PitchDeckScorecard';
 import TermSheetGlossary from '@/components/TermSheetGlossary';
 import InvestorCRM from '@/components/InvestorCRM';
 import RunwayOptimizer from '@/components/RunwayOptimizer';
-import FeasibilityEvaluator from '@/components/FeasibilityEvaluator';
 import ResourceDatabase from '@/components/ResourceDatabase';
 import InvestorMatcher from '@/components/InvestorMatcher';
 import AdminDashboard from '@/pages/AdminDashboard';
@@ -61,7 +60,7 @@ import DataRoom from '@/components/DataRoom';
 import TermSheetBuilder from '@/components/TermSheetBuilder';
 import CapTableManager from '@/components/CapTableManager';
 import IdeaValidator from '@/components/IdeaValidator';
-type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'resources' | 'matching' | 'admin' | 'feasibility' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator';
+type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator';
 
 interface NavItem {
   id: ToolId;
@@ -95,8 +94,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'accelerators',  label: 'Accelerator Finder',    shortLabel: 'Accelerators',   navKey: 'navAccelerators', icon: Rocket,    group: 'Resources',    badge: 'New' },
   { id: 'runway',        label: 'Runway Optimizer',      shortLabel: 'Runway',   navKey: 'navRunway',     icon: BarChart3,   group: 'Resources' },
   { id: 'term-sheet',    label: 'Term Sheet Glossary',   shortLabel: 'Term Sheet',   navKey: 'navTermSheet', icon: BookOpen,    group: 'Resources',    badge: '75 terms' },
-  // Idea Evaluation
-  { id: 'feasibility',   label: 'Idea Evaluator',        shortLabel: 'Idea Check',   navKey: 'navIdeaCheck', icon: Sparkles,    group: 'Valuation',    badge: 'AI' },
   // My Startup
   // Legal & Jurisdictions
   { id: 'free-zones',    label: 'Free Zones & Jurisdictions', shortLabel: 'Free Zones', navKey: 'navFreeZones', icon: Globe,        group: 'Resources',    badge: 'New' },
@@ -129,7 +126,6 @@ const GROUPS = ['My Startup', 'Valuation', 'Equity & Cap Table', 'Fundraising', 
 const TOOL_COLORS: Record<ToolId, string> = {
   dashboard: '#0F1B2D',
   cogs: '#059669',
-  feasibility: '#6366F1',
   valuation: '#C4614A',
   accelerators: '#10B981',
   'equity-split': '#2D4A6B',
@@ -233,7 +229,7 @@ function HomeInner() {
             {/* Chat Panel */}
             <div className={`flex flex-col border-r border-border transition-all duration-500 ${chatComplete ? 'w-full lg:w-[400px]' : 'w-full'}`}
               style={{ background: 'oklch(0.993 0.003 80)' }}>
-              <div className="shrink-0 px-5 py-3.5 border-b border-border flex items-center gap-2.5" style={{ background: 'oklch(0.18 0.05 240)' }}>
+              <div className="shrink-0 px-5 py-3.5 border-b border-border flex items-center gap-2.5" style={{ background: 'oklch(0.13 0.04 265)' }}>
                 <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'oklch(0.55 0.13 30)' }}>
                   <Sparkles className="w-3.5 h-3.5 text-white" />
                 </div>
@@ -241,7 +237,7 @@ function HomeInner() {
                   <div className="text-sm font-semibold text-white">{t('valuationAssistantTitle')}</div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-[10px]" style={{ color: 'oklch(0.62 0.02 240)' }}>{t('valuationAssistantStatus')}</span>
+                    <span className="text-[10px]" style={{ color: 'oklch(0.65 0.03 265)' }}>{t('valuationAssistantStatus')}</span>
                   </div>
                 </div>
               </div>
@@ -282,15 +278,15 @@ function HomeInner() {
 
             {/* Placeholder when not complete */}
             {!chatComplete && (
-              <div className="hidden lg:flex flex-1 flex-col items-center justify-center p-8" style={{ background: 'oklch(0.18 0.05 240)' }}>
+              <div className="hidden lg:flex flex-1 flex-col items-center justify-center p-8" style={{ background: 'oklch(0.13 0.04 265)' }}>
                 <div className="max-w-sm text-center">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: 'oklch(0.22 0.05 240)', border: '1px solid oklch(0.28 0.04 240)' }}>
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: 'oklch(0.52 0.22 265 / 0.2)', border: '1px solid oklch(0.52 0.22 265 / 0.4)' }}>
                     <TrendingUp className="w-8 h-8" style={{ color: 'oklch(0.55 0.13 30)' }} />
                   </div>
                   <h2 className="text-2xl font-bold text-white mb-3" style={{ fontFamily: isRTL ? 'inherit' : 'Playfair Display, serif' }}>
                     {t('valuationReportWillAppear')}
                   </h2>
-                  <p className="text-sm leading-relaxed mb-6" style={{ color: 'oklch(0.62 0.02 240)' }}>
+                  <p className="text-sm leading-relaxed mb-6" style={{ color: 'oklch(0.65 0.03 265)' }}>
                     {t('valuationReportWillAppearDesc')}
                   </p>
                   <div className="space-y-2">
@@ -312,11 +308,11 @@ function HomeInner() {
                       { label: 'First Chicago Method', desc: 'Bear / base / bull scenarios', color: '#C4614A' },
                     ]).map((m, i) => (
                       <motion.div key={m.label} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }}
-                        className="flex items-center gap-3 text-left p-2.5 rounded-lg" style={{ background: 'oklch(0.22 0.04 240)' }}>
+                        className="flex items-center gap-3 text-left p-2.5 rounded-lg" style={{ background: 'oklch(0.20 0.05 265)' }}>
                         <div className="w-2 h-2 rounded-full shrink-0" style={{ background: m.color }} />
                         <div>
                           <div className="text-xs font-semibold text-white">{m.label}</div>
-                          <div className="text-[10px]" style={{ color: 'oklch(0.45 0.04 240)' }}>{m.desc}</div>
+                          <div className="text-[10px]" style={{ color: 'oklch(0.50 0.04 265)' }}>{m.desc}</div>
                         </div>
                       </motion.div>
                     ))}
@@ -337,7 +333,6 @@ function HomeInner() {
       case 'term-sheet':      return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><TermSheetGlossary /></div>;
       case 'investor-crm':    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><InvestorCRM /></div>;
       case 'profile':         return <StartupProfile />;
-      case 'feasibility':     return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><FeasibilityEvaluator /></div>;
       case 'resources':       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ResourceDatabase /></div>;
       case 'matching':        return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><InvestorMatcher /></div>;
       case 'admin':                    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><AdminDashboard /></div>;
@@ -364,7 +359,7 @@ function HomeInner() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'oklch(0.978 0.008 80)' }}>
+    <div className="min-h-screen flex flex-col bg-background">
 
       {/* ── Top Bar ── */}
       <header className="shrink-0 border-b border-border bg-card px-4 py-3 flex items-center justify-between z-40 relative">
@@ -377,11 +372,11 @@ function HomeInner() {
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
-              <TrendingUp className="w-4 h-4" style={{ color: 'oklch(0.55 0.13 30)' }} />
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, oklch(0.52 0.22 265), oklch(0.62 0.22 330))' }}>
+              <TrendingUp className="w-4 h-4 text-white" />
             </div>
             <div>
-              <div className="text-sm font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <div className="text-sm font-bold text-foreground">
                 Polaris Arabia
               </div>
               <div className="text-[10px] text-muted-foreground font-mono hidden sm:block">
@@ -408,7 +403,7 @@ function HomeInner() {
             <button
               onClick={handleShare}
               className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-90 active:scale-95"
-              style={{ background: linkCopied ? '#10B981' : 'oklch(0.24 0.04 240)', color: '#FAF6EF', border: '1px solid oklch(0.32 0.04 240)' }}
+              style={{ background: linkCopied ? 'oklch(0.72 0.19 155)' : 'oklch(0.52 0.22 265)', color: 'white', border: 'none' }}
               title="Copy shareable link"
             >
               {linkCopied ? <Check className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
@@ -468,7 +463,7 @@ function HomeInner() {
               });
             }}
             className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-90 active:scale-95"
-            style={{ background: 'oklch(0.18 0.05 240)', color: '#FAF6EF', border: '1px solid oklch(0.28 0.04 240)' }}
+            style={{ background: 'oklch(0.13 0.04 265)', color: 'oklch(0.88 0.01 265)', border: '1px solid oklch(0.24 0.04 265)' }}
             title="Download Full Report (PDF)"
           >
             <FileDown className="w-3.5 h-3.5" />
@@ -524,7 +519,7 @@ function HomeInner() {
               };
               return (
                 <div key={group} className="mb-3">
-                  <div className="text-[9px] font-bold uppercase tracking-widest px-3 mb-1" style={{ color: 'oklch(0.5 0.03 240)' }}>
+                  <div className="text-[9px] font-bold uppercase tracking-widest px-3 mb-1" style={{ color: 'oklch(0.55 0.04 265)' }}>
                     {groupLabel[group] || group}
                   </div>
                   {groupItems.map(item => {
@@ -540,7 +535,7 @@ function HomeInner() {
                             ? 'text-white shadow-sm'
                             : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
                         }`}
-                        style={isActive ? { background: TOOL_COLORS[item.id] } : {}}
+                        style={isActive ? { background: 'oklch(0.52 0.22 265)', boxShadow: '0 2px 8px oklch(0.52 0.22 265 / 0.35)' } : {}}
                       >
                         <Icon className="w-3.5 h-3.5 shrink-0" />
                         <span className="text-xs font-medium flex-1 truncate">{item.navKey ? t(item.navKey as any) : item.shortLabel}</span>
@@ -585,11 +580,11 @@ function HomeInner() {
           {/* Tool header bar */}
           {activeTool !== 'valuation' && activeTool !== 'dashboard' && (
             <div className="shrink-0 px-5 py-3 border-b border-border bg-card flex items-center gap-3">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm" style={{ background: TOOL_COLORS[activeTool] }}>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm" style={{ background: 'oklch(0.52 0.22 265)' }}>
                 {(() => { const Icon = activeItem.icon; return <Icon className="w-3.5 h-3.5 text-white" />; })()}
               </div>
               <div>
-                <div className="text-sm font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>{activeItem.label}</div>
+                <div className="text-sm font-bold text-foreground">{activeItem.label}</div>
               </div>
             </div>
           )}

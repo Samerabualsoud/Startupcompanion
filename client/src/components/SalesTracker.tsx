@@ -494,13 +494,15 @@ export default function SalesTracker() {
             <CardContent className="pb-4">
               {analytics?.monthly?.length ? (
                 <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={analytics.monthly} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+                  <BarChart data={analytics.monthly.map(m => ({ ...m, revenue: m.revenue ?? 0, wonDeals: m.wonDeals ?? 0 }))} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                    <YAxis tickFormatter={v => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
-                    <Tooltip formatter={(v: any) => fmt(v, currency)} />
-                    <Bar dataKey="revenue" fill="#10B981" name="Revenue" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="wonDeals" fill="#3B82F6" name="Won Deals" radius={[4, 4, 0, 0]} yAxisId={1} />
+                    <YAxis yAxisId={0} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
+                    <YAxis yAxisId={1} orientation="right" tick={{ fontSize: 11 }} />
+                    <Tooltip formatter={(v: any, name: string) => name === 'Revenue' ? fmt(v, currency) : v} />
+                    <Legend />
+                    <Bar yAxisId={0} dataKey="revenue" fill="#10B981" name="Revenue" radius={[4, 4, 0, 0]} />
+                    <Bar yAxisId={1} dataKey="wonDeals" fill="#3B82F6" name="Won Deals" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (

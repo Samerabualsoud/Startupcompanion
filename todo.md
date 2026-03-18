@@ -379,4 +379,19 @@
 - [x] Add 7 new pipeline fields to salesEntries schema + db:push migration applied
 - [x] Redesign landing page: "Venture Capital Night" — deep navy + amber/terracotta, asymmetric hero, stats grid, how-it-works, tools grid, testimonials, CTA banner
 - [x] 0 TypeScript errors
+- [x] Save checkpoint and push to GitHub
+
+## Round 28 — App Redesign (Playful), ESOP Fix & Rebuild, Remove Idea Check
+- [x] Fix ESOP bug: AI recommendation save should NOT populate allocated shares in dashboard
+- [x] Remove old "Idea Check" (FeasibilityEvaluator) tab from sidebar — AI Idea Validator replaces it
+- [x] Rebuild ESOP Planner: best-practice grant management (employee grants, cliff/vesting, strike price, pool tracking, grant letters)
+- [x] Redesign global app shell: playful indigo/violet + electric green palette, Plus Jakarta Sans + Inter fonts
+- [x] Redesign sidebar: indigo active states with glow, group labels updated
+- [x] Redesign FounderDashboard: indigo/green color palette, updated charts
+- [x] Apply playful design tokens to index.css (new color palette, rounded corners, shadows, glow buttons)
+- [x] Generate new favicon
+- [x] 0 TypeScript errors
 - [ ] Save checkpoint and push to GitHub
+
+## Round 28 Bug Fixes (urgent)
+- [x] Fix SalesTracker Revenue tab crash: Recharts "Invariant failed" — added missing YAxis yAxisId={1} for wonDeals Bar

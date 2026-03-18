@@ -78,13 +78,18 @@ export default function CapTableManager() {
         }
       });
     }
-    // Add ESOP pool if set
-    if (snapshot.esopPoolPct && snapshot.esopPoolPct > 0) {
+    // Add ESOP pool — prefer actual pool size from ESOP plan, fall back to % estimate
+    const esopPoolSize = snapshot.currentOptionPool ?? 0;
+    const esopPctSize = (snapshot.esopPoolPct ?? 0) > 0
+      ? Math.round(((snapshot.esopPoolPct ?? 0) / 100) * (snapshot.totalShares || 1_000_000))
+      : 0;
+    const esopShares = esopPoolSize > 0 ? esopPoolSize : esopPctSize;
+    if (esopShares > 0) {
       initial.push({
         id: generateId(),
         name: 'ESOP Pool',
         type: 'esop',
-        shares: Math.round((snapshot.esopPoolPct / 100) * (snapshot.totalShares || 1000000)),
+        shares: esopShares,
         investmentAmount: 0,
         roundName: 'ESOP',
       });

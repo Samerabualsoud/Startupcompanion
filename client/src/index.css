@@ -1,9 +1,9 @@
 /*
- * Design System: "Venture Capital Clarity" — Editorial Finance
- * Movement: Swiss Grid / Editorial Finance
- * Colors: Deep Navy (#0F1B2D) base, Warm Cream (#FAF6EF) bg, Terracotta (#C4614A) accent
- * Typography: Playfair Display (headings) + DM Sans (body) + JetBrains Mono (numbers)
- * Layout: Asymmetric editorial with sticky summary header
+ * Design System: "Founder Mode" — Playful Modern Fintech
+ * Movement: Rounded, vibrant, energetic — inspired by Linear, Notion, Vercel
+ * Colors: Indigo/violet primary, electric green accent, soft white background
+ * Typography: Plus Jakarta Sans (headings) + Inter (body) + JetBrains Mono (numbers)
+ * Vibe: Confident, fun, startup-native — not stuffy VC
  */
 
 @import "tailwindcss";
@@ -51,40 +51,41 @@
 }
 
 :root {
-  --radius: 0.375rem;
-  /* Navy-cream editorial palette */
-  --background: oklch(0.978 0.008 80);       /* warm cream #FAF6EF */
-  --foreground: oklch(0.18 0.03 240);         /* deep navy #0F1B2D */
-  --card: oklch(1 0 0);                        /* white */
-  --card-foreground: oklch(0.18 0.03 240);
+  --radius: 0.625rem;
+
+  /* ── Light mode: clean white + indigo ── */
+  --background: oklch(0.985 0.003 260);       /* near-white with cool tint */
+  --foreground: oklch(0.15 0.025 265);         /* deep indigo-black */
+  --card: oklch(1 0 0);                         /* pure white */
+  --card-foreground: oklch(0.15 0.025 265);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.03 240);
-  --primary: oklch(0.18 0.05 240);             /* deep navy */
-  --primary-foreground: oklch(0.978 0.008 80);
-  --secondary: oklch(0.94 0.01 80);            /* light cream */
-  --secondary-foreground: oklch(0.18 0.03 240);
-  --muted: oklch(0.94 0.01 80);
-  --muted-foreground: oklch(0.45 0.02 240);
-  --accent: oklch(0.55 0.13 30);              /* terracotta #C4614A */
-  --accent-foreground: oklch(0.978 0.008 80);
+  --popover-foreground: oklch(0.15 0.025 265);
+  --primary: oklch(0.52 0.22 265);              /* vibrant indigo #5B4EFF */
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.94 0.015 265);           /* light indigo tint */
+  --secondary-foreground: oklch(0.25 0.06 265);
+  --muted: oklch(0.94 0.008 265);
+  --muted-foreground: oklch(0.50 0.02 265);
+  --accent: oklch(0.72 0.19 155);               /* electric green #22C55E */
+  --accent-foreground: oklch(0.12 0.04 155);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.88 0.01 80);
-  --input: oklch(0.88 0.01 80);
-  --ring: oklch(0.55 0.13 30);
-  --chart-1: oklch(0.55 0.13 30);             /* terracotta */
-  --chart-2: oklch(0.18 0.05 240);            /* navy */
-  --chart-3: oklch(0.65 0.1 30);             /* light terracotta */
-  --chart-4: oklch(0.35 0.04 240);           /* mid navy */
-  --chart-5: oklch(0.78 0.07 80);            /* warm gold */
-  --sidebar: oklch(0.18 0.05 240);
-  --sidebar-foreground: oklch(0.85 0.01 80);
-  --sidebar-primary: oklch(0.55 0.13 30);
-  --sidebar-primary-foreground: oklch(0.978 0.008 80);
-  --sidebar-accent: oklch(0.25 0.04 240);
-  --sidebar-accent-foreground: oklch(0.85 0.01 80);
-  --sidebar-border: oklch(0.28 0.04 240);
-  --sidebar-ring: oklch(0.55 0.13 30);
+  --border: oklch(0.90 0.01 265);
+  --input: oklch(0.90 0.01 265);
+  --ring: oklch(0.52 0.22 265);
+  --chart-1: oklch(0.52 0.22 265);              /* indigo */
+  --chart-2: oklch(0.72 0.19 155);              /* green */
+  --chart-3: oklch(0.75 0.18 55);               /* amber */
+  --chart-4: oklch(0.62 0.22 330);              /* pink */
+  --chart-5: oklch(0.65 0.18 200);              /* cyan */
+  --sidebar: oklch(0.13 0.04 265);              /* very dark indigo */
+  --sidebar-foreground: oklch(0.88 0.01 265);
+  --sidebar-primary: oklch(0.52 0.22 265);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.20 0.05 265);
+  --sidebar-accent-foreground: oklch(0.88 0.01 265);
+  --sidebar-border: oklch(0.24 0.04 265);
+  --sidebar-ring: oklch(0.52 0.22 265);
 }
 
 @layer base {
@@ -93,10 +94,14 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Inter', 'DM Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  h1, h2, h3 {
-    font-family: 'Playfair Display', serif;
+  h1, h2, h3, h4 {
+    font-family: 'Plus Jakarta Sans', 'Playfair Display', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
   .font-mono, .tabular-nums {
     font-family: 'JetBrains Mono', monospace;
@@ -116,7 +121,7 @@
   html.font-arabic textarea,
   html.font-arabic select,
   html.font-arabic label {
-    font-family: 'Noto Kufi Arabic', 'DM Sans', sans-serif;
+    font-family: 'Noto Kufi Arabic', 'Inter', sans-serif;
     letter-spacing: 0;
   }
   button:not(:disabled),
@@ -160,111 +165,163 @@
     }
   }
 
-  /* Editorial section numbering */
+  /* ── Playful gradient pill badge ── */
+  .badge-gradient {
+    background: linear-gradient(135deg, oklch(0.52 0.22 265), oklch(0.62 0.22 330));
+    color: white;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.15rem 0.6rem;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── Glowing primary button ── */
+  .btn-glow {
+    box-shadow: 0 0 0 0 oklch(0.52 0.22 265 / 0);
+    transition: box-shadow 0.2s ease, transform 0.1s ease;
+  }
+  .btn-glow:hover {
+    box-shadow: 0 4px 20px oklch(0.52 0.22 265 / 0.35);
+    transform: translateY(-1px);
+  }
+  .btn-glow:active {
+    transform: translateY(0);
+  }
+
+  /* ── Metric display ── */
+  .metric-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  /* ── Sidebar ── */
+  .nav-sidebar {
+    background: oklch(0.13 0.04 265);
+    color: oklch(0.88 0.01 265);
+  }
+
+  /* ── Gradient accent bar ── */
+  .accent-bar {
+    background: linear-gradient(90deg, oklch(0.52 0.22 265), oklch(0.72 0.19 155));
+  }
+
+  /* ── Card hover lift ── */
+  .card-hover {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px oklch(0.52 0.22 265 / 0.12);
+  }
+
+  /* ── Input styling ── */
+  .vc-input {
+    background: oklch(0.97 0.005 265);
+    border: 1.5px solid oklch(0.90 0.01 265);
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .vc-input:focus {
+    border-color: oklch(0.52 0.22 265);
+    outline: none;
+    box-shadow: 0 0 0 3px oklch(0.52 0.22 265 / 0.15);
+  }
+
+  /* ── Chat input ── */
+  .chat-input {
+    background: oklch(1 0 0);
+    border: 1.5px solid oklch(0.90 0.01 265);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    color: oklch(0.15 0.025 265);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .chat-input:focus {
+    border-color: oklch(0.52 0.22 265);
+    outline: none;
+    box-shadow: 0 0 0 3px oklch(0.52 0.22 265 / 0.12);
+  }
+
+  /* ── Chat send button ── */
+  .chat-send-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 10px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    background: oklch(0.52 0.22 265);
+    color: white;
+    border: none;
+    transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+  }
+  .chat-send-btn:hover {
+    background: oklch(0.46 0.22 265);
+    box-shadow: 0 4px 12px oklch(0.52 0.22 265 / 0.3);
+  }
+  .chat-send-btn:active {
+    transform: scale(0.97);
+  }
+
+  /* ── Section stamp ── */
   .section-stamp {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.65rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: oklch(0.55 0.13 30);
+    color: oklch(0.52 0.22 265);
     font-weight: 600;
   }
 
-  /* Metric display */
-  .metric-value {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-
-  /* Navy sidebar */
-  .nav-sidebar {
-    background: oklch(0.18 0.05 240);
-    color: oklch(0.85 0.01 80);
-  }
-
-  /* Terracotta highlight bar */
-  .accent-bar {
-    background: oklch(0.55 0.13 30);
-  }
-
-  /* Input styling */
-  .vc-input {
-    background: oklch(0.96 0.008 80);
-    border: 1px solid oklch(0.88 0.01 80);
-    border-radius: 4px;
-    font-family: 'DM Sans', sans-serif;
-    transition: border-color 0.15s ease;
-  }
-  .vc-input:focus {
-    border-color: oklch(0.55 0.13 30);
-    outline: none;
-    box-shadow: 0 0 0 2px oklch(0.55 0.13 30 / 0.15);
-  }
-
-  /* Tooltip */
+  /* ── Tooltip ── */
   .info-tooltip {
-    background: oklch(0.18 0.05 240);
-    color: oklch(0.85 0.01 80);
-    border-radius: 4px;
+    background: oklch(0.13 0.04 265);
+    color: oklch(0.88 0.01 265);
+    border-radius: 8px;
     font-size: 0.75rem;
     padding: 0.5rem 0.75rem;
     max-width: 240px;
     line-height: 1.5;
   }
 
-  /* Chat input */
-  .chat-input {
-    background: oklch(1 0 0);
-    border: 1.5px solid oklch(0.88 0.01 80);
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    color: oklch(0.18 0.03 240);
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  }
-  .chat-input:focus {
-    border-color: oklch(0.55 0.13 30);
-    outline: none;
-    box-shadow: 0 0 0 3px oklch(0.55 0.13 30 / 0.12);
-  }
-
-  /* Chat send button */
-  .chat-send-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.5rem 0.875rem;
-    border-radius: 8px;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    font-family: 'DM Sans', sans-serif;
-    background: oklch(0.55 0.13 30);
-    color: oklch(0.978 0.008 80);
-    border: none;
-    transition: background 0.15s ease, transform 0.1s ease;
-    white-space: nowrap;
-  }
-  .chat-send-btn:hover {
-    background: oklch(0.48 0.13 30);
-  }
-  .chat-send-btn:active {
-    transform: scale(0.97);
-  }
-
-  /* Scrollbar */
+  /* ── Scrollbar ── */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
   ::-webkit-scrollbar-track {
-    background: oklch(0.94 0.01 80);
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: oklch(0.75 0.02 240);
-    border-radius: 3px;
+    background: oklch(0.80 0.02 265);
+    border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.55 0.13 30);
+    background: oklch(0.52 0.22 265);
+  }
+
+  /* ── Animated gradient text ── */
+  .gradient-text {
+    background: linear-gradient(135deg, oklch(0.52 0.22 265), oklch(0.62 0.22 330), oklch(0.72 0.19 155));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Noise texture overlay for hero sections ── */
+  .noise-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
   }
 }
 
@@ -272,23 +329,19 @@
    RTL / Arabic Layout Fixes
    ═══════════════════════════════════════════════════════════════ */
 
-/* Flip sidebar to right side in RTL */
 [dir="rtl"] aside {
   border-right: none;
   border-left: 1px solid var(--border);
 }
 
-/* Sidebar nav items: flip icon/chevron direction */
 [dir="rtl"] .sidebar-nav-item {
   text-align: right;
 }
 
-/* Flip ChevronRight to ChevronLeft in RTL */
 [dir="rtl"] .lucide-chevron-right {
   transform: scaleX(-1);
 }
 
-/* Flip any left-border accent bars */
 [dir="rtl"] .border-l {
   border-left: none;
   border-right: inherit;
@@ -302,7 +355,6 @@
   border-right-width: 4px;
 }
 
-/* Flip left/right padding and margin utilities */
 [dir="rtl"] .pl-3 { padding-left: 0; padding-right: 0.75rem; }
 [dir="rtl"] .pl-4 { padding-left: 0; padding-right: 1rem; }
 [dir="rtl"] .pl-5 { padding-left: 0; padding-right: 1.25rem; }
@@ -312,16 +364,13 @@
 [dir="rtl"] .ml-auto { margin-left: 0; margin-right: auto; }
 [dir="rtl"] .mr-auto { margin-right: 0; margin-left: auto; }
 
-/* Text alignment */
 [dir="rtl"] .text-left { text-align: right; }
 [dir="rtl"] .text-right { text-align: left; }
 
-/* Flex row direction: items that should reverse in RTL */
 [dir="rtl"] .flex-row-rtl {
   flex-direction: row-reverse;
 }
 
-/* Input fields: right-align text in RTL */
 [dir="rtl"] input,
 [dir="rtl"] textarea,
 [dir="rtl"] select {
@@ -329,7 +378,6 @@
   direction: rtl;
 }
 
-/* Number inputs should stay LTR even in RTL */
 [dir="rtl"] input[type="number"],
 [dir="rtl"] input[type="tel"],
 [dir="rtl"] input[type="url"],
@@ -338,19 +386,16 @@
   direction: ltr;
 }
 
-/* Card headers and section titles */
 [dir="rtl"] .card-header,
 [dir="rtl"] .section-title {
   text-align: right;
 }
 
-/* Badge positioning: flip right badges to left */
 [dir="rtl"] .badge-right {
   right: auto;
   left: 0.5rem;
 }
 
-/* Recharts / chart labels — keep LTR for numbers */
 [dir="rtl"] .recharts-cartesian-axis-tick text,
 [dir="rtl"] .recharts-label,
 [dir="rtl"] .recharts-legend-item-text {
@@ -358,29 +403,24 @@
   unicode-bidi: embed;
 }
 
-/* Table cells: right-align in RTL */
 [dir="rtl"] th,
 [dir="rtl"] td {
   text-align: right;
 }
 
-/* Dropdown menus: align to right in RTL */
 [dir="rtl"] [data-radix-popper-content-wrapper] {
   direction: rtl;
 }
 
-/* Toasts: position from right in RTL */
 [dir="rtl"] [data-sonner-toaster] {
   left: 1rem;
   right: auto;
 }
 
-/* Dialog/modal: text align right */
 [dir="rtl"] [role="dialog"] {
   text-align: right;
 }
 
-/* Sidebar translate fix for RTL mobile */
 [dir="rtl"] .sidebar-mobile-hidden {
   transform: translateX(100%);
 }
@@ -388,12 +428,10 @@
   transform: translateX(0);
 }
 
-/* Step indicators / progress: flip */
 [dir="rtl"] .step-connector {
   transform: scaleX(-1);
 }
 
-/* Ensure the main layout flex direction is correct in RTL */
 [dir="rtl"] .main-layout {
   flex-direction: row-reverse;
 }

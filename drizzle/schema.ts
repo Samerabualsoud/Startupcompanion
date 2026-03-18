@@ -489,17 +489,28 @@ export type SalesTarget = typeof salesTargets.$inferSelect;
 export type InsertSalesTarget = typeof salesTargets.$inferInsert;
 
 // ── ESOP Plans ────────────────────────────────────────────────────────────
+// grants JSON shape per element:
+// { id, employeeName, employeeEmail, role, department, grantDate, shares,
+//   strikePrice, vestingMonths, cliffMonths, startDate,
+//   status: 'active'|'cancelled'|'exercised', exercisedShares, notes }
 export const esopPlans = mysqlTable('esop_plans', {
   id: int('id').autoincrement().primaryKey(),
   userId: int('userId').notNull(),
   startupId: int('startupId'),
   label: varchar('label', { length: 256 }).notNull().default('ESOP Plan'),
+  // Pool configuration
   totalShares: bigint('totalShares', { mode: 'number' }).notNull().default(10000000),
   currentOptionPool: bigint('currentOptionPool', { mode: 'number' }).notNull().default(1000000),
-  pricePerShare: float('pricePerShare').notNull().default(1),
+  pricePerShare: float('pricePerShare').notNull().default(0.10),  // strike price default
+  fmvPerShare: float('fmvPerShare'),                              // 409A Fair Market Value
+  // Default vesting terms (overridable per grant)
   vestingMonths: int('vestingMonths').notNull().default(48),
   cliffMonths: int('cliffMonths').notNull().default(12),
+  // Structured grants array
   grants: json('grants'),
+  // Plan metadata
+  jurisdiction: varchar('jurisdiction', { length: 64 }).default('delaware'),
+  planType: mysqlEnum('planType', ['iso', 'nso', 'rsu', 'sar']).default('iso'),
   isActive: boolean('isActive').default(true).notNull(),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),

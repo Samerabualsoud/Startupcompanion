@@ -127,6 +127,13 @@
       "when": 1773871198623,
       "tag": "0017_massive_silverclaw",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1773873141630,
+      "tag": "0018_optimal_iron_lad",
+      "breakpoints": true
     }
   ]
 }
