@@ -85,6 +85,16 @@ export default function DataRoom() {
   const [customFolder, setCustomFolder] = useState('');
   const [requireEmail, setRequireEmail] = useState(false);
   const [expiresInDays, setExpiresInDays] = useState<string>('');
+  const [shareTitle, setShareTitle] = useState('');
+  const [shareMessage, setShareMessage] = useState('');
+  const [visibleSections, setVisibleSections] = useState({
+    files: true,
+    companyOverview: false,
+    financials: false,
+    team: false,
+    metrics: false,
+    contactInfo: false,
+  });
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['General']));
@@ -610,14 +620,16 @@ export default function DataRoom() {
 
       {/* ── Share Modal ── */}
       <Dialog open={showShareModal} onOpenChange={setShowShareModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Share2 className="w-5 h-5" style={{ color: 'oklch(0.55 0.13 30)' }} />
+              <Share2 className="w-5 h-5 text-primary" />
               Share Data Room
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 pt-2">
+          <div className="space-y-5 pt-2">
+
+            {/* Current link */}
             {selectedRoom?.isShared && (
               <div className="p-3 rounded-lg border border-green-500/30 bg-green-500/5">
                 <div className="flex items-center gap-2 mb-2">
@@ -637,7 +649,62 @@ export default function DataRoom() {
               </div>
             )}
 
+            {/* Branding */}
             <div className="space-y-3">
+              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Branding</p>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Page title shown to viewers (optional)</Label>
+                <Input
+                  placeholder={`e.g. ${selectedRoom?.name ?? 'Acme Inc'} — Investor Data Room`}
+                  className="h-8 text-xs"
+                  value={shareTitle}
+                  onChange={e => setShareTitle(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Welcome message (optional)</Label>
+                <textarea
+                  placeholder="e.g. Thank you for your interest. Please review the documents below."
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs min-h-[56px] resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+                  value={shareMessage}
+                  onChange={e => setShareMessage(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Visible sections */}
+            <div className="space-y-3">
+              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">What can viewers see?</p>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { key: 'files' as const, label: 'Documents & Files', emoji: '📁' },
+                  { key: 'companyOverview' as const, label: 'Company Overview', emoji: '🏢' },
+                  { key: 'financials' as const, label: 'Financials (ARR, Burn)', emoji: '💰' },
+                  { key: 'team' as const, label: 'Team Members', emoji: '👥' },
+                  { key: 'metrics' as const, label: 'Key Metrics', emoji: '📊' },
+                  { key: 'contactInfo' as const, label: 'Contact Info', emoji: '📬' },
+                ]).map(({ key, label, emoji }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setVisibleSections(prev => ({ ...prev, [key]: !prev[key] }))}
+                    className={`flex items-center gap-2 p-2.5 rounded-lg border text-left transition-all ${
+                      visibleSections[key]
+                        ? 'border-primary/60 bg-primary/10 text-primary'
+                        : 'border-border bg-muted/20 text-muted-foreground hover:border-border/80'
+                    }`}
+                  >
+                    <span className="text-base leading-none">{emoji}</span>
+                    <span className="text-xs font-medium leading-tight flex-1">{label}</span>
+                    {visibleSections[key] && <Check className="w-3 h-3 shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Access controls */}
+            <div className="space-y-3">
+              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Access Controls</p>
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-xs font-semibold">Require email to view</Label>
@@ -657,7 +724,7 @@ export default function DataRoom() {
               </div>
             </div>
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2 pt-1">
               {selectedRoom?.isShared && (
                 <Button
                   variant="outline"
@@ -673,7 +740,6 @@ export default function DataRoom() {
               )}
               <Button
                 className="flex-1"
-                style={{ background: 'oklch(0.55 0.13 30)' }}
                 disabled={generateLink.isPending}
                 onClick={() => {
                   if (!selectedRoom) return;
@@ -681,6 +747,9 @@ export default function DataRoom() {
                     dataRoomId: selectedRoom.id,
                     requireEmail,
                     expiresInDays: expiresInDays ? parseInt(expiresInDays) : undefined,
+                    shareTitle: shareTitle || undefined,
+                    shareMessage: shareMessage || undefined,
+                    visibleSections,
                   });
                 }}
               >

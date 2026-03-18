@@ -1,12 +1,13 @@
 /**
  * Data Room Router
  * Handles: create/list/delete rooms, file upload to S3, share-link generation,
+ * per-link visibility controls (which sections the recipient can see),
  * activity tracking (who opened, what they viewed), and public viewer access.
  */
 import { z } from 'zod';
 import { router, protectedProcedure, publicProcedure } from './_core/trpc';
 import { getDb } from './db';
-import { dataRooms, dataRoomFiles, dataRoomViews } from '../drizzle/schema';
+import { dataRooms, dataRoomFiles, dataRoomViews, startupProfiles, teamMembers } from '../drizzle/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { storagePut } from './storage';
 import crypto from 'crypto';
@@ -18,6 +19,24 @@ function generateToken(): string {
 function randomSuffix(): string {
   return crypto.randomBytes(6).toString('hex');
 }
+
+const visibleSectionsSchema = z.object({
+  files: z.boolean(),
+  companyOverview: z.boolean(),
+  financials: z.boolean(),
+  team: z.boolean(),
+  metrics: z.boolean(),
+  contactInfo: z.boolean(),
+});
+
+const DEFAULT_SECTIONS = {
+  files: true,
+  companyOverview: false,
+  financials: false,
+  team: false,
+  metrics: false,
+  contactInfo: false,
+};
 
 export const dataRoomRouter = router({
   // ── List all data rooms for the authenticated user ──────────────────────
@@ -49,6 +68,7 @@ export const dataRoomRouter = router({
           isShared: false,
           requireEmail: false,
           viewCount: 0,
+          visibleSections: DEFAULT_SECTIONS,
         })
         .$returningId();
       const created = await db
@@ -180,6 +200,9 @@ export const dataRoomRouter = router({
       dataRoomId: z.number(),
       requireEmail: z.boolean().default(false),
       expiresInDays: z.number().min(1).max(365).optional(),
+      shareTitle: z.string().max(256).optional(),
+      shareMessage: z.string().max(2000).optional(),
+      visibleSections: visibleSectionsSchema.optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -191,10 +214,38 @@ export const dataRoomRouter = router({
 
       await db
         .update(dataRooms)
-        .set({ shareToken: token, isShared: true, requireEmail: input.requireEmail, expiresAt })
+        .set({
+          shareToken: token,
+          isShared: true,
+          requireEmail: input.requireEmail,
+          expiresAt,
+          shareTitle: input.shareTitle ?? null,
+          shareMessage: input.shareMessage ?? null,
+          visibleSections: input.visibleSections ?? DEFAULT_SECTIONS,
+        })
         .where(and(eq(dataRooms.id, input.dataRoomId), eq(dataRooms.userId, ctx.user.id)));
 
       return { token, shareUrl: `/data-room/${token}` };
+    }),
+
+  // ── Update share settings without regenerating token ──────────────────
+  updateShareSettings: protectedProcedure
+    .input(z.object({
+      dataRoomId: z.number(),
+      shareTitle: z.string().max(256).optional(),
+      shareMessage: z.string().max(2000).optional(),
+      requireEmail: z.boolean().optional(),
+      visibleSections: visibleSectionsSchema.optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new Error('Database unavailable');
+      const { dataRoomId, ...fields } = input;
+      await db
+        .update(dataRooms)
+        .set(fields)
+        .where(and(eq(dataRooms.id, dataRoomId), eq(dataRooms.userId, ctx.user.id)));
+      return { success: true };
     }),
 
   // ── Revoke share link ──────────────────────────────────────────────────
@@ -264,7 +315,7 @@ export const dataRoomRouter = router({
         throw new Error('This share link has expired');
       }
       if (room.requireEmail && !input.viewerEmail) {
-        return { requireEmail: true, room: null, files: [] };
+        return { requireEmail: true, room: null, files: [], sections: null, profile: null, team: null };
       }
 
       const req = (ctx as any).req;
@@ -286,16 +337,51 @@ export const dataRoomRouter = router({
         .set({ viewCount: room.viewCount + 1 })
         .where(eq(dataRooms.id, room.id));
 
-      const files = await db
-        .select()
-        .from(dataRoomFiles)
-        .where(eq(dataRoomFiles.dataRoomId, room.id))
-        .orderBy(dataRoomFiles.folder, dataRoomFiles.sortOrder);
+      const sections = (room.visibleSections as typeof DEFAULT_SECTIONS | null) ?? DEFAULT_SECTIONS;
+
+      // Load files if enabled
+      const files = sections.files
+        ? await db
+            .select()
+            .from(dataRoomFiles)
+            .where(eq(dataRoomFiles.dataRoomId, room.id))
+            .orderBy(dataRoomFiles.folder, dataRoomFiles.sortOrder)
+        : [];
+
+      // Load startup profile if any section needs it
+      let profile = null;
+      if (sections.companyOverview || sections.financials || sections.metrics || sections.contactInfo) {
+        const profiles = await db
+          .select()
+          .from(startupProfiles)
+          .where(eq(startupProfiles.userId, room.userId))
+          .limit(1);
+        profile = profiles[0] ?? null;
+      }
+
+      // Load team if enabled
+      let team: typeof teamMembers.$inferSelect[] = [];
+      if (sections.team && profile) {
+        team = await db
+          .select()
+          .from(teamMembers)
+          .where(eq(teamMembers.startupId, profile.id))
+          .orderBy(teamMembers.sortOrder);
+      }
 
       return {
         requireEmail: false,
-        room: { id: room.id, name: room.name, description: room.description },
+        room: {
+          id: room.id,
+          name: room.name,
+          description: room.description,
+          shareTitle: room.shareTitle,
+          shareMessage: room.shareMessage,
+        },
+        sections,
         files,
+        profile,
+        team,
       };
     }),
 

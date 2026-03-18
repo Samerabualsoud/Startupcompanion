@@ -413,6 +413,16 @@ export const dataRooms = mysqlTable('data_rooms', {
   requireEmail: boolean('requireEmail').default(false).notNull(),
   expiresAt: timestamp('expiresAt'),
   viewCount: int('viewCount').default(0).notNull(),
+  shareTitle: varchar('shareTitle', { length: 256 }),
+  shareMessage: text('shareMessage'),
+  visibleSections: json('visibleSections').$type<{
+    files: boolean;
+    companyOverview: boolean;
+    financials: boolean;
+    team: boolean;
+    metrics: boolean;
+    contactInfo: boolean;
+  }>(),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
 });

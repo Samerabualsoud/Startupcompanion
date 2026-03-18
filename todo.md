@@ -391,7 +391,16 @@
 - [x] Apply playful design tokens to index.css (new color palette, rounded corners, shadows, glow buttons)
 - [x] Generate new favicon
 - [x] 0 TypeScript errors
-- [ ] Save checkpoint and push to GitHub
+- [x] Save checkpoint and push to GitHub
 
 ## Round 28 Bug Fixes (urgent)
 - [x] Fix SalesTracker Revenue tab crash: Recharts "Invariant failed" — added missing YAxis yAxisId={1} for wonDeals Bar
+
+## Round 29 — Data Room Visibility Controls + Time-Based New Badge
+- [x] Extend data_rooms schema: add visibleSections, shareTitle, shareMessage fields + db:push migration
+- [x] Update dataRoomRouter: generateShareLink accepts visibleSections/shareTitle/shareMessage; getSharedRoom returns them; add updateShareSettings procedure
+- [x] Update DataRoom.tsx: share modal with section visibility toggle cards, shareTitle, shareMessage branding fields
+- [x] Rebuild DataRoomShare.tsx: tabs for each enabled section (Documents, Company, Financials, Team, Metrics, Contact); email gate; file tracking
+- [x] Implement time-based New badge: newUntil ISO date field on NavItem; isNewFeature() helper; sidebar renders New badge only within 14 days
+- [x] 0 TypeScript errors
+- [ ] Save checkpoint and push to GitHub

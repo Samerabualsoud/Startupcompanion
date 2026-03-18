@@ -69,17 +69,25 @@ interface NavItem {
   navKey?: string;
   icon: React.ElementType;
   badge?: string;
+  /** ISO date string — show 'New' badge until 14 days after this date */
+  newUntil?: string;
   group: string;
+}
+
+/** Returns true if today is within 14 days of the launch date */
+function isNewFeature(newUntil?: string): boolean {
+  if (!newUntil) return false;
+  return new Date() <= new Date(newUntil);
 }
 
 const NAV_ITEMS: NavItem[] = [
   // Overview
   { id: 'dashboard',     label: 'Founder Dashboard',     shortLabel: 'Dashboard',   navKey: 'navDashboard',   icon: Gauge,       group: 'My Startup',   badge: undefined },
   { id: 'profile',       label: 'My Startup Profile',    shortLabel: 'Profile',     navKey: 'navMyStartup',   icon: Building2,   group: 'My Startup' },
-  { id: 'cogs',          label: 'COGS Calculator',        shortLabel: 'COGS',        navKey: 'navCOGS',        icon: DollarSign,  group: 'My Startup',   badge: 'New' },
-  { id: 'sales',         label: 'Sales Tracker',          shortLabel: 'Sales',       navKey: 'navSales',       icon: ShoppingCart, group: 'My Startup',  badge: 'New' },
-  { id: 'data-room',     label: 'Data Room',              shortLabel: 'Data Room',   navKey: 'navDataRoom',    icon: FolderOpen,  group: 'My Startup',   badge: 'New' },
-  { id: 'cap-table',     label: 'Cap Table Manager',      shortLabel: 'Cap Table',   navKey: 'navCapTable',    icon: Users,       group: 'My Startup',   badge: 'New' },
+  { id: 'cogs',          label: 'COGS Calculator',        shortLabel: 'COGS',        navKey: 'navCOGS',        icon: DollarSign,  group: 'My Startup',   newUntil: '2026-04-01' },
+  { id: 'sales',         label: 'Sales Tracker',          shortLabel: 'Sales',       navKey: 'navSales',       icon: ShoppingCart, group: 'My Startup',  newUntil: '2026-04-01' },
+  { id: 'data-room',     label: 'Data Room',              shortLabel: 'Data Room',   navKey: 'navDataRoom',    icon: FolderOpen,  group: 'My Startup',   newUntil: '2026-04-01' },
+  { id: 'cap-table',     label: 'Cap Table Manager',      shortLabel: 'Cap Table',   navKey: 'navCapTable',    icon: Users,       group: 'My Startup',   newUntil: '2026-04-01' },
   // Valuation
   { id: 'valuation',     label: 'Valuation Calculator', shortLabel: 'Valuation',   navKey: 'navValuation',   icon: TrendingUp,  group: 'Valuation',    badge: '7 methods' },
   // Equity & Funding
@@ -91,27 +99,27 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'pitch-deck',    label: 'Pitch Deck Scorecard',  shortLabel: 'Pitch Deck',   navKey: 'navPitchDeck', icon: Layers,      group: 'Fundraising' },
   { id: 'investor-crm',  label: 'Investor CRM',          shortLabel: 'Investors',   navKey: 'navInvestorCRM',  icon: Target,      group: 'Fundraising' },
   // Resources
-  { id: 'accelerators',  label: 'Accelerator Finder',    shortLabel: 'Accelerators',   navKey: 'navAccelerators', icon: Rocket,    group: 'Resources',    badge: 'New' },
+  { id: 'accelerators',  label: 'Accelerator Finder',    shortLabel: 'Accelerators',   navKey: 'navAccelerators', icon: Rocket,    group: 'Resources',    newUntil: '2026-04-01' },
   { id: 'runway',        label: 'Runway Optimizer',      shortLabel: 'Runway',   navKey: 'navRunway',     icon: BarChart3,   group: 'Resources' },
   { id: 'term-sheet',    label: 'Term Sheet Glossary',   shortLabel: 'Term Sheet',   navKey: 'navTermSheet', icon: BookOpen,    group: 'Resources',    badge: '75 terms' },
   // My Startup
   // Legal & Jurisdictions
-  { id: 'free-zones',    label: 'Free Zones & Jurisdictions', shortLabel: 'Free Zones', navKey: 'navFreeZones', icon: Globe,        group: 'Resources',    badge: 'New' },
+  { id: 'free-zones',    label: 'Free Zones & Jurisdictions', shortLabel: 'Free Zones', navKey: 'navFreeZones', icon: Globe,        group: 'Resources',    newUntil: '2026-04-01' },
   // Database
-  { id: 'resources',     label: 'Investor Database',     shortLabel: 'Database',   navKey: 'navDatabase',   icon: Building2,   group: 'Database',     badge: 'New' },
+  { id: 'resources',     label: 'Investor Database',     shortLabel: 'Database',   navKey: 'navDatabase',   icon: Building2,   group: 'Database',     newUntil: '2026-04-01' },
   { id: 'matching',      label: 'Investor Matching',     shortLabel: 'Matching',   navKey: 'navMatching',   icon: Target,      group: 'Database',     badge: 'AI' },
   // Admin
   { id: 'admin',         label: 'Admin Dashboard',       shortLabel: 'Admin',      icon: Gauge,       group: 'Admin' },
   // Legal & Documents
-  { id: 'safe-note',         label: 'SAFE / Convertible Note', shortLabel: 'SAFE / Note',    navKey: 'navSAFENote',       icon: FileText,    group: 'Legal & Documents', badge: 'New' },
-  { id: 'nda',               label: 'NDA Generator',           shortLabel: 'NDA',            navKey: 'navNDA',            icon: ClipboardCheck, group: 'Legal & Documents', badge: 'New' },
-  { id: 'term-sheet-builder', label: 'Term Sheet Builder',     shortLabel: 'Term Sheet',     navKey: 'navTermSheetBuilder', icon: FileText,   group: 'Legal & Documents', badge: 'New' },
+  { id: 'safe-note',         label: 'SAFE / Convertible Note', shortLabel: 'SAFE / Note',    navKey: 'navSAFENote',       icon: FileText,    group: 'Legal & Documents', newUntil: '2026-04-01' },
+  { id: 'nda',               label: 'NDA Generator',           shortLabel: 'NDA',            navKey: 'navNDA',            icon: ClipboardCheck, group: 'Legal & Documents', newUntil: '2026-04-01' },
+  { id: 'term-sheet-builder', label: 'Term Sheet Builder',     shortLabel: 'Term Sheet',     navKey: 'navTermSheetBuilder', icon: FileText,   group: 'Legal & Documents', newUntil: '2026-04-01' },
   // ESOP moved to My Startup group above
   // Community
-  { id: 'startup-directory', label: 'Startup Directory',       shortLabel: 'Directory',      navKey: 'navStartupDir',     icon: Globe,       group: 'Database',           badge: 'New' },
-  { id: 'valuation-timeline',label: '409A / Valuation History',shortLabel: '409A History',   navKey: 'navValuationTimeline', icon: BarChart3, group: 'My Startup',         badge: 'New' },
+  { id: 'startup-directory', label: 'Startup Directory',       shortLabel: 'Directory',      navKey: 'navStartupDir',     icon: Globe,       group: 'Database',           newUntil: '2026-04-01' },
+  { id: 'valuation-timeline',label: '409A / Valuation History',shortLabel: '409A History',   navKey: 'navValuationTimeline', icon: BarChart3, group: 'My Startup',         newUntil: '2026-04-01' },
   // Equity & Cap Table
-  { id: 'esop',              label: 'ESOP / Option Pool',      shortLabel: 'ESOP',           navKey: 'navESOP',           icon: Users2,      group: 'My Startup',         badge: 'New' },
+  { id: 'esop',              label: 'ESOP / Option Pool',      shortLabel: 'ESOP',           navKey: 'navESOP',           icon: Users2,      group: 'My Startup',         newUntil: '2026-04-01' },
   // AI Tools
   { id: 'idea-validator',        label: 'AI Idea Validator',      shortLabel: 'Idea Validator', navKey: 'navIdeaValidator', icon: Sparkles,     group: 'AI Tools', badge: 'AI' },
   { id: 'ai-fundraising-advisor', label: 'AI Fundraising Advisor', shortLabel: 'AI Advisor',   navKey: 'navAIAdvisor',    icon: MessageCircle, group: 'AI Tools', badge: 'AI' },
@@ -526,6 +534,9 @@ function HomeInner() {
                     const Icon = item.icon;
                     const isActive = activeTool === item.id;
                     const isAI = item.badge === 'AI';
+                    const showNew = isNewFeature(item.newUntil);
+                    // Effective badge: 'AI' takes priority, then time-based 'New', then static badge
+                    const effectiveBadge = isAI ? 'AI' : showNew ? 'New' : item.badge;
                     return (
                       <button
                         key={item.id}
@@ -539,15 +550,15 @@ function HomeInner() {
                       >
                         <Icon className="w-3.5 h-3.5 shrink-0" />
                         <span className="text-xs font-medium flex-1 truncate">{item.navKey ? t(item.navKey as any) : item.shortLabel}</span>
-                        {item.badge && !isActive && (
+                        {effectiveBadge && !isActive && (
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
-                            isAI
+                            effectiveBadge === 'AI'
                               ? 'bg-violet-100 text-violet-700'
-                              : item.badge === 'New'
+                              : effectiveBadge === 'New'
                               ? 'bg-emerald-100 text-emerald-700'
                               : 'bg-secondary text-muted-foreground'
                           }`}>
-                            {item.badge}
+                            {effectiveBadge}
                           </span>
                         )}
                         {isActive && <ChevronRight className={`w-3 h-3 shrink-0 opacity-70 ${isRTL ? 'rotate-180' : ''}`} />}
