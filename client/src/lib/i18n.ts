@@ -238,6 +238,9 @@ export const translations = {
     navStartupDir: 'Startup Directory',
     navValuationTimeline: '409A History',
     navGroupLegal: 'Legal & Documents',
+    navTermSheetBuilder: 'Term Sheet Builder',
+    navCapTable: 'Cap Table Manager',
+    navIdeaValidator: 'AI Idea Validator',
 
     // AI Fundraising Advisor
     aiFundraisingTitle: "AI Fundraising Advisor",
@@ -737,6 +740,9 @@ export const translations = {
     navStartupDir: 'دليل الشركات',
     navValuationTimeline: 'تاريخ 409A',
     navGroupLegal: 'الوثائق القانونية',
+    navTermSheetBuilder: 'منشئ صحيفة الشروط',
+    navCapTable: 'مدير جدول الملكية',
+    navIdeaValidator: 'مدقق الأفكار بالذكاء الاصطناعي',
 
     // AI Fundraising Advisor
     aiFundraisingTitle: "مستشار جمع التمويل بالذكاء الاصطناعي",

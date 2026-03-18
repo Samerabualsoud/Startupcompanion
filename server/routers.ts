@@ -17,6 +17,8 @@ import { cogsRouter } from './cogsRouter';
 import { dataRoomRouter } from './dataRoomRouter';
 import { salesRouter } from './salesRouter';
 import { esopRouter } from './esopRouter';
+import { termSheetRouter } from './termSheetRouter';
+import { ideaValidatorRouter } from './ideaValidatorRouter';
 
 export const appRouter = router({
   system: systemRouter,
@@ -37,6 +39,8 @@ export const appRouter = router({
   dataRoom: dataRoomRouter,
   sales: salesRouter,
   esop: esopRouter,
+  termSheet: termSheetRouter,
+  ideaValidator: ideaValidatorRouter,
 });
 
 export type AppRouter = typeof appRouter;

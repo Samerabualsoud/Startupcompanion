@@ -363,3 +363,11 @@
 - [ ] Admin: Audit Log (recent admin actions with timestamps)
 - [ ] adminRouter.ts: add getStats, getUsers, updateUserRole, banUser, getAuditLog, getToolUsage procedures
 - [ ] Wire admin panel to all new procedures
+
+## Round 26 — Sidebar Reorder + 3 New Tabs
+- [x] Reorder sidebar: My Startup (Dashboard + Profile + Team + COGS + ESOP) as first section
+- [x] Add Term Sheet Builder tab with guided form for SAFE, convertible note, priced round — generates downloadable PDF
+- [x] Add Cap Table Manager tab with visual shareholder table, ownership %, value at current valuation, auto-updated from Valuation Timeline
+- [x] Add AI Startup Idea Validator tab with AI-powered assessment: market size, competition, moat, risk score, fundability rating
+- [x] 0 TypeScript errors
+- [ ] Save checkpoint and push to GitHub

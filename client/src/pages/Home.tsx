@@ -58,7 +58,10 @@ import FounderDashboard from '@/components/FounderDashboard';
 import COGSCalculator from '@/components/COGSCalculator';
 import SalesTracker from '@/components/SalesTracker';
 import DataRoom from '@/components/DataRoom';
-type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'resources' | 'matching' | 'admin' | 'feasibility' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'valuation-timeline';
+import TermSheetBuilder from '@/components/TermSheetBuilder';
+import CapTableManager from '@/components/CapTableManager';
+import IdeaValidator from '@/components/IdeaValidator';
+type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'resources' | 'matching' | 'admin' | 'feasibility' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator';
 
 interface NavItem {
   id: ToolId;
@@ -72,10 +75,12 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   // Overview
-  { id: 'dashboard',     label: 'Founder Dashboard',     shortLabel: 'Dashboard',   navKey: 'navDashboard',   icon: Gauge,       group: 'Overview',     badge: undefined },
-  { id: 'cogs',          label: 'COGS Calculator',        shortLabel: 'COGS',        navKey: 'navCOGS',        icon: DollarSign,  group: 'Overview',     badge: 'New' },
-  { id: 'sales',         label: 'Sales Tracker',          shortLabel: 'Sales',       navKey: 'navSales',       icon: ShoppingCart, group: 'Overview',    badge: 'New' },
+  { id: 'dashboard',     label: 'Founder Dashboard',     shortLabel: 'Dashboard',   navKey: 'navDashboard',   icon: Gauge,       group: 'My Startup',   badge: undefined },
+  { id: 'profile',       label: 'My Startup Profile',    shortLabel: 'Profile',     navKey: 'navMyStartup',   icon: Building2,   group: 'My Startup' },
+  { id: 'cogs',          label: 'COGS Calculator',        shortLabel: 'COGS',        navKey: 'navCOGS',        icon: DollarSign,  group: 'My Startup',   badge: 'New' },
+  { id: 'sales',         label: 'Sales Tracker',          shortLabel: 'Sales',       navKey: 'navSales',       icon: ShoppingCart, group: 'My Startup',  badge: 'New' },
   { id: 'data-room',     label: 'Data Room',              shortLabel: 'Data Room',   navKey: 'navDataRoom',    icon: FolderOpen,  group: 'My Startup',   badge: 'New' },
+  { id: 'cap-table',     label: 'Cap Table Manager',      shortLabel: 'Cap Table',   navKey: 'navCapTable',    icon: Users,       group: 'My Startup',   badge: 'New' },
   // Valuation
   { id: 'valuation',     label: 'Valuation Calculator', shortLabel: 'Valuation',   navKey: 'navValuation',   icon: TrendingUp,  group: 'Valuation',    badge: '7 methods' },
   // Equity & Funding
@@ -93,7 +98,6 @@ const NAV_ITEMS: NavItem[] = [
   // Idea Evaluation
   { id: 'feasibility',   label: 'Idea Evaluator',        shortLabel: 'Idea Check',   navKey: 'navIdeaCheck', icon: Sparkles,    group: 'Valuation',    badge: 'AI' },
   // My Startup
-  { id: 'profile',       label: 'My Startup Profile',    shortLabel: 'My Startup',   navKey: 'navMyStartup', icon: Building2,   group: 'My Startup' },
   // Legal & Jurisdictions
   { id: 'free-zones',    label: 'Free Zones & Jurisdictions', shortLabel: 'Free Zones', navKey: 'navFreeZones', icon: Globe,        group: 'Resources',    badge: 'New' },
   // Database
@@ -104,11 +108,15 @@ const NAV_ITEMS: NavItem[] = [
   // Legal & Documents
   { id: 'safe-note',         label: 'SAFE / Convertible Note', shortLabel: 'SAFE / Note',    navKey: 'navSAFENote',       icon: FileText,    group: 'Legal & Documents', badge: 'New' },
   { id: 'nda',               label: 'NDA Generator',           shortLabel: 'NDA',            navKey: 'navNDA',            icon: ClipboardCheck, group: 'Legal & Documents', badge: 'New' },
-  { id: 'esop',              label: 'ESOP / Option Pool',      shortLabel: 'ESOP',           navKey: 'navESOP',           icon: Users2,      group: 'Equity & Cap Table', badge: 'New' },
+  { id: 'term-sheet-builder', label: 'Term Sheet Builder',     shortLabel: 'Term Sheet',     navKey: 'navTermSheetBuilder', icon: FileText,   group: 'Legal & Documents', badge: 'New' },
+  // ESOP moved to My Startup group above
   // Community
   { id: 'startup-directory', label: 'Startup Directory',       shortLabel: 'Directory',      navKey: 'navStartupDir',     icon: Globe,       group: 'Database',           badge: 'New' },
   { id: 'valuation-timeline',label: '409A / Valuation History',shortLabel: '409A History',   navKey: 'navValuationTimeline', icon: BarChart3, group: 'My Startup',         badge: 'New' },
+  // Equity & Cap Table
+  { id: 'esop',              label: 'ESOP / Option Pool',      shortLabel: 'ESOP',           navKey: 'navESOP',           icon: Users2,      group: 'My Startup',         badge: 'New' },
   // AI Tools
+  { id: 'idea-validator',        label: 'AI Idea Validator',      shortLabel: 'Idea Validator', navKey: 'navIdeaValidator', icon: Sparkles,     group: 'AI Tools', badge: 'AI' },
   { id: 'ai-fundraising-advisor', label: 'AI Fundraising Advisor', shortLabel: 'AI Advisor',   navKey: 'navAIAdvisor',    icon: MessageCircle, group: 'AI Tools', badge: 'AI' },
   { id: 'ai-market-research',     label: 'AI Market Research',     shortLabel: 'Market Research',   navKey: 'navAIMarketResearch', icon: BarChart3,    group: 'AI Tools', badge: 'AI' },
   { id: 'ai-investor-email',      label: 'AI Investor Email',      shortLabel: 'Email Writer',   navKey: 'navAIEmailWriter',  icon: Mail,          group: 'AI Tools', badge: 'AI' },
@@ -117,7 +125,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'ai-due-diligence',       label: 'AI Due Diligence',       shortLabel: 'Due Diligence',   navKey: 'navAIDueDiligence', icon: ClipboardCheck,group: 'AI Tools', badge: 'AI' },
 ];
 
-const GROUPS = ['Overview', 'Valuation', 'Equity & Cap Table', 'Fundraising', 'Resources', 'Legal & Documents', 'Database', 'My Startup', 'AI Tools', 'Admin'];
+const GROUPS = ['My Startup', 'Valuation', 'Equity & Cap Table', 'Fundraising', 'Legal & Documents', 'Resources', 'Database', 'AI Tools', 'Admin'];
 const TOOL_COLORS: Record<ToolId, string> = {
   dashboard: '#0F1B2D',
   cogs: '#059669',
@@ -150,6 +158,9 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'valuation-timeline': '#2D4A6B',
   'sales': '#F59E0B',
   'data-room': '#2D4A6B',
+  'term-sheet-builder': '#7C3AED',
+  'cap-table': '#0EA5E9',
+  'idea-validator': '#EC4899',
 };
 
 function HomeInner() {
@@ -345,6 +356,9 @@ function HomeInner() {
       case 'cogs':                       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><COGSCalculator /></div>;
       case 'sales':                      return <SalesTracker />;
       case 'data-room':                  return <DataRoom />;
+      case 'term-sheet-builder':           return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><TermSheetBuilder /></div>;
+      case 'cap-table':                    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><CapTableManager /></div>;
+      case 'idea-validator':               return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><IdeaValidator /></div>;
       default: return null;
     }
   };
