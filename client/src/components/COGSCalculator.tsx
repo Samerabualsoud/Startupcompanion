@@ -1,14 +1,13 @@
 /**
- * COGS & Cost Calculator
- * Calculates cost of goods sold, gross margin, EBITDA, and break-even.
- * Connects to the backend cogs router and AI analysis.
+ * COGS & Cost Management Suite
+ * Full cost structure: direct (fixed/variable/semi-variable), indirect/OpEx,
+ * overhead allocation, margin waterfall, break-even, monthly trend, AI analysis.
  */
-
 import { useState, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Trash2, Loader2, Save, Sparkles, Calculator,
-  ChevronDown, ChevronUp, History, RefreshCw
+  History, RefreshCw, BarChart3, TrendingDown, TrendingUp,
+  AlertCircle, Package, DollarSign, Percent, Target
 } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { trpc } from '@/lib/trpc';
@@ -17,184 +16,284 @@ import { useStartup } from '@/contexts/StartupContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FieldInfo } from '@/components/ui/field-info';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
 import { Streamdown } from 'streamdown';
+import {
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Cell, ReferenceLine, Legend
+} from 'recharts';
 
 // ── Types ──────────────────────────────────────────────────────────────────
+type CostType = 'fixed' | 'variable' | 'semi-variable';
+type DirectCategory = 'materials' | 'labor' | 'hosting' | 'payment_processing' | 'support' | 'packaging' | 'shipping' | 'licensing' | 'cloud' | 'other';
+type IndirectCategory = 'sales' | 'marketing' | 'admin' | 'rd' | 'hr' | 'facilities' | 'legal' | 'insurance' | 'other';
+type BusinessModel = 'saas' | 'ecommerce' | 'marketplace' | 'hardware' | 'services' | 'manufacturing' | 'other';
 
 interface DirectCost {
   id: string;
   name: string;
   amount: number;
-  type: 'fixed' | 'variable';
+  type: CostType;
   perUnit: boolean;
-  category: 'materials' | 'labor' | 'hosting' | 'payment_processing' | 'support' | 'packaging' | 'shipping' | 'licensing' | 'other';
+  fixedPortion?: number;
+  variablePortion?: number;
+  category: DirectCategory;
 }
 
 interface IndirectCost {
   id: string;
   name: string;
   amount: number;
-  category: 'sales' | 'marketing' | 'admin' | 'rd' | 'hr' | 'facilities' | 'other';
+  category: IndirectCategory;
 }
-
-type BusinessModel = 'saas' | 'ecommerce' | 'marketplace' | 'hardware' | 'services' | 'manufacturing' | 'other';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-
 function fmt(n: number, currency = 'USD'): string {
-  return `${currency === 'USD' ? '$' : currency === 'SAR' ? 'SAR ' : currency + ' '}${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+  const sym = currency === 'USD' ? '$' : currency === 'SAR' ? 'SAR ' : currency === 'AED' ? 'AED ' : currency + ' ';
+  return `${sym}${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 }
+function pct(n: number): string { return `${n.toFixed(1)}%`; }
+function clamp(n: number, min: number, max: number) { return Math.min(max, Math.max(min, n)); }
 
-// ── Component ──────────────────────────────────────────────────────────────
+const DIRECT_CATEGORIES: { value: DirectCategory; label: string }[] = [
+  { value: 'materials', label: 'Raw Materials' },
+  { value: 'labor', label: 'Direct Labor' },
+  { value: 'hosting', label: 'Hosting / Infra' },
+  { value: 'cloud', label: 'Cloud Services' },
+  { value: 'payment_processing', label: 'Payment Processing' },
+  { value: 'support', label: 'Customer Support' },
+  { value: 'packaging', label: 'Packaging' },
+  { value: 'shipping', label: 'Shipping / Delivery' },
+  { value: 'licensing', label: 'Licensing / Royalties' },
+  { value: 'other', label: 'Other Direct' },
+];
 
+const INDIRECT_CATEGORIES: { value: IndirectCategory; label: string }[] = [
+  { value: 'sales', label: 'Sales' },
+  { value: 'marketing', label: 'Marketing' },
+  { value: 'admin', label: 'G&A / Admin' },
+  { value: 'rd', label: 'R&D' },
+  { value: 'hr', label: 'HR / Recruiting' },
+  { value: 'facilities', label: 'Facilities / Rent' },
+  { value: 'legal', label: 'Legal & Compliance' },
+  { value: 'insurance', label: 'Insurance' },
+  { value: 'other', label: 'Other OpEx' },
+];
+
+const MARGIN_BENCHMARKS: Record<BusinessModel, { gross: number; ebitda: number; label: string }> = {
+  saas:          { gross: 72, ebitda: 20, label: 'SaaS' },
+  ecommerce:     { gross: 35, ebitda: 8,  label: 'E-Commerce' },
+  marketplace:   { gross: 60, ebitda: 15, label: 'Marketplace' },
+  hardware:      { gross: 40, ebitda: 10, label: 'Hardware' },
+  services:      { gross: 55, ebitda: 18, label: 'Services' },
+  manufacturing: { gross: 38, ebitda: 12, label: 'Manufacturing' },
+  other:         { gross: 50, ebitda: 15, label: 'General' },
+};
+
+// ── Main Component ─────────────────────────────────────────────────────────
 export default function COGSCalculator() {
-  const { t, lang } = useLanguage();
+  const { lang } = useLanguage();
   const { refresh: refreshContext } = useStartup();
   const isRTL = lang === 'ar';
 
-  // ── Form state ──
-  const [calcName, setCalcName] = useState('');
+  // ── State ──────────────────────────────────────────────────────────────
   const [businessModel, setBusinessModel] = useState<BusinessModel>('saas');
   const [currency, setCurrency] = useState('USD');
-  const [revenuePerUnit, setRevenuePerUnit] = useState<number>(0);
-  const [unitsPerMonth, setUnitsPerMonth] = useState<number>(0);
+  const [calcName, setCalcName] = useState('');
+  const [revenuePerUnit, setRevenuePerUnit] = useState(0);
+  const [unitsPerMonth, setUnitsPerMonth] = useState(0);
   const [directCosts, setDirectCosts] = useState<DirectCost[]>([]);
   const [indirectCosts, setIndirectCosts] = useState<IndirectCost[]>([]);
+  const [notes, setNotes] = useState('');
+  const [activeTab, setActiveTab] = useState('costs');
   const [showHistory, setShowHistory] = useState(false);
-  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
-  const [showAI, setShowAI] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState('');
+  const [loadedId, setLoadedId] = useState<number | null>(null);
+  const [growthRate, setGrowthRate] = useState(10);
 
-  // ── Computed metrics ──
+  // ── tRPC ───────────────────────────────────────────────────────────────
+  const { data: history, refetch: refetchHistory } = trpc.cogs.list.useQuery(undefined, { enabled: showHistory });
+  const saveMutation = trpc.cogs.save.useMutation();
+  const updateMutation = trpc.cogs.update.useMutation();
+  const deleteMutation = trpc.cogs.delete.useMutation();
+  const analyzeMutation = trpc.ai.analyzeCOGS.useMutation({
+    onSuccess: (data) => setAiAnalysis(data?.analysis ?? ''),
+    onError: () => toast.error('AI analysis failed'),
+  });
+
+  // ── Computed Metrics ───────────────────────────────────────────────────
   const metrics = useMemo(() => {
-    const totalRevenue = revenuePerUnit * unitsPerMonth;
+    const monthlyRevenue = revenuePerUnit * unitsPerMonth;
 
-    // Direct costs: fixed costs are monthly; variable per-unit costs are multiplied by units
-    const totalCOGS = directCosts.reduce((sum, c) => {
-      if (c.type === 'variable' && c.perUnit) {
-        return sum + c.amount * unitsPerMonth;
+    let totalDirectFixed = 0;
+    let totalDirectVariable = 0;
+    let totalDirectSemiFixed = 0;
+    let totalDirectSemiVariable = 0;
+
+    for (const c of directCosts) {
+      if (c.type === 'fixed') {
+        totalDirectFixed += c.amount;
+      } else if (c.type === 'variable') {
+        totalDirectVariable += c.perUnit ? c.amount * unitsPerMonth : c.amount;
+      } else if (c.type === 'semi-variable') {
+        const fixedBase = c.fixedPortion ?? c.amount * 0.4;
+        const varPer = c.variablePortion ?? (c.amount * 0.6) / Math.max(1, unitsPerMonth);
+        totalDirectSemiFixed += fixedBase;
+        totalDirectSemiVariable += varPer * unitsPerMonth;
       }
-      return sum + c.amount;
-    }, 0);
-
-    const grossProfit = totalRevenue - totalCOGS;
-    const grossMarginPct = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
-
-    const totalOpEx = indirectCosts.reduce((sum, c) => sum + c.amount, 0);
-    const ebitda = grossProfit - totalOpEx;
-
-    // Break-even: fixed costs / (revenue per unit - variable cost per unit)
-    const fixedCosts = directCosts
-      .filter(c => c.type === 'fixed')
-      .reduce((sum, c) => sum + c.amount, 0) + totalOpEx;
-    const variableCostPerUnit = directCosts
-      .filter(c => c.type === 'variable' && c.perUnit)
-      .reduce((sum, c) => sum + c.amount, 0);
-    const contributionMargin = revenuePerUnit - variableCostPerUnit;
-    const breakEvenUnits = contributionMargin > 0 ? fixedCosts / contributionMargin : 0;
-
-    return { totalRevenue, totalCOGS, grossProfit, grossMarginPct, totalOpEx, ebitda, breakEvenUnits };
-  }, [revenuePerUnit, unitsPerMonth, directCosts, indirectCosts]);
-
-  // ── tRPC ──
-  const utils = trpc.useUtils();
-  const { data: history, isLoading: historyLoading } = trpc.cogs.list.useQuery(undefined, { retry: false });
-
-  const saveMutation = trpc.cogs.save.useMutation({
-    onSuccess: () => {
-      toast.success(t('cogsSaved'));
-      utils.cogs.list.invalidate();
-      refreshContext();
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
-  const deleteMutation = trpc.cogs.delete.useMutation({
-    onSuccess: () => {
-      utils.cogs.list.invalidate();
-      refreshContext();
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
-  const analyzeAI = trpc.ai.analyzeCOGS.useMutation({
-    onSuccess: (data) => {
-      setAiAnalysis(data.analysis);
-      setShowAI(true);
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
-  // ── Handlers ──
-  const addDirectCost = useCallback(() => {
-    setDirectCosts(prev => [...prev, {
-      id: nanoid(),
-      name: '',
-      amount: 0,
-      type: 'fixed',
-      perUnit: false,
-      category: 'other',
-    }]);
-  }, []);
-
-  const addIndirectCost = useCallback(() => {
-    setIndirectCosts(prev => [...prev, {
-      id: nanoid(),
-      name: '',
-      amount: 0,
-      category: 'other',
-    }]);
-  }, []);
-
-  const updateDirectCost = useCallback((id: string, field: keyof DirectCost, value: any) => {
-    setDirectCosts(prev => prev.map(c => c.id === id ? { ...c, [field]: value } : c));
-  }, []);
-
-  const updateIndirectCost = useCallback((id: string, field: keyof IndirectCost, value: any) => {
-    setIndirectCosts(prev => prev.map(c => c.id === id ? { ...c, [field]: value } : c));
-  }, []);
-
-  const removeDirectCost = useCallback((id: string) => {
-    setDirectCosts(prev => prev.filter(c => c.id !== id));
-  }, []);
-
-  const removeIndirectCost = useCallback((id: string) => {
-    setIndirectCosts(prev => prev.filter(c => c.id !== id));
-  }, []);
-
-  const handleSave = () => {
-    if (!calcName.trim()) {
-      toast.error('Please enter a calculation name');
-      return;
     }
-    saveMutation.mutate({
-      name: calcName,
-      businessModel,
-      currency,
-      revenuePerUnit,
-      unitsPerMonth,
-      directCostsJson: directCosts,
-      indirectCostsJson: indirectCosts,
+
+    const totalCOGS = totalDirectFixed + totalDirectVariable + totalDirectSemiFixed + totalDirectSemiVariable;
+    const grossProfit = monthlyRevenue - totalCOGS;
+    const grossMarginPct = monthlyRevenue > 0 ? (grossProfit / monthlyRevenue) * 100 : 0;
+
+    const totalOpEx = indirectCosts.reduce((s, c) => s + c.amount, 0);
+    const ebitda = grossProfit - totalOpEx;
+    const ebitdaMarginPct = monthlyRevenue > 0 ? (ebitda / monthlyRevenue) * 100 : 0;
+
+    const totalFixed = totalDirectFixed + totalDirectSemiFixed + totalOpEx;
+    const variableCostPerUnit = unitsPerMonth > 0
+      ? (totalDirectVariable + totalDirectSemiVariable) / unitsPerMonth
+      : 0;
+    const contributionMarginPerUnit = revenuePerUnit - variableCostPerUnit;
+    const breakEvenUnits = contributionMarginPerUnit > 0
+      ? Math.ceil(totalFixed / contributionMarginPerUnit)
+      : null;
+    const breakEvenRevenue = breakEvenUnits !== null ? breakEvenUnits * revenuePerUnit : null;
+
+    const cogPerUnit = unitsPerMonth > 0 ? totalCOGS / unitsPerMonth : 0;
+    const grossProfitPerUnit = revenuePerUnit - cogPerUnit;
+
+    const benchmark = MARGIN_BENCHMARKS[businessModel];
+    const grossVsBenchmark = grossMarginPct - benchmark.gross;
+    const ebitdaVsBenchmark = ebitdaMarginPct - benchmark.ebitda;
+
+    return {
+      monthlyRevenue, totalCOGS, grossProfit, grossMarginPct,
+      totalOpEx, ebitda, ebitdaMarginPct,
+      totalFixed, variableCostPerUnit, contributionMarginPerUnit,
+      breakEvenUnits, breakEvenRevenue,
+      cogPerUnit, grossProfitPerUnit,
+      totalDirectFixed, totalDirectVariable, totalDirectSemiFixed, totalDirectSemiVariable,
+      benchmark, grossVsBenchmark, ebitdaVsBenchmark,
+    };
+  }, [directCosts, indirectCosts, revenuePerUnit, unitsPerMonth, businessModel]);
+
+  // ── Chart Data ─────────────────────────────────────────────────────────
+  const waterfallData = useMemo(() => [
+    { name: 'Revenue', value: metrics.monthlyRevenue, fill: '#10B981' },
+    { name: 'Direct Costs', value: -metrics.totalCOGS, fill: '#EF4444' },
+    { name: 'Gross Profit', value: metrics.grossProfit, fill: metrics.grossProfit >= 0 ? '#3B82F6' : '#EF4444' },
+    { name: 'OpEx', value: -metrics.totalOpEx, fill: '#F59E0B' },
+    { name: 'EBITDA', value: metrics.ebitda, fill: metrics.ebitda >= 0 ? '#8B5CF6' : '#EF4444' },
+  ], [metrics]);
+
+  const breakEvenData = useMemo(() => {
+    const maxUnits = Math.max(unitsPerMonth * 2, (metrics.breakEvenUnits ?? 0) * 1.5, 100);
+    return Array.from({ length: 11 }, (_, i) => {
+      const u = Math.round((maxUnits / 10) * i);
+      const rev = u * revenuePerUnit;
+      const totalCost = metrics.totalFixed + u * metrics.variableCostPerUnit;
+      return { units: u, revenue: rev, totalCost };
+    });
+  }, [metrics, revenuePerUnit, unitsPerMonth]);
+
+  const trendData = useMemo(() => {
+    return ['M1', 'M2', 'M3', 'M4', 'M5', 'M6'].map((m, i) => {
+      const gf = Math.pow(1 + growthRate / 100, i);
+      const u = Math.round(unitsPerMonth * gf);
+      const rev = u * revenuePerUnit;
+      const varCost = u * metrics.variableCostPerUnit;
+      const cogs = metrics.totalFixed + varCost;
+      const gp = rev - cogs;
+      const ebitda = gp - metrics.totalOpEx;
+      return { month: m, revenue: rev, cogs, grossProfit: gp, ebitda };
+    });
+  }, [metrics, revenuePerUnit, unitsPerMonth, growthRate]);
+
+  const costByCategory = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const c of directCosts) {
+      const label = DIRECT_CATEGORIES.find(x => x.value === c.category)?.label ?? c.category;
+      const amt = c.type === 'variable' ? (c.perUnit ? c.amount * unitsPerMonth : c.amount)
+        : c.type === 'semi-variable' ? ((c.fixedPortion ?? c.amount * 0.4) + (c.variablePortion ?? (c.amount * 0.6) / Math.max(1, unitsPerMonth)) * unitsPerMonth)
+        : c.amount;
+      map[label] = (map[label] ?? 0) + amt;
+    }
+    for (const c of indirectCosts) {
+      const label = INDIRECT_CATEGORIES.find(x => x.value === c.category)?.label ?? c.category;
+      map[label] = (map[label] ?? 0) + c.amount;
+    }
+    return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [directCosts, indirectCosts, unitsPerMonth]);
+
+  // ── Handlers ───────────────────────────────────────────────────────────
+  const addDirectCost = () => setDirectCosts(prev => [...prev, {
+    id: nanoid(), name: '', amount: 0, type: 'variable', perUnit: true, category: 'other',
+  }]);
+
+  const updateDirectCost = (id: string, field: keyof DirectCost, value: unknown) =>
+    setDirectCosts(prev => prev.map(c => c.id === id ? { ...c, [field]: value } : c));
+
+  const removeDirectCost = (id: string) =>
+    setDirectCosts(prev => prev.filter(c => c.id !== id));
+
+  const addIndirectCost = () => setIndirectCosts(prev => [...prev, {
+    id: nanoid(), name: '', amount: 0, category: 'admin',
+  }]);
+
+  const updateIndirectCost = (id: string, field: keyof IndirectCost, value: unknown) =>
+    setIndirectCosts(prev => prev.map(c => c.id === id ? { ...c, [field]: value } : c));
+
+  const removeIndirectCost = (id: string) =>
+    setIndirectCosts(prev => prev.filter(c => c.id !== id));
+
+  const handleSave = useCallback(async () => {
+    if (!calcName.trim()) { toast.error('Please enter a name for this calculation'); return; }
+    const payload = {
+      name: calcName, businessModel, currency, revenuePerUnit, unitsPerMonth,
+      directCostsJson: directCosts as any,
+      indirectCostsJson: indirectCosts as any,
       totalCOGS: metrics.totalCOGS,
       grossProfit: metrics.grossProfit,
       grossMarginPct: metrics.grossMarginPct,
       totalOpEx: metrics.totalOpEx,
       ebitda: metrics.ebitda,
-      breakEvenUnits: metrics.breakEvenUnits,
-    });
+      breakEvenUnits: metrics.breakEvenUnits ?? undefined,
+      notes,
+    };
+    try {
+      if (loadedId) {
+        await updateMutation.mutateAsync({ ...payload, id: loadedId });
+        toast.success('Calculation updated');
+      } else {
+        await saveMutation.mutateAsync(payload);
+        toast.success('Calculation saved');
+      }
+      refreshContext();
+      refetchHistory();
+    } catch { toast.error('Failed to save'); }
+  }, [calcName, businessModel, currency, revenuePerUnit, unitsPerMonth, directCosts, indirectCosts, metrics, notes, loadedId]);
+
+  const handleLoad = (item: any) => {
+    setCalcName(item.name); setBusinessModel(item.businessModel); setCurrency(item.currency);
+    setRevenuePerUnit(item.revenuePerUnit); setUnitsPerMonth(item.unitsPerMonth);
+    setDirectCosts(Array.isArray(item.directCostsJson) ? item.directCostsJson : []);
+    setIndirectCosts(Array.isArray(item.indirectCostsJson) ? item.indirectCostsJson : []);
+    setNotes(item.notes ?? ''); setLoadedId(item.id); setShowHistory(false);
+    toast.success(`Loaded: ${item.name}`);
   };
 
-  const handleAnalyze = () => {
-    analyzeAI.mutate({
-      businessModel,
-      revenuePerUnit,
-      unitsPerMonth,
-      totalRevenue: metrics.totalRevenue,
+  const handleAIAnalysis = () => {
+    analyzeMutation.mutate({
+      businessModel, currency,
+      monthlyRevenue: metrics.monthlyRevenue,
       totalCOGS: metrics.totalCOGS,
       grossMarginPct: metrics.grossMarginPct,
       totalOpEx: metrics.totalOpEx,
@@ -202,467 +301,550 @@ export default function COGSCalculator() {
       breakEvenUnits: metrics.breakEvenUnits,
       directCosts: directCosts.map(c => ({ name: c.name, amount: c.amount, type: c.type })),
       indirectCosts: indirectCosts.map(c => ({ name: c.name, amount: c.amount, category: c.category })),
-      currency,
       language: lang === 'ar' ? 'arabic' : 'english',
     });
+    setActiveTab('analysis');
   };
 
-  const loadFromHistory = (item: any) => {
-    setCalcName(item.name + ' (copy)');
-    setBusinessModel(item.businessModel);
-    setCurrency(item.currency);
-    setRevenuePerUnit(item.revenuePerUnit);
-    setUnitsPerMonth(item.unitsPerMonth);
-    setDirectCosts((item.directCostsJson as DirectCost[]) ?? []);
-    setIndirectCosts((item.indirectCostsJson as IndirectCost[]) ?? []);
-    setShowHistory(false);
-    toast.success('Loaded from history');
-  };
-
-  // ── Margin color ──
-  const marginColor = metrics.grossMarginPct >= 60
-    ? '#059669'
-    : metrics.grossMarginPct >= 30
-    ? '#F59E0B'
-    : '#EF4444';
+  // ── Sub-components ─────────────────────────────────────────────────────
+  const BenchmarkPill = ({ delta, label }: { delta: number; label: string }) => (
+    <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${delta >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+      {delta >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+      {delta >= 0 ? '+' : ''}{delta.toFixed(1)}pp vs {label}
+    </span>
+  );
 
   return (
-    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* ── Header ── */}
-      <div className="flex items-start justify-between gap-4">
+    <div className={`space-y-6 ${isRTL ? 'rtl' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
-            {t('cogsTitle')}
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <Calculator className="w-5 h-5 text-primary" />
+            Cost Management Suite
           </h2>
-          <p className="text-sm text-muted-foreground mt-0.5">{t('cogsSubtitle')}</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Full cost structure · Margin waterfall · Break-even · AI analysis</p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowHistory(v => !v)}
-          className="shrink-0"
-        >
-          <History className="w-3.5 h-3.5 mr-1.5" />
-          {t('cogsHistory')}
-        </Button>
-      </div>
-
-      {/* ── History Panel ── */}
-      <AnimatePresence>
-        {showHistory && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-          >
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm">{t('cogsHistory')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {historyLoading ? (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Loading…
-                  </div>
-                ) : !history || history.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">{t('cogsNoHistory')}</p>
-                ) : (
-                  <div className="space-y-2">
-                    {history.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border">
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold truncate">{item.name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {item.businessModel} · {item.currency} · GM: {item.grossMarginPct?.toFixed(1) ?? '—'}%
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <Button size="sm" variant="outline" onClick={() => loadFromHistory(item)}>
-                            Load
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => deleteMutation.mutate({ id: item.id })}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ── Left: Inputs ── */}
-        <div className="lg:col-span-2 space-y-5">
-
-          {/* Basic Settings */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Calculator className="w-4 h-4" />
-                Setup
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <div className="flex items-center gap-1.5 mb-1.5"><Label className="text-xs font-semibold">{t('cogsBusinessModel')}</Label><FieldInfo text="Your primary revenue model. Pre-fills typical cost categories for your industry (e.g. SaaS: hosting, support; E-commerce: product cost, shipping)." /></div>
-                  <Select value={businessModel} onValueChange={(v) => setBusinessModel(v as BusinessModel)}>
-                    <SelectTrigger className="h-9 text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(['saas', 'ecommerce', 'marketplace', 'hardware', 'services', 'manufacturing', 'other'] as BusinessModel[]).map(m => (
-                        <SelectItem key={m} value={m}>{m.charAt(0).toUpperCase() + m.slice(1)}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5 mb-1.5"><Label className="text-xs font-semibold">{t('cogsCurrency')}</Label><FieldInfo text="The currency used for all cost and revenue figures in this calculation." /></div>
-                  <Select value={currency} onValueChange={setCurrency}>
-                    <SelectTrigger className="h-9 text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {['USD', 'SAR', 'AED', 'EGP', 'EUR', 'GBP'].map(c => (
-                        <SelectItem key={c} value={c}>{c}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <div className="flex items-center gap-1.5 mb-1.5"><Label className="text-xs font-semibold">{t('cogsRevenuePerUnit')}</Label><FieldInfo text="Average revenue per unit sold or per customer (MRR for SaaS, average order value for e-commerce). Used to calculate gross margin and break-even point." /></div>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={revenuePerUnit || ''}
-                    onChange={e => setRevenuePerUnit(parseFloat(e.target.value) || 0)}
-                    className="h-9 text-sm"
-                    placeholder="0"
-                  />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5 mb-1.5"><Label className="text-xs font-semibold">{t('cogsUnitsPerMonth')}</Label><FieldInfo text="Number of units sold or customers served per month. Combined with revenue per unit to calculate total monthly revenue." /></div>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={unitsPerMonth || ''}
-                    onChange={e => setUnitsPerMonth(parseFloat(e.target.value) || 0)}
-                    className="h-9 text-sm"
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Direct Costs */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm">{t('cogsDirectCosts')}</CardTitle>
-                <Button size="sm" variant="outline" onClick={addDirectCost}>
-                  <Plus className="w-3.5 h-3.5 mr-1" />
-                  {t('cogsAddCost')}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {directCosts.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No direct costs yet. Click "Add Cost Item" to start.
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {directCosts.map((cost) => (
-                    <div key={cost.id} className="grid grid-cols-12 gap-2 items-center">
-                      <div className="col-span-4">
-                        <Input
-                          value={cost.name}
-                          onChange={e => updateDirectCost(cost.id, 'name', e.target.value)}
-                          placeholder={t('cogsCostName')}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <Input
-                          type="number"
-                          min={0}
-                          value={cost.amount || ''}
-                          onChange={e => updateDirectCost(cost.id, 'amount', parseFloat(e.target.value) || 0)}
-                          placeholder={t('cogsCostAmount')}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <Select
-                          value={cost.type}
-                          onValueChange={v => {
-                            updateDirectCost(cost.id, 'type', v);
-                            updateDirectCost(cost.id, 'perUnit', v === 'variable');
-                          }}
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="fixed">{t('cogsFixed')}</SelectItem>
-                            <SelectItem value="variable">{t('cogsVariable')} ({t('cogsPerUnit')})</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="col-span-2 flex justify-end">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                          onClick={() => removeDirectCost(cost.id)}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Indirect / OpEx Costs */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm">{t('cogsIndirectCosts')}</CardTitle>
-                <Button size="sm" variant="outline" onClick={addIndirectCost}>
-                  <Plus className="w-3.5 h-3.5 mr-1" />
-                  {t('cogsAddCost')}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {indirectCosts.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No operating expenses yet. Click "Add Cost Item" to start.
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {indirectCosts.map((cost) => (
-                    <div key={cost.id} className="grid grid-cols-12 gap-2 items-center">
-                      <div className="col-span-4">
-                        <Input
-                          value={cost.name}
-                          onChange={e => updateIndirectCost(cost.id, 'name', e.target.value)}
-                          placeholder={t('cogsCostName')}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <Input
-                          type="number"
-                          min={0}
-                          value={cost.amount || ''}
-                          onChange={e => updateIndirectCost(cost.id, 'amount', parseFloat(e.target.value) || 0)}
-                          placeholder={t('cogsCostAmount')}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <Select
-                          value={cost.category}
-                          onValueChange={v => updateIndirectCost(cost.id, 'category', v as IndirectCost['category'])}
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {['sales', 'marketing', 'admin', 'rd', 'hr', 'facilities', 'other'].map(c => (
-                              <SelectItem key={c} value={c}>{c.toUpperCase()}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="col-span-2 flex justify-end">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                          onClick={() => removeIndirectCost(cost.id)}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Save */}
-          <div className="flex items-center gap-3">
-            <Input
-              value={calcName}
-              onChange={e => setCalcName(e.target.value)}
-              placeholder={t('cogsNamePlaceholder')}
-              className="h-9 text-sm"
-            />
-            <Button
-              onClick={handleSave}
-              disabled={saveMutation.isPending}
-              className="shrink-0"
-            >
-              {saveMutation.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
-              ) : (
-                <Save className="w-4 h-4 mr-1.5" />
-              )}
-              {saveMutation.isPending ? t('cogsSaving') : t('cogsSave')}
-            </Button>
-          </div>
-        </div>
-
-        {/* ── Right: Results ── */}
-        <div className="space-y-4">
-          {/* Summary Card */}
-          <Card className="sticky top-4">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Results</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <ResultRow label={t('cogsMonthlyRevenue')} value={fmt(metrics.totalRevenue, currency)} />
-              <ResultRow label={t('cogsTotal')} value={fmt(metrics.totalCOGS, currency)} negative />
-              <Separator />
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold">{t('cogsGrossProfit')}</span>
-                <span
-                  className="text-sm font-bold"
-                  style={{ color: metrics.grossProfit >= 0 ? '#059669' : '#EF4444' }}
-                >
-                  {fmt(metrics.grossProfit, currency)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold">{t('cogsGrossMargin')}</span>
-                <Badge
-                  className="text-xs font-bold"
-                  style={{ background: `${marginColor}18`, color: marginColor, border: `1px solid ${marginColor}40` }}
-                >
-                  {metrics.grossMarginPct.toFixed(1)}%
-                </Badge>
-              </div>
-              <Separator />
-              <ResultRow label="OpEx" value={fmt(metrics.totalOpEx, currency)} negative />
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold">EBITDA</span>
-                <span
-                  className="text-sm font-bold"
-                  style={{ color: metrics.ebitda >= 0 ? '#059669' : '#EF4444' }}
-                >
-                  {fmt(metrics.ebitda, currency)}
-                </span>
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Break-even Units</span>
-                <span className="text-xs font-semibold">
-                  {metrics.breakEvenUnits > 0 ? Math.ceil(metrics.breakEvenUnits).toLocaleString() : '—'}
-                </span>
-              </div>
-              {unitsPerMonth > 0 && metrics.breakEvenUnits > 0 && (
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">vs. Current Units</span>
-                  <Badge
-                    variant="outline"
-                    className="text-xs"
-                    style={{
-                      color: unitsPerMonth >= metrics.breakEvenUnits ? '#059669' : '#F59E0B',
-                      borderColor: unitsPerMonth >= metrics.breakEvenUnits ? '#059669' : '#F59E0B',
-                    }}
-                  >
-                    {unitsPerMonth >= metrics.breakEvenUnits ? '✓ Above break-even' : `${Math.ceil(metrics.breakEvenUnits - unitsPerMonth)} more needed`}
-                  </Badge>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* AI Analysis */}
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleAnalyze}
-            disabled={analyzeAI.isPending || metrics.totalRevenue === 0}
-          >
-            {analyzeAI.isPending ? (
-              <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
-            ) : (
-              <Sparkles className="w-4 h-4 mr-1.5" />
-            )}
-            {analyzeAI.isPending ? t('cogsAnalyzing') : t('cogsAnalyze')}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" size="sm" onClick={() => { setShowHistory(v => !v); if (!showHistory) refetchHistory(); }}>
+            <History className="w-4 h-4 mr-1.5" /> History
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleAIAnalysis} disabled={analyzeMutation.isPending}>
+            {analyzeMutation.isPending ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1.5" />}
+            AI Analysis
+          </Button>
+          <Button size="sm" onClick={handleSave} disabled={saveMutation.isPending || updateMutation.isPending}>
+            {(saveMutation.isPending || updateMutation.isPending) ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Save className="w-4 h-4 mr-1.5" />}
+            {loadedId ? 'Update' : 'Save'}
           </Button>
         </div>
       </div>
 
-      {/* ── AI Analysis Panel ── */}
-      <AnimatePresence>
-        {showAI && aiAnalysis && (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 12 }}
-          >
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-violet-500" />
-                    AI Cost Analysis
-                  </CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Button size="sm" variant="ghost" onClick={handleAnalyze} disabled={analyzeAI.isPending}>
-                      <RefreshCw className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setShowAI(false)}>
-                      ✕
+      {/* History Panel */}
+      {showHistory && (
+        <Card>
+          <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">Saved Calculations</CardTitle></CardHeader>
+          <CardContent className="pb-4">
+            {!history?.length ? (
+              <p className="text-sm text-muted-foreground">No saved calculations yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {history.map((item: any) => (
+                  <div key={item.id} className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/40">
+                    <div>
+                      <p className="text-sm font-medium">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">{item.businessModel} · GM {item.grossMarginPct?.toFixed(1)}% · {new Date(item.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => handleLoad(item)}>Load</Button>
+                      <Button variant="ghost" size="sm" className="text-destructive" onClick={async () => { await deleteMutation.mutateAsync({ id: item.id }); refetchHistory(); toast.success('Deleted'); }}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Setup Row */}
+      <Card>
+        <CardContent className="pt-4 pb-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="col-span-2">
+              <Label className="text-xs">Calculation Name</Label>
+              <Input value={calcName} onChange={e => setCalcName(e.target.value)} placeholder="e.g. Q2 2025 Cost Model" className="mt-1" />
+            </div>
+            <div>
+              <Label className="text-xs">Business Model</Label>
+              <Select value={businessModel} onValueChange={v => setBusinessModel(v as BusinessModel)}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(MARGIN_BENCHMARKS).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Currency</Label>
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {['USD', 'SAR', 'AED', 'EUR', 'GBP', 'EGP', 'JOD'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Revenue / Unit ({currency})</Label>
+              <Input type="number" min={0} value={revenuePerUnit || ''} onChange={e => setRevenuePerUnit(parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
+            </div>
+            <div>
+              <Label className="text-xs">Units / Month</Label>
+              <Input type="number" min={0} value={unitsPerMonth || ''} onChange={e => setUnitsPerMonth(parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label: 'Monthly Revenue', value: fmt(metrics.monthlyRevenue, currency), icon: DollarSign, color: 'text-green-600' },
+          { label: 'Gross Margin', value: pct(metrics.grossMarginPct), icon: Percent, color: metrics.grossMarginPct >= metrics.benchmark.gross ? 'text-green-600' : 'text-red-500', sub: <BenchmarkPill delta={metrics.grossVsBenchmark} label={metrics.benchmark.label} /> },
+          { label: 'EBITDA', value: fmt(metrics.ebitda, currency), icon: TrendingUp, color: metrics.ebitda >= 0 ? 'text-blue-600' : 'text-red-500', sub: `${pct(metrics.ebitdaMarginPct)} margin` },
+          { label: 'Break-even', value: metrics.breakEvenUnits !== null ? `${metrics.breakEvenUnits.toLocaleString()} units` : 'N/A', icon: Target, color: 'text-foreground', sub: metrics.breakEvenRevenue !== null ? `${fmt(metrics.breakEvenRevenue, currency)}/mo` : undefined },
+        ].map(card => (
+          <Card key={card.label}>
+            <CardContent className="pt-4 pb-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">{card.label}</p>
+                  <p className={`text-xl font-bold ${card.color}`}>{card.value}</p>
+                  {card.sub && <div className="mt-1">{typeof card.sub === 'string' ? <p className="text-xs text-muted-foreground">{card.sub}</p> : card.sub}</div>}
+                </div>
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                  <card.icon className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="w-full justify-start overflow-x-auto">
+          <TabsTrigger value="costs">Cost Inputs</TabsTrigger>
+          <TabsTrigger value="waterfall">Margin Waterfall</TabsTrigger>
+          <TabsTrigger value="breakeven">Break-even</TabsTrigger>
+          <TabsTrigger value="trend">6-Month Trend</TabsTrigger>
+          <TabsTrigger value="breakdown">Cost Breakdown</TabsTrigger>
+          <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
+        </TabsList>
+
+        {/* ── COST INPUTS ── */}
+        <TabsContent value="costs" className="space-y-4 mt-4">
+          {/* Direct Costs */}
+          <Card>
+            <CardHeader className="pb-2 pt-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Package className="w-4 h-4 text-primary" />
+                  Direct Costs (COGS)
+                  <Badge variant="secondary">{fmt(metrics.totalCOGS, currency)}</Badge>
+                </CardTitle>
+                <Button variant="outline" size="sm" onClick={addDirectCost}><Plus className="w-4 h-4 mr-1" /> Add Cost</Button>
+              </div>
+            </CardHeader>
+            <CardContent className="pb-4 space-y-3">
+              {directCosts.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">No direct costs yet. Click "Add Cost" to begin.</p>
+              )}
+              {directCosts.map(cost => (
+                <div key={cost.id} className="grid grid-cols-12 gap-2 items-end p-3 rounded-lg border border-border bg-muted/20">
+                  <div className="col-span-12 sm:col-span-3">
+                    <Label className="text-xs">Cost Name</Label>
+                    <Input value={cost.name} onChange={e => updateDirectCost(cost.id, 'name', e.target.value)} placeholder="e.g. AWS Hosting" className="mt-1 h-8 text-sm" />
+                  </div>
+                  <div className="col-span-6 sm:col-span-2">
+                    <Label className="text-xs">Type</Label>
+                    <Select value={cost.type} onValueChange={v => updateDirectCost(cost.id, 'type', v)}>
+                      <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fixed">Fixed</SelectItem>
+                        <SelectItem value="variable">Variable</SelectItem>
+                        <SelectItem value="semi-variable">Semi-Variable</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="col-span-6 sm:col-span-2">
+                    <Label className="text-xs">Category</Label>
+                    <Select value={cost.category} onValueChange={v => updateDirectCost(cost.id, 'category', v as DirectCategory)}>
+                      <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {DIRECT_CATEGORIES.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {cost.type === 'semi-variable' ? (
+                    <>
+                      <div className="col-span-5 sm:col-span-2">
+                        <Label className="text-xs">Fixed Base ({currency})</Label>
+                        <Input type="number" min={0} value={cost.fixedPortion ?? ''} onChange={e => updateDirectCost(cost.id, 'fixedPortion', parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1 h-8 text-sm" />
+                      </div>
+                      <div className="col-span-5 sm:col-span-2">
+                        <Label className="text-xs">Var / Unit ({currency})</Label>
+                        <Input type="number" min={0} value={cost.variablePortion ?? ''} onChange={e => updateDirectCost(cost.id, 'variablePortion', parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1 h-8 text-sm" />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="col-span-5 sm:col-span-2">
+                        <Label className="text-xs">{cost.type === 'variable' && cost.perUnit ? `Per Unit (${currency})` : `Monthly (${currency})`}</Label>
+                        <Input type="number" min={0} value={cost.amount || ''} onChange={e => updateDirectCost(cost.id, 'amount', parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1 h-8 text-sm" />
+                      </div>
+                      {cost.type === 'variable' && (
+                        <div className="col-span-5 sm:col-span-1 flex items-center pb-1">
+                          <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                            <input type="checkbox" checked={cost.perUnit} onChange={e => updateDirectCost(cost.id, 'perUnit', e.target.checked)} className="rounded" />
+                            Per unit
+                          </label>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  <div className="col-span-2 sm:col-span-1 flex items-center pb-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => removeDirectCost(cost.id)}>
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="prose prose-sm max-w-none text-foreground">
-                  <Streamdown>{aiAnalysis}</Streamdown>
+              ))}
+              {directCosts.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pt-2">
+                  <div className="text-xs text-muted-foreground bg-muted/30 rounded p-2"><span className="font-medium">Fixed:</span> {fmt(metrics.totalDirectFixed, currency)}</div>
+                  <div className="text-xs text-muted-foreground bg-muted/30 rounded p-2"><span className="font-medium">Variable:</span> {fmt(metrics.totalDirectVariable, currency)}</div>
+                  <div className="text-xs text-muted-foreground bg-muted/30 rounded p-2"><span className="font-medium">Semi-Var:</span> {fmt(metrics.totalDirectSemiFixed + metrics.totalDirectSemiVariable, currency)}</div>
+                  <div className="text-xs bg-primary/10 text-primary rounded p-2 font-semibold">Total COGS: {fmt(metrics.totalCOGS, currency)}</div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Indirect / OpEx */}
+          <Card>
+            <CardHeader className="pb-2 pt-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-orange-500" />
+                  Operating Expenses (OpEx)
+                  <Badge variant="secondary">{fmt(metrics.totalOpEx, currency)}</Badge>
+                </CardTitle>
+                <Button variant="outline" size="sm" onClick={addIndirectCost}><Plus className="w-4 h-4 mr-1" /> Add Expense</Button>
+              </div>
+            </CardHeader>
+            <CardContent className="pb-4 space-y-3">
+              {indirectCosts.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">No operating expenses yet.</p>
+              )}
+              {indirectCosts.map(cost => (
+                <div key={cost.id} className="grid grid-cols-12 gap-2 items-end p-3 rounded-lg border border-border bg-muted/20">
+                  <div className="col-span-12 sm:col-span-5">
+                    <Label className="text-xs">Expense Name</Label>
+                    <Input value={cost.name} onChange={e => updateIndirectCost(cost.id, 'name', e.target.value)} placeholder="e.g. Google Ads" className="mt-1 h-8 text-sm" />
+                  </div>
+                  <div className="col-span-6 sm:col-span-3">
+                    <Label className="text-xs">Category</Label>
+                    <Select value={cost.category} onValueChange={v => updateIndirectCost(cost.id, 'category', v as IndirectCategory)}>
+                      <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {INDIRECT_CATEGORIES.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="col-span-5 sm:col-span-3">
+                    <Label className="text-xs">Monthly ({currency})</Label>
+                    <Input type="number" min={0} value={cost.amount || ''} onChange={e => updateIndirectCost(cost.id, 'amount', parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1 h-8 text-sm" />
+                  </div>
+                  <div className="col-span-1 flex items-center pb-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => removeIndirectCost(cost.id)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Unit Economics */}
+          {revenuePerUnit > 0 && unitsPerMonth > 0 && (
+            <Card className="border-primary/20 bg-primary/5">
+              <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">Unit Economics</CardTitle></CardHeader>
+              <CardContent className="pb-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  {[
+                    { label: 'Revenue / Unit', value: fmt(revenuePerUnit, currency), color: 'text-green-600' },
+                    { label: 'COGS / Unit', value: fmt(metrics.cogPerUnit, currency), color: 'text-red-500' },
+                    { label: 'Gross Profit / Unit', value: fmt(metrics.grossProfitPerUnit, currency), color: metrics.grossProfitPerUnit >= 0 ? 'text-blue-600' : 'text-red-500' },
+                    { label: 'Contribution Margin / Unit', value: fmt(metrics.contributionMarginPerUnit, currency), color: metrics.contributionMarginPerUnit >= 0 ? 'text-purple-600' : 'text-red-500' },
+                  ].map(item => (
+                    <div key={item.label}>
+                      <p className="text-xs text-muted-foreground">{item.label}</p>
+                      <p className={`font-bold ${item.color}`}>{item.value}</p>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+          )}
 
-// ── Sub-component ──────────────────────────────────────────────────────────
+          {/* Notes */}
+          <div>
+            <Label className="text-xs">Notes / Assumptions</Label>
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add assumptions, pricing notes, or context..." className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px] resize-y focus:outline-none focus:ring-2 focus:ring-ring" />
+          </div>
+        </TabsContent>
 
-function ResultRow({ label, value, negative }: { label: string; value: string; negative?: boolean }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className={`text-xs font-semibold ${negative ? 'text-destructive' : 'text-foreground'}`}>
-        {negative ? `(${value})` : value}
-      </span>
+        {/* ── WATERFALL ── */}
+        <TabsContent value="waterfall" className="mt-4">
+          <Card>
+            <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">Margin Waterfall</CardTitle></CardHeader>
+            <CardContent className="pb-4">
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={waterfallData} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis tickFormatter={v => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
+                  <Tooltip formatter={(v: any) => fmt(Math.abs(v), currency)} />
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                    {waterfallData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+              <div className="mt-4 space-y-1.5">
+                {[
+                  { label: 'Revenue', value: metrics.monthlyRevenue, pctVal: 100, color: 'text-green-600' },
+                  { label: '− Direct Costs (COGS)', value: -metrics.totalCOGS, pctVal: metrics.monthlyRevenue > 0 ? -(metrics.totalCOGS / metrics.monthlyRevenue) * 100 : 0, color: 'text-red-500' },
+                  { label: '= Gross Profit', value: metrics.grossProfit, pctVal: metrics.grossMarginPct, color: metrics.grossProfit >= 0 ? 'text-blue-600' : 'text-red-500', bold: true },
+                  { label: '− Operating Expenses', value: -metrics.totalOpEx, pctVal: metrics.monthlyRevenue > 0 ? -(metrics.totalOpEx / metrics.monthlyRevenue) * 100 : 0, color: 'text-orange-500' },
+                  { label: '= EBITDA', value: metrics.ebitda, pctVal: metrics.ebitdaMarginPct, color: metrics.ebitda >= 0 ? 'text-purple-600' : 'text-red-500', bold: true },
+                ].map(row => (
+                  <div key={row.label} className={`flex items-center justify-between text-sm px-3 py-2 rounded ${row.bold ? 'bg-muted/50 font-semibold' : ''}`}>
+                    <span className="text-muted-foreground">{row.label}</span>
+                    <div className="flex items-center gap-4">
+                      <span className={row.color}>{fmt(row.value, currency)}</span>
+                      <span className="text-xs text-muted-foreground w-14 text-right">{row.pctVal.toFixed(1)}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 p-3 rounded-lg bg-muted/30 text-sm">
+                <p className="font-medium mb-2 text-xs text-muted-foreground uppercase tracking-wide">Industry Benchmarks — {metrics.benchmark.label}</p>
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">Gross Margin:</span>
+                    <span className="font-medium">{metrics.benchmark.gross}%</span>
+                    <BenchmarkPill delta={metrics.grossVsBenchmark} label={metrics.benchmark.label} />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">EBITDA:</span>
+                    <span className="font-medium">{metrics.benchmark.ebitda}%</span>
+                    <BenchmarkPill delta={metrics.ebitdaVsBenchmark} label={metrics.benchmark.label} />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ── BREAK-EVEN ── */}
+        <TabsContent value="breakeven" className="mt-4">
+          <Card>
+            <CardHeader className="pb-2 pt-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm">Break-even Analysis</CardTitle>
+                {metrics.breakEvenUnits !== null && (
+                  <Badge className="bg-primary/10 text-primary border-0">BEP: {metrics.breakEvenUnits.toLocaleString()} units</Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="pb-4">
+              {metrics.contributionMarginPerUnit <= 0 ? (
+                <div className="flex items-center gap-2 p-4 rounded-lg bg-red-50 text-red-700 text-sm">
+                  <AlertCircle className="w-5 h-5 shrink-0" />
+                  Variable cost per unit exceeds revenue per unit — break-even is not achievable at current pricing.
+                </div>
+              ) : (
+                <>
+                  <ResponsiveContainer width="100%" height={260}>
+                    <LineChart data={breakEvenData} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="units" tickFormatter={v => v.toLocaleString()} tick={{ fontSize: 11 }} />
+                      <YAxis tickFormatter={v => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
+                      <Tooltip formatter={(v: any) => fmt(v, currency)} labelFormatter={v => `${v.toLocaleString()} units`} />
+                      <Legend />
+                      <Line type="monotone" dataKey="revenue" stroke="#10B981" strokeWidth={2} dot={false} name="Revenue" />
+                      <Line type="monotone" dataKey="totalCost" stroke="#EF4444" strokeWidth={2} dot={false} name="Total Cost" />
+                      {metrics.breakEvenUnits !== null && (
+                        <ReferenceLine x={metrics.breakEvenUnits} stroke="#6366F1" strokeDasharray="4 4" label={{ value: 'BEP', fill: '#6366F1', fontSize: 11 }} />
+                      )}
+                    </LineChart>
+                  </ResponsiveContainer>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4 text-sm">
+                    {[
+                      { label: 'Fixed Costs / Month', value: fmt(metrics.totalFixed, currency), color: '' },
+                      { label: 'Variable Cost / Unit', value: fmt(metrics.variableCostPerUnit, currency), color: '' },
+                      { label: 'Contribution Margin / Unit', value: fmt(metrics.contributionMarginPerUnit, currency), color: 'text-purple-600' },
+                      metrics.breakEvenUnits !== null ? { label: 'Break-even Units', value: metrics.breakEvenUnits.toLocaleString(), color: 'text-primary' } : null,
+                      metrics.breakEvenRevenue !== null ? { label: 'Break-even Revenue', value: `${fmt(metrics.breakEvenRevenue, currency)}/mo`, color: 'text-primary' } : null,
+                      metrics.breakEvenUnits !== null && unitsPerMonth > 0 ? {
+                        label: 'Current vs BEP',
+                        value: unitsPerMonth >= metrics.breakEvenUnits ? `+${(unitsPerMonth - metrics.breakEvenUnits).toLocaleString()} above` : `${(metrics.breakEvenUnits - unitsPerMonth).toLocaleString()} to go`,
+                        color: unitsPerMonth >= metrics.breakEvenUnits ? 'text-green-600' : 'text-red-500',
+                      } : null,
+                    ].filter(Boolean).map((item: any) => (
+                      <div key={item.label} className="p-3 rounded-lg bg-muted/30">
+                        <p className="text-xs text-muted-foreground">{item.label}</p>
+                        <p className={`font-bold ${item.color}`}>{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ── TREND ── */}
+        <TabsContent value="trend" className="mt-4">
+          <Card>
+            <CardHeader className="pb-2 pt-4">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <CardTitle className="text-sm">6-Month Projection</CardTitle>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground">Monthly Growth:</span>
+                  <div className="flex items-center gap-2 w-36">
+                    <Slider value={[growthRate]} onValueChange={([v]) => setGrowthRate(v)} min={-20} max={50} step={1} className="flex-1" />
+                    <span className="text-sm font-medium w-10 text-right">{growthRate}%</span>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pb-4">
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={trendData} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                  <YAxis tickFormatter={v => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
+                  <Tooltip formatter={(v: any) => fmt(v, currency)} />
+                  <Legend />
+                  <Bar dataKey="revenue" fill="#10B981" name="Revenue" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="cogs" fill="#EF4444" name="COGS" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="grossProfit" fill="#3B82F6" name="Gross Profit" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="ebitda" fill="#8B5CF6" name="EBITDA" radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-border">
+                      {['Month', 'Revenue', 'COGS', 'Gross Profit', 'EBITDA'].map(h => (
+                        <th key={h} className={`py-2 text-muted-foreground font-medium ${h === 'Month' ? 'text-left' : 'text-right'}`}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trendData.map(row => (
+                      <tr key={row.month} className="border-b border-border/50">
+                        <td className="py-2 font-medium">{row.month}</td>
+                        <td className="text-right text-green-600">{fmt(row.revenue, currency)}</td>
+                        <td className="text-right text-red-500">{fmt(row.cogs, currency)}</td>
+                        <td className={`text-right ${row.grossProfit >= 0 ? 'text-blue-600' : 'text-red-500'}`}>{fmt(row.grossProfit, currency)}</td>
+                        <td className={`text-right ${row.ebitda >= 0 ? 'text-purple-600' : 'text-red-500'}`}>{fmt(row.ebitda, currency)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ── BREAKDOWN ── */}
+        <TabsContent value="breakdown" className="mt-4">
+          <Card>
+            <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">Cost Breakdown by Category</CardTitle></CardHeader>
+            <CardContent className="pb-4">
+              {costByCategory.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">Add costs to see the breakdown.</p>
+              ) : (
+                <div className="space-y-3">
+                  {costByCategory.map((item, i) => {
+                    const total = metrics.totalCOGS + metrics.totalOpEx;
+                    const share = total > 0 ? (item.value / total) * 100 : 0;
+                    const colors = ['#EF4444', '#F59E0B', '#3B82F6', '#10B981', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'];
+                    return (
+                      <div key={item.name}>
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span>{item.name}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-muted-foreground">{fmt(item.value, currency)}</span>
+                            <span className="text-xs font-medium w-12 text-right">{share.toFixed(1)}%</span>
+                          </div>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div className="h-2 rounded-full transition-all" style={{ width: `${clamp(share, 0, 100)}%`, background: colors[i % colors.length] }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <Separator className="my-3" />
+                  <div className="flex items-center justify-between text-sm font-semibold">
+                    <span>Total Costs</span>
+                    <span>{fmt(metrics.totalCOGS + metrics.totalOpEx, currency)}</span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ── AI ANALYSIS ── */}
+        <TabsContent value="analysis" className="mt-4">
+          <Card>
+            <CardHeader className="pb-2 pt-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" /> AI Cost Analysis
+                </CardTitle>
+                <Button variant="outline" size="sm" onClick={handleAIAnalysis} disabled={analyzeMutation.isPending}>
+                  {analyzeMutation.isPending ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-1.5" />}
+                  {analyzeMutation.isPending ? 'Analyzing…' : 'Refresh'}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="pb-4">
+              {!aiAnalysis && !analyzeMutation.isPending && (
+                <div className="text-center py-10">
+                  <Sparkles className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground mb-4">Get CFO-level analysis of your cost structure, margin optimization, and industry benchmarks.</p>
+                  <Button onClick={handleAIAnalysis}><Sparkles className="w-4 h-4 mr-2" /> Generate Analysis</Button>
+                </div>
+              )}
+              {analyzeMutation.isPending && (
+                <div className="flex items-center gap-3 py-8 justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <span className="text-sm text-muted-foreground">Analyzing your cost structure…</span>
+                </div>
+              )}
+              {aiAnalysis && !analyzeMutation.isPending && (
+                <div className="prose prose-sm max-w-none"><Streamdown>{aiAnalysis}</Streamdown></div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

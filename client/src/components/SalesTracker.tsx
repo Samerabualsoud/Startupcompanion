@@ -1,805 +1,776 @@
 /**
- * SalesTracker — Full sales pipeline and revenue analytics tool.
- *
- * Features:
- * - Add/edit/delete sales entries (deals) with stage, channel, product, amount
- * - Revenue trend chart (monthly, area chart)
- * - MoM growth, win rate, avg deal size KPIs
- * - Deal stage funnel
- * - Channel & product breakdown (bar charts)
- * - Monthly target setting
- * - AI sales analysis
+ * Sales Tracker — Full Pipeline CRM
+ * Kanban pipeline, detailed deal form, analytics: MoM revenue, channel, product,
+ * win rate, weighted pipeline, forecast, AI analysis.
  */
-
-import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useMemo, useCallback } from 'react';
 import {
-  Plus, Trash2, Edit2, TrendingUp, TrendingDown, Target,
-  DollarSign, BarChart3, ShoppingCart, Sparkles, X, Check,
-  ChevronDown, ChevronUp, ArrowUpRight, Loader2, Save
+  Plus, Trash2, Loader2, Edit2, X, Check, ChevronDown, ChevronUp,
+  BarChart3, TrendingUp, DollarSign, Target, Users, Mail, Phone,
+  Calendar, Sparkles, RefreshCw, Filter, Search, ArrowUpDown,
+  AlertCircle, CheckCircle2, Clock, XCircle, GitMerge
 } from 'lucide-react';
-import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Cell, FunnelChart, Funnel, LabelList
-} from 'recharts';
 import { trpc } from '@/lib/trpc';
-import { useStartup } from '@/contexts/StartupContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { FieldInfo } from '@/components/ui/field-info';
 import { Streamdown } from 'streamdown';
+import {
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Cell, Legend, PieChart, Pie
+} from 'recharts';
 
-// ── Constants ────────────────────────────────────────────────────────────
+// ── Types ──────────────────────────────────────────────────────────────────
+type DealStage = 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost';
+type Channel = 'direct' | 'online' | 'referral' | 'partner' | 'inbound' | 'outbound' | 'other';
 
-const DEAL_STAGES = [
-  { value: 'lead',          label: 'Lead',          color: '#94A3B8' },
-  { value: 'qualified',     label: 'Qualified',     color: '#60A5FA' },
-  { value: 'proposal',      label: 'Proposal',      color: '#A78BFA' },
-  { value: 'negotiation',   label: 'Negotiation',   color: '#F59E0B' },
-  { value: 'closed_won',    label: 'Closed Won',    color: '#10B981' },
-  { value: 'closed_lost',   label: 'Closed Lost',   color: '#EF4444' },
-];
-
-const CHANNELS = ['Direct', 'Referral', 'Inbound', 'Outbound', 'Partner', 'Event', 'Social Media', 'Other'];
-const CURRENCIES = ['USD', 'SAR', 'AED', 'EGP', 'EUR', 'GBP'];
-
-const STAGE_COLORS: Record<string, string> = Object.fromEntries(DEAL_STAGES.map(s => [s.value, s.color]));
-
-function fmtCurrency(v: number, currency = 'USD') {
-  if (v >= 1_000_000) return `${currency} ${(v / 1_000_000).toFixed(1)}M`;
-  if (v >= 1_000) return `${currency} ${(v / 1_000).toFixed(0)}K`;
-  return `${currency} ${v.toLocaleString()}`;
-}
-
-// ── Entry Form ────────────────────────────────────────────────────────────
-
-interface EntryFormData {
-  clientName: string;
-  dealStage: string;
-  amount: string;
+interface Deal {
+  id: number;
+  date: string | Date;
+  amount: number;
   currency: string;
-  date: string;
-  channel: string;
+  channel: Channel;
   product: string;
-  notes: string;
+  customer: string;
+  dealStage: DealStage;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  dealValue?: number | null;
+  probability?: number | null;
+  expectedCloseDate?: string | Date | null;
+  lostReason?: string | null;
+  nextAction?: string | null;
+  notes?: string | null;
+  createdAt?: string | Date;
 }
 
-const EMPTY_FORM: EntryFormData = {
-  clientName: '',
-  dealStage: 'lead',
-  amount: '',
-  currency: 'USD',
-  date: new Date().toISOString().slice(0, 10),
-  channel: 'Direct',
-  product: '',
-  notes: '',
+const STAGE_CONFIG: Record<DealStage, { label: string; color: string; bg: string; icon: React.ElementType; defaultProb: number }> = {
+  lead:         { label: 'Lead',        color: 'text-slate-600',  bg: 'bg-slate-100',  icon: Users,        defaultProb: 10 },
+  qualified:    { label: 'Qualified',   color: 'text-blue-600',   bg: 'bg-blue-50',    icon: CheckCircle2, defaultProb: 25 },
+  proposal:     { label: 'Proposal',    color: 'text-yellow-600', bg: 'bg-yellow-50',  icon: Clock,        defaultProb: 50 },
+  negotiation:  { label: 'Negotiation', color: 'text-orange-600', bg: 'bg-orange-50',  icon: ArrowUpDown,  defaultProb: 75 },
+  closed_won:   { label: 'Won',         color: 'text-green-600',  bg: 'bg-green-50',   icon: CheckCircle2, defaultProb: 100 },
+  closed_lost:  { label: 'Lost',        color: 'text-red-600',    bg: 'bg-red-50',     icon: XCircle,      defaultProb: 0 },
 };
 
-// ── Main Component ────────────────────────────────────────────────────────
+const CHANNELS: { value: Channel; label: string }[] = [
+  { value: 'direct', label: 'Direct' },
+  { value: 'inbound', label: 'Inbound' },
+  { value: 'outbound', label: 'Outbound' },
+  { value: 'referral', label: 'Referral' },
+  { value: 'partner', label: 'Partner' },
+  { value: 'online', label: 'Online' },
+  { value: 'other', label: 'Other' },
+];
 
+const CHANNEL_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'];
+
+function fmt(n: number, currency = 'USD'): string {
+  const sym = currency === 'USD' ? '$' : currency === 'SAR' ? 'SAR ' : currency === 'AED' ? 'AED ' : currency + ' ';
+  return `${sym}${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+}
+
+function dateStr(d: string | Date | null | undefined): string {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString();
+}
+
+function isoDate(d: string | Date | null | undefined): string {
+  if (!d) return '';
+  return new Date(d).toISOString().split('T')[0];
+}
+
+// ── Empty form ─────────────────────────────────────────────────────────────
+const emptyForm = (): Omit<Deal, 'id' | 'createdAt'> => ({
+  date: new Date().toISOString().split('T')[0],
+  amount: 0,
+  currency: 'USD',
+  channel: 'direct',
+  product: '',
+  customer: '',
+  dealStage: 'lead',
+  contactName: '',
+  contactEmail: '',
+  contactPhone: '',
+  dealValue: 0,
+  probability: 10,
+  expectedCloseDate: '',
+  lostReason: '',
+  nextAction: '',
+  notes: '',
+});
+
+// ── Main Component ─────────────────────────────────────────────────────────
 export default function SalesTracker() {
-  const { t, lang } = useLanguage();
+  const { lang } = useLanguage();
   const isRTL = lang === 'ar';
-  const { refresh } = useStartup();
 
+  const [activeTab, setActiveTab] = useState('pipeline');
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [form, setForm] = useState<EntryFormData>(EMPTY_FORM);
-  const [activeTab, setActiveTab] = useState<'overview' | 'deals' | 'targets' | 'ai'>('overview');
-  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
+  const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
+  const [form, setForm] = useState<Omit<Deal, 'id' | 'createdAt'>>(emptyForm());
+  const [expandedDeal, setExpandedDeal] = useState<number | null>(null);
+  const [stageFilter, setStageFilter] = useState<DealStage | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [aiAnalysis, setAiAnalysis] = useState('');
   const [targetMonth, setTargetMonth] = useState(new Date().toISOString().slice(0, 7));
-  const [targetAmount, setTargetAmount] = useState('');
-  const [expandedEntry, setExpandedEntry] = useState<number | null>(null);
+  const [targetAmount, setTargetAmount] = useState(0);
+  const [targetCurrency, setTargetCurrency] = useState('USD');
 
-  // Data queries
-  const { data: analytics, refetch: refetchAnalytics } = trpc.sales.getAnalytics.useQuery(undefined, { retry: false });
-
-  // Mutations
-  const addEntry = trpc.sales.addEntry.useMutation({
-    onSuccess: () => {
-      toast.success('Deal added successfully.');
-      setShowForm(false);
-      setForm(EMPTY_FORM);
-      refetchAnalytics();
-      refresh();
-    },
-    onError: (err) => toast.error(err.message),
+  // ── tRPC ───────────────────────────────────────────────────────────────
+  const { data: rawEntries = [], refetch } = trpc.sales.listEntries.useQuery({ limit: 500 });
+  const entries: Deal[] = rawEntries as Deal[];
+  const { data: analytics } = trpc.sales.getAnalytics.useQuery(undefined as any);
+  const addMutation = trpc.sales.addEntry.useMutation({ onSuccess: () => { refetch(); setShowForm(false); setForm(emptyForm()); toast.success('Deal added'); } });
+  const updateMutation = trpc.sales.updateEntry.useMutation({ onSuccess: () => { refetch(); setEditingDeal(null); toast.success('Deal updated'); } });
+  const deleteMutation = trpc.sales.deleteEntry.useMutation({ onSuccess: () => { refetch(); toast.success('Deal deleted'); } });
+  const targetMutation = trpc.sales.setTarget.useMutation({ onSuccess: () => toast.success('Target saved') });
+  const analyzeMutation = trpc.ai.analyzeCOGS.useMutation({
+    onSuccess: (d: any) => setAiAnalysis(d?.analysis ?? ''),
+    onError: () => toast.error('AI analysis failed'),
   });
 
-  const updateEntry = trpc.sales.updateEntry.useMutation({
-    onSuccess: () => {
-      toast.success('Deal updated.');
-      setEditingId(null);
-      setShowForm(false);
-      setForm(EMPTY_FORM);
-      refetchAnalytics();
-      refresh();
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
-  const deleteEntry = trpc.sales.deleteEntry.useMutation({
-    onSuccess: () => {
-      toast.success('Deal deleted.');
-      refetchAnalytics();
-      refresh();
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
-  const setTarget = trpc.sales.setTarget.useMutation({
-    onSuccess: () => {
-      toast.success('Target saved.');
-      setTargetAmount('');
-      refetchAnalytics();
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
-  const analyzeAI = trpc.sales.analyzeAI.useMutation({
-    onSuccess: (data) => setAiAnalysis(typeof data.analysis === 'string' ? data.analysis : String(data.analysis)),
-    onError: (err) => toast.error(err.message),
-  });
-
-  const handleSubmit = () => {
-    const amount = parseFloat(form.amount);
-    if (!form.clientName.trim()) { toast.error('Client name required'); return; }
-    if (isNaN(amount) || amount < 0) { toast.error('Valid amount required'); return; }
-
-    const payload = {
-      customer: form.clientName.trim(),
-      dealStage: form.dealStage as any,
-      amount,
-      currency: form.currency,
-      date: form.date,
-      channel: form.channel.toLowerCase().replace(' ', '_') as any,
-      product: form.product.trim() || '',
-      notes: form.notes.trim() || undefined,
-    };
-
-    if (editingId !== null) {
-      updateEntry.mutate({ id: editingId, ...payload });
-    } else {
-      addEntry.mutate(payload);
+  // ── Computed ───────────────────────────────────────────────────────────
+  const filtered = useMemo(() => {
+    let list = entries;
+    if (stageFilter !== 'all') list = list.filter(d => d.dealStage === stageFilter);
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(d =>
+        d.customer.toLowerCase().includes(q) ||
+        d.product.toLowerCase().includes(q) ||
+        (d.contactName ?? '').toLowerCase().includes(q)
+      );
     }
-  };
+    return list;
+  }, [entries, stageFilter, searchQuery]);
 
-  const handleEdit = (entry: any) => {
+  const kpis = useMemo(() => {
+    const won = entries.filter(d => d.dealStage === 'closed_won');
+    const lost = entries.filter(d => d.dealStage === 'closed_lost');
+    const active = entries.filter(d => !['closed_won', 'closed_lost'].includes(d.dealStage));
+    const totalRevenue = won.reduce((s, d) => s + d.amount, 0);
+    const pipeline = active.reduce((s, d) => s + (d.dealValue ?? d.amount), 0);
+    const weighted = active.reduce((s, d) => s + (d.dealValue ?? d.amount) * ((d.probability ?? 50) / 100), 0);
+    const winRate = (won.length + lost.length) > 0 ? (won.length / (won.length + lost.length)) * 100 : 0;
+    const avgDealSize = won.length > 0 ? totalRevenue / won.length : 0;
+    return { totalRevenue, pipeline, weighted, winRate, avgDealSize, wonCount: won.length, lostCount: lost.length, activeCount: active.length };
+  }, [entries]);
+
+  const stageGroups = useMemo(() => {
+    const groups: Record<DealStage, Deal[]> = {
+      lead: [], qualified: [], proposal: [], negotiation: [], closed_won: [], closed_lost: [],
+    };
+    for (const d of filtered) groups[d.dealStage].push(d);
+    return groups;
+  }, [filtered]);
+
+  const channelData = useMemo(() => {
+    const map: Record<string, { revenue: number; deals: number }> = {};
+    for (const d of entries.filter(e => e.dealStage === 'closed_won')) {
+      const ch = CHANNELS.find(c => c.value === d.channel)?.label ?? d.channel;
+      if (!map[ch]) map[ch] = { revenue: 0, deals: 0 };
+      map[ch].revenue += d.amount;
+      map[ch].deals++;
+    }
+    return Object.entries(map).map(([name, v]) => ({ name, ...v })).sort((a, b) => b.revenue - a.revenue);
+  }, [entries]);
+
+  const productData = useMemo(() => {
+    const map: Record<string, { revenue: number; deals: number }> = {};
+    for (const d of entries.filter(e => e.dealStage === 'closed_won' && e.product)) {
+      if (!map[d.product]) map[d.product] = { revenue: 0, deals: 0 };
+      map[d.product].revenue += d.amount;
+      map[d.product].deals++;
+    }
+    return Object.entries(map).map(([name, v]) => ({ name, ...v })).sort((a, b) => b.revenue - a.revenue).slice(0, 8);
+  }, [entries]);
+
+  // ── Handlers ───────────────────────────="────────────────────────────────
+  const openAdd = () => { setForm(emptyForm()); setEditingDeal(null); setShowForm(true); };
+  const openEdit = (deal: Deal) => {
+    setEditingDeal(deal);
     setForm({
-      clientName: entry.clientName,
-      dealStage: entry.dealStage,
-      amount: String(entry.amount),
-      currency: entry.currency,
-      date: new Date(entry.date).toISOString().slice(0, 10),
-      channel: entry.channel,
-      product: entry.product ?? '',
-      notes: entry.notes ?? '',
+      date: isoDate(deal.date),
+      amount: deal.amount,
+      currency: deal.currency,
+      channel: deal.channel,
+      product: deal.product,
+      customer: deal.customer,
+      dealStage: deal.dealStage,
+      contactName: deal.contactName ?? '',
+      contactEmail: deal.contactEmail ?? '',
+      contactPhone: deal.contactPhone ?? '',
+      dealValue: deal.dealValue ?? 0,
+      probability: deal.probability ?? STAGE_CONFIG[deal.dealStage].defaultProb,
+      expectedCloseDate: isoDate(deal.expectedCloseDate),
+      lostReason: deal.lostReason ?? '',
+      nextAction: deal.nextAction ?? '',
+      notes: deal.notes ?? '',
     });
-    setEditingId(entry.id);
     setShowForm(true);
   };
 
-  const handleRunAI = () => {
-    if (!analytics?.summary) return;
-    analyzeAI.mutate({
-      totalRevenue: analytics.summary.totalRevenue,
-      totalDeals: analytics.summary.totalDeals,
-      wonDeals: analytics.summary.wonDeals,
-      avgDealSize: analytics.summary.avgDealSize,
-      winRate: analytics.summary.winRate,
-      topChannel: analytics.channels[0]?.channel,
-      topProduct: analytics.products[0]?.product,
-      recentMonths: (analytics.monthly ?? []).slice(-6).map(m => ({
-        month: m.month,
-        revenue: m.revenue,
-        momGrowth: m.momGrowth ?? null,
-      })),
-      currency: 'USD',
-    });
-    setActiveTab('ai');
+  const setField = (key: keyof typeof form, value: unknown) =>
+    setForm(prev => ({ ...prev, [key]: value }));
+
+  const handleStageChange = (stage: DealStage) => {
+    setField('dealStage', stage);
+    setField('probability', STAGE_CONFIG[stage].defaultProb);
   };
 
-  const summary = analytics?.summary;
-  const monthly = analytics?.monthly ?? [];
-  const channels = analytics?.channels ?? [];
-  const products = analytics?.products ?? [];
-  const stageFunnel = analytics?.stageFunnel ?? [];
-  const entries = analytics?.entries ?? [];
-  const targets = analytics?.targets ?? [];
+  const handleSubmit = () => {
+    const dateStr2 = typeof form.date === 'string' ? form.date : new Date(form.date).toISOString().split('T')[0];
+    const payload = {
+      ...form,
+      date: dateStr2,
+      amount: Number(form.amount) || 0,
+      dealValue: Number(form.dealValue) || undefined,
+      probability: Number(form.probability) || undefined,
+      expectedCloseDate: form.expectedCloseDate ? String(form.expectedCloseDate) : undefined,
+      contactName: form.contactName || undefined,
+      contactEmail: form.contactEmail || undefined,
+      contactPhone: form.contactPhone || undefined,
+      lostReason: form.lostReason || undefined,
+      nextAction: form.nextAction || undefined,
+      notes: form.notes || undefined,
+    };
+    if (editingDeal) {
+      updateMutation.mutate({ id: editingDeal.id, ...payload });
+    } else {
+      addMutation.mutate(payload);
+    }
+  };
 
-  const currentMonthKey = new Date().toISOString().slice(0, 7);
-  const currentTarget = targets.find((t: any) => t.month === currentMonthKey);
-  const targetProgress = currentTarget && summary
-    ? Math.min(100, (summary.currentMonthRevenue / currentTarget.targetAmount) * 100)
-    : null;
+  const handleAI = useCallback(() => {
+    const won = entries.filter(d => d.dealStage === 'closed_won');
+    const active = entries.filter(d => !['closed_won', 'closed_lost'].includes(d.dealStage));
+    // Use analyzeCOGS as a general business analysis endpoint
+    analyzeMutation.mutate({
+      businessModel: 'services',
+      totalCOGS: 0,
+      grossMarginPct: kpis.winRate,
+      totalOpEx: 0,
+      ebitda: kpis.totalRevenue,
+      directCosts: [],
+      indirectCosts: channelData.slice(0, 3).map(c => ({ name: c.name, amount: c.revenue, category: 'sales' as const })),
+      monthlyRevenue: kpis.totalRevenue,
+      language: lang === 'ar' ? 'arabic' : 'english',
+    });
+    setActiveTab('ai');
+  }, [entries, kpis, channelData, productData, lang]);
 
-  const CHART_COLORS = ['#C4614A', '#2D4A6B', '#10B981', '#F59E0B', '#6366F1', '#8B5CF6', '#EC4899'];
+  const currency = entries[0]?.currency ?? 'USD';
+
+  // ── Deal Card ──────────────────────────────────────────────────────────
+  const DealCard = ({ deal }: { deal: Deal }) => {
+    const cfg = STAGE_CONFIG[deal.dealStage];
+    const isExpanded = expandedDeal === deal.id;
+    return (
+      <div className={`rounded-lg border border-border bg-card shadow-sm transition-all ${isExpanded ? 'ring-1 ring-primary/30' : ''}`}>
+        <div
+          className="flex items-start justify-between p-3 cursor-pointer"
+          onClick={() => setExpandedDeal(isExpanded ? null : deal.id)}
+        >
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold truncate">{deal.customer || 'Unnamed'}</p>
+            {deal.product && <p className="text-xs text-muted-foreground truncate">{deal.product}</p>}
+            {deal.contactName && <p className="text-xs text-muted-foreground">{deal.contactName}</p>}
+          </div>
+          <div className="flex flex-col items-end gap-1 ml-2 shrink-0">
+            <span className="text-sm font-bold text-foreground">{fmt(deal.dealValue ?? deal.amount, deal.currency)}</span>
+            {deal.probability != null && deal.dealStage !== 'closed_won' && deal.dealStage !== 'closed_lost' && (
+              <span className="text-xs text-muted-foreground">{deal.probability}%</span>
+            )}
+          </div>
+        </div>
+        {isExpanded && (
+          <div className="px-3 pb-3 border-t border-border/50 pt-2 space-y-2">
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {deal.contactEmail && <div className="flex items-center gap-1 text-muted-foreground"><Mail className="w-3 h-3" />{deal.contactEmail}</div>}
+              {deal.contactPhone && <div className="flex items-center gap-1 text-muted-foreground"><Phone className="w-3 h-3" />{deal.contactPhone}</div>}
+              {deal.expectedCloseDate && <div className="flex items-center gap-1 text-muted-foreground"><Calendar className="w-3 h-3" />Close: {dateStr(deal.expectedCloseDate)}</div>}
+              <div className="flex items-center gap-1 text-muted-foreground"><DollarSign className="w-3 h-3" />Closed: {fmt(deal.amount, deal.currency)}</div>
+            </div>
+            {deal.nextAction && (
+              <div className="text-xs bg-blue-50 text-blue-700 rounded p-2">
+                <span className="font-medium">Next: </span>{deal.nextAction}
+              </div>
+            )}
+            {deal.lostReason && (
+              <div className="text-xs bg-red-50 text-red-700 rounded p-2">
+                <span className="font-medium">Lost: </span>{deal.lostReason}
+              </div>
+            )}
+            {deal.notes && <p className="text-xs text-muted-foreground">{deal.notes}</p>}
+            <div className="flex gap-2 pt-1">
+              <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => openEdit(deal)}>
+                <Edit2 className="w-3 h-3 mr-1" /> Edit
+              </Button>
+              <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => deleteMutation.mutate({ id: deal.id })}>
+                <Trash2 className="w-3 h-3 mr-1" /> Delete
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
-    <div className="flex-1 overflow-y-auto" dir={isRTL ? 'rtl' : 'ltr'} style={{ background: 'oklch(0.978 0.008 80)' }}>
-      {/* ── Header ── */}
-      <div className="px-5 py-4 border-b border-border bg-card flex items-center justify-between gap-3">
+    <div className={`space-y-6 ${isRTL ? 'rtl' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-lg font-bold text-foreground flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5" style={{ color: '#F59E0B' }} />
-            Sales Tracker
-          </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Track your deals, revenue, and growth</p>
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <Target className="w-5 h-5 text-primary" />
+            Sales Pipeline Tracker
+          </h2>
+          <p className="text-sm text-muted-foreground mt-0.5">Full CRM pipeline · Channel & product analytics · AI forecasting</p>
         </div>
         <div className="flex items-center gap-2">
-          {summary && summary.totalDeals > 0 && (
-            <Button size="sm" variant="outline" onClick={handleRunAI} disabled={analyzeAI.isPending}>
-              {analyzeAI.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-              <span className="ml-1.5 hidden sm:inline">AI Analysis</span>
-            </Button>
-          )}
-          <Button
-            size="sm"
-            onClick={() => { setEditingId(null); setForm(EMPTY_FORM); setShowForm(true); }}
-            style={{ background: '#F59E0B', color: 'white' }}
-          >
-            <Plus className="w-3.5 h-3.5 mr-1" />
-            Add Deal
+          <Button variant="outline" size="sm" onClick={handleAI} disabled={analyzeMutation.isPending}>
+            {analyzeMutation.isPending ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1.5" />}
+            AI Analysis
           </Button>
+          <Button size="sm" onClick={openAdd}><Plus className="w-4 h-4 mr-1.5" /> Add Deal</Button>
         </div>
       </div>
 
-      {/* ── Tabs ── */}
-      <div className="flex gap-0 border-b border-border bg-card px-5 overflow-x-auto">
-        {(['overview', 'deals', 'targets', 'ai'] as const).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-              activeTab === tab
-                ? 'border-amber-500 text-amber-600'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {tab === 'overview' ? 'Overview' : tab === 'deals' ? 'Deals' : tab === 'targets' ? 'Targets' : 'AI Analysis'}
-          </button>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label: 'Total Revenue', value: fmt(kpis.totalRevenue, currency), sub: `${kpis.wonCount} won deals`, icon: DollarSign, color: 'text-green-600' },
+          { label: 'Pipeline Value', value: fmt(kpis.pipeline, currency), sub: `${kpis.activeCount} active deals`, icon: GitMerge, color: 'text-blue-600' },
+          { label: 'Weighted Pipeline', value: fmt(kpis.weighted, currency), sub: 'probability-adjusted', icon: BarChart3, color: 'text-purple-600' },
+          { label: 'Win Rate', value: `${kpis.winRate.toFixed(1)}%`, sub: `Avg deal: ${fmt(kpis.avgDealSize, currency)}`, icon: TrendingUp, color: kpis.winRate >= 30 ? 'text-green-600' : 'text-orange-500' },
+        ].map(card => (
+          <Card key={card.label}>
+            <CardContent className="pt-4 pb-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">{card.label}</p>
+                  <p className={`text-xl font-bold ${card.color}`}>{card.value}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{card.sub}</p>
+                </div>
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                  <card.icon className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      <div className="p-5 lg:p-6 space-y-5">
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="w-full justify-start overflow-x-auto">
+          <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
+          <TabsTrigger value="list">Deal List</TabsTrigger>
+          <TabsTrigger value="revenue">Revenue</TabsTrigger>
+          <TabsTrigger value="channels">Channels</TabsTrigger>
+          <TabsTrigger value="products">Products</TabsTrigger>
+          <TabsTrigger value="targets">Targets</TabsTrigger>
+          <TabsTrigger value="ai">AI Analysis</TabsTrigger>
+        </TabsList>
 
-        {/* ── Add/Edit Form ── */}
-        <AnimatePresence>
-          {showForm && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
-              <Card className="border-amber-200 shadow-md">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm">{editingId !== null ? 'Edit Deal' : 'Add New Deal'}</CardTitle>
-                    <button onClick={() => { setShowForm(false); setEditingId(null); setForm(EMPTY_FORM); }}>
-                      <X className="w-4 h-4 text-muted-foreground" />
-                    </button>
+        {/* ── PIPELINE (Kanban) ── */}
+        <TabsContent value="pipeline" className="mt-4">
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search deals…" className="pl-9 h-9" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 overflow-x-auto">
+            {(Object.keys(STAGE_CONFIG) as DealStage[]).map(stage => {
+              const cfg = STAGE_CONFIG[stage];
+              const deals = stageGroups[stage];
+              const total = deals.reduce((s, d) => s + (d.dealValue ?? d.amount), 0);
+              return (
+                <div key={stage} className="flex flex-col min-w-[160px]">
+                  <div className={`flex items-center justify-between p-2 rounded-t-lg ${cfg.bg}`}>
+                    <div className="flex items-center gap-1.5">
+                      <cfg.icon className={`w-3.5 h-3.5 ${cfg.color}`} />
+                      <span className={`text-xs font-semibold ${cfg.color}`}>{cfg.label}</span>
+                    </div>
+                    <Badge variant="secondary" className="text-xs h-5 px-1.5">{deals.length}</Badge>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="space-y-1">
-                      <Label className="text-xs flex items-center gap-1">
-                        Client / Company Name *
-                        <FieldInfo text="The name of the client or company you're selling to." />
-                      </Label>
-                      <Input
-                        value={form.clientName}
-                        onChange={e => setForm(f => ({ ...f, clientName: e.target.value }))}
-                        placeholder="Acme Corp"
-                        className="h-8 text-sm"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs flex items-center gap-1">
-                        Deal Stage *
-                        <FieldInfo text="Current stage of this deal in your sales pipeline." />
-                      </Label>
-                      <Select value={form.dealStage} onValueChange={v => setForm(f => ({ ...f, dealStage: v }))}>
-                        <SelectTrigger className="h-8 text-sm">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {DEAL_STAGES.map(s => (
-                            <SelectItem key={s.value} value={s.value}>
-                              <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full" style={{ background: s.color }} />
-                                {s.label}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs flex items-center gap-1">
-                        Deal Amount *
-                        <FieldInfo text="Total value of this deal. For recurring deals, enter the annual contract value (ACV)." />
-                      </Label>
-                      <div className="flex gap-1.5">
-                        <Select value={form.currency} onValueChange={v => setForm(f => ({ ...f, currency: v }))}>
-                          <SelectTrigger className="h-8 text-sm w-20">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <Input
-                          type="number"
-                          value={form.amount}
-                          onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
-                          placeholder="10000"
-                          className="h-8 text-sm flex-1"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs flex items-center gap-1">
-                        Date *
-                        <FieldInfo text="The date this deal was created or closed." />
-                      </Label>
-                      <Input
-                        type="date"
-                        value={form.date}
-                        onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                        className="h-8 text-sm"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs flex items-center gap-1">
-                        Channel
-                        <FieldInfo text="How did you acquire this lead? Helps identify your best-performing acquisition channels." />
-                      </Label>
-                      <Select value={form.channel} onValueChange={v => setForm(f => ({ ...f, channel: v }))}>
-                        <SelectTrigger className="h-8 text-sm">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {CHANNELS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs flex items-center gap-1">
-                        Product / Service
-                        <FieldInfo text="Which product or service is this deal for? Helps track per-product revenue." />
-                      </Label>
-                      <Input
-                        value={form.product}
-                        onChange={e => setForm(f => ({ ...f, product: e.target.value }))}
-                        placeholder="e.g. Enterprise Plan"
-                        className="h-8 text-sm"
-                      />
-                    </div>
-                    <div className="space-y-1 sm:col-span-2 lg:col-span-3">
-                      <Label className="text-xs">Notes</Label>
-                      <Textarea
-                        value={form.notes}
-                        onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-                        placeholder="Any additional context about this deal…"
-                        className="text-sm resize-none"
-                        rows={2}
-                      />
-                    </div>
+                  <div className="text-xs text-muted-foreground text-center py-1 bg-muted/30 border-x border-border">
+                    {fmt(total, currency)}
                   </div>
-                  <div className="flex gap-2 mt-4 justify-end">
-                    <Button size="sm" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); setForm(EMPTY_FORM); }}>
-                      Cancel
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={handleSubmit}
-                      disabled={addEntry.isPending || updateEntry.isPending}
-                      style={{ background: '#F59E0B', color: 'white' }}
-                    >
-                      {(addEntry.isPending || updateEntry.isPending)
-                        ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        : <Save className="w-3.5 h-3.5" />}
-                      <span className="ml-1.5">{editingId !== null ? 'Update' : 'Save Deal'}</span>
-                    </Button>
+                  <div className="flex-1 space-y-2 p-2 bg-muted/10 rounded-b-lg border border-border border-t-0 min-h-[100px]">
+                    {deals.map(deal => <DealCard key={deal.id} deal={deal} />)}
+                    {deals.length === 0 && (
+                      <p className="text-xs text-muted-foreground text-center py-4">No deals</p>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+        </TabsContent>
 
-        {/* ── Overview Tab ── */}
-        {activeTab === 'overview' && (
-          <div className="space-y-5">
-            {/* KPI Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { label: 'Total Revenue', value: summary ? fmtCurrency(summary.totalRevenue) : '—', icon: DollarSign, color: '#10B981', sub: `${summary?.wonDeals ?? 0} won deals` },
-                { label: 'This Month', value: summary ? fmtCurrency(summary.currentMonthRevenue) : '—', icon: TrendingUp, color: '#F59E0B', sub: currentTarget ? `Target: ${fmtCurrency(currentTarget.targetAmount)}` : 'No target set' },
-                { label: 'Avg Deal Size', value: summary ? fmtCurrency(summary.avgDealSize) : '—', icon: BarChart3, color: '#6366F1', sub: `${summary?.totalDeals ?? 0} total deals` },
-                { label: 'Win Rate', value: summary ? `${summary.winRate.toFixed(1)}%` : '—', icon: Target, color: '#C4614A', sub: `${summary?.wonDeals ?? 0} / ${(summary?.wonDeals ?? 0) + (entries.filter((e: any) => e.dealStage === 'closed_lost').length)} closed` },
-              ].map((card, i) => (
-                <motion.div key={card.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                  <Card className="border-border shadow-sm">
-                    <CardContent className="p-4">
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-2" style={{ background: `${card.color}18` }}>
-                        <card.icon className="w-3.5 h-3.5" style={{ color: card.color }} />
+        {/* ── DEAL LIST ── */}
+        <TabsContent value="list" className="mt-4">
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search deals…" className="pl-9 h-9" />
+            </div>
+            <Select value={stageFilter} onValueChange={v => setStageFilter(v as DealStage | 'all')}>
+              <SelectTrigger className="w-36 h-9"><SelectValue placeholder="All stages" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stages</SelectItem>
+                {(Object.keys(STAGE_CONFIG) as DealStage[]).map(s => (
+                  <SelectItem key={s} value={s}>{STAGE_CONFIG[s].label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="overflow-x-auto rounded-lg border border-border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/40">
+                  {['Customer', 'Product', 'Contact', 'Stage', 'Deal Value', 'Prob.', 'Close Date', 'Channel', 'Actions'].map(h => (
+                    <th key={h} className="text-left py-2.5 px-3 text-xs font-medium text-muted-foreground whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 && (
+                  <tr><td colSpan={9} className="text-center py-8 text-muted-foreground text-sm">No deals found. Add your first deal.</td></tr>
+                )}
+                {filtered.map(deal => {
+                  const cfg = STAGE_CONFIG[deal.dealStage];
+                  return (
+                    <tr key={deal.id} className="border-b border-border/50 hover:bg-muted/20">
+                      <td className="py-2.5 px-3 font-medium">{deal.customer || '—'}</td>
+                      <td className="py-2.5 px-3 text-muted-foreground">{deal.product || '—'}</td>
+                      <td className="py-2.5 px-3">
+                        <div>{deal.contactName || '—'}</div>
+                        {deal.contactEmail && <div className="text-xs text-muted-foreground">{deal.contactEmail}</div>}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${cfg.bg} ${cfg.color}`}>
+                          {cfg.label}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 font-medium">{fmt(deal.dealValue ?? deal.amount, deal.currency)}</td>
+                      <td className="py-2.5 px-3 text-muted-foreground">{deal.probability ?? '—'}%</td>
+                      <td className="py-2.5 px-3 text-muted-foreground whitespace-nowrap">{dateStr(deal.expectedCloseDate) || '—'}</td>
+                      <td className="py-2.5 px-3 text-muted-foreground capitalize">{deal.channel}</td>
+                      <td className="py-2.5 px-3">
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(deal)}>
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteMutation.mutate({ id: deal.id })}>
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </TabsContent>
+
+        {/* ── REVENUE ── */}
+        <TabsContent value="revenue" className="mt-4">
+          <Card>
+            <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">Monthly Revenue (Won Deals)</CardTitle></CardHeader>
+            <CardContent className="pb-4">
+              {analytics?.monthly?.length ? (
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart data={analytics.monthly} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                    <YAxis tickFormatter={v => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
+                    <Tooltip formatter={(v: any) => fmt(v, currency)} />
+                    <Bar dataKey="revenue" fill="#10B981" name="Revenue" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="wonDeals" fill="#3B82F6" name="Won Deals" radius={[4, 4, 0, 0]} yAxisId={1} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">No revenue data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ── CHANNELS ── */}
+        <TabsContent value="channels" className="mt-4">
+          <Card>
+            <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">Revenue by Channel</CardTitle></CardHeader>
+            <CardContent className="pb-4">
+              {channelData.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">No channel data yet.</p>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-6">
+                  <ResponsiveContainer width="100%" height={220}>
+                    <PieChart>
+                      <Pie data={channelData} dataKey="revenue" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                        {channelData.map((_, i) => <Cell key={i} fill={CHANNEL_COLORS[i % CHANNEL_COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip formatter={(v: any) => fmt(v, currency)} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="space-y-2">
+                    {channelData.map((c, i) => (
+                      <div key={c.name} className="flex items-center justify-between text-sm p-2 rounded-lg bg-muted/30">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full" style={{ background: CHANNEL_COLORS[i % CHANNEL_COLORS.length] }} />
+                          <span>{c.name}</span>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className="text-muted-foreground">{c.deals} deals</span>
+                          <span className="font-medium">{fmt(c.revenue, currency)}</span>
+                        </div>
                       </div>
-                      <div className="text-xl font-bold text-foreground">{card.value}</div>
-                      <div className="text-xs font-medium text-foreground mt-0.5">{card.label}</div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5">{card.sub}</div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ── PRODUCTS ── */}
+        <TabsContent value="products" className="mt-4">
+          <Card>
+            <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">Revenue by Product / Service</CardTitle></CardHeader>
+            <CardContent className="pb-4">
+              {productData.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">No product data yet. Add deals with product names.</p>
+              ) : (
+                <>
+                  <ResponsiveContainer width="100%" height={220}>
+                    <BarChart data={productData} layout="vertical" margin={{ top: 5, right: 20, left: 80, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                      <XAxis type="number" tickFormatter={v => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
+                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={80} />
+                      <Tooltip formatter={(v: any) => fmt(v, currency)} />
+                      <Bar dataKey="revenue" fill="#8B5CF6" name="Revenue" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <div className="mt-4 space-y-2">
+                    {productData.map((p, i) => (
+                      <div key={p.name} className="flex items-center justify-between text-sm p-2 rounded-lg bg-muted/30">
+                        <span>{p.name}</span>
+                        <div className="flex items-center gap-4">
+                          <span className="text-muted-foreground">{p.deals} deals</span>
+                          <span className="font-medium">{fmt(p.revenue, currency)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ── TARGETS ── */}
+        <TabsContent value="targets" className="mt-4">
+          <Card>
+            <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">Monthly Sales Target</CardTitle></CardHeader>
+            <CardContent className="pb-4 space-y-4">
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <Label className="text-xs">Month</Label>
+                  <Input type="month" value={targetMonth} onChange={e => setTargetMonth(e.target.value)} className="mt-1" />
+                </div>
+                <div>
+                  <Label className="text-xs">Target Amount</Label>
+                  <Input type="number" min={0} value={targetAmount || ''} onChange={e => setTargetAmount(parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
+                </div>
+                <div>
+                  <Label className="text-xs">Currency</Label>
+                  <Select value={targetCurrency} onValueChange={setTargetCurrency}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {['USD', 'SAR', 'AED', 'EUR', 'GBP'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button onClick={() => targetMutation.mutate({ month: targetMonth, targetAmount, currency: targetCurrency })} disabled={targetMutation.isPending}>
+                {targetMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
+                Save Target
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ── AI ── */}
+        <TabsContent value="ai" className="mt-4">
+          <Card>
+            <CardHeader className="pb-2 pt-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> AI Sales Analysis</CardTitle>
+                <Button variant="outline" size="sm" onClick={handleAI} disabled={analyzeMutation.isPending}>
+                  {analyzeMutation.isPending ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-1.5" />}
+                  {analyzeMutation.isPending ? 'Analyzing…' : 'Refresh'}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="pb-4">
+              {!aiAnalysis && !analyzeMutation.isPending && (
+                <div className="text-center py-10">
+                  <Sparkles className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground mb-4">Get AI-powered analysis of your pipeline health, win rate, and revenue forecast.</p>
+                  <Button onClick={handleAI}><Sparkles className="w-4 h-4 mr-2" /> Generate Analysis</Button>
+                </div>
+              )}
+              {analyzeMutation.isPending && (
+                <div className="flex items-center gap-3 py-8 justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <span className="text-sm text-muted-foreground">Analyzing your pipeline…</span>
+                </div>
+              )}
+              {aiAnalysis && !analyzeMutation.isPending && (
+                <div className="prose prose-sm max-w-none"><Streamdown>{aiAnalysis}</Streamdown></div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* ── Deal Form Dialog ── */}
+      <Dialog open={showForm} onOpenChange={open => { if (!open) { setShowForm(false); setEditingDeal(null); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingDeal ? 'Edit Deal' : 'Add New Deal'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {/* Basic Info */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <Label className="text-xs">Company / Customer *</Label>
+                <Input value={form.customer} onChange={e => setField('customer', e.target.value)} placeholder="e.g. Acme Corp" className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">Product / Service</Label>
+                <Input value={form.product} onChange={e => setField('product', e.target.value)} placeholder="e.g. Enterprise Plan" className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">Deal Stage</Label>
+                <Select value={form.dealStage} onValueChange={v => handleStageChange(v as DealStage)}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {(Object.keys(STAGE_CONFIG) as DealStage[]).map(s => (
+                      <SelectItem key={s} value={s}>{STAGE_CONFIG[s].label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* Monthly target progress */}
-            {targetProgress !== null && (
-              <Card className="border-border shadow-sm">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold">Monthly Revenue vs Target</span>
-                    <span className="text-sm font-bold" style={{ color: targetProgress >= 100 ? '#10B981' : '#F59E0B' }}>
-                      {targetProgress.toFixed(0)}%
-                    </span>
-                  </div>
-                  <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{
-                        width: `${Math.min(100, targetProgress)}%`,
-                        background: targetProgress >= 100 ? '#10B981' : targetProgress >= 70 ? '#F59E0B' : '#EF4444'
-                      }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>{fmtCurrency(summary?.currentMonthRevenue ?? 0)} achieved</span>
-                    <span>{fmtCurrency(currentTarget?.targetAmount ?? 0)} target</span>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <Separator />
 
-            {/* Revenue Trend */}
-            {monthly.length > 0 && (
-              <Card className="border-border shadow-sm">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-semibold">Monthly Revenue Trend</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={220}>
-                    <AreaChart data={monthly} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#F59E0B" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.9 0 0)" />
-                      <XAxis dataKey="month" tick={{ fontSize: 10 }} tickFormatter={v => v.slice(5)} />
-                      <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'K' : v}`} />
-                      <Tooltip
-                        formatter={(v: any, name: string) => [
-                          name === 'revenue' ? `$${Number(v).toLocaleString()}` : `${Number(v).toFixed(1)}%`,
-                          name === 'revenue' ? 'Revenue' : 'MoM Growth'
-                        ]}
-                        labelFormatter={l => `Month: ${l}`}
-                      />
-                      <Area type="monotone" dataKey="revenue" stroke="#F59E0B" strokeWidth={2} fill="url(#revGrad)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Channel + Product breakdown */}
-            {(channels.length > 0 || products.length > 0) && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {channels.length > 0 && (
-                  <Card className="border-border shadow-sm">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-semibold">Revenue by Channel</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={180}>
-                        <BarChart data={channels} margin={{ top: 5, right: 10, left: 0, bottom: 0 }} layout="vertical">
-                          <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.9 0 0)" horizontal={false} />
-                          <XAxis type="number" tick={{ fontSize: 9 }} tickFormatter={v => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'K' : v}`} />
-                          <YAxis type="category" dataKey="channel" tick={{ fontSize: 10 }} width={70} />
-                          <Tooltip formatter={(v: any) => [`$${Number(v).toLocaleString()}`, 'Revenue']} />
-                          <Bar dataKey="revenue" radius={[0, 4, 4, 0]}>
-                            {channels.map((_: any, i: number) => (
-                              <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                )}
-                {products.length > 0 && (
-                  <Card className="border-border shadow-sm">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-semibold">Revenue by Product</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={180}>
-                        <BarChart data={products} margin={{ top: 5, right: 10, left: 0, bottom: 0 }} layout="vertical">
-                          <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.9 0 0)" horizontal={false} />
-                          <XAxis type="number" tick={{ fontSize: 9 }} tickFormatter={v => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'K' : v}`} />
-                          <YAxis type="category" dataKey="product" tick={{ fontSize: 10 }} width={90} />
-                          <Tooltip formatter={(v: any) => [`$${Number(v).toLocaleString()}`, 'Revenue']} />
-                          <Bar dataKey="revenue" radius={[0, 4, 4, 0]}>
-                            {products.map((_: any, i: number) => (
-                              <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                )}
+            {/* Contact */}
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Contact Details</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Contact Name</Label>
+                <Input value={form.contactName ?? ''} onChange={e => setField('contactName', e.target.value)} placeholder="John Smith" className="mt-1" />
               </div>
-            )}
-
-            {/* Deal Stage Funnel */}
-            {stageFunnel.some((s: any) => s.count > 0) && (
-              <Card className="border-border shadow-sm">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-semibold">Deal Stage Funnel</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {stageFunnel.map((stage: any) => {
-                      const maxCount = Math.max(...stageFunnel.map((s: any) => s.count), 1);
-                      const pct = (stage.count / maxCount) * 100;
-                      const stageInfo = DEAL_STAGES.find(s => s.value === stage.stage);
-                      return (
-                        <div key={stage.stage} className="flex items-center gap-3">
-                          <div className="w-24 text-xs text-muted-foreground text-right shrink-0">
-                            {stageInfo?.label ?? stage.stage}
-                          </div>
-                          <div className="flex-1 h-5 bg-secondary rounded-full overflow-hidden">
-                            <div
-                              className="h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2"
-                              style={{ width: `${pct}%`, background: stageInfo?.color ?? '#94A3B8', minWidth: stage.count > 0 ? '2rem' : 0 }}
-                            >
-                              {stage.count > 0 && (
-                                <span className="text-[10px] font-bold text-white">{stage.count}</span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {entries.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <ShoppingCart className="w-12 h-12 text-muted-foreground/20 mb-4" />
-                <h3 className="text-base font-semibold text-foreground mb-1">No deals yet</h3>
-                <p className="text-sm text-muted-foreground mb-4">Add your first deal to start tracking your sales pipeline.</p>
-                <Button size="sm" onClick={() => { setEditingId(null); setForm(EMPTY_FORM); setShowForm(true); }} style={{ background: '#F59E0B', color: 'white' }}>
-                  <Plus className="w-3.5 h-3.5 mr-1" />
-                  Add First Deal
-                </Button>
+              <div>
+                <Label className="text-xs">Contact Email</Label>
+                <Input type="email" value={form.contactEmail ?? ''} onChange={e => setField('contactEmail', e.target.value)} placeholder="john@acme.com" className="mt-1" />
               </div>
-            )}
-          </div>
-        )}
-
-        {/* ── Deals Tab ── */}
-        {activeTab === 'deals' && (
-          <div className="space-y-2">
-            {entries.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <ShoppingCart className="w-12 h-12 text-muted-foreground/20 mb-4" />
-                <p className="text-sm text-muted-foreground">No deals yet. Add your first deal above.</p>
+              <div>
+                <Label className="text-xs">Contact Phone</Label>
+                <Input value={form.contactPhone ?? ''} onChange={e => setField('contactPhone', e.target.value)} placeholder="+1 555 0100" className="mt-1" />
               </div>
-            ) : (
-              entries.map((entry: any) => {
-                const stageInfo = DEAL_STAGES.find(s => s.value === entry.dealStage);
-                const isExpanded = expandedEntry === entry.id;
-                return (
-                  <Card key={entry.id} className="border-border shadow-sm">
-                    <CardContent className="p-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full shrink-0" style={{ background: stageInfo?.color ?? '#94A3B8' }} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-semibold text-foreground truncate">{entry.clientName}</span>
-                            <Badge variant="outline" className="text-[10px]" style={{ borderColor: stageInfo?.color, color: stageInfo?.color }}>
-                              {stageInfo?.label}
-                            </Badge>
-                            {entry.product && (
-                              <Badge variant="secondary" className="text-[10px]">{entry.product}</Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
-                            <span className="font-semibold text-foreground">{entry.currency} {Number(entry.amount).toLocaleString()}</span>
-                            <span>{new Date(entry.date).toLocaleDateString()}</span>
-                            <span>{entry.channel}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 shrink-0">
-                          <button onClick={() => setExpandedEntry(isExpanded ? null : entry.id)} className="p-1.5 rounded hover:bg-secondary text-muted-foreground">
-                            {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                          </button>
-                          <button onClick={() => handleEdit(entry)} className="p-1.5 rounded hover:bg-secondary text-muted-foreground">
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => deleteEntry.mutate({ id: entry.id })}
-                            className="p-1.5 rounded hover:bg-red-50 text-muted-foreground hover:text-red-500"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                      {isExpanded && entry.notes && (
-                        <div className="mt-2 pt-2 border-t border-border text-xs text-muted-foreground">
-                          {entry.notes}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })
-            )}
-          </div>
-        )}
+              <div>
+                <Label className="text-xs">Channel</Label>
+                <Select value={form.channel} onValueChange={v => setField('channel', v)}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {CHANNELS.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-        {/* ── Targets Tab ── */}
-        {activeTab === 'targets' && (
-          <div className="space-y-4">
-            <Card className="border-border shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold">Set Monthly Revenue Target</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-3 items-end">
-                  <div className="space-y-1 flex-1">
-                    <Label className="text-xs flex items-center gap-1">
-                      Month
-                      <FieldInfo text="Select the month you want to set a revenue target for." />
-                    </Label>
-                    <Input
-                      type="month"
-                      value={targetMonth}
-                      onChange={e => setTargetMonth(e.target.value)}
-                      className="h-8 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-1 flex-1">
-                    <Label className="text-xs flex items-center gap-1">
-                      Target Amount (USD)
-                      <FieldInfo text="Your revenue goal for this month. Used to track progress on the overview dashboard." />
-                    </Label>
-                    <Input
-                      type="number"
-                      value={targetAmount}
-                      onChange={e => setTargetAmount(e.target.value)}
-                      placeholder="50000"
-                      className="h-8 text-sm"
-                    />
-                  </div>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      if (!targetAmount) return;
-                      setTarget.mutate({ month: targetMonth, targetAmount: parseFloat(targetAmount), currency: 'USD' });
-                    }}
-                    disabled={setTarget.isPending}
-                    style={{ background: '#F59E0B', color: 'white' }}
-                  >
-                    {setTarget.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                    <span className="ml-1">Save</span>
-                  </Button>
+            <Separator />
+
+            {/* Financials */}
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Deal Financials</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Deal Value (Expected)</Label>
+                <Input type="number" min={0} value={form.dealValue ?? ''} onChange={e => setField('dealValue', parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">Closed Amount (Actual)</Label>
+                <Input type="number" min={0} value={form.amount || ''} onChange={e => setField('amount', parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">Currency</Label>
+                <Select value={form.currency} onValueChange={v => setField('currency', v)}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {['USD', 'SAR', 'AED', 'EUR', 'GBP', 'EGP'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Win Probability (%)</Label>
+                <Input type="number" min={0} max={100} value={form.probability ?? ''} onChange={e => setField('probability', parseInt(e.target.value) || 0)} placeholder="50" className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">Date</Label>
+                <Input type="date" value={typeof form.date === 'string' ? form.date : isoDate(form.date)} onChange={e => setField('date', e.target.value)} className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">Expected Close Date</Label>
+                <Input type="date" value={form.expectedCloseDate ? String(form.expectedCloseDate) : ''} onChange={e => setField('expectedCloseDate', e.target.value)} className="mt-1" />
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Actions & Notes */}
+            <div className="space-y-3">
+              <div>
+                <Label className="text-xs">Next Action</Label>
+                <Input value={form.nextAction ?? ''} onChange={e => setField('nextAction', e.target.value)} placeholder="e.g. Follow up call on Friday" className="mt-1" />
+              </div>
+              {form.dealStage === 'closed_lost' && (
+                <div>
+                  <Label className="text-xs">Lost Reason</Label>
+                  <Input value={form.lostReason ?? ''} onChange={e => setField('lostReason', e.target.value)} placeholder="e.g. Price too high, chose competitor" className="mt-1" />
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Existing targets */}
-            {targets.length > 0 && (
-              <Card className="border-border shadow-sm">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-semibold">Monthly Targets</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {[...targets].sort((a: any, b: any) => b.month.localeCompare(a.month)).map((target: any) => {
-                      const monthData = monthly.find((m: any) => m.month === target.month);
-                      const achieved = monthData?.revenue ?? 0;
-                      const pct = Math.min(100, (achieved / target.targetAmount) * 100);
-                      return (
-                        <div key={target.id} className="flex items-center gap-3">
-                          <div className="w-16 text-xs text-muted-foreground shrink-0">{target.month}</div>
-                          <div className="flex-1">
-                            <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                              <div
-                                className="h-full rounded-full transition-all duration-500"
-                                style={{ width: `${pct}%`, background: pct >= 100 ? '#10B981' : pct >= 70 ? '#F59E0B' : '#EF4444' }}
-                              />
-                            </div>
-                          </div>
-                          <div className="text-xs text-right shrink-0 w-32">
-                            <span className="font-semibold">${achieved.toLocaleString()}</span>
-                            <span className="text-muted-foreground"> / ${target.targetAmount.toLocaleString()}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        )}
-
-        {/* ── AI Analysis Tab ── */}
-        {activeTab === 'ai' && (
-          <div className="space-y-4">
-            {!aiAnalysis && !analyzeAI.isPending && (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <Sparkles className="w-12 h-12 text-muted-foreground/20 mb-4" />
-                <h3 className="text-base font-semibold text-foreground mb-1">AI Sales Analysis</h3>
-                <p className="text-sm text-muted-foreground mb-4 max-w-sm">
-                  Get AI-powered insights on your revenue trends, win rate, channel strategy, and actionable recommendations.
-                </p>
-                <Button
-                  onClick={handleRunAI}
-                  disabled={!summary || summary.totalDeals === 0}
-                  style={{ background: '#F59E0B', color: 'white' }}
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Generate Analysis
-                </Button>
-                {(!summary || summary.totalDeals === 0) && (
-                  <p className="text-xs text-muted-foreground mt-2">Add at least one deal to enable AI analysis.</p>
-                )}
+              )}
+              <div>
+                <Label className="text-xs">Notes</Label>
+                <textarea value={form.notes ?? ''} onChange={e => setField('notes', e.target.value)} placeholder="Additional context, meeting notes…" className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px] resize-y focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
-            )}
-            {analyzeAI.isPending && (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <Loader2 className="w-8 h-8 text-amber-500 animate-spin mb-3" />
-                <p className="text-sm text-muted-foreground">Analyzing your sales data…</p>
-              </div>
-            )}
-            {aiAnalysis && (
-              <Card className="border-border shadow-sm">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-amber-500" />
-                      AI Sales Analysis
-                    </CardTitle>
-                    <Button size="sm" variant="outline" onClick={handleRunAI} disabled={analyzeAI.isPending}>
-                      Refresh
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="prose prose-sm max-w-none text-sm text-foreground">
-                    <Streamdown>{aiAnalysis}</Streamdown>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            </div>
           </div>
-        )}
-      </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowForm(false); setEditingDeal(null); }}>Cancel</Button>
+            <Button onClick={handleSubmit} disabled={addMutation.isPending || updateMutation.isPending}>
+              {(addMutation.isPending || updateMutation.isPending) ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              {editingDeal ? 'Update Deal' : 'Add Deal'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

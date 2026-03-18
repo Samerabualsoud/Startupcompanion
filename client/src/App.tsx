@@ -13,8 +13,8 @@ import Register from "./pages/Register";
 import Onboarding from "./pages/Onboarding";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import AdminDashboard from "./pages/AdminDashboard";
-
+import AdminDashboard from './pages/AdminDashboard';
+import DataRoomShare from './pages/DataRoomShare';
 function AppRoutes() {
   return (
     <Switch>
@@ -26,6 +26,7 @@ function AppRoutes() {
       <Route path={"/forgot-password"} component={ForgotPassword} />
       <Route path={"/reset-password"} component={ResetPassword} />
       <Route path={"/admin"} component={AdminDashboard} />
+      <Route path={"/data-room/:token"} component={DataRoomShare} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

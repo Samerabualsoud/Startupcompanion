@@ -370,4 +370,13 @@
 - [x] Add Cap Table Manager tab with visual shareholder table, ownership %, value at current valuation, auto-updated from Valuation Timeline
 - [x] Add AI Startup Idea Validator tab with AI-powered assessment: market size, competition, moat, risk score, fundability rating
 - [x] 0 TypeScript errors
+- [x] Save checkpoint and push to GitHub
+
+## Round 27 — COGS Rebuild, Sales Rebuild, Data Room Fix, Landing Page Redesign
+- [x] Fix Data Room share link: /share/:token route returns 404 — created DataRoomShare.tsx and registered /data-room/:token route in App.tsx
+- [x] Rebuild COGS: product-level costing, overhead allocation, margin waterfall, break-even chart, monthly trend, AI analysis
+- [x] Rebuild Sales Tracker: Kanban pipeline, detailed deal form (contact, probability, close date, next action, lost reason), channel analytics, product analytics, targets, AI analysis
+- [x] Add 7 new pipeline fields to salesEntries schema + db:push migration applied
+- [x] Redesign landing page: "Venture Capital Night" — deep navy + amber/terracotta, asymmetric hero, stats grid, how-it-works, tools grid, testimonials, CTA banner
+- [x] 0 TypeScript errors
 - [ ] Save checkpoint and push to GitHub

@@ -879,14 +879,15 @@ Provide:
     .input(
       z.object({
         businessModel: z.string(),
-        revenuePerUnit: z.number(),
-        unitsPerMonth: z.number(),
-        totalRevenue: z.number(),
+        revenuePerUnit: z.number().optional().default(0),
+        unitsPerMonth: z.number().optional().default(0),
+        totalRevenue: z.number().optional().default(0),
+        monthlyRevenue: z.number().optional().default(0),
         totalCOGS: z.number(),
         grossMarginPct: z.number(),
         totalOpEx: z.number(),
         ebitda: z.number(),
-        breakEvenUnits: z.number(),
+        breakEvenUnits: z.number().nullable().optional(),
         directCosts: z.array(z.object({ name: z.string(), amount: z.number(), type: z.string() })),
         indirectCosts: z.array(z.object({ name: z.string(), amount: z.number(), category: z.string() })),
         currency: z.string().default('USD'),
@@ -921,12 +922,12 @@ Provide:
             content: `Analyze this startup's cost structure and provide optimization recommendations:
 
 Business Model: ${input.businessModel}
-Monthly Revenue: ${input.currency} ${input.totalRevenue.toLocaleString()}
+Monthly Revenue: ${input.currency} ${(input.monthlyRevenue || input.totalRevenue || 0).toLocaleString()}
 Monthly COGS: ${input.currency} ${input.totalCOGS.toLocaleString()}
 Gross Margin: ${input.grossMarginPct.toFixed(1)}%
 Monthly OpEx: ${input.currency} ${input.totalOpEx.toLocaleString()}
 EBITDA: ${input.currency} ${input.ebitda.toLocaleString()}
-Break-even Units: ${input.breakEvenUnits.toFixed(0)}
+Break-even Units: ${input.breakEvenUnits != null ? input.breakEvenUnits.toFixed(0) : 'N/A'}
 Current Units/Month: ${input.unitsPerMonth}
 Revenue per Unit: ${input.currency} ${input.revenuePerUnit}
 
@@ -940,7 +941,7 @@ Provide:
 1. **Gross Margin Assessment**: Is ${input.grossMarginPct.toFixed(1)}% healthy for a ${input.businessModel} business? What is the industry benchmark?
 2. **Top 3 Cost Reduction Opportunities**: Specific, actionable ways to reduce COGS
 3. **Unit Economics Health**: Is the current revenue-per-unit vs cost-per-unit ratio sustainable?
-4. **Break-even Analysis**: At ${input.breakEvenUnits.toFixed(0)} units, how realistic is this target?
+4. **Break-even Analysis**: At ${input.breakEvenUnits != null ? input.breakEvenUnits.toFixed(0) : 'N/A'} units, how realistic is this target?
 5. **OpEx Efficiency**: Are the indirect costs proportionate to revenue?
 6. **Path to Profitability**: What specific changes would move EBITDA to positive?
 7. **Red Flags**: Any concerning cost patterns that need immediate attention?`,

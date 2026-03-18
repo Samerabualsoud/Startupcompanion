@@ -15,13 +15,22 @@ export const salesRouter = router({
   // ── Add a sales entry ──────────────────────────────────────────────────
   addEntry: protectedProcedure
     .input(z.object({
-      date: z.string(), // ISO date string
+      date: z.string(),
       amount: z.number().min(0),
       currency: z.string().default('USD'),
       channel: z.enum(['direct', 'online', 'referral', 'partner', 'inbound', 'outbound', 'other']).default('direct'),
       product: z.string().max(256).default(''),
       customer: z.string().max(256).default(''),
       dealStage: z.enum(['lead', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost']).default('closed_won'),
+      // Pipeline fields
+      contactName: z.string().max(256).optional(),
+      contactEmail: z.string().max(320).optional(),
+      contactPhone: z.string().max(64).optional(),
+      dealValue: z.number().min(0).optional(),
+      probability: z.number().min(0).max(100).optional(),
+      expectedCloseDate: z.string().optional(),
+      lostReason: z.string().max(512).optional(),
+      nextAction: z.string().max(512).optional(),
       notes: z.string().max(2000).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
@@ -38,6 +47,14 @@ export const salesRouter = router({
           product: input.product,
           customer: input.customer,
           dealStage: input.dealStage,
+          contactName: input.contactName ?? null,
+          contactEmail: input.contactEmail ?? null,
+          contactPhone: input.contactPhone ?? null,
+          dealValue: input.dealValue ?? null,
+          probability: input.probability ?? 50,
+          expectedCloseDate: input.expectedCloseDate ? new Date(input.expectedCloseDate) : null,
+          lostReason: input.lostReason ?? null,
+          nextAction: input.nextAction ?? null,
           notes: input.notes ?? null,
         })
         .$returningId();
@@ -60,14 +77,25 @@ export const salesRouter = router({
       product: z.string().max(256).optional(),
       customer: z.string().max(256).optional(),
       dealStage: z.enum(['lead', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost']).optional(),
-      notes: z.string().max(2000).optional(),
+      contactName: z.string().max(256).nullable().optional(),
+      contactEmail: z.string().max(320).nullable().optional(),
+      contactPhone: z.string().max(64).nullable().optional(),
+      dealValue: z.number().min(0).nullable().optional(),
+      probability: z.number().min(0).max(100).optional(),
+      expectedCloseDate: z.string().nullable().optional(),
+      lostReason: z.string().max(512).nullable().optional(),
+      nextAction: z.string().max(512).nullable().optional(),
+      notes: z.string().max(2000).nullable().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new Error('Database unavailable');
-      const { id, date, ...rest } = input;
+      const { id, date, expectedCloseDate, ...rest } = input;
       const updateData: Record<string, any> = { ...rest };
       if (date) updateData.date = new Date(date);
+      if (expectedCloseDate !== undefined) {
+        updateData.expectedCloseDate = expectedCloseDate ? new Date(expectedCloseDate) : null;
+      }
       await db
         .update(salesEntries)
         .set(updateData)

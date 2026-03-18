@@ -120,6 +120,13 @@
       "when": 1773794525189,
       "tag": "0016_colorful_master_mold",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1773871198623,
+      "tag": "0017_massive_silverclaw",
+      "breakpoints": true
     }
   ]
 }
