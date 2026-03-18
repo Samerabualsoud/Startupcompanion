@@ -84,7 +84,7 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
                 </span>
               )}
             </div>
-            <h3 className="text-base font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h3 className="text-base font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               {acc.name}
             </h3>
             <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
@@ -135,7 +135,7 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
               className="flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-all hover:opacity-90"
               style={tracked
                 ? { background: '#D1FAE5', color: '#059669', border: '1px solid #6EE7B7' }
-                : { background: 'oklch(0.18 0.05 240)', color: '#FAF6EF', border: '1px solid oklch(0.28 0.04 240)' }
+                : { background: 'oklch(0.35 0.2 270)', color: '#FAF6EF', border: '1px solid oklch(0.42 0.18 270)' }
               }
               title={tracked ? 'Remove from tracker' : 'Track this application'}
             >
@@ -186,7 +186,7 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
-                style={{ background: 'oklch(0.18 0.05 240)' }}
+                style={{ background: 'oklch(0.35 0.2 270)' }}
               >
                 Apply Now
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -214,7 +214,7 @@ export default function AcceleratorRecommender() {
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+        <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
           Accelerator & Incubator Finder
         </h2>
         <p className="text-sm text-muted-foreground">

@@ -238,11 +238,11 @@ export default function AdminDashboard() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'oklch(0.18 0.05 240)' }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'oklch(0.35 0.2 270)' }}>
             <Shield className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               Platform Management
             </h2>
             <p className="text-xs text-muted-foreground">Full control over users, KYC, resources, and analytics</p>
@@ -276,7 +276,7 @@ export default function AdminDashboard() {
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap relative"
               style={isActive
-                ? { background: 'white', color: 'oklch(0.18 0.05 240)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }
+                ? { background: 'white', color: 'oklch(0.35 0.2 270)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }
                 : { color: 'oklch(0.5 0.03 240)' }}>
               <Icon className="w-3.5 h-3.5" />
               {tab.label}
@@ -294,9 +294,9 @@ export default function AdminDashboard() {
       {activeTab === 'overview' && (
         <div className="space-y-5">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <StatCard label="Total Users" value={stats?.totalUsers ?? 0} icon={Users} color="oklch(0.18 0.05 240)"
+            <StatCard label="Total Users" value={stats?.totalUsers ?? 0} icon={Users} color="oklch(0.35 0.2 270)"
               sub={stats?.pendingSubmissions ? `${stats.pendingSubmissions} pending submissions` : undefined} />
-            <StatCard label="VC Firms" value={stats?.vcCount ?? 0} icon={Building2} color="oklch(0.55 0.13 30)" />
+            <StatCard label="VC Firms" value={stats?.vcCount ?? 0} icon={Building2} color="oklch(0.45 0.2 270)" />
             <StatCard label="Angel Investors" value={stats?.angelCount ?? 0} icon={Star} color="oklch(0.4 0.1 280)" />
             <StatCard label="Startups" value={stats?.startupCount ?? 0} icon={Rocket} color="oklch(0.35 0.12 145)" />
           </div>
@@ -321,7 +321,7 @@ export default function AdminDashboard() {
               {(stats?.recentUsers ?? []).slice(0, 5).map((u: { id: number; name: string | null; email: string; role: string; userType: string; createdAt: Date }) => (
                 <div key={u.id} className="px-4 py-3 flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                    style={{ background: u.role === 'admin' ? 'oklch(0.55 0.13 30)' : 'oklch(0.18 0.05 240)' }}>
+                    style={{ background: u.role === 'admin' ? 'oklch(0.45 0.2 270)' : 'oklch(0.35 0.2 270)' }}>
                     {(u.name ?? u.email ?? '?').charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -383,7 +383,7 @@ export default function AdminDashboard() {
                   <div key={u.id} className="grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto] gap-0 px-4 py-3 hover:bg-secondary/20 transition-colors items-center">
                     <div className="flex items-center gap-3 min-w-0 px-2">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                        style={{ background: u.role === 'admin' ? 'oklch(0.55 0.13 30)' : 'oklch(0.18 0.05 240)' }}>
+                        style={{ background: u.role === 'admin' ? 'oklch(0.45 0.2 270)' : 'oklch(0.35 0.2 270)' }}>
                         {(u.name ?? u.email ?? '?').charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
@@ -589,8 +589,8 @@ export default function AdminDashboard() {
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-left">
               {[
-                { label: 'VC Firms', icon: Building2, color: 'oklch(0.18 0.05 240)' },
-                { label: 'Angel Investors', icon: Users, color: 'oklch(0.55 0.13 30)' },
+                { label: 'VC Firms', icon: Building2, color: 'oklch(0.35 0.2 270)' },
+                { label: 'Angel Investors', icon: Users, color: 'oklch(0.45 0.2 270)' },
                 { label: 'Grants', icon: Package, color: 'oklch(0.35 0.12 145)' },
                 { label: 'Venture Lawyers', icon: Briefcase, color: 'oklch(0.4 0.1 280)' },
               ].map(r => (
@@ -674,8 +674,8 @@ export default function AdminDashboard() {
             <h3 className="text-sm font-semibold text-foreground mb-4">User Type Breakdown</h3>
             <div className="space-y-3">
               {[
-                { label: 'VC Firms', value: stats?.vcCount ?? 0, total: stats?.totalUsers ?? 1, color: 'oklch(0.18 0.05 240)' },
-                { label: 'Angel Investors', value: stats?.angelCount ?? 0, total: stats?.totalUsers ?? 1, color: 'oklch(0.55 0.13 30)' },
+                { label: 'VC Firms', value: stats?.vcCount ?? 0, total: stats?.totalUsers ?? 1, color: 'oklch(0.35 0.2 270)' },
+                { label: 'Angel Investors', value: stats?.angelCount ?? 0, total: stats?.totalUsers ?? 1, color: 'oklch(0.45 0.2 270)' },
                 { label: 'Venture Lawyers', value: stats?.lawyerCount ?? 0, total: stats?.totalUsers ?? 1, color: 'oklch(0.4 0.1 280)' },
                 { label: 'Startups', value: stats?.startupCount ?? 0, total: stats?.totalUsers ?? 1, color: 'oklch(0.35 0.12 145)' },
               ].map(item => (

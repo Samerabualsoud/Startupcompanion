@@ -99,7 +99,7 @@
     -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4 {
-    font-family: 'Plus Jakarta Sans', 'Playfair Display', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 700;
     letter-spacing: -0.02em;
   }

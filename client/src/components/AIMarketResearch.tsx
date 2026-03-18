@@ -105,11 +105,11 @@ export default function AIMarketResearch() {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
             <Search className="w-4.5 h-4.5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               AI Market Research
             </h1>
             <p className="text-xs text-muted-foreground">Comprehensive market analysis powered by AI</p>
@@ -176,7 +176,7 @@ export default function AIMarketResearch() {
             type="submit"
             disabled={mutation.isPending}
             className="w-full h-11 text-sm font-semibold"
-            style={{ background: 'oklch(0.18 0.05 240)', color: '#FAF6EF' }}
+            style={{ background: 'oklch(0.35 0.2 270)', color: '#FAF6EF' }}
           >
             {mutation.isPending ? (
               <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Researching market… (30-60s)</>
@@ -193,7 +193,7 @@ export default function AIMarketResearch() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             {/* Reset button */}
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-base font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <h2 className="text-base font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                 Market Research Report
               </h2>
               <Button variant="outline" size="sm" onClick={() => setResult(null)} className="text-xs">
@@ -202,7 +202,7 @@ export default function AIMarketResearch() {
             </div>
 
             {/* Executive Summary */}
-            <div className="p-4 rounded-xl border border-border" style={{ background: 'oklch(0.18 0.05 240)' }}>
+            <div className="p-4 rounded-xl border border-border" style={{ background: 'oklch(0.35 0.2 270)' }}>
               <p className="text-sm text-white/90 leading-relaxed">{result.executiveSummary}</p>
             </div>
 
@@ -305,7 +305,7 @@ export default function AIMarketResearch() {
               <ul className="space-y-2">
                 {result.goToMarketSuggestions.map((s, i) => (
                   <li key={i} className="flex gap-2.5 text-xs text-foreground">
-                    <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'oklch(0.55 0.13 30)' }}>{i + 1}</span>
+                    <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'oklch(0.45 0.2 270)' }}>{i + 1}</span>
                     {s}
                   </li>
                 ))}

@@ -39,6 +39,41 @@ const profileInput = z.object({
   investorType: z.string().optional(),
   linkedinUrl: z.string().optional(),
   twitterUrl: z.string().optional(),
+  instagramUrl: z.string().optional(),
+  facebookUrl: z.string().optional(),
+  tiktokUrl: z.string().optional(),
+  appStoreUrl: z.string().optional(),
+  playStoreUrl: z.string().optional(),
+  // Product & Business
+  problem: z.string().optional(),
+  solution: z.string().optional(),
+  targetCustomer: z.string().optional(),
+  competitiveAdvantage: z.string().optional(),
+  businessModel: z.string().optional(),
+  revenueModel: z.string().optional(),
+  productStatus: z.enum(['idea', 'prototype', 'mvp', 'beta', 'launched', 'scaling']).optional(),
+  techStack: z.string().optional(),
+  patents: z.string().optional(),
+  keyRisks: z.string().optional(),
+  // Traction Metrics
+  mrr: z.number().optional(),
+  numberOfCustomers: z.number().optional(),
+  monthlyActiveUsers: z.number().optional(),
+  churnRate: z.number().optional(),
+  ltv: z.number().optional(),
+  cac: z.number().optional(),
+  npsScore: z.number().optional(),
+  // Team & Headcount
+  employeeCount: z.number().optional(),
+  fullTimeCount: z.number().optional(),
+  partTimeCount: z.number().optional(),
+  // Legal & Incorporation
+  incorporationCountry: z.string().optional(),
+  incorporationType: z.string().optional(),
+  taxId: z.string().optional(),
+  registrationNumber: z.string().optional(),
+  // Fundraising
+  nextFundingDate: z.date().optional(),
   isPublic: z.boolean().optional(),
 });
 

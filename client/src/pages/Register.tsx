@@ -63,7 +63,7 @@ export default function Register() {
     registerMutation.mutate({ name, email, password });
   };
 
-  const fontFamily = isRTL ? 'Noto Kufi Arabic, sans-serif' : 'Playfair Display, serif';
+  const fontFamily = isRTL ? 'Noto Kufi Arabic, sans-serif' : 'Plus Jakarta Sans, sans-serif';
 
   const FEATURES = isRTL ? [
     'حاسبة تقييم بـ ٧ طرق',
@@ -86,10 +86,10 @@ export default function Register() {
       {/* Left panel */}
       <div
         className="hidden lg:flex flex-col justify-between w-[480px] shrink-0 p-12"
-        style={{ background: 'oklch(0.18 0.05 240)' }}
+        style={{ background: 'oklch(0.35 0.2 270)' }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.55 0.13 30)' }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.45 0.2 270)' }}>
             <TrendingUp className="w-5 h-5 text-white" />
           </div>
           <span className="text-white font-bold text-lg" style={{ fontFamily }}>
@@ -124,8 +124,8 @@ export default function Register() {
           {/* Mobile logo + language switcher */}
           <div className="flex items-center justify-between mb-8 lg:hidden">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
-                <TrendingUp className="w-4 h-4" style={{ color: 'oklch(0.55 0.13 30)' }} />
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
+                <TrendingUp className="w-4 h-4" style={{ color: 'oklch(0.45 0.2 270)' }} />
               </div>
               <span className="font-bold" style={{ fontFamily }}>{t('appName')}</span>
             </div>
@@ -138,7 +138,7 @@ export default function Register() {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'oklch(0.18 0.05 240)' }}>
+            <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'oklch(0.35 0.2 270)' }}>
               {t('registerTitle')}
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -167,7 +167,7 @@ export default function Register() {
                 required
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
                 style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-                onFocus={e => e.target.style.borderColor = 'oklch(0.55 0.13 30)'}
+                onFocus={e => e.target.style.borderColor = 'oklch(0.45 0.2 270)'}
                 onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
               />
             </div>
@@ -185,7 +185,7 @@ export default function Register() {
                 required
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
                 style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-                onFocus={e => e.target.style.borderColor = 'oklch(0.55 0.13 30)'}
+                onFocus={e => e.target.style.borderColor = 'oklch(0.45 0.2 270)'}
                 onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
               />
             </div>
@@ -204,7 +204,7 @@ export default function Register() {
                   required
                   className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all pr-11"
                   style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-                  onFocus={e => e.target.style.borderColor = 'oklch(0.55 0.13 30)'}
+                  onFocus={e => e.target.style.borderColor = 'oklch(0.45 0.2 270)'}
                   onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
                 />
                 <button
@@ -222,7 +222,7 @@ export default function Register() {
               type="submit"
               disabled={registerMutation.isPending}
               className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
-              style={{ background: 'oklch(0.18 0.05 240)' }}
+              style={{ background: 'oklch(0.35 0.2 270)' }}
             >
               {registerMutation.isPending ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> {isRTL ? 'جارٍ إنشاء الحساب...' : 'Creating account…'}</>
@@ -241,7 +241,7 @@ export default function Register() {
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             {t('haveAccount')}{' '}
-            <Link href={LOGIN_PATH} className="font-semibold hover:underline" style={{ color: 'oklch(0.55 0.13 30)' }}>
+            <Link href={LOGIN_PATH} className="font-semibold hover:underline" style={{ color: 'oklch(0.45 0.2 270)' }}>
               {t('signInLink')}
             </Link>
           </div>

@@ -109,16 +109,19 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
     : runway <= 6 ? '#F59E0B'
     : '#10B981';
 
-  // Tool progress
+  // Tool progress — covers profile completeness + tool usage
   const toolProgress = [
-    { id: 'profile',        label: 'Startup Profile',         done: hasProfile },
+    { id: 'profile',        label: 'Startup Profile',         done: hasProfile && !!snapshot.companyName },
+    { id: 'problem',        label: 'Problem & Solution',      done: !!snapshot.problem && !!snapshot.solution },
+    { id: 'business-model', label: 'Business Model',          done: !!snapshot.businessModel },
+    { id: 'financials',     label: 'Financial Metrics',       done: (snapshot.currentARR ?? 0) > 0 || (snapshot.mrr ?? 0) > 0 },
+    { id: 'traction',       label: 'Traction Metrics',        done: (snapshot.numberOfCustomers ?? 0) > 0 || (snapshot.monthlyActiveUsers ?? 0) > 0 },
     { id: 'valuation',      label: t('navValuation'),         done: snapshot.latestValuation !== null },
     { id: 'cogs',           label: t('navCOGS'),              done: snapshot.latestMonthlyCOGS !== null },
     { id: 'esop',           label: t('navESOP'),              done: snapshot.currentOptionPool !== null },
     { id: 'sales',          label: 'Sales Tracker',           done: snapshot.totalSalesRevenue !== null && snapshot.totalSalesRevenue > 0 },
     { id: 'readiness',      label: t('navReadiness'),         done: readinessScore !== null },
     { id: 'pitch-deck',     label: t('navPitchDeck'),         done: pitchScore !== null },
-    { id: 'investor-crm',   label: t('navInvestorCRM'),       done: false },
     { id: 'data-room',      label: 'Data Room',               done: false },
   ];
 

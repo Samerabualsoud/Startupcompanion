@@ -117,10 +117,10 @@ export default function NDAGenerator() {
       <div className="flex items-start gap-4 flex-wrap">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
               <Shield className="w-4 h-4 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               NDA Generator
             </h1>
             <Badge variant="secondary" className="text-xs">AI</Badge>
@@ -347,7 +347,7 @@ export default function NDAGenerator() {
                     className="w-full"
                     onClick={handleGenerate}
                     disabled={isGenerating || !inputs.disclosingParty || !inputs.receivingParty || !inputs.purpose}
-                    style={{ background: 'oklch(0.18 0.05 240)' }}
+                    style={{ background: 'oklch(0.35 0.2 270)' }}
                   >
                     {isGenerating ? (
                       <><Sparkles className="w-4 h-4 mr-2 animate-spin" /> Generating…</>

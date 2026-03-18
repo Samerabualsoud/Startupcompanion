@@ -138,10 +138,10 @@ export default function SAFENoteBuilder() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
               <FileText className="w-4 h-4 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               SAFE / Convertible Note Builder
             </h1>
             <Badge variant="secondary" className="text-xs">AI</Badge>
@@ -389,7 +389,7 @@ export default function SAFENoteBuilder() {
 
                   <div className="space-y-2">
                     <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Projected Ownership at Cap</div>
-                    <div className="text-2xl font-bold" style={{ color: 'oklch(0.55 0.13 30)' }}>
+                    <div className="text-2xl font-bold" style={{ color: 'oklch(0.45 0.2 270)' }}>
                       {ownershipAtCap.toFixed(2)}%
                     </div>
                     <div className="text-xs text-muted-foreground">
@@ -453,7 +453,7 @@ export default function SAFENoteBuilder() {
                     className="w-full"
                     onClick={handleGenerate}
                     disabled={isGenerating || !inputs.companyName || !inputs.investorName}
-                    style={{ background: 'oklch(0.18 0.05 240)' }}
+                    style={{ background: 'oklch(0.35 0.2 270)' }}
                   >
                     {isGenerating ? (
                       <><Sparkles className="w-4 h-4 mr-2 animate-spin" /> Generating…</>

@@ -237,7 +237,7 @@ export default function VestingScheduleBuilder() {
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             Vesting Schedule Builder
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -249,7 +249,7 @@ export default function VestingScheduleBuilder() {
             onClick={handleAiRecommend}
             disabled={aiLoading}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-60"
-            style={{ background: 'oklch(0.55 0.13 30)' }}
+            style={{ background: 'oklch(0.45 0.2 270)' }}
           >
             {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
             AI Review
@@ -294,9 +294,9 @@ export default function VestingScheduleBuilder() {
         {showAiPanel && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             className="border border-border rounded-xl p-4 bg-card"
-            style={{ borderLeft: '3px solid oklch(0.55 0.13 30)' }}>
+            style={{ borderLeft: '3px solid oklch(0.45 0.2 270)' }}>
             <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="w-4 h-4" style={{ color: 'oklch(0.55 0.13 30)' }} />
+              <Sparkles className="w-4 h-4" style={{ color: 'oklch(0.45 0.2 270)' }} />
               <span className="text-sm font-semibold text-foreground">AI Vesting Review</span>
               <button onClick={() => setShowAiPanel(false)} className="ml-auto text-muted-foreground hover:text-foreground">✕</button>
             </div>

@@ -71,7 +71,7 @@ export function generatePDFReport(inputs: StartupInputs, summary: ValuationSumma
   /* Header */
   .report-header { background: #0F1B2D; color: #FAF6EF; padding: 32px 40px; margin: -40px -48px 32px; }
   .report-header .label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: #C4614A; margin-bottom: 6px; }
-  .report-header h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+  .report-header h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 4px; }
   .report-header .meta { font-size: 11px; color: rgba(250,246,239,0.6); }
   .valuation-badge { display: inline-block; margin-top: 16px; background: rgba(196,97,74,0.15); border: 1px solid #C4614A; border-radius: 6px; padding: 12px 20px; }
   .valuation-badge .badge-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #C4614A; }
@@ -80,7 +80,7 @@ export function generatePDFReport(inputs: StartupInputs, summary: ValuationSumma
 
   /* Section */
   .section { margin-bottom: 28px; }
-  .section-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; color: #0F1B2D; border-bottom: 2px solid #C4614A; padding-bottom: 6px; margin-bottom: 14px; }
+  .section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 600; color: #0F1B2D; border-bottom: 2px solid #C4614A; padding-bottom: 6px; margin-bottom: 14px; }
   .section-stamp { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #C4614A; margin-right: 8px; }
 
   /* Metrics grid */
@@ -100,7 +100,7 @@ export function generatePDFReport(inputs: StartupInputs, summary: ValuationSumma
 
   /* Method sections */
   .method-section { margin-bottom: 18px; padding: 14px 16px; background: #faf7f3; border: 1px solid #ede8e0; border-radius: 6px; border-left: 3px solid #C4614A; }
-  .method-section h3 { font-family: 'Playfair Display', serif; font-size: 12px; font-weight: 600; margin-bottom: 5px; color: #0F1B2D; }
+  .method-section h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 600; margin-bottom: 5px; color: #0F1B2D; }
   .method-section .desc { font-size: 10px; color: #666; margin-bottom: 10px; line-height: 1.5; }
   .breakdown-table td.key { color: #888; width: 55%; }
   .breakdown-table td.val { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #0F1B2D; text-align: right; }

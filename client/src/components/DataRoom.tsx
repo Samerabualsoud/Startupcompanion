@@ -234,7 +234,7 @@ export default function DataRoom() {
   return (
     <div className={`flex h-full ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
       {/* ── Left Panel: Room List ── */}
-      <div className="w-64 shrink-0 border-r border-border flex flex-col" style={{ background: 'oklch(0.18 0.05 240)' }}>
+      <div className="w-64 shrink-0 border-r border-border flex flex-col" style={{ background: 'oklch(0.35 0.2 270)' }}>
         <div className="p-4 border-b border-border/30">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-white">Data Rooms</h2>
@@ -272,7 +272,7 @@ export default function DataRoom() {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <FolderOpen className="w-4 h-4 shrink-0" style={{ color: room.isShared ? '#10B981' : 'oklch(0.55 0.13 30)' }} />
+                  <FolderOpen className="w-4 h-4 shrink-0" style={{ color: room.isShared ? '#10B981' : 'oklch(0.45 0.2 270)' }} />
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-semibold truncate">{room.name}</div>
                     <div className="flex items-center gap-1.5 mt-0.5">
@@ -291,7 +291,7 @@ export default function DataRoom() {
         <div className="p-3 border-t border-border/30">
           <Button
             className="w-full h-8 text-xs"
-            style={{ background: 'oklch(0.55 0.13 30)' }}
+            style={{ background: 'oklch(0.45 0.2 270)' }}
             onClick={() => setShowCreateRoom(true)}
           >
             <Plus className="w-3.5 h-3.5 mr-1.5" /> New Data Room
@@ -304,14 +304,14 @@ export default function DataRoom() {
         {!selectedRoom ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center max-w-sm">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'oklch(0.22 0.05 240)' }}>
-                <FolderOpen className="w-8 h-8" style={{ color: 'oklch(0.55 0.13 30)' }} />
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'oklch(0.38 0.18 270)' }}>
+                <FolderOpen className="w-8 h-8" style={{ color: 'oklch(0.45 0.2 270)' }} />
               </div>
               <h3 className="text-lg font-bold text-foreground mb-2">Select or Create a Data Room</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 Organize your startup documents and share them securely with investors, advisors, or partners.
               </p>
-              <Button onClick={() => setShowCreateRoom(true)} style={{ background: 'oklch(0.55 0.13 30)' }}>
+              <Button onClick={() => setShowCreateRoom(true)} style={{ background: 'oklch(0.45 0.2 270)' }}>
                 <Plus className="w-4 h-4 mr-2" /> Create Data Room
               </Button>
             </div>
@@ -319,9 +319,9 @@ export default function DataRoom() {
         ) : (
           <>
             {/* Header */}
-            <div className="shrink-0 px-5 py-3.5 border-b border-border flex items-center justify-between" style={{ background: 'oklch(0.18 0.05 240)' }}>
+            <div className="shrink-0 px-5 py-3.5 border-b border-border flex items-center justify-between" style={{ background: 'oklch(0.35 0.2 270)' }}>
               <div className="flex items-center gap-3">
-                <FolderOpen className="w-5 h-5" style={{ color: 'oklch(0.55 0.13 30)' }} />
+                <FolderOpen className="w-5 h-5" style={{ color: 'oklch(0.45 0.2 270)' }} />
                 <div>
                   <h2 className="text-sm font-bold text-white">{selectedRoom.name}</h2>
                   {selectedRoom.description && (
@@ -346,7 +346,7 @@ export default function DataRoom() {
                 <Button
                   size="sm"
                   className="h-8 text-xs gap-1.5"
-                  style={{ background: 'oklch(0.55 0.13 30)' }}
+                  style={{ background: 'oklch(0.45 0.2 270)' }}
                   onClick={() => { setShareUrl(selectedRoom.shareToken ? `${window.location.origin}/data-room/${selectedRoom.shareToken}` : null); setShowShareModal(true); }}
                 >
                   <Share2 className="w-3.5 h-3.5" /> Share
@@ -446,7 +446,7 @@ export default function DataRoom() {
                         }}
                       >
                         {expandedFolders.has(folder) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                        <FolderOpen className="w-4 h-4" style={{ color: 'oklch(0.55 0.13 30)' }} />
+                        <FolderOpen className="w-4 h-4" style={{ color: 'oklch(0.45 0.2 270)' }} />
                         {folder}
                         <span className="text-xs text-muted-foreground font-normal">({folderFiles.length})</span>
                       </button>
@@ -516,11 +516,11 @@ export default function DataRoom() {
             animate={{ width: 320, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             className="shrink-0 border-l border-border flex flex-col overflow-hidden"
-            style={{ background: 'oklch(0.18 0.05 240)' }}
+            style={{ background: 'oklch(0.35 0.2 270)' }}
           >
             <div className="p-4 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4" style={{ color: 'oklch(0.55 0.13 30)' }} />
+                <Activity className="w-4 h-4" style={{ color: 'oklch(0.45 0.2 270)' }} />
                 <h3 className="text-sm font-bold text-white">Activity Log</h3>
               </div>
               <button onClick={() => setShowActivity(false)} className="text-white/40 hover:text-white">
@@ -539,13 +539,13 @@ export default function DataRoom() {
                 </div>
               ) : (
                 activity.map((entry: ActivityEntry) => (
-                  <div key={entry.id} className="p-2.5 rounded-lg" style={{ background: 'oklch(0.22 0.04 240)' }}>
+                  <div key={entry.id} className="p-2.5 rounded-lg" style={{ background: 'oklch(0.38 0.18 270)' }}>
                     <div className="flex items-start gap-2">
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: 'oklch(0.55 0.13 30)20' }}>
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: 'oklch(0.45 0.2 270)20' }}>
                         {entry.action === 'room_opened' ? (
-                          <Eye className="w-3 h-3" style={{ color: 'oklch(0.55 0.13 30)' }} />
+                          <Eye className="w-3 h-3" style={{ color: 'oklch(0.45 0.2 270)' }} />
                         ) : (
-                          <FileText className="w-3 h-3" style={{ color: 'oklch(0.55 0.13 30)' }} />
+                          <FileText className="w-3 h-3" style={{ color: 'oklch(0.45 0.2 270)' }} />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -581,7 +581,7 @@ export default function DataRoom() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <FolderPlus className="w-5 h-5" style={{ color: 'oklch(0.55 0.13 30)' }} />
+              <FolderPlus className="w-5 h-5" style={{ color: 'oklch(0.45 0.2 270)' }} />
               Create Data Room
             </DialogTitle>
           </DialogHeader>
@@ -607,7 +607,7 @@ export default function DataRoom() {
               <Button variant="outline" className="flex-1" onClick={() => setShowCreateRoom(false)}>Cancel</Button>
               <Button
                 className="flex-1"
-                style={{ background: 'oklch(0.55 0.13 30)' }}
+                style={{ background: 'oklch(0.45 0.2 270)' }}
                 disabled={!newRoomName.trim() || createRoom.isPending}
                 onClick={() => createRoom.mutate({ name: newRoomName.trim(), description: newRoomDesc || undefined })}
               >

@@ -1,13 +1,15 @@
 /**
  * Startup Profile Page
- * Founders can build and manage their startup's full profile
+ * Comprehensive founder profile with 60+ fields organized in sections
  */
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Building2, Users, TrendingUp, Target, Plus, Trash2, Edit3, Check, X,
-  Globe, Linkedin, Twitter, Upload, ChevronDown, ChevronUp, Loader2,
-  DollarSign, BarChart3, Calendar, Flag, Rocket, BookOpen, Save, Eye, EyeOff
+  Building2, Users, TrendingUp, Target, Plus, Trash2, Check, X,
+  Globe, ChevronDown, ChevronUp, Loader2,
+  DollarSign, BarChart3, Calendar, Flag, Save, Eye, EyeOff,
+  Lightbulb, Zap, ShoppingCart, Code2, Scale, Link2, Activity,
+  UserCheck, Shield
 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useAuth } from '@/_core/hooks/useAuth';
@@ -29,6 +31,29 @@ const STAGE_OPTIONS = [
   { value: 'growth', label: 'Growth' },
 ];
 
+const PRODUCT_STATUS_OPTIONS = [
+  { value: 'idea', label: 'Idea' },
+  { value: 'prototype', label: 'Prototype' },
+  { value: 'mvp', label: 'MVP' },
+  { value: 'beta', label: 'Beta' },
+  { value: 'launched', label: 'Launched' },
+  { value: 'scaling', label: 'Scaling' },
+];
+
+const BUSINESS_MODEL_OPTIONS = [
+  { value: 'saas', label: 'SaaS' },
+  { value: 'marketplace', label: 'Marketplace' },
+  { value: 'ecommerce', label: 'E-Commerce' },
+  { value: 'services', label: 'Services' },
+  { value: 'hardware', label: 'Hardware' },
+  { value: 'manufacturing', label: 'Manufacturing' },
+  { value: 'other', label: 'Other' },
+];
+
+const INCORPORATION_TYPES = [
+  'LLC', 'C-Corp', 'S-Corp', 'Ltd', 'PLC', 'GmbH', 'SAS', 'SARL', 'JSC', 'Other'
+];
+
 const MILESTONE_CATEGORIES = [
   { value: 'product', label: 'Product', color: '#6366F1' },
   { value: 'revenue', label: 'Revenue', color: '#10B981' },
@@ -41,8 +66,8 @@ const MILESTONE_CATEGORIES = [
 const fmt = (n?: number | null) => n != null ? `$${n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(0) + 'K' : n.toFixed(0)}` : '—';
 
 // ── Section Wrapper ──────────────────────────────────────────────────────────
-function Section({ title, icon: Icon, color, children, defaultOpen = true }: {
-  title: string; icon: any; color: string; children: React.ReactNode; defaultOpen?: boolean;
+function Section({ title, icon: Icon, color, children, defaultOpen = true, badge }: {
+  title: string; icon: any; color: string; children: React.ReactNode; defaultOpen?: boolean; badge?: string;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
@@ -54,7 +79,12 @@ function Section({ title, icon: Icon, color, children, defaultOpen = true }: {
         <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: color }}>
           <Icon className="w-3.5 h-3.5 text-white" />
         </div>
-        <span className="font-semibold text-sm text-foreground flex-1" style={{ fontFamily: 'Playfair Display, serif' }}>{title}</span>
+        <span className="font-semibold text-sm text-foreground flex-1">{title}</span>
+        {badge && (
+          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full mr-2" style={{ background: color + '20', color }}>
+            {badge}
+          </span>
+        )}
         {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
       </button>
       <AnimatePresence initial={false}>
@@ -75,12 +105,22 @@ function Section({ title, icon: Icon, color, children, defaultOpen = true }: {
 }
 
 // ── Field ────────────────────────────────────────────────────────────────────
-function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
+function Field({ label, children, hint, span2 }: { label: string; children: React.ReactNode; hint?: string; span2?: boolean }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className={`flex flex-col gap-1 ${span2 ? 'sm:col-span-2' : ''}`}>
       <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</label>
       {children}
       {hint && <p className="text-[11px] text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
+// ── Metric Card ──────────────────────────────────────────────────────────────
+function MetricCard({ label, value, color }: { label: string; value: string; color?: string }) {
+  return (
+    <div className="rounded-lg p-3 text-center border border-border/50" style={{ background: 'var(--secondary)' }}>
+      <div className="text-base font-bold font-mono" style={{ color: color || 'var(--foreground)' }}>{value}</div>
+      <div className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">{label}</div>
     </div>
   );
 }
@@ -101,7 +141,7 @@ export default function StartupProfile() {
   });
 
   const addMember = trpc.profile.addTeamMember.useMutation({
-    onSuccess: (data) => { utils.profile.getTeam.invalidate(); setAddingMember(false); setNewMember({ name: '', role: '', bio: '', equityPercent: 0, isFounder: false, esopShares: 0, esopVestingMonths: 48, esopCliffMonths: 12 }); toast.success('Team member added'); },
+    onSuccess: () => { utils.profile.getTeam.invalidate(); setAddingMember(false); setNewMember({ name: '', role: '', bio: '', equityPercent: 0, isFounder: false, esopShares: 0, esopVestingMonths: 48, esopCliffMonths: 12 }); toast.success('Team member added'); },
     onError: (e) => toast.error(e.message),
   });
 
@@ -127,16 +167,35 @@ export default function StartupProfile() {
     onSuccess: () => utils.profile.getSavedValuations.invalidate(),
   });
 
-  // Form state
+  // Form state — all 60+ fields
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
+    // Identity
     name: '', tagline: '', description: '', logoUrl: '', websiteUrl: '', pitchDeckUrl: '',
     sector: '', stage: '' as any, country: '', city: '', foundedYear: new Date().getFullYear(),
-    currentARR: 0, monthlyBurnRate: 0, cashOnHand: 0, totalRaised: 0,
-    totalSharesOutstanding: 0, authorizedShares: 0, parValuePerShare: 0, esopPoolPercent: 0,
+    // Problem & Solution
+    problem: '', solution: '', targetCustomer: '', competitiveAdvantage: '',
+    // Business Model
+    businessModel: '' as any, revenueModel: '', productStatus: '' as any,
+    techStack: '', patents: '', keyRisks: '',
+    // Financial Metrics
+    currentARR: 0, mrr: 0, monthlyBurnRate: 0, cashOnHand: 0, totalRaised: 0,
     revenueGrowthRate: 0, grossMargin: 0, totalAddressableMarket: 0,
     targetRaise: 0, useOfFunds: '', investorType: '',
-    linkedinUrl: '', twitterUrl: '', isPublic: false,
+    // Traction Metrics
+    numberOfCustomers: 0, monthlyActiveUsers: 0, churnRate: 0,
+    ltv: 0, cac: 0, npsScore: 0,
+    // Cap Table
+    totalSharesOutstanding: 0, authorizedShares: 0, parValuePerShare: 0, esopPoolPercent: 0,
+    // Team & Headcount
+    employeeCount: 0, fullTimeCount: 0, partTimeCount: 0,
+    // Legal & Incorporation
+    incorporationCountry: '', incorporationType: '', taxId: '', registrationNumber: '',
+    // Social & Links
+    linkedinUrl: '', twitterUrl: '', instagramUrl: '', facebookUrl: '',
+    tiktokUrl: '', appStoreUrl: '', playStoreUrl: '',
+    // Settings
+    isPublic: false,
   });
 
   const [addingMember, setAddingMember] = useState(false);
@@ -155,29 +214,67 @@ export default function StartupProfile() {
         tagline: profile.tagline || '',
         description: profile.description || '',
         logoUrl: profile.logoUrl || '',
-      websiteUrl: profile.websiteUrl || '',
-      pitchDeckUrl: profile.pitchDeckUrl || '',
-      sector: profile.sector || '',
+        websiteUrl: (profile as any).websiteUrl || '',
+        pitchDeckUrl: (profile as any).pitchDeckUrl || '',
+        sector: profile.sector || '',
         stage: profile.stage || '',
         country: profile.country || '',
         city: profile.city || '',
         foundedYear: profile.foundedYear || new Date().getFullYear(),
+        // Problem & Solution
+        problem: (profile as any).problem || '',
+        solution: (profile as any).solution || '',
+        targetCustomer: (profile as any).targetCustomer || '',
+        competitiveAdvantage: (profile as any).competitiveAdvantage || '',
+        // Business Model
+        businessModel: (profile as any).businessModel || '',
+        revenueModel: (profile as any).revenueModel || '',
+        productStatus: (profile as any).productStatus || '',
+        techStack: (profile as any).techStack || '',
+        patents: (profile as any).patents || '',
+        keyRisks: (profile as any).keyRisks || '',
+        // Financial
         currentARR: profile.currentARR || 0,
+        mrr: (profile as any).mrr || 0,
         monthlyBurnRate: profile.monthlyBurnRate || 0,
         cashOnHand: profile.cashOnHand || 0,
         totalRaised: profile.totalRaised || 0,
-        totalSharesOutstanding: profile.totalSharesOutstanding || 0,
-        authorizedShares: profile.authorizedShares || 0,
-        parValuePerShare: profile.parValuePerShare || 0,
-        esopPoolPercent: profile.esopPoolPercent || 0,
         revenueGrowthRate: profile.revenueGrowthRate || 0,
         grossMargin: profile.grossMargin || 0,
         totalAddressableMarket: profile.totalAddressableMarket || 0,
         targetRaise: profile.targetRaise || 0,
         useOfFunds: profile.useOfFunds || '',
         investorType: profile.investorType || '',
+        // Traction
+        numberOfCustomers: (profile as any).numberOfCustomers || 0,
+        monthlyActiveUsers: (profile as any).monthlyActiveUsers || 0,
+        churnRate: (profile as any).churnRate || 0,
+        ltv: (profile as any).ltv || 0,
+        cac: (profile as any).cac || 0,
+        npsScore: (profile as any).npsScore || 0,
+        // Cap Table
+        totalSharesOutstanding: profile.totalSharesOutstanding || 0,
+        authorizedShares: profile.authorizedShares || 0,
+        parValuePerShare: profile.parValuePerShare || 0,
+        esopPoolPercent: profile.esopPoolPercent || 0,
+        // Team & Headcount
+        employeeCount: (profile as any).employeeCount || 0,
+        fullTimeCount: (profile as any).fullTimeCount || 0,
+        partTimeCount: (profile as any).partTimeCount || 0,
+        // Legal
+        incorporationCountry: (profile as any).incorporationCountry || '',
+        incorporationType: (profile as any).incorporationType || '',
+        taxId: (profile as any).taxId || '',
+        registrationNumber: (profile as any).registrationNumber || '',
+        // Social
         linkedinUrl: profile.linkedinUrl || '',
         twitterUrl: profile.twitterUrl || '',
+        instagramUrl: (profile as any).instagramUrl || '',
+        facebookUrl: (profile as any).facebookUrl || '',
+        tiktokUrl: (profile as any).tiktokUrl || '',
+        appStoreUrl: (profile as any).appStoreUrl || '',
+        playStoreUrl: (profile as any).playStoreUrl || '',
+        // Settings
         isPublic: profile.isPublic || false,
       });
     }
@@ -186,7 +283,12 @@ export default function StartupProfile() {
   const handleSave = () => {
     if (!form.name.trim()) { toast.error('Startup name is required'); return; }
     setSaving(true);
-    saveProfile.mutate({ ...form, stage: form.stage || undefined });
+    saveProfile.mutate({
+      ...form,
+      stage: form.stage || undefined,
+      businessModel: form.businessModel || undefined,
+      productStatus: form.productStatus || undefined,
+    });
   };
 
   const set = (key: string, val: any) => setForm(f => ({ ...f, [key]: val }));
@@ -194,6 +296,21 @@ export default function StartupProfile() {
     const n = parseFloat(val);
     set(key, isNaN(n) ? 0 : n);
   };
+  const setInt = (key: string, val: string) => {
+    const n = parseInt(val);
+    set(key, isNaN(n) ? 0 : n);
+  };
+
+  // Computed metrics
+  const runway = form.cashOnHand > 0 && form.monthlyBurnRate > 0
+    ? Math.floor(form.cashOnHand / form.monthlyBurnRate)
+    : null;
+  const ltvCacRatio = form.cac > 0 && form.ltv > 0
+    ? (form.ltv / form.cac).toFixed(1)
+    : null;
+  const mrrFromArr = form.currentARR > 0 && form.mrr === 0
+    ? Math.round(form.currentARR / 12)
+    : null;
 
   if (authLoading || profileLoading) {
     return (
@@ -206,12 +323,12 @@ export default function StartupProfile() {
   if (!isAuthenticated) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'oklch(0.18 0.05 240)' }}>
-          <Building2 className="w-7 h-7" style={{ color: 'oklch(0.55 0.13 30)' }} />
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'oklch(0.45 0.2 270)' }}>
+          <Building2 className="w-7 h-7 text-white" />
         </div>
-        <h2 className="text-xl font-bold text-foreground mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>Sign in to Build Your Profile</h2>
+        <h2 className="text-xl font-bold text-foreground mb-2">Sign in to Build Your Profile</h2>
         <p className="text-sm text-muted-foreground mb-5 max-w-xs">Create a startup profile to save your data, track milestones, and auto-fill your valuation reports.</p>
-        <Button onClick={() => window.location.href = getLoginUrl()} style={{ background: 'oklch(0.55 0.13 30)', color: 'white' }}>
+        <Button onClick={() => window.location.href = getLoginUrl()} style={{ background: 'oklch(0.45 0.2 270)', color: 'white' }}>
           Sign In
         </Button>
       </div>
@@ -226,15 +343,22 @@ export default function StartupProfile() {
           {form.logoUrl ? (
             <img src={form.logoUrl} alt="logo" className="w-12 h-12 rounded-xl object-cover border border-border" />
           ) : (
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg" style={{ background: 'oklch(0.18 0.05 240)' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg"
+              style={{ background: 'oklch(0.45 0.2 270)' }}>
               {form.name ? form.name[0].toUpperCase() : '?'}
             </div>
           )}
           <div>
-            <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h1 className="text-xl font-bold text-foreground">
               {form.name || 'Your Startup'}
             </h1>
             <p className="text-xs text-muted-foreground">{form.tagline || 'Add a tagline below'}</p>
+            {form.stage && (
+              <span className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                style={{ background: 'oklch(0.45 0.2 270 / 0.15)', color: 'oklch(0.55 0.2 270)' }}>
+                {STAGE_OPTIONS.find(s => s.value === form.stage)?.label || form.stage}
+              </span>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -250,7 +374,7 @@ export default function StartupProfile() {
             disabled={saving}
             size="sm"
             className="flex items-center gap-1.5 text-white"
-            style={{ background: 'oklch(0.55 0.13 30)' }}
+            style={{ background: 'oklch(0.45 0.2 270)' }}
           >
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
             Save Profile
@@ -258,8 +382,8 @@ export default function StartupProfile() {
         </div>
       </div>
 
-      {/* ── Identity ── */}
-      <Section title="Identity & Overview" icon={Building2} color="oklch(0.18 0.05 240)">
+      {/* ── 1. Identity & Overview ── */}
+      <Section title="Identity & Overview" icon={Building2} color="oklch(0.45 0.2 270)">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Startup Name *">
             <Input value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Acme AI" />
@@ -301,20 +425,85 @@ export default function StartupProfile() {
             <Input value={form.city} onChange={e => set('city', e.target.value)} placeholder="e.g. Riyadh" />
           </Field>
           <Field label="Founded Year">
-            <Input type="number" value={form.foundedYear} onChange={e => setNum('foundedYear', e.target.value)} />
+            <Input type="number" value={form.foundedYear} onChange={e => setInt('foundedYear', e.target.value)} />
           </Field>
-          <div className="sm:col-span-2">
-            <Field label="Description">
-              <Textarea value={form.description} onChange={e => set('description', e.target.value)} placeholder="What does your startup do? Who is it for? What problem does it solve?" rows={3} />
-            </Field>
-          </div>
+          <Field label="Pitch Deck URL">
+            <Input value={form.pitchDeckUrl ?? ''} onChange={e => set('pitchDeckUrl', e.target.value)} placeholder="https://docsend.com/..." />
+          </Field>
+          <Field label="Description" span2>
+            <Textarea value={form.description} onChange={e => set('description', e.target.value)}
+              placeholder="What does your startup do? Who is it for? What problem does it solve?" rows={3} />
+          </Field>
         </div>
       </Section>
 
-      {/* ── Financials ── */}
-      <Section title="Financial Metrics" icon={DollarSign} color="oklch(0.55 0.13 30)">
+      {/* ── 2. Problem & Solution ── */}
+      <Section title="Problem & Solution" icon={Lightbulb} color="oklch(0.6 0.18 45)" defaultOpen={false}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="Problem Statement" span2>
+            <Textarea value={form.problem} onChange={e => set('problem', e.target.value)}
+              placeholder="What specific pain point or problem does your startup solve? Be concrete about who suffers from it and how much." rows={3} />
+          </Field>
+          <Field label="Solution" span2>
+            <Textarea value={form.solution} onChange={e => set('solution', e.target.value)}
+              placeholder="How does your product/service solve the problem? What makes it unique?" rows={3} />
+          </Field>
+          <Field label="Target Customer" span2>
+            <Textarea value={form.targetCustomer} onChange={e => set('targetCustomer', e.target.value)}
+              placeholder="Who is your ideal customer? Describe demographics, firmographics, and psychographics." rows={2} />
+          </Field>
+          <Field label="Competitive Advantage" span2>
+            <Textarea value={form.competitiveAdvantage} onChange={e => set('competitiveAdvantage', e.target.value)}
+              placeholder="What is your unfair advantage? Why can't competitors easily replicate this?" rows={2} />
+          </Field>
+          <Field label="Key Risks" span2>
+            <Textarea value={form.keyRisks} onChange={e => set('keyRisks', e.target.value)}
+              placeholder="What are the top 3 risks to your business? Market risk, execution risk, regulatory risk, etc." rows={2} />
+          </Field>
+        </div>
+      </Section>
+
+      {/* ── 3. Business Model & Product ── */}
+      <Section title="Business Model & Product" icon={ShoppingCart} color="oklch(0.55 0.18 200)" defaultOpen={false}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="Business Model">
+            <Select value={form.businessModel} onValueChange={v => set('businessModel', v)}>
+              <SelectTrigger><SelectValue placeholder="Select model…" /></SelectTrigger>
+              <SelectContent>
+                {BUSINESS_MODEL_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Product Status">
+            <Select value={form.productStatus} onValueChange={v => set('productStatus', v)}>
+              <SelectTrigger><SelectValue placeholder="Select status…" /></SelectTrigger>
+              <SelectContent>
+                {PRODUCT_STATUS_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Revenue Model" span2>
+            <Input value={form.revenueModel} onChange={e => set('revenueModel', e.target.value)}
+              placeholder="e.g. Monthly subscription $29/user, Transaction fee 2.5%, Freemium with paid tiers" />
+          </Field>
+          <Field label="Tech Stack" span2>
+            <Input value={form.techStack} onChange={e => set('techStack', e.target.value)}
+              placeholder="e.g. React, Node.js, PostgreSQL, AWS, Python ML pipeline" />
+          </Field>
+          <Field label="Patents / IP" span2>
+            <Input value={form.patents} onChange={e => set('patents', e.target.value)}
+              placeholder="e.g. Patent pending US2024/123456, Proprietary algorithm, Trade secrets" />
+          </Field>
+        </div>
+      </Section>
+
+      {/* ── 4. Financial Metrics ── */}
+      <Section title="Financial Metrics" icon={DollarSign} color="oklch(0.55 0.18 145)">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          <Field label="Annual Recurring Revenue ($)" hint="Current ARR">
+          <Field label="MRR ($)" hint="Monthly Recurring Revenue">
+            <Input type="number" value={form.mrr || ''} onChange={e => setNum('mrr', e.target.value)} placeholder="0" />
+          </Field>
+          <Field label="ARR ($)" hint="Annual Recurring Revenue">
             <Input type="number" value={form.currentARR || ''} onChange={e => setNum('currentARR', e.target.value)} placeholder="0" />
           </Field>
           <Field label="Monthly Burn Rate ($)">
@@ -339,33 +528,64 @@ export default function StartupProfile() {
             <Input type="number" value={form.targetRaise || ''} onChange={e => setNum('targetRaise', e.target.value)} placeholder="0" />
           </Field>
           <Field label="Investor Type">
-            <Input value={form.investorType} onChange={e => set('investorType', e.target.value)} placeholder="e.g. Angel, VC" />
+            <Input value={form.investorType} onChange={e => set('investorType', e.target.value)} placeholder="e.g. Angel, VC, Strategic" />
           </Field>
-        </div>
-        <div className="mt-4">
-          <Field label="Use of Funds">
-            <Textarea value={form.useOfFunds} onChange={e => set('useOfFunds', e.target.value)} placeholder="How will you use the money you're raising?" rows={2} />
+          <Field label="Use of Funds" span2>
+            <Textarea value={form.useOfFunds} onChange={e => set('useOfFunds', e.target.value)}
+              placeholder="How will you use the money you're raising? e.g. 40% engineering, 30% sales, 30% marketing" rows={2} />
           </Field>
         </div>
         {/* Quick metrics display */}
-        {(form.cashOnHand > 0 && form.monthlyBurnRate > 0) && (
+        {(runway !== null || form.currentARR > 0 || form.totalRaised > 0) && (
           <div className="mt-4 grid grid-cols-3 gap-3">
-            {[
-              { label: 'Runway', value: `${Math.floor(form.cashOnHand / form.monthlyBurnRate)} months` },
-              { label: 'ARR', value: fmt(form.currentARR) },
-              { label: 'Total Raised', value: fmt(form.totalRaised) },
-            ].map(m => (
-              <div key={m.label} className="rounded-lg p-3 text-center" style={{ background: 'oklch(0.97 0.005 80)' }}>
-                <div className="text-lg font-bold text-foreground font-mono">{m.value}</div>
-                <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{m.label}</div>
-              </div>
-            ))}
+            {runway !== null && <MetricCard label="Runway" value={`${runway} mo`} color="oklch(0.55 0.18 145)" />}
+            {form.currentARR > 0 && <MetricCard label="ARR" value={fmt(form.currentARR)} color="oklch(0.55 0.18 145)" />}
+            {form.totalRaised > 0 && <MetricCard label="Total Raised" value={fmt(form.totalRaised)} />}
           </div>
         )}
       </Section>
 
-      {/* ── Cap Table ── */}
-      <Section title="Cap Table" icon={BarChart3} color="#8B5CF6" defaultOpen={false}>
+      {/* ── 5. Traction Metrics ── */}
+      <Section title="Traction Metrics" icon={Activity} color="oklch(0.5 0.2 300)" defaultOpen={false}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <Field label="Customers / Accounts" hint="Paying customers or accounts">
+            <Input type="number" value={form.numberOfCustomers || ''} onChange={e => setInt('numberOfCustomers', e.target.value)} placeholder="0" />
+          </Field>
+          <Field label="Monthly Active Users (MAU)">
+            <Input type="number" value={form.monthlyActiveUsers || ''} onChange={e => setInt('monthlyActiveUsers', e.target.value)} placeholder="0" />
+          </Field>
+          <Field label="Churn Rate (%)" hint="Monthly customer churn">
+            <Input type="number" value={form.churnRate || ''} onChange={e => setNum('churnRate', e.target.value)} placeholder="0" step="0.1" />
+          </Field>
+          <Field label="LTV ($)" hint="Customer Lifetime Value">
+            <Input type="number" value={form.ltv || ''} onChange={e => setNum('ltv', e.target.value)} placeholder="0" />
+          </Field>
+          <Field label="CAC ($)" hint="Customer Acquisition Cost">
+            <Input type="number" value={form.cac || ''} onChange={e => setNum('cac', e.target.value)} placeholder="0" />
+          </Field>
+          <Field label="NPS Score" hint="Net Promoter Score (-100 to 100)">
+            <Input type="number" value={form.npsScore || ''} onChange={e => setInt('npsScore', e.target.value)} placeholder="0" min="-100" max="100" />
+          </Field>
+        </div>
+        {/* Traction summary */}
+        {(ltvCacRatio || form.numberOfCustomers > 0 || form.churnRate > 0) && (
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            {ltvCacRatio && <MetricCard label="LTV:CAC" value={`${ltvCacRatio}x`} color={parseFloat(ltvCacRatio) >= 3 ? 'oklch(0.55 0.18 145)' : 'oklch(0.55 0.18 30)'} />}
+            {form.numberOfCustomers > 0 && <MetricCard label="Customers" value={form.numberOfCustomers.toLocaleString()} />}
+            {form.churnRate > 0 && <MetricCard label="Churn" value={`${form.churnRate}%/mo`} color={form.churnRate < 3 ? 'oklch(0.55 0.18 145)' : 'oklch(0.55 0.18 30)'} />}
+          </div>
+        )}
+        {ltvCacRatio && (
+          <p className="text-xs text-muted-foreground mt-3">
+            {parseFloat(ltvCacRatio) >= 3
+              ? '✅ LTV:CAC ratio ≥ 3x is considered healthy for SaaS businesses.'
+              : '⚠️ LTV:CAC ratio below 3x may indicate high acquisition costs or low retention.'}
+          </p>
+        )}
+      </Section>
+
+      {/* ── 6. Cap Table ── */}
+      <Section title="Cap Table" icon={BarChart3} color="oklch(0.5 0.2 270)" defaultOpen={false}>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <Field label="Total Shares Outstanding" hint="Current total issued shares">
             <Input type="number" value={form.totalSharesOutstanding || ''} onChange={e => setNum('totalSharesOutstanding', e.target.value)} placeholder="e.g. 10,000,000" />
@@ -376,22 +596,15 @@ export default function StartupProfile() {
           <Field label="Par Value per Share ($)" hint="Nominal value per share (often $0.0001)">
             <Input type="number" value={form.parValuePerShare || ''} onChange={e => setNum('parValuePerShare', e.target.value)} placeholder="0.0001" step="0.0001" />
           </Field>
-          <Field label="ESOP Pool (%)" hint="Percentage of total shares reserved for employee stock options">
+          <Field label="ESOP Pool (%)" hint="Percentage reserved for employee stock options">
             <Input type="number" value={form.esopPoolPercent || ''} onChange={e => setNum('esopPoolPercent', e.target.value)} placeholder="10" min="0" max="100" />
           </Field>
         </div>
         {(form.totalSharesOutstanding > 0 && form.esopPoolPercent > 0) && (
           <div className="mt-4 grid grid-cols-3 gap-3">
-            {[
-              { label: 'ESOP Shares', value: Math.round(form.totalSharesOutstanding * form.esopPoolPercent / 100).toLocaleString() },
-              { label: 'Available Shares', value: form.authorizedShares > 0 ? (form.authorizedShares - form.totalSharesOutstanding).toLocaleString() : '—' },
-              { label: 'Dilution Headroom', value: form.authorizedShares > 0 ? `${((form.authorizedShares - form.totalSharesOutstanding) / form.authorizedShares * 100).toFixed(1)}%` : '—' },
-            ].map(m => (
-              <div key={m.label} className="rounded-lg p-3 text-center" style={{ background: 'oklch(0.97 0.005 80)' }}>
-                <div className="text-lg font-bold text-foreground font-mono">{m.value}</div>
-                <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{m.label}</div>
-              </div>
-            ))}
+            <MetricCard label="ESOP Shares" value={Math.round(form.totalSharesOutstanding * form.esopPoolPercent / 100).toLocaleString()} />
+            <MetricCard label="Available Shares" value={form.authorizedShares > 0 ? (form.authorizedShares - form.totalSharesOutstanding).toLocaleString() : '—'} />
+            <MetricCard label="Dilution Headroom" value={form.authorizedShares > 0 ? `${((form.authorizedShares - form.totalSharesOutstanding) / form.authorizedShares * 100).toFixed(1)}%` : '—'} />
           </div>
         )}
         <p className="text-xs text-muted-foreground mt-3">
@@ -399,8 +612,141 @@ export default function StartupProfile() {
         </p>
       </Section>
 
-      {/* ── Social ── */}
-      <Section title="Social & Links" icon={Globe} color="#6366F1" defaultOpen={false}>
+      {/* ── 7. Team & Headcount ── */}
+      <Section title="Team & Headcount" icon={UserCheck} color="oklch(0.5 0.18 180)" defaultOpen={false}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+          <Field label="Total Employees">
+            <Input type="number" value={form.employeeCount || ''} onChange={e => setInt('employeeCount', e.target.value)} placeholder="0" />
+          </Field>
+          <Field label="Full-Time">
+            <Input type="number" value={form.fullTimeCount || ''} onChange={e => setInt('fullTimeCount', e.target.value)} placeholder="0" />
+          </Field>
+          <Field label="Part-Time / Contractors">
+            <Input type="number" value={form.partTimeCount || ''} onChange={e => setInt('partTimeCount', e.target.value)} placeholder="0" />
+          </Field>
+        </div>
+        <div className="border-t border-border pt-4">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Team Members</p>
+          <div className="space-y-3 mb-4">
+            {teamLoading ? (
+              <div className="flex items-center justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>
+            ) : team.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-3">No team members yet. Add your co-founders and key hires.</p>
+            ) : (
+              team.map((m: any) => (
+                <div key={m.id} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-secondary/20">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
+                    style={{ background: m.isFounder ? 'oklch(0.5 0.2 270)' : 'oklch(0.5 0.18 180)' }}>
+                    {m.name[0].toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-foreground truncate">{m.name}</span>
+                      {m.isFounder && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Founder</Badge>}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {m.role}{m.equityPercent ? ` · ${m.equityPercent}% equity` : ''}
+                      {m.esopShares > 0 ? ` · ${m.esopShares.toLocaleString()} ESOP (${m.esopVestingMonths}mo vest, ${m.esopCliffMonths}mo cliff)` : ''}
+                    </div>
+                  </div>
+                  <button onClick={() => deleteMember.mutate({ id: m.id })} className="p-1.5 rounded hover:bg-red-50 hover:text-red-500 transition-colors text-muted-foreground">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+
+          {addingMember ? (
+            <div className="rounded-lg border border-border p-4 bg-secondary/10 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Name *">
+                  <Input value={newMember.name} onChange={e => setNewMember(m => ({ ...m, name: e.target.value }))} placeholder="Full name" />
+                </Field>
+                <Field label="Role *">
+                  <Input value={newMember.role} onChange={e => setNewMember(m => ({ ...m, role: e.target.value }))} placeholder="e.g. CEO, CTO" />
+                </Field>
+                <Field label="Equity %" hint="Percentage of total company equity">
+                  <Input type="number" value={newMember.equityPercent || ''} onChange={e => setNewMember(m => ({ ...m, equityPercent: parseFloat(e.target.value) || 0 }))} placeholder="0" />
+                </Field>
+                <Field label="Is Founder?">
+                  <div className="flex items-center gap-2 mt-1">
+                    <input type="checkbox" checked={newMember.isFounder} onChange={e => setNewMember(m => ({ ...m, isFounder: e.target.checked }))} className="w-4 h-4" />
+                    <span className="text-sm text-foreground">Yes, this is a founder</span>
+                  </div>
+                </Field>
+              </div>
+              {/* ESOP Grant Fields */}
+              <div className="rounded-lg border border-border p-3 bg-purple-50/30 space-y-3">
+                <p className="text-xs font-semibold text-purple-700">ESOP Grant (optional)</p>
+                <div className="grid grid-cols-3 gap-3">
+                  <Field label="ESOP Shares" hint="Number of options/shares granted">
+                    <Input type="number" value={newMember.esopShares || ''} onChange={e => setNewMember(m => ({ ...m, esopShares: parseInt(e.target.value) || 0 }))} placeholder="0" />
+                  </Field>
+                  <Field label="Vesting (months)" hint="Total vesting period (e.g. 48 = 4 years)">
+                    <Input type="number" value={newMember.esopVestingMonths || ''} onChange={e => setNewMember(m => ({ ...m, esopVestingMonths: parseInt(e.target.value) || 48 }))} placeholder="48" />
+                  </Field>
+                  <Field label="Cliff (months)" hint="Months before first vesting (e.g. 12 = 1 year cliff)">
+                    <Input type="number" value={newMember.esopCliffMonths || ''} onChange={e => setNewMember(m => ({ ...m, esopCliffMonths: parseInt(e.target.value) || 12 }))} placeholder="12" />
+                  </Field>
+                </div>
+              </div>
+              <Field label="Bio">
+                <Textarea value={newMember.bio} onChange={e => setNewMember(m => ({ ...m, bio: e.target.value }))} placeholder="Short bio..." rows={2} />
+              </Field>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => addMember.mutate(newMember)} disabled={!newMember.name || !newMember.role || addMember.isPending}
+                  style={{ background: '#10B981', color: 'white' }}>
+                  {addMember.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  Add Member
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setAddingMember(false)}>Cancel</Button>
+              </div>
+            </div>
+          ) : (
+            <Button size="sm" variant="outline" onClick={() => setAddingMember(true)} className="flex items-center gap-1.5">
+              <Plus className="w-3.5 h-3.5" /> Add Team Member
+            </Button>
+          )}
+        </div>
+      </Section>
+
+      {/* ── 8. Legal & Incorporation ── */}
+      <Section title="Legal & Incorporation" icon={Scale} color="oklch(0.45 0.15 240)" defaultOpen={false}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="Incorporation Country">
+            <Select value={form.incorporationCountry} onValueChange={v => set('incorporationCountry', v)}>
+              <SelectTrigger><SelectValue placeholder="Select country…" /></SelectTrigger>
+              <SelectContent className="max-h-64 overflow-y-auto">
+                {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Legal Structure / Entity Type">
+            <Select value={form.incorporationType} onValueChange={v => set('incorporationType', v)}>
+              <SelectTrigger><SelectValue placeholder="Select type…" /></SelectTrigger>
+              <SelectContent>
+                {INCORPORATION_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Tax ID / EIN" hint="Employer Identification Number or local equivalent">
+            <Input value={form.taxId} onChange={e => set('taxId', e.target.value)} placeholder="e.g. 12-3456789" />
+          </Field>
+          <Field label="Company Registration Number" hint="Commercial registration or company number">
+            <Input value={form.registrationNumber} onChange={e => set('registrationNumber', e.target.value)} placeholder="e.g. CR-1234567" />
+          </Field>
+        </div>
+        <div className="mt-3 p-3 rounded-lg bg-amber-50/50 border border-amber-200/50">
+          <p className="text-xs text-amber-700">
+            <Shield className="w-3 h-3 inline mr-1" />
+            Legal information is stored securely and only visible to you unless you make your profile public.
+          </p>
+        </div>
+      </Section>
+
+      {/* ── 9. Social & Links ── */}
+      <Section title="Social & Links" icon={Globe} color="oklch(0.5 0.2 220)" defaultOpen={false}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="LinkedIn">
             <Input value={form.linkedinUrl} onChange={e => set('linkedinUrl', e.target.value)} placeholder="https://linkedin.com/company/..." />
@@ -408,99 +754,26 @@ export default function StartupProfile() {
           <Field label="Twitter / X">
             <Input value={form.twitterUrl} onChange={e => set('twitterUrl', e.target.value)} placeholder="https://twitter.com/..." />
           </Field>
-          <Field label="Pitch Deck URL">
-            <Input value={form.pitchDeckUrl ?? ''} onChange={e => set('pitchDeckUrl', e.target.value)} placeholder="https://docsend.com/..." />
+          <Field label="Instagram">
+            <Input value={form.instagramUrl} onChange={e => set('instagramUrl', e.target.value)} placeholder="https://instagram.com/..." />
+          </Field>
+          <Field label="Facebook">
+            <Input value={form.facebookUrl} onChange={e => set('facebookUrl', e.target.value)} placeholder="https://facebook.com/..." />
+          </Field>
+          <Field label="TikTok">
+            <Input value={form.tiktokUrl} onChange={e => set('tiktokUrl', e.target.value)} placeholder="https://tiktok.com/@..." />
+          </Field>
+          <Field label="App Store URL">
+            <Input value={form.appStoreUrl} onChange={e => set('appStoreUrl', e.target.value)} placeholder="https://apps.apple.com/..." />
+          </Field>
+          <Field label="Google Play URL">
+            <Input value={form.playStoreUrl} onChange={e => set('playStoreUrl', e.target.value)} placeholder="https://play.google.com/..." />
           </Field>
         </div>
       </Section>
 
-      {/* ── Team ── */}
-      <Section title={`Team Members (${team.length})`} icon={Users} color="#10B981">
-        <div className="space-y-3 mb-4">
-          {teamLoading ? (
-            <div className="flex items-center justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>
-          ) : team.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-3">No team members yet. Add your co-founders and key hires.</p>
-          ) : (
-            team.map((m: any) => (
-              <div key={m.id} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-secondary/20">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
-                  style={{ background: m.isFounder ? 'oklch(0.55 0.13 30)' : 'oklch(0.18 0.05 240)' }}>
-                  {m.name[0].toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-foreground truncate">{m.name}</span>
-                    {m.isFounder && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Founder</Badge>}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {m.role}{m.equityPercent ? ` · ${m.equityPercent}% equity` : ''}
-                    {m.esopShares > 0 ? ` · ${m.esopShares.toLocaleString()} ESOP (${m.esopVestingMonths}mo vest, ${m.esopCliffMonths}mo cliff)` : ''}
-                  </div>
-                </div>
-                <button onClick={() => deleteMember.mutate({ id: m.id })} className="p-1.5 rounded hover:bg-red-50 hover:text-red-500 transition-colors text-muted-foreground">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-
-        {addingMember ? (
-          <div className="rounded-lg border border-border p-4 bg-secondary/10 space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Name *">
-                <Input value={newMember.name} onChange={e => setNewMember(m => ({ ...m, name: e.target.value }))} placeholder="Full name" />
-              </Field>
-              <Field label="Role *">
-                <Input value={newMember.role} onChange={e => setNewMember(m => ({ ...m, role: e.target.value }))} placeholder="e.g. CEO, CTO" />
-              </Field>
-              <Field label="Equity %" hint="Percentage of total company equity">
-                <Input type="number" value={newMember.equityPercent || ''} onChange={e => setNewMember(m => ({ ...m, equityPercent: parseFloat(e.target.value) || 0 }))} placeholder="0" />
-              </Field>
-              <Field label="Is Founder?">
-                <div className="flex items-center gap-2 mt-1">
-                  <input type="checkbox" checked={newMember.isFounder} onChange={e => setNewMember(m => ({ ...m, isFounder: e.target.checked }))} className="w-4 h-4" />
-                  <span className="text-sm text-foreground">Yes, this is a founder</span>
-                </div>
-              </Field>
-            </div>
-            {/* ESOP Grant Fields */}
-            <div className="rounded-lg border border-border p-3 bg-purple-50/30 space-y-3">
-              <p className="text-xs font-semibold text-purple-700">ESOP Grant (optional)</p>
-              <div className="grid grid-cols-3 gap-3">
-                <Field label="ESOP Shares" hint="Number of options/shares granted">
-                  <Input type="number" value={newMember.esopShares || ''} onChange={e => setNewMember(m => ({ ...m, esopShares: parseInt(e.target.value) || 0 }))} placeholder="0" />
-                </Field>
-                <Field label="Vesting (months)" hint="Total vesting period (e.g. 48 = 4 years)">
-                  <Input type="number" value={newMember.esopVestingMonths || ''} onChange={e => setNewMember(m => ({ ...m, esopVestingMonths: parseInt(e.target.value) || 48 }))} placeholder="48" />
-                </Field>
-                <Field label="Cliff (months)" hint="Months before first vesting (e.g. 12 = 1 year cliff)">
-                  <Input type="number" value={newMember.esopCliffMonths || ''} onChange={e => setNewMember(m => ({ ...m, esopCliffMonths: parseInt(e.target.value) || 12 }))} placeholder="12" />
-                </Field>
-              </div>
-            </div>
-            <Field label="Bio">
-              <Textarea value={newMember.bio} onChange={e => setNewMember(m => ({ ...m, bio: e.target.value }))} placeholder="Short bio..." rows={2} />
-            </Field>
-            <div className="flex gap-2">
-              <Button size="sm" onClick={() => addMember.mutate(newMember)} disabled={!newMember.name || !newMember.role || addMember.isPending}
-                style={{ background: '#10B981', color: 'white' }}>
-                {addMember.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-                Add Member
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => setAddingMember(false)}>Cancel</Button>
-            </div>
-          </div>
-        ) : (
-          <Button size="sm" variant="outline" onClick={() => setAddingMember(true)} className="flex items-center gap-1.5">
-            <Plus className="w-3.5 h-3.5" /> Add Team Member
-          </Button>
-        )}
-      </Section>
-
-      {/* ── Milestones ── */}
-      <Section title={`Milestones (${milestoneList.length})`} icon={Flag} color="#F59E0B" defaultOpen={false}>
+      {/* ── 10. Milestones ── */}
+      <Section title={`Milestones (${milestoneList.length})`} icon={Flag} color="oklch(0.6 0.18 80)" defaultOpen={false}>
         <div className="space-y-2 mb-4">
           {milestoneList.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-3">Track key milestones — product launches, revenue targets, funding goals.</p>
@@ -565,20 +838,20 @@ export default function StartupProfile() {
         )}
       </Section>
 
-      {/* ── Saved Valuations ── */}
-      <Section title={`Saved Valuations (${savedVals.length})`} icon={TrendingUp} color="oklch(0.55 0.13 30)" defaultOpen={savedVals.length > 0}>
+      {/* ── 11. Saved Valuations ── */}
+      <Section title={`Saved Valuations (${savedVals.length})`} icon={TrendingUp} color="oklch(0.55 0.18 145)" defaultOpen={savedVals.length > 0}>
         {savedVals.length === 0 ? (
           <div className="text-center py-6">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: 'oklch(0.95 0.01 80)' }}>
-              <TrendingUp className="w-5 h-5" style={{ color: 'oklch(0.55 0.13 30)' }} />
+            <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: 'oklch(0.95 0.01 145)' }}>
+              <TrendingUp className="w-5 h-5" style={{ color: 'oklch(0.55 0.18 145)' }} />
             </div>
             <p className="text-sm font-medium text-foreground mb-1">No saved valuations yet</p>
-            <p className="text-xs text-muted-foreground">Complete a valuation in the Valuation Calculator and click “Save Scenario” to save it here.</p>
+            <p className="text-xs text-muted-foreground">Complete a valuation in the Valuation Calculator and click "Save Scenario" to save it here.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {savedVals.map((v: any, idx: number) => (
-              <div key={v.id} className="group relative p-4 rounded-xl border border-border hover:border-accent/40 hover:shadow-sm transition-all" style={{ background: 'oklch(0.995 0.002 80)' }}>
+              <div key={v.id} className="group relative p-4 rounded-xl border border-border hover:border-accent/40 hover:shadow-sm transition-all bg-secondary/20">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -589,14 +862,15 @@ export default function StartupProfile() {
                       {new Date(v.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </div>
                     {v.summary?.stage && (
-                      <span className="inline-block mt-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: 'oklch(0.92 0.02 240)', color: 'oklch(0.35 0.05 240)' }}>
+                      <span className="inline-block mt-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full"
+                        style={{ background: 'oklch(0.92 0.02 270)', color: 'oklch(0.35 0.1 270)' }}>
                         {v.summary.stage}
                       </span>
                     )}
                   </div>
                   <div className="text-right shrink-0">
                     {v.blendedValue && (
-                      <div className="text-lg font-bold font-mono" style={{ color: 'oklch(0.55 0.13 30)' }}>
+                      <div className="text-lg font-bold font-mono" style={{ color: 'oklch(0.55 0.18 145)' }}>
                         {fmt(v.blendedValue)}
                       </div>
                     )}
@@ -630,7 +904,7 @@ export default function StartupProfile() {
       {/* Save button at bottom */}
       <div className="flex justify-end mt-2 mb-8">
         <Button onClick={handleSave} disabled={saving} className="flex items-center gap-2 text-white px-6"
-          style={{ background: 'oklch(0.55 0.13 30)' }}>
+          style={{ background: 'oklch(0.45 0.2 270)' }}>
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save All Changes
         </Button>

@@ -73,16 +73,16 @@ export default function AIFundraisingAdvisor() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="shrink-0 px-5 py-3.5 border-b border-border flex items-center justify-between" style={{ background: 'oklch(0.18 0.05 240)' }}>
+      <div className="shrink-0 px-5 py-3.5 border-b border-border flex items-center justify-between" style={{ background: 'oklch(0.35 0.2 270)' }}>
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'oklch(0.55 0.13 30)' }}>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'oklch(0.45 0.2 270)' }}>
             <Bot className="w-4 h-4 text-white" />
           </div>
           <div>
             <div className="text-sm font-semibold text-white">{t('aiFundraisingTitle')}</div>
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-[10px]" style={{ color: 'oklch(0.62 0.02 240)' }}>Expert advisor · Always available</span>
+              <span className="text-[10px]" style={{ color: 'oklch(0.65 0.1 270)' }}>Expert advisor · Always available</span>
             </div>
           </div>
         </div>
@@ -129,10 +129,10 @@ export default function AIFundraisingAdvisor() {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full py-8 text-center">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'oklch(0.18 0.05 240)' }}>
-              <MessageCircle className="w-7 h-7" style={{ color: 'oklch(0.55 0.13 30)' }} />
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'oklch(0.35 0.2 270)' }}>
+              <MessageCircle className="w-7 h-7" style={{ color: 'oklch(0.45 0.2 270)' }} />
             </div>
-            <h3 className="text-base font-bold text-foreground mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h3 className="text-base font-bold text-foreground mb-2" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               Ask Me Anything About Fundraising
             </h3>
             <p className="text-xs text-muted-foreground mb-6 max-w-sm">
@@ -160,7 +160,7 @@ export default function AIFundraisingAdvisor() {
             className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
           >
             <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${msg.role === 'user' ? 'bg-secondary' : ''}`}
-              style={msg.role === 'assistant' ? { background: 'oklch(0.55 0.13 30)' } : {}}>
+              style={msg.role === 'assistant' ? { background: 'oklch(0.45 0.2 270)' } : {}}>
               {msg.role === 'user' ? <User className="w-3.5 h-3.5 text-foreground" /> : <Bot className="w-3.5 h-3.5 text-white" />}
             </div>
             <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.role === 'user' ? 'rounded-tr-sm bg-foreground text-background' : 'rounded-tl-sm bg-card border border-border'}`}>
@@ -177,7 +177,7 @@ export default function AIFundraisingAdvisor() {
 
         {isLoading && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
-            <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'oklch(0.55 0.13 30)' }}>
+            <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'oklch(0.45 0.2 270)' }}>
               <Bot className="w-3.5 h-3.5 text-white" />
             </div>
             <div className="bg-card border border-border rounded-2xl rounded-tl-sm px-4 py-3">
@@ -202,7 +202,7 @@ export default function AIFundraisingAdvisor() {
             className="flex-1 text-sm"
             disabled={isLoading}
           />
-          <Button type="submit" disabled={!input.trim() || isLoading} size="icon" className="shrink-0" style={{ background: 'oklch(0.18 0.05 240)', color: 'white' }}>
+          <Button type="submit" disabled={!input.trim() || isLoading} size="icon" className="shrink-0" style={{ background: 'oklch(0.35 0.2 270)', color: 'white' }}>
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </Button>
         </form>

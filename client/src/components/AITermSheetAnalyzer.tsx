@@ -86,7 +86,7 @@ export default function AITermSheetAnalyzer() {
             <FileText className="w-4.5 h-4.5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>AI Term Sheet Analyzer</h1>
+            <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>AI Term Sheet Analyzer</h1>
             <p className="text-xs text-muted-foreground">Plain-English explanations + red flags + negotiation tips</p>
           </div>
         </div>
@@ -152,7 +152,7 @@ export default function AITermSheetAnalyzer() {
         {result && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>Analysis Results</h2>
+              <h2 className="text-base font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>Analysis Results</h2>
               <Button variant="outline" size="sm" onClick={() => setResult(null)} className="text-xs gap-1.5">
                 <RefreshCw className="w-3.5 h-3.5" /> New Analysis
               </Button>

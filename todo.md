@@ -403,4 +403,37 @@
 - [x] Rebuild DataRoomShare.tsx: tabs for each enabled section (Documents, Company, Financials, Team, Metrics, Contact); email gate; file tracking
 - [x] Implement time-based New badge: newUntil ISO date field on NavItem; isNewFeature() helper; sidebar renders New badge only within 14 days
 - [x] 0 TypeScript errors
+- [x] Save checkpoint and push to GitHub
+
+
+## Round 30 — Platform Audit + Comprehensive Startup Profile
+- [ ] Full platform audit: document all bugs, UX issues, missing wiring, empty states
+- [ ] Rebuild Startup Profile: comprehensive fields (basic info, financials, team, product, traction, legal, social, documents)
+- [ ] Fix all high-priority issues found in audit
+- [ ] Fix all medium-priority issues and polish
+- [ ] 0 TypeScript errors
 - [ ] Save checkpoint and push to GitHub
+
+## Round 30 Completed Items
+- [x] DB migration: added 25+ new fields to startup_profiles (problem, solution, businessModel, mrr, arr, cac, ltv, churnRate, nps, teamSize, incorporationCountry, incorporationDate, legalStructure, website, github, productHunt, angelList, crunchbase, productStatus, techStack, etc.)
+- [x] profileRouter input schema: all new fields included (problem, solution, businessModel, mrr, cac, ltv, churnRate, npsScore, employeeCount, incorporationCountry, etc.)
+- [x] Rebuilt StartupProfile.tsx: 11 comprehensive sections (Identity, Problem & Solution, Business Model & Product, Financial Metrics, Traction Metrics, Cap Table, Team & Headcount, Legal & Incorporation, Social & Links, Milestones, Saved Valuations)
+- [x] Updated StartupContext.tsx: StartupSnapshot interface now includes 30+ new fields mapped from profile
+- [x] Deleted dead code file: FeasibilityEvaluator.tsx
+- [x] Global color migration: replaced all 83 instances of old terracotta/navy oklch colors with new indigo/violet palette
+- [x] Global font migration: replaced all Playfair Display references with Plus Jakarta Sans
+- [x] Updated FounderDashboard workspace completion % to include new profile fields (Problem & Solution, Business Model, Financial Metrics, Traction Metrics)
+- [x] 31 tests passing, 0 TypeScript errors
+- [x] Save checkpoint and push to GitHub
+
+## Round 30 Completed Items
+- [x] DB migration: added 25+ new fields to startup_profiles (problem, solution, businessModel, mrr, arr, cac, ltv, churnRate, nps, teamSize, incorporationCountry, incorporationDate, legalStructure, website, github, productHunt, angelList, crunchbase, productStatus, techStack, etc.)
+- [x] profileRouter input schema: all new fields included (problem, solution, businessModel, mrr, cac, ltv, churnRate, npsScore, employeeCount, incorporationCountry, etc.)
+- [x] Rebuilt StartupProfile.tsx: 11 comprehensive sections (Identity, Problem & Solution, Business Model & Product, Financial Metrics, Traction Metrics, Cap Table, Team & Headcount, Legal & Incorporation, Social & Links, Milestones, Saved Valuations)
+- [x] Updated StartupContext.tsx: StartupSnapshot interface now includes 30+ new fields mapped from profile
+- [x] Deleted dead code file: FeasibilityEvaluator.tsx
+- [x] Global color migration: replaced all 83 instances of old terracotta/navy oklch colors with new indigo/violet palette
+- [x] Global font migration: replaced all Playfair Display references with Plus Jakarta Sans
+- [x] Updated FounderDashboard workspace completion % to include new profile fields
+- [x] 31 tests passing, 0 TypeScript errors
+- [x] Save checkpoint and push to GitHub

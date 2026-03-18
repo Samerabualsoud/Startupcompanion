@@ -238,7 +238,7 @@ function HomeInner() {
             <div className={`flex flex-col border-r border-border transition-all duration-500 ${chatComplete ? 'w-full lg:w-[400px]' : 'w-full'}`}
               style={{ background: 'oklch(0.993 0.003 80)' }}>
               <div className="shrink-0 px-5 py-3.5 border-b border-border flex items-center gap-2.5" style={{ background: 'oklch(0.13 0.04 265)' }}>
-                <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'oklch(0.55 0.13 30)' }}>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'oklch(0.45 0.2 270)' }}>
                   <Sparkles className="w-3.5 h-3.5 text-white" />
                 </div>
                 <div>
@@ -289,9 +289,9 @@ function HomeInner() {
               <div className="hidden lg:flex flex-1 flex-col items-center justify-center p-8" style={{ background: 'oklch(0.13 0.04 265)' }}>
                 <div className="max-w-sm text-center">
                   <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: 'oklch(0.52 0.22 265 / 0.2)', border: '1px solid oklch(0.52 0.22 265 / 0.4)' }}>
-                    <TrendingUp className="w-8 h-8" style={{ color: 'oklch(0.55 0.13 30)' }} />
+                    <TrendingUp className="w-8 h-8" style={{ color: 'oklch(0.45 0.2 270)' }} />
                   </div>
-                  <h2 className="text-2xl font-bold text-white mb-3" style={{ fontFamily: isRTL ? 'inherit' : 'Playfair Display, serif' }}>
+                  <h2 className="text-2xl font-bold text-white mb-3" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                     {t('valuationReportWillAppear')}
                   </h2>
                   <p className="text-sm leading-relaxed mb-6" style={{ color: 'oklch(0.65 0.03 265)' }}>

@@ -80,7 +80,7 @@ function MatchCard({ match, isRTL }: { match: MatchResult; isRTL: boolean }) {
     <div className="rounded-2xl border border-border bg-card p-5 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: match.type === 'vc' ? 'oklch(0.18 0.05 240)' : 'oklch(0.55 0.13 30)' }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: match.type === 'vc' ? 'oklch(0.35 0.2 270)' : 'oklch(0.45 0.2 270)' }}>
             {match.type === 'vc' ? <Building2 className="w-5 h-5 text-white" /> : <User className="w-5 h-5 text-white" />}
           </div>
           <div>
@@ -136,7 +136,7 @@ function MatchCard({ match, isRTL }: { match: MatchResult; isRTL: boolean }) {
           {(match.applyUrl || match.website) && (
             <a href={match.applyUrl ?? match.website ?? '#'} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: 'oklch(0.18 0.05 240)' }}>
+              style={{ background: 'oklch(0.35 0.2 270)' }}>
               {isRTL ? 'تواصل' : 'Connect'}
               <ExternalLink className="w-3 h-3" />
             </a>
@@ -182,13 +182,13 @@ export default function InvestorMatcher() {
     );
   };
 
-  const fontFamily = isRTL ? 'Noto Kufi Arabic, sans-serif' : 'Playfair Display, serif';
+  const fontFamily = isRTL ? 'Noto Kufi Arabic, sans-serif' : 'Plus Jakarta Sans, sans-serif';
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
           <Target className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -292,7 +292,7 @@ export default function InvestorMatcher() {
                 onClick={() => toggleType(type)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
                 style={investorTypes.includes(type)
-                  ? { background: 'oklch(0.18 0.05 240)', color: 'white' }
+                  ? { background: 'oklch(0.35 0.2 270)', color: 'white' }
                   : { background: 'oklch(0.94 0.01 240)', color: 'oklch(0.4 0.04 240)' }
                 }
               >
@@ -307,7 +307,7 @@ export default function InvestorMatcher() {
           onClick={handleSearch}
           disabled={isLoading || investorTypes.length === 0}
           className="w-full py-3 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
-          style={{ background: 'oklch(0.55 0.13 30)' }}
+          style={{ background: 'oklch(0.45 0.2 270)' }}
         >
           {isLoading ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> {isRTL ? 'جارٍ البحث...' : 'Finding matches…'}</>

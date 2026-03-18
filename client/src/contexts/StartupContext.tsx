@@ -30,22 +30,58 @@ export interface TeamMemberEquity {
 export interface StartupSnapshot {
   // Identity
   companyName: string;
+  tagline: string;
+  description: string;
+  logoUrl: string;
+  websiteUrl: string;
+  pitchDeckUrl: string;
   sector: string;
   stage: string;
   country: string;
+  city: string;
+  foundedYear: number | null;
+  // Problem & Solution
+  problem: string;
+  solution: string;
+  targetCustomer: string;
+  competitiveAdvantage: string;
+  keyRisks: string;
+  // Business Model & Product
+  businessModel: string;
+  revenueModel: string;
+  productStatus: string;
+  techStack: string;
+  patents: string;
   // Financials
   currentARR: number | null;
+  mrr: number | null;
   monthlyBurnRate: number | null;
   cashOnHand: number | null;
   totalRaised: number | null;
   grossMargin: number | null;
   revenueGrowthRate: number | null;
   targetRaise: number | null;
+  useOfFunds: string;
+  investorType: string;
+  // Traction Metrics
+  numberOfCustomers: number | null;
+  monthlyActiveUsers: number | null;
+  churnRate: number | null;
+  ltv: number | null;
+  cac: number | null;
+  npsScore: number | null;
   // Cap table
   totalShares: number | null;
   authorizedShares: number | null;
   parValue: number | null;
   esopPoolPct: number | null;
+  // Team headcount
+  employeeCount: number | null;
+  fullTimeCount: number | null;
+  partTimeCount: number | null;
+  // Legal & Incorporation
+  incorporationCountry: string;
+  incorporationType: string;
   // Team equity
   teamMembers: TeamMemberEquity[];
   // Latest valuation
@@ -90,20 +126,51 @@ interface StartupContextValue {
 
 const DEFAULT_SNAPSHOT: StartupSnapshot = {
   companyName: '',
+  tagline: '',
+  description: '',
+  logoUrl: '',
+  websiteUrl: '',
+  pitchDeckUrl: '',
   sector: '',
   stage: '',
   country: '',
+  city: '',
+  foundedYear: null,
+  problem: '',
+  solution: '',
+  targetCustomer: '',
+  competitiveAdvantage: '',
+  keyRisks: '',
+  businessModel: '',
+  revenueModel: '',
+  productStatus: '',
+  techStack: '',
+  patents: '',
   currentARR: null,
+  mrr: null,
   monthlyBurnRate: null,
   cashOnHand: null,
   totalRaised: null,
   grossMargin: null,
   revenueGrowthRate: null,
   targetRaise: null,
+  useOfFunds: '',
+  investorType: '',
+  numberOfCustomers: null,
+  monthlyActiveUsers: null,
+  churnRate: null,
+  ltv: null,
+  cac: null,
+  npsScore: null,
   totalShares: null,
   authorizedShares: null,
   parValue: null,
   esopPoolPct: null,
+  employeeCount: null,
+  fullTimeCount: null,
+  partTimeCount: null,
+  incorporationCountry: '',
+  incorporationType: '',
   teamMembers: [],
   latestValuation: null,
   latestValuationDate: null,
@@ -214,11 +281,6 @@ export function StartupProvider({ children }: { children: ReactNode }) {
   })();
 
   // Derive sales metrics
-  const now = new Date();
-  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).getTime();
-  const lastMonthEnd = thisMonthStart - 1;
-
   const salesThisMonth = salesSummary?.thisMonth ?? null;
   const salesLastMonth = salesSummary?.lastMonth ?? null;
   const salesMoMGrowth = (() => {
@@ -237,29 +299,72 @@ export function StartupProvider({ children }: { children: ReactNode }) {
   }));
 
   const snapshot: StartupSnapshot = {
+    // Identity
     companyName: profile?.name ?? '',
+    tagline: profile?.tagline ?? '',
+    description: profile?.description ?? '',
+    logoUrl: profile?.logoUrl ?? '',
+    websiteUrl: (profile as any)?.websiteUrl ?? '',
+    pitchDeckUrl: (profile as any)?.pitchDeckUrl ?? '',
     sector: profile?.sector ?? '',
     stage: profile?.stage ?? '',
     country: profile?.country ?? '',
+    city: profile?.city ?? '',
+    foundedYear: profile?.foundedYear ?? null,
+    // Problem & Solution
+    problem: (profile as any)?.problem ?? '',
+    solution: (profile as any)?.solution ?? '',
+    targetCustomer: (profile as any)?.targetCustomer ?? '',
+    competitiveAdvantage: (profile as any)?.competitiveAdvantage ?? '',
+    keyRisks: (profile as any)?.keyRisks ?? '',
+    // Business Model & Product
+    businessModel: (profile as any)?.businessModel ?? '',
+    revenueModel: (profile as any)?.revenueModel ?? '',
+    productStatus: (profile as any)?.productStatus ?? '',
+    techStack: (profile as any)?.techStack ?? '',
+    patents: (profile as any)?.patents ?? '',
+    // Financials
     currentARR: profile?.currentARR ?? null,
+    mrr: (profile as any)?.mrr ?? null,
     monthlyBurnRate: profile?.monthlyBurnRate ?? null,
     cashOnHand: profile?.cashOnHand ?? null,
     totalRaised: profile?.totalRaised ?? null,
     grossMargin: profile?.grossMargin ?? null,
     revenueGrowthRate: profile?.revenueGrowthRate ?? null,
     targetRaise: profile?.targetRaise ?? null,
+    useOfFunds: profile?.useOfFunds ?? '',
+    investorType: profile?.investorType ?? '',
+    // Traction Metrics
+    numberOfCustomers: (profile as any)?.numberOfCustomers ?? null,
+    monthlyActiveUsers: (profile as any)?.monthlyActiveUsers ?? null,
+    churnRate: (profile as any)?.churnRate ?? null,
+    ltv: (profile as any)?.ltv ?? null,
+    cac: (profile as any)?.cac ?? null,
+    npsScore: (profile as any)?.npsScore ?? null,
+    // Cap table
     totalShares: (profile as any)?.totalSharesOutstanding ?? null,
     authorizedShares: (profile as any)?.authorizedShares ?? null,
     parValue: (profile as any)?.parValuePerShare ?? null,
     esopPoolPct: (profile as any)?.esopPoolPercent ?? null,
+    // Team headcount
+    employeeCount: (profile as any)?.employeeCount ?? null,
+    fullTimeCount: (profile as any)?.fullTimeCount ?? null,
+    partTimeCount: (profile as any)?.partTimeCount ?? null,
+    // Legal
+    incorporationCountry: (profile as any)?.incorporationCountry ?? '',
+    incorporationType: (profile as any)?.incorporationType ?? '',
+    // Team equity
     teamMembers,
+    // Valuations
     latestValuation,
     latestValuationDate,
+    // COGS
     latestGrossMarginPct: latestCogs?.grossMarginPct ?? null,
     latestMonthlyRevenue: latestCogs
       ? (latestCogs.revenuePerUnit ?? 0) * (latestCogs.unitsPerMonth ?? 0)
       : null,
     latestMonthlyCOGS: latestCogs?.totalCOGS ?? null,
+    // ESOP
     currentOptionPool: esopPlan ? Number(esopPlan.currentOptionPool) : null,
     esopPlanId: esopPlan?.id ?? null,
     esopTotalShares: esopPlan ? Number(esopPlan.totalShares) : null,
@@ -303,11 +408,13 @@ export function StartupProvider({ children }: { children: ReactNode }) {
     })(),
     esopJurisdiction: esopPlan?.jurisdiction ?? null,
     esopPlanType: esopPlan?.planType ?? null,
+    // Sales
     totalSalesRevenue: salesSummary?.total ?? null,
     salesThisMonth,
     salesLastMonth,
     salesMoMGrowth,
     salesARR: salesSummary?.annualizedRevenue ?? null,
+    // Scores
     readinessScore: null,
     pitchScore: null,
   };

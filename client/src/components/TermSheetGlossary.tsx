@@ -60,7 +60,7 @@ function TermCard({ term, index }: { term: TermDefinition; index: number }) {
                 </span>
               )}
             </div>
-            <div className="text-sm font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <div className="text-sm font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               {term.term}
             </div>
             <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{term.plain}</div>
@@ -138,7 +138,7 @@ export default function TermSheetGlossary() {
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+        <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
           Term Sheet Glossary
         </h2>
         <p className="text-sm text-muted-foreground">

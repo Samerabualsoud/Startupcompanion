@@ -212,23 +212,23 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* ── Valuation Hero ── */}
-      <div className="shrink-0 p-5" style={{ background: 'oklch(0.18 0.05 240)' }}>
+      <div className="shrink-0 p-5" style={{ background: 'oklch(0.35 0.2 270)' }}>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-[10px] font-mono uppercase tracking-widest mb-1" style={{ color: 'oklch(0.55 0.13 30)' }}>
+            <div className="text-[10px] font-mono uppercase tracking-widest mb-1" style={{ color: 'oklch(0.45 0.2 270)' }}>
               {inputs.companyName}
             </div>
             <div className="text-3xl font-bold metric-value" style={{ color: 'oklch(0.978 0.008 80)', fontFamily: 'JetBrains Mono, monospace' }}>
               {formatCurrency(summary.blended, true)}
             </div>
-            <div className="text-xs mt-1" style={{ color: 'oklch(0.62 0.02 240)' }}>
+            <div className="text-xs mt-1" style={{ color: 'oklch(0.65 0.1 270)' }}>
               {isRTL ? 'النطاق' : 'Range'}: {formatCurrency(summary.weightedLow, true)} — {formatCurrency(summary.weightedHigh, true)}
             </div>
             <div className="flex items-center gap-3 mt-2">
-              <div className="text-[10px] font-mono" style={{ color: 'oklch(0.62 0.02 240)' }}>
+              <div className="text-[10px] font-mono" style={{ color: 'oklch(0.65 0.1 270)' }}>
                 {isRTL ? 'الثقة' : 'Confidence'}: <span className="font-semibold" style={{ color: 'oklch(0.978 0.008 80)' }}>{summary.confidenceScore}%</span>
               </div>
-              <div className="text-[10px] font-mono" style={{ color: 'oklch(0.62 0.02 240)' }}>
+              <div className="text-[10px] font-mono" style={{ color: 'oklch(0.65 0.1 270)' }}>
                 {isRTL ? 'المرحلة' : 'Stage'}: <span className="font-semibold" style={{ color: 'oklch(0.978 0.008 80)' }}>{summary.stage}</span>
               </div>
             </div>
@@ -270,8 +270,8 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
             { label: isRTL ? 'مضاعف ARR' : 'ARR Multiple', value: `${summary.impliedARRMultiple}x` },
             { label: isRTL ? 'المخاطرة' : 'Risk', value: summary.riskLevel, color: riskColor },
           ].map(m => (
-            <div key={m.label} className="rounded-md p-2 text-center" style={{ background: 'oklch(0.22 0.04 240)' }}>
-              <div className="text-[9px] font-mono uppercase tracking-wider mb-0.5" style={{ color: 'oklch(0.45 0.04 240)' }}>{m.label}</div>
+            <div key={m.label} className="rounded-md p-2 text-center" style={{ background: 'oklch(0.38 0.18 270)' }}>
+              <div className="text-[9px] font-mono uppercase tracking-wider mb-0.5" style={{ color: 'oklch(0.55 0.12 270)' }}>{m.label}</div>
               <div className="text-sm font-bold metric-value" style={{ color: m.color || (m.warn ? '#EF4444' : 'oklch(0.978 0.008 80)') }}>{m.value}</div>
             </div>
           ))}
@@ -299,7 +299,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
             {/* Bar Chart */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>{isRTL ? 'التقييم حسب الطريقة' : 'Valuation by Method'}</h3>
+                <h3 className="text-sm font-semibold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{isRTL ? 'التقييم حسب الطريقة' : 'Valuation by Method'}</h3>
                 <span className="text-[10px] text-muted-foreground font-mono">{isRTL ? 'القيم بالمليون $' : 'Values in $M'}</span>
               </div>
               <ResponsiveContainer width="100%" height={220}>
@@ -319,7 +319,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
 
             {/* Method Cards */}
             <div>
-              <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                 {isRTL ? 'تفصيل الطرق' : 'Method Breakdown'} <span className="text-xs font-normal text-muted-foreground ml-1">— {isRTL ? 'اضغط للتوسيع' : 'tap to expand'}</span>
               </h3>
               <div className="space-y-2">
@@ -329,11 +329,11 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
 
             {/* ── Valuation Rationale ── */}
             <div className="border border-border rounded-xl overflow-hidden bg-card">
-              <div className="px-4 py-3 border-b border-border" style={{ background: 'oklch(0.18 0.05 240)' }}>
-                <h3 className="text-sm font-semibold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <div className="px-4 py-3 border-b border-border" style={{ background: 'oklch(0.35 0.2 270)' }}>
+                <h3 className="text-sm font-semibold text-white" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                   {isRTL ? 'لماذا استخدمنا هذه الطرق' : 'Why These Methods Were Used'}
                 </h3>
-                <p className="text-[10px] mt-0.5" style={{ color: 'oklch(0.62 0.02 240)' }}>
+                <p className="text-[10px] mt-0.5" style={{ color: 'oklch(0.65 0.1 270)' }}>
                   {isRTL ? 'يتم اختيار كل طريقة وترجيحها بناءً على مرحلتك وقطاعك والبيانات المتاحة.' : 'Each method is selected and weighted based on your stage, sector, and available data.'}
                 </p>
               </div>
@@ -380,7 +380,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
 
             {/* Scorecard Radar */}
             <div className="border border-border rounded-lg p-4 bg-card">
-              <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>{isRTL ? 'بطاقة أداء الفريق والمنتج' : 'Team & Product Scorecard'}</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{isRTL ? 'بطاقة أداء الفريق والمنتج' : 'Team & Product Scorecard'}</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="oklch(0.88 0.01 80)" />
@@ -393,7 +393,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
 
             {/* Analyst Summary */}
             <div className="border border-border rounded-lg p-4 bg-card">
-              <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>{isRTL ? 'ماذا يعني هذا بالنسبة لك' : 'What This Means For You'}</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{isRTL ? 'ماذا يعني هذا بالنسبة لك' : 'What This Means For You'}</h3>
               <div className="space-y-2.5 text-sm text-muted-foreground leading-relaxed">
                 {isRTL ? (
                   <>

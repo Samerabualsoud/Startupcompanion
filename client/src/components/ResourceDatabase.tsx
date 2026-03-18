@@ -51,7 +51,7 @@ function VcCard({ firm }: { firm: any }) {
     <div className="bg-white rounded-2xl p-5 border border-border hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-base truncate" style={{ fontFamily: 'Playfair Display, serif', color: 'oklch(0.18 0.05 240)' }}>
+          <h3 className="font-bold text-base truncate" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', color: 'oklch(0.35 0.2 270)' }}>
             {firm.name}
           </h3>
           <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted-foreground">
@@ -62,7 +62,7 @@ function VcCard({ firm }: { firm: any }) {
         {firm.aum && (
           <div className="text-right shrink-0">
             <div className="text-xs text-muted-foreground">AUM</div>
-            <div className="text-sm font-bold font-mono" style={{ color: 'oklch(0.55 0.13 30)' }}>
+            <div className="text-sm font-bold font-mono" style={{ color: 'oklch(0.45 0.2 270)' }}>
               ${firm.aum >= 1000 ? `${(firm.aum / 1000).toFixed(0)}B` : `${firm.aum}M`}
             </div>
           </div>
@@ -107,7 +107,7 @@ function VcCard({ firm }: { firm: any }) {
       {firm.applyUrl && (
         <a href={firm.applyUrl} target="_blank" rel="noopener noreferrer"
           className="flex items-center justify-center gap-1.5 w-full py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-          style={{ background: 'oklch(0.18 0.05 240)', color: 'white' }}>
+          style={{ background: 'oklch(0.35 0.2 270)', color: 'white' }}>
           <ExternalLink className="w-3.5 h-3.5" />
           Visit Website
         </a>
@@ -122,11 +122,11 @@ function AngelCard({ angel }: { angel: any }) {
     <div className="bg-white rounded-2xl p-5 border border-border hover:shadow-md transition-shadow">
       <div className="flex items-start gap-3 mb-3">
         <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm"
-          style={{ background: 'oklch(0.55 0.13 30)' }}>
+          style={{ background: 'oklch(0.45 0.2 270)' }}>
           {angel.name.charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-sm" style={{ fontFamily: 'Playfair Display, serif', color: 'oklch(0.18 0.05 240)' }}>
+          <h3 className="font-bold text-sm" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', color: 'oklch(0.35 0.2 270)' }}>
             {angel.name}
           </h3>
           <div className="text-xs text-muted-foreground truncate">{angel.title}</div>
@@ -194,7 +194,7 @@ function GrantCard({ grant }: { grant: any }) {
     <div className="bg-white rounded-2xl p-5 border border-border hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-sm leading-tight" style={{ fontFamily: 'Playfair Display, serif', color: 'oklch(0.18 0.05 240)' }}>
+          <h3 className="font-bold text-sm leading-tight" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', color: 'oklch(0.35 0.2 270)' }}>
             {grant.name}
           </h3>
           <div className="text-xs text-muted-foreground mt-0.5">{grant.provider}</div>
@@ -228,7 +228,7 @@ function GrantCard({ grant }: { grant: any }) {
       {grant.applyUrl && (
         <a href={grant.applyUrl} target="_blank" rel="noopener noreferrer"
           className="flex items-center justify-center gap-1.5 w-full py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-          style={{ background: 'oklch(0.18 0.05 240)', color: 'white' }}>
+          style={{ background: 'oklch(0.35 0.2 270)', color: 'white' }}>
           <ExternalLink className="w-3.5 h-3.5" />
           Apply Now
         </a>
@@ -247,7 +247,7 @@ function LawyerCard({ lawyer }: { lawyer: any }) {
           {lawyer.name.charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-sm leading-tight" style={{ fontFamily: 'Playfair Display, serif', color: 'oklch(0.18 0.05 240)' }}>
+          <h3 className="font-bold text-sm leading-tight" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', color: 'oklch(0.35 0.2 270)' }}>
             {lawyer.name}
           </h3>
           <div className="text-xs text-muted-foreground">{lawyer.firm}</div>
@@ -288,7 +288,7 @@ function LawyerCard({ lawyer }: { lawyer: any }) {
         {lawyer.websiteUrl && (
           <a href={lawyer.websiteUrl} target="_blank" rel="noopener noreferrer"
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-            style={{ background: 'oklch(0.18 0.05 240)', color: 'white' }}>
+            style={{ background: 'oklch(0.35 0.2 270)', color: 'white' }}>
             <Globe className="w-3.5 h-3.5" />
             Website
           </a>
@@ -367,7 +367,7 @@ export default function ResourceDatabase() {
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold" style={{ fontFamily: 'Playfair Display, serif', color: 'oklch(0.18 0.05 240)' }}>
+          <h2 className="text-xl font-bold" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', color: 'oklch(0.35 0.2 270)' }}>
             Investor & Resources Database
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -377,7 +377,7 @@ export default function ResourceDatabase() {
         <button
           onClick={() => { setShowListModal(true); setListForm(f => ({ ...f, type: activeTab === 'grants' ? 'grant' : activeTab === 'lawyers' ? 'lawyer' : activeTab === 'angel' ? 'angel' : 'vc' })); }}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-white shrink-0 hover:opacity-90 transition-opacity"
-          style={{ background: 'oklch(0.55 0.13 30)' }}
+          style={{ background: 'oklch(0.45 0.2 270)' }}
         >
           <Plus className="w-3.5 h-3.5" />
           List Your Firm
@@ -390,7 +390,7 @@ export default function ResourceDatabase() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="p-5 border-b border-border flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-base" style={{ fontFamily: 'Playfair Display, serif', color: 'oklch(0.18 0.05 240)' }}>List Your Firm</h3>
+                <h3 className="font-bold text-base" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', color: 'oklch(0.35 0.2 270)' }}>List Your Firm</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">Submit your listing for review. Our team will verify and publish within 2-3 business days.</p>
               </div>
               <button onClick={() => setShowListModal(false)} className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
@@ -466,7 +466,7 @@ export default function ResourceDatabase() {
                   submitterName: listForm.name,
                 })}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-                style={{ background: 'oklch(0.18 0.05 240)' }}
+                style={{ background: 'oklch(0.35 0.2 270)' }}
               >
                 {submitListingMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 Submit for Review
@@ -488,7 +488,7 @@ export default function ResourceDatabase() {
               className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
                 isActive ? 'text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'
               }`}
-              style={isActive ? { background: 'oklch(0.18 0.05 240)' } : {}}
+              style={isActive ? { background: 'oklch(0.35 0.2 270)' } : {}}
             >
               <Icon className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{tab.label}</span>
@@ -620,7 +620,7 @@ export default function ResourceDatabase() {
           <div className="font-medium mb-1">No results found</div>
           <div className="text-xs">Try adjusting your search or filters</div>
           {hasFilters && (
-            <button onClick={clearFilters} className="mt-3 text-xs underline" style={{ color: 'oklch(0.55 0.13 30)' }}>
+            <button onClick={clearFilters} className="mt-3 text-xs underline" style={{ color: 'oklch(0.45 0.2 270)' }}>
               Clear all filters
             </button>
           )}

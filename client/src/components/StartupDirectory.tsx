@@ -74,10 +74,10 @@ export default function StartupDirectory() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
             <Building2 className="w-4 h-4 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             Startup Directory
           </h1>
           {startups && (

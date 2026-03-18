@@ -247,7 +247,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
       <div className="h-1 bg-secondary rounded-full overflow-hidden">
         <motion.div
           className="h-full rounded-full"
-          style={{ background: 'oklch(0.55 0.13 30)' }}
+          style={{ background: 'oklch(0.45 0.2 270)' }}
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
@@ -464,7 +464,7 @@ export default function ChatInterface({ onComplete }: Props) {
 
       {/* Sales-to-Valuation Bridge Banner */}
       {arrFromSalesBridge && !isComplete && (
-        <div className="flex items-center gap-2 px-4 py-2 text-[11px] font-medium" style={{ background: 'oklch(0.22 0.05 240)', color: 'oklch(0.85 0.04 240)', borderBottom: '1px solid oklch(0.28 0.04 240)' }}>
+        <div className="flex items-center gap-2 px-4 py-2 text-[11px] font-medium" style={{ background: 'oklch(0.38 0.18 270)', color: 'oklch(0.85 0.04 240)', borderBottom: '1px solid oklch(0.42 0.18 270)' }}>
           <TrendingUp className="w-3.5 h-3.5 shrink-0" style={{ color: '#10B981' }} />
           <span>
             {isRTL
@@ -487,8 +487,8 @@ export default function ChatInterface({ onComplete }: Props) {
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.role === 'bot' && (
-                <div className="w-7 h-7 rounded-full shrink-0 mr-2 flex items-center justify-center text-xs" style={{ background: 'oklch(0.18 0.05 240)', color: 'oklch(0.978 0.008 80)' }}>
-                  <Sparkles className="w-3.5 h-3.5" style={{ color: 'oklch(0.55 0.13 30)' }} />
+                <div className="w-7 h-7 rounded-full shrink-0 mr-2 flex items-center justify-center text-xs" style={{ background: 'oklch(0.35 0.2 270)', color: 'oklch(0.978 0.008 80)' }}>
+                  <Sparkles className="w-3.5 h-3.5" style={{ color: 'oklch(0.45 0.2 270)' }} />
                 </div>
               )}
               <div
@@ -497,7 +497,7 @@ export default function ChatInterface({ onComplete }: Props) {
                     ? 'rounded-br-sm text-white font-medium'
                     : 'rounded-bl-sm border border-border bg-card text-foreground'
                 }`}
-                style={msg.role === 'user' ? { background: 'oklch(0.55 0.13 30)' } : {}}
+                style={msg.role === 'user' ? { background: 'oklch(0.45 0.2 270)' } : {}}
               >
                 {msg.text.startsWith('💬 *') && msg.text.endsWith('*')
                   ? <span className="text-muted-foreground text-xs italic">{msg.text.slice(4, -1)}</span>
@@ -510,8 +510,8 @@ export default function ChatInterface({ onComplete }: Props) {
           {/* Typing indicator */}
           {isTyping && (
             <motion.div key="typing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex justify-start">
-              <div className="w-7 h-7 rounded-full shrink-0 mr-2 flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
-                <Sparkles className="w-3.5 h-3.5" style={{ color: 'oklch(0.55 0.13 30)' }} />
+              <div className="w-7 h-7 rounded-full shrink-0 mr-2 flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
+                <Sparkles className="w-3.5 h-3.5" style={{ color: 'oklch(0.45 0.2 270)' }} />
               </div>
               <div className="px-3.5 py-2.5 rounded-2xl rounded-bl-sm border border-border bg-card">
                 <TypingDots />
@@ -536,7 +536,7 @@ export default function ChatInterface({ onComplete }: Props) {
             <button
               onClick={handleSkipWithAI}
               className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-dashed text-xs font-medium transition-all hover:bg-secondary/50"
-              style={{ borderColor: 'oklch(0.55 0.13 30)', color: 'oklch(0.55 0.13 30)' }}
+              style={{ borderColor: 'oklch(0.45 0.2 270)', color: 'oklch(0.45 0.2 270)' }}
             >
               <Wand2 className="w-3.5 h-3.5" />
               {isRTL ? 'لا أعرف — دع الذكاء الاصطناعي يقدّر هذا لي' : "I don't know — let AI estimate this for me"}
@@ -548,15 +548,15 @@ export default function ChatInterface({ onComplete }: Props) {
       {/* AI inferring indicator */}
       {isInferring && (
         <div className="border-t border-border p-4 bg-card flex items-center gap-2 text-xs text-muted-foreground">
-          <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'oklch(0.55 0.13 30)', borderTopColor: 'transparent' }} />
+          <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'oklch(0.45 0.2 270)', borderTopColor: 'transparent' }} />
           {isRTL ? 'الذكاء الاصطناعي يقدّر قيمة لك...' : 'AI is estimating a value for you...'}
         </div>
       )}
 
       {/* AI inferred fields notice */}
       {aiInferredFields.length > 0 && !isComplete && (
-        <div className="px-4 py-2 flex items-start gap-2 text-[10px] text-muted-foreground" style={{ background: 'oklch(0.55 0.13 30)10' }}>
-          <Info className="w-3 h-3 shrink-0 mt-0.5" style={{ color: 'oklch(0.55 0.13 30)' }} />
+        <div className="px-4 py-2 flex items-start gap-2 text-[10px] text-muted-foreground" style={{ background: 'oklch(0.45 0.2 270)10' }}>
+          <Info className="w-3 h-3 shrink-0 mt-0.5" style={{ color: 'oklch(0.45 0.2 270)' }} />
           <span>{isRTL ? `تم تقدير ${aiInferredFields.length} قيمة بواسطة الذكاء الاصطناعي. يمكنك إعادة المحادثة لتعديلها.` : `${aiInferredFields.length} value${aiInferredFields.length > 1 ? 's were' : ' was'} estimated by AI. You can retake the chat to adjust them.`}</span>
         </div>
       )}

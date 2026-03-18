@@ -985,7 +985,7 @@ export default function FreeZones() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2" style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}>
-          <Landmark className="w-6 h-6" style={{ color: 'oklch(0.55 0.13 30)' }} />
+          <Landmark className="w-6 h-6" style={{ color: 'oklch(0.45 0.2 270)' }} />
           {lang === 'ar' ? 'المناطق الحرة والاختصاصات القضائية' : 'Free Zones & Jurisdictions'}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -1007,7 +1007,7 @@ export default function FreeZones() {
                   ? 'text-white shadow-sm'
                   : 'bg-muted text-muted-foreground hover:bg-muted/80'
               }`}
-              style={activeFilter === f ? { background: 'oklch(0.18 0.05 240)' } : {}}
+              style={activeFilter === f ? { background: 'oklch(0.35 0.2 270)' } : {}}
             >
               {f}
             </button>

@@ -38,17 +38,17 @@ export default function Login() {
     loginMutation.mutate({ email, password });
   };
 
-  const fontFamily = isRTL ? 'Noto Kufi Arabic, sans-serif' : 'Playfair Display, serif';
+  const fontFamily = isRTL ? 'Noto Kufi Arabic, sans-serif' : 'Plus Jakarta Sans, sans-serif';
 
   return (
     <div className="min-h-screen flex" style={{ background: 'oklch(0.978 0.008 80)' }}>
       {/* Left panel — branding */}
       <div
         className="hidden lg:flex flex-col justify-between w-[480px] shrink-0 p-12"
-        style={{ background: 'oklch(0.18 0.05 240)' }}
+        style={{ background: 'oklch(0.35 0.2 270)' }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.55 0.13 30)' }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.45 0.2 270)' }}>
             <TrendingUp className="w-5 h-5 text-white" />
           </div>
           <span className="text-white font-bold text-lg" style={{ fontFamily }}>
@@ -89,8 +89,8 @@ export default function Login() {
           {/* Mobile logo + language switcher */}
           <div className="flex items-center justify-between mb-8 lg:hidden">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
-                <TrendingUp className="w-4 h-4" style={{ color: 'oklch(0.55 0.13 30)' }} />
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
+                <TrendingUp className="w-4 h-4" style={{ color: 'oklch(0.45 0.2 270)' }} />
               </div>
               <span className="font-bold" style={{ fontFamily }}>{t('appName')}</span>
             </div>
@@ -103,7 +103,7 @@ export default function Login() {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'oklch(0.18 0.05 240)' }}>
+            <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'oklch(0.35 0.2 270)' }}>
               {t('signInTitle')}
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -132,7 +132,7 @@ export default function Login() {
                 required
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
                 style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-                onFocus={e => e.target.style.borderColor = 'oklch(0.55 0.13 30)'}
+                onFocus={e => e.target.style.borderColor = 'oklch(0.45 0.2 270)'}
                 onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
               />
             </div>
@@ -142,7 +142,7 @@ export default function Login() {
                 <label className="block text-sm font-medium" style={{ color: 'oklch(0.3 0.04 240)' }}>
                   {t('passwordLabel')}
                 </label>
-                <Link href="/forgot-password" className="text-xs hover:underline" style={{ color: 'oklch(0.55 0.13 30)' }}>
+                <Link href="/forgot-password" className="text-xs hover:underline" style={{ color: 'oklch(0.45 0.2 270)' }}>
                   {isRTL ? 'نسيت كلمة المرور؟' : 'Forgot password?'}
                 </Link>
               </div>
@@ -156,7 +156,7 @@ export default function Login() {
                   required
                   className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all pr-11"
                   style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-                  onFocus={e => e.target.style.borderColor = 'oklch(0.55 0.13 30)'}
+                  onFocus={e => e.target.style.borderColor = 'oklch(0.45 0.2 270)'}
                   onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
                 />
                 <button
@@ -173,7 +173,7 @@ export default function Login() {
               type="submit"
               disabled={loginMutation.isPending}
               className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
-              style={{ background: 'oklch(0.18 0.05 240)' }}
+              style={{ background: 'oklch(0.35 0.2 270)' }}
             >
               {loginMutation.isPending ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> {t('signingIn')}</>
@@ -183,7 +183,7 @@ export default function Login() {
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             {t('noAccount')}{' '}
-            <Link href={REGISTER_PATH} className="font-semibold hover:underline" style={{ color: 'oklch(0.55 0.13 30)' }}>
+            <Link href={REGISTER_PATH} className="font-semibold hover:underline" style={{ color: 'oklch(0.45 0.2 270)' }}>
               {t('registerLink')}
             </Link>
           </div>

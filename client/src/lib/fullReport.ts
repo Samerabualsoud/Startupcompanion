@@ -47,7 +47,7 @@ const CSS = `
   /* Cover */
   .cover { background: #0F1B2D; color: #FAF6EF; padding: 56px 48px; margin: -40px -48px 40px; page-break-after: avoid; }
   .cover .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #C4614A; margin-bottom: 10px; }
-  .cover h1 { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; margin-bottom: 6px; }
+  .cover h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 36px; font-weight: 700; margin-bottom: 6px; }
   .cover .subtitle { font-size: 13px; color: rgba(250,246,239,0.55); margin-bottom: 24px; }
   .cover-metrics { display: flex; gap: 24px; flex-wrap: wrap; }
   .cover-metric { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 14px 20px; min-width: 140px; }
@@ -59,7 +59,7 @@ const CSS = `
   .section { margin-bottom: 32px; page-break-inside: avoid; }
   .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #C4614A; }
   .section-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #C4614A; font-weight: 700; }
-  .section-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; color: #0F1B2D; }
+  .section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 600; color: #0F1B2D; }
 
   /* Tables */
   table { width: 100%; border-collapse: collapse; font-size: 10px; }
@@ -94,7 +94,7 @@ const CSS = `
 
   /* Method card */
   .method-card { background: #faf7f3; border: 1px solid #ede8e0; border-radius: 6px; padding: 12px 14px; border-left: 3px solid #C4614A; margin-bottom: 10px; }
-  .method-card h4 { font-family: 'Playfair Display', serif; font-size: 11px; font-weight: 600; color: #0F1B2D; margin-bottom: 4px; }
+  .method-card h4 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 600; color: #0F1B2D; margin-bottom: 4px; }
   .method-card .mc-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: #C4614A; }
   .method-card .mc-range { font-size: 9px; color: #888; margin-top: 2px; }
 

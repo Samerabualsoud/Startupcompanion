@@ -228,7 +228,7 @@ export default function InvestorCRM() {
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             Investor CRM
           </h2>
           <p className="text-sm text-muted-foreground">Track your investor outreach pipeline. Contacts are saved to your account.</p>
@@ -236,7 +236,7 @@ export default function InvestorCRM() {
         <div className="flex items-center gap-2 shrink-0">
           <button onClick={exportCSV}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
-            style={{ background: 'oklch(0.18 0.05 240)', color: '#FAF6EF', border: '1px solid oklch(0.28 0.04 240)' }}
+            style={{ background: 'oklch(0.35 0.2 270)', color: '#FAF6EF', border: '1px solid oklch(0.42 0.18 270)' }}
             title="Export to CSV">
             <Download className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Export CSV</span>
@@ -476,7 +476,7 @@ export default function InvestorCRM() {
                 <div className="flex items-center gap-2 shrink-0">
                   <a href={app.website} target="_blank" rel="noopener noreferrer"
                     className="text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-all hover:opacity-90"
-                    style={{ background: 'oklch(0.18 0.05 240)', color: '#FAF6EF', border: '1px solid oklch(0.28 0.04 240)' }}>
+                    style={{ background: 'oklch(0.35 0.2 270)', color: '#FAF6EF', border: '1px solid oklch(0.42 0.18 270)' }}>
                     Apply
                   </a>
                   <button onClick={() => untrack(app.acceleratorName)}

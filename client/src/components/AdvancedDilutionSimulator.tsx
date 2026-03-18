@@ -191,7 +191,7 @@ export default function AdvancedDilutionSimulator() {
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+        <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
           Dilution Simulator
         </h2>
         <p className="text-sm text-muted-foreground">

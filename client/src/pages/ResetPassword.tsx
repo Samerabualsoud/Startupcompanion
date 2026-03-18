@@ -14,7 +14,7 @@ export default function ResetPassword() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const fontFamily = isRTL ? 'Noto Kufi Arabic, sans-serif' : 'Playfair Display, serif';
+  const fontFamily = isRTL ? 'Noto Kufi Arabic, sans-serif' : 'Plus Jakarta Sans, sans-serif';
 
   // Extract token from URL
   const token = new URLSearchParams(window.location.search).get('token') ?? '';
@@ -57,7 +57,7 @@ export default function ResetPassword() {
           <p className="text-sm text-muted-foreground mb-4">
             {isRTL ? 'هذا الرابط غير صالح أو منتهي الصلاحية.' : 'This reset link is invalid or has expired.'}
           </p>
-          <Link href="/forgot-password" className="text-sm font-semibold hover:underline" style={{ color: 'oklch(0.55 0.13 30)' }}>
+          <Link href="/forgot-password" className="text-sm font-semibold hover:underline" style={{ color: 'oklch(0.45 0.2 270)' }}>
             {isRTL ? 'طلب رابط جديد' : 'Request a new link'}
           </Link>
         </div>
@@ -77,14 +77,14 @@ export default function ResetPassword() {
     return (
       <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'oklch(0.978 0.008 80)' }}>
         <div className="text-center max-w-sm">
-          <ShieldAlert className="w-12 h-12 mx-auto mb-4" style={{ color: 'oklch(0.55 0.13 30)' }} />
+          <ShieldAlert className="w-12 h-12 mx-auto mb-4" style={{ color: 'oklch(0.45 0.2 270)' }} />
           <h1 className="text-xl font-bold mb-2" style={{ fontFamily }}>
             {isRTL ? 'الرابط منتهي الصلاحية' : 'Link Expired'}
           </h1>
           <p className="text-sm text-muted-foreground mb-4">
             {tokenCheck.reason ?? (isRTL ? 'انتهت صلاحية هذا الرابط.' : 'This link has expired.')}
           </p>
-          <Link href="/forgot-password" className="text-sm font-semibold hover:underline" style={{ color: 'oklch(0.55 0.13 30)' }}>
+          <Link href="/forgot-password" className="text-sm font-semibold hover:underline" style={{ color: 'oklch(0.45 0.2 270)' }}>
             {isRTL ? 'طلب رابط جديد' : 'Request a new link'}
           </Link>
         </div>
@@ -97,10 +97,10 @@ export default function ResetPassword() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center gap-2.5 mb-8">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.18 0.05 240)' }}>
-            <TrendingUp className="w-4 h-4" style={{ color: 'oklch(0.55 0.13 30)' }} />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
+            <TrendingUp className="w-4 h-4" style={{ color: 'oklch(0.45 0.2 270)' }} />
           </div>
-          <span className="font-bold text-lg" style={{ fontFamily, color: 'oklch(0.18 0.05 240)' }}>
+          <span className="font-bold text-lg" style={{ fontFamily, color: 'oklch(0.35 0.2 270)' }}>
             {isRTL ? 'أداة الشركات الناشئة' : 'Polaris Arabia'}
           </span>
         </div>
@@ -110,7 +110,7 @@ export default function ResetPassword() {
             <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'oklch(0.94 0.05 145)' }}>
               <CheckCircle2 className="w-8 h-8" style={{ color: 'oklch(0.5 0.15 145)' }} />
             </div>
-            <h1 className="text-2xl font-bold mb-3" style={{ fontFamily, color: 'oklch(0.18 0.05 240)' }}>
+            <h1 className="text-2xl font-bold mb-3" style={{ fontFamily, color: 'oklch(0.35 0.2 270)' }}>
               {isRTL ? 'تم تغيير كلمة المرور!' : 'Password Changed!'}
             </h1>
             <p className="text-sm text-muted-foreground mb-2">
@@ -123,7 +123,7 @@ export default function ResetPassword() {
         ) : (
           <>
             <div className="mb-8">
-              <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'oklch(0.18 0.05 240)' }}>
+              <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'oklch(0.35 0.2 270)' }}>
                 {isRTL ? 'إعادة تعيين كلمة المرور' : 'Reset your password'}
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -152,7 +152,7 @@ export default function ResetPassword() {
                     required
                     className="w-full px-4 py-3 pr-11 rounded-xl text-sm outline-none transition-all"
                     style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-                    onFocus={e => e.target.style.borderColor = 'oklch(0.55 0.13 30)'}
+                    onFocus={e => e.target.style.borderColor = 'oklch(0.45 0.2 270)'}
                     onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
                   />
                   <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -173,7 +173,7 @@ export default function ResetPassword() {
                   required
                   className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
                   style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-                  onFocus={e => e.target.style.borderColor = 'oklch(0.55 0.13 30)'}
+                  onFocus={e => e.target.style.borderColor = 'oklch(0.45 0.2 270)'}
                   onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
                 />
               </div>
@@ -182,7 +182,7 @@ export default function ResetPassword() {
                 type="submit"
                 disabled={resetPassword.isPending}
                 className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
-                style={{ background: 'oklch(0.18 0.05 240)' }}
+                style={{ background: 'oklch(0.35 0.2 270)' }}
               >
                 {resetPassword.isPending ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> {isRTL ? 'جارٍ التحديث...' : 'Updating…'}</>

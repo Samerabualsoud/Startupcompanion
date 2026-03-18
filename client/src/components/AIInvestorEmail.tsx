@@ -72,7 +72,7 @@ export default function AIInvestorEmail() {
             <Mail className="w-4.5 h-4.5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>AI Investor Email Writer</h1>
+            <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>AI Investor Email Writer</h1>
             <p className="text-xs text-muted-foreground">Personalized cold outreach emails that get responses</p>
           </div>
         </div>
@@ -176,7 +176,7 @@ export default function AIInvestorEmail() {
         {result && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>Your Investor Email</h2>
+              <h2 className="text-base font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>Your Investor Email</h2>
               <Button variant="outline" size="sm" onClick={() => setResult(null)} className="text-xs gap-1.5">
                 <RefreshCw className="w-3.5 h-3.5" /> New Email
               </Button>

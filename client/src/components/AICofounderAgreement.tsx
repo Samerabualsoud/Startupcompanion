@@ -83,7 +83,7 @@ export default function AICofounderAgreement() {
             <Users className="w-4.5 h-4.5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>AI Co-founder Agreement</h1>
+            <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>AI Co-founder Agreement</h1>
             <p className="text-xs text-muted-foreground">Draft a comprehensive co-founder agreement in minutes</p>
           </div>
         </div>
@@ -222,7 +222,7 @@ export default function AICofounderAgreement() {
         {result && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>{result.documentTitle}</h2>
+              <h2 className="text-base font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{result.documentTitle}</h2>
               <div className="flex items-center gap-2">
                 <CopyButton text={fullDocumentText} />
                 <Button variant="outline" size="sm" onClick={() => setResult(null)} className="text-xs gap-1.5">

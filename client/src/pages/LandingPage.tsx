@@ -2,7 +2,7 @@
  * LandingPage — Polaris Arabia
  * Design: "Venture Capital Night" — Deep navy + warm amber/terracotta accents
  * Layout: Asymmetric hero with floating stats, diagonal section breaks, editorial grid
- * Typography: Playfair Display (headings) + DM Sans (body) + JetBrains Mono (numbers/labels)
+ * Typography: Plus Jakarta Sans (headings) + Inter (body) + JetBrains Mono (numbers/labels)
  */
 import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
@@ -81,7 +81,7 @@ export default function LandingPage() {
               <TrendingUp className="w-4 h-4 text-white" />
             </div>
             <div>
-              <span className="font-bold text-white text-sm" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <span className="font-bold text-white text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                 Polaris Arabia
               </span>
               <span className="text-xs ml-2 hidden sm:inline" style={{ color: 'rgba(240,237,232,0.4)', fontFamily: "'JetBrains Mono', monospace" }}>
@@ -174,7 +174,7 @@ export default function LandingPage() {
               </div>
 
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6"
-                style={{ fontFamily: "'Playfair Display', serif", color: '#F0EDE8' }}>
+                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#F0EDE8' }}>
                 {isRTL ? (
                   <>
                     <span>أدوات </span>
@@ -289,7 +289,7 @@ export default function LandingPage() {
               style={{ background: 'rgba(139,92,246,0.1)', borderColor: 'rgba(139,92,246,0.25)', color: '#8B5CF6', fontFamily: "'JetBrains Mono', monospace" }}>
               <Zap className="w-3 h-3" /> {isRTL ? 'كيف يعمل' : 'How It Works'}
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
               {isRTL ? 'من الفكرة إلى التمويل في ٣ خطوات' : 'From Idea to Funding in 3 Steps'}
             </h2>
             <p className="text-base max-w-xl mx-auto" style={{ color: 'rgba(240,237,232,0.55)' }}>
@@ -333,7 +333,7 @@ export default function LandingPage() {
                 style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'rgba(16,185,129,0.25)', color: '#10B981', fontFamily: "'JetBrains Mono', monospace" }}>
                 <Globe className="w-3 h-3" /> {isRTL ? 'مجموعة الأدوات' : 'The Full Toolkit'}
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h2 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                 {isRTL ? '١٨+ أداة لكل مرحلة' : '18+ Tools for Every Stage'}
               </h2>
             </div>
@@ -385,7 +385,7 @@ export default function LandingPage() {
               style={{ background: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.25)', color: '#F59E0B', fontFamily: "'JetBrains Mono', monospace" }}>
               <Star className="w-3 h-3" /> {isRTL ? 'آراء المؤسسين' : 'Founder Reviews'}
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
               {isRTL ? 'ماذا يقول المؤسسون' : 'What Founders Say'}
             </h2>
           </div>
@@ -427,7 +427,7 @@ export default function LandingPage() {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 rounded-full opacity-30"
               style={{ background: 'radial-gradient(ellipse, #E07B54 0%, transparent 70%)', filter: 'blur(40px)' }} />
             <div className="relative">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                 {isRTL ? 'ابدأ رحلتك اليوم' : 'Start Your Journey Today'}
               </h2>
               <p className="text-base mb-8 max-w-xl mx-auto" style={{ color: 'rgba(240,237,232,0.6)' }}>
@@ -459,7 +459,7 @@ export default function LandingPage() {
                 style={{ background: 'linear-gradient(135deg, #E07B54 0%, #C4614A 100%)' }}>
                 <TrendingUp className="w-3.5 h-3.5 text-white" />
               </div>
-              <span className="font-bold text-sm" style={{ fontFamily: "'Playfair Display', serif", color: 'rgba(240,237,232,0.8)' }}>
+              <span className="font-bold text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(240,237,232,0.8)' }}>
                 Polaris Arabia
               </span>
             </div>

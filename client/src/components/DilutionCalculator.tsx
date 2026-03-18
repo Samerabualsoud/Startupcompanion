@@ -54,7 +54,7 @@ export default function DilutionCalculator() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-base font-semibold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h3 className="text-base font-semibold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             Dilution Calculator
           </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -94,7 +94,7 @@ export default function DilutionCalculator() {
 
       {/* Ownership Chart */}
       <div className="rounded-md border border-border bg-card p-4">
-        <div className="text-xs font-semibold text-foreground mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+        <div className="text-xs font-semibold text-foreground mb-3" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
           Founder Ownership Over Time
         </div>
         <ResponsiveContainer width="100%" height={160}>

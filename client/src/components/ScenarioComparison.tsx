@@ -53,7 +53,7 @@ export default function ScenarioComparison({ scenarios, onDelete }: Props) {
   return (
     <div className="space-y-5">
       <div>
-        <h3 className="text-base font-semibold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
+        <h3 className="text-base font-semibold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
           Scenario Comparison
         </h3>
         <p className="text-xs text-muted-foreground mt-0.5">
@@ -116,7 +116,7 @@ export default function ScenarioComparison({ scenarios, onDelete }: Props) {
       {/* Blended Bar Chart */}
       {scenarios.length > 1 && (
         <div className="rounded-md border border-border bg-card p-4">
-          <div className="text-xs font-semibold text-foreground mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <div className="text-xs font-semibold text-foreground mb-3" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             Blended Valuation Comparison
           </div>
           <ResponsiveContainer width="100%" height={180}>
@@ -141,7 +141,7 @@ export default function ScenarioComparison({ scenarios, onDelete }: Props) {
       {/* Method-by-Method Chart */}
       {scenarios.length > 1 && (
         <div className="rounded-md border border-border bg-card p-4">
-          <div className="text-xs font-semibold text-foreground mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <div className="text-xs font-semibold text-foreground mb-3" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             Method-by-Method Comparison ($M)
           </div>
           <ResponsiveContainer width="100%" height={220}>

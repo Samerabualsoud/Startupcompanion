@@ -191,7 +191,7 @@ export default function PitchDeckScorecard() {
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+        <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
           Pitch Deck Scorecard
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -203,7 +203,7 @@ export default function PitchDeckScorecard() {
       <div className="border border-border rounded-xl p-4 bg-card">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
           <div className="text-center">
-            <div className="text-6xl font-black metric-value mb-1" style={{ color: fundabilityLabel.color, fontFamily: 'Playfair Display, serif' }}>
+            <div className="text-6xl font-black metric-value mb-1" style={{ color: fundabilityLabel.color, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               {pct}%
             </div>
             <div className="text-base font-semibold text-foreground mb-1">{fundabilityLabel.label}</div>
