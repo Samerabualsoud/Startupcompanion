@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "./_core/trpc";
 import * as db from "./db";
+import { VC_FIRMS_DATA, ANGEL_INVESTORS_DATA, GRANTS_DATA, VENTURE_LAWYERS_DATA } from "./resourcesRouter";
 
 // Admin-only middleware
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -198,13 +199,36 @@ export const adminRouter = router({
 
   // ── Resource Database CRUD ────────────────────────────────────────────────
   getResourceDatabase: adminProcedure.query(async () => {
-    const [vcs, angels, grantsList, lawyers] = await Promise.all([
+    // Static curated arrays are the source of truth for the ecosystem database.
+    // DB tables hold user-submitted KYC entries only — merge both.
+    const [dbVcs, dbAngels, dbGrantsList, dbLawyers] = await Promise.all([
       db.adminGetAllVcFirms(),
       db.adminGetAllAngelInvestors(),
       db.adminGetAllGrants(),
       db.adminGetAllVentureLawyers(),
     ]);
-    return { vcs, angels, grants: grantsList, lawyers };
+    const staticVcIds = new Set(VC_FIRMS_DATA.map(v => v.id));
+    const staticAngelIds = new Set(ANGEL_INVESTORS_DATA.map(a => a.id));
+    const staticGrantIds = new Set(GRANTS_DATA.map(g => g.id));
+    const staticLawyerIds = new Set(VENTURE_LAWYERS_DATA.map(l => l.id));
+    return {
+      vcs: [
+        ...VC_FIRMS_DATA.map(v => ({ ...v, source: 'curated' })),
+        ...dbVcs.filter(v => !staticVcIds.has(v.id as number)).map(v => ({ ...v, source: 'user' })),
+      ],
+      angels: [
+        ...ANGEL_INVESTORS_DATA.map(a => ({ ...a, source: 'curated' })),
+        ...dbAngels.filter(a => !staticAngelIds.has(a.id as number)).map(a => ({ ...a, source: 'user' })),
+      ],
+      grants: [
+        ...GRANTS_DATA.map(g => ({ ...g, source: 'curated' })),
+        ...dbGrantsList.filter(g => !staticGrantIds.has(g.id as number)).map(g => ({ ...g, source: 'user' })),
+      ],
+      lawyers: [
+        ...VENTURE_LAWYERS_DATA.map(l => ({ ...l, source: 'curated' })),
+        ...dbLawyers.filter(l => !staticLawyerIds.has(l.id as number)).map(l => ({ ...l, source: 'user' })),
+      ],
+    };
   }),
 
   deleteVC: adminProcedure

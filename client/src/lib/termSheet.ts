@@ -6,7 +6,7 @@
 export interface TermDefinition {
   term: string;
   arabicTerm?: string;
-  category: 'economics' | 'control' | 'protection' | 'governance' | 'exit' | 'fundraising' | 'captable' | 'legal' | 'duediligence' | 'metrics' | 'mena';
+  category: 'economics' | 'control' | 'protection' | 'governance' | 'exit' | 'fundraising' | 'captable' | 'legal' | 'duediligence' | 'metrics';
   plain: string;
   detail: string;
   redFlag: boolean;
@@ -687,134 +687,6 @@ export const TERM_SHEET_GLOSSARY: TermDefinition[] = [
     redFlag: false,
     example: 'Net New ARR $500K, prior quarter S&M $600K → Magic Number = 0.83',
   },
-
-  // ─── MENA-Specific ───────────────────────────────────────────────────────────────────────
-  {
-    term: 'Free Zone Entity',
-    arabicTerm: 'كيان المنطقة الحرة',
-    category: 'mena',
-    plain: 'A company registered inside a UAE (or GCC) free zone, with 100% foreign ownership and tax exemptions.',
-    detail: 'Free zones like DIFC, ADGM, DMCC, and RAKEZ allow 100% foreign ownership, 0% corporate tax (within the zone), and full profit repatriation. The trade-off: you cannot trade directly with the UAE mainland without a local distributor or a mainland license.',
-    redFlag: false,
-    founderTip: 'If your customers are primarily in the UAE mainland, consider a dual structure: free zone holding company + mainland branch.',
-  },
-  {
-    term: 'DIFC (Dubai International Financial Centre)',
-    arabicTerm: 'مركز دبي المالي الدولي',
-    category: 'mena',
-    plain: 'A leading financial free zone in Dubai with its own courts, laws, and regulatory framework based on English common law.',
-    detail: 'DIFC is the preferred jurisdiction for VC funds, fintech companies, and startups seeking institutional investment. It has its own DIFC Courts (highly regarded), DFSA regulation for financial services, and is recognised by international investors.',
-    redFlag: false,
-    founderTip: 'If you plan to raise from international institutional investors or run a fintech, DIFC is the gold standard in the region.',
-  },
-  {
-    term: 'ADGM (Abu Dhabi Global Market)',
-    arabicTerm: 'سوق أبوظبي العالمي',
-    category: 'mena',
-    plain: 'Abu Dhabi’s international financial centre, similar to DIFC but based in Abu Dhabi.',
-    detail: 'ADGM uses English common law, has its own courts, and is regulated by FSRA. It is increasingly popular for VC funds, family offices, and tech startups. Abu Dhabi’s sovereign wealth funds (ADIA, Mubadala) prefer ADGM-registered entities.',
-    redFlag: false,
-    founderTip: 'If your primary investors or customers are Abu Dhabi-based, ADGM may give you easier access to government and sovereign fund capital.',
-  },
-  {
-    term: 'Wasta',
-    arabicTerm: 'واسطة',
-    category: 'mena',
-    plain: 'Informal influence, connections, or social capital used to facilitate business or access decision-makers in the Arab world.',
-    detail: 'Wasta is a real factor in MENA business. Relationships with the right family, government official, or investor can open doors that cold outreach cannot. It is not corruption — it is relationship capital. Building wasta takes time and genuine relationship investment.',
-    redFlag: false,
-    founderTip: 'Invest in community events, accelerators, and government programs to build legitimate wasta. Attend GITEX, Expand North Star, and local VC events.',
-  },
-  {
-    term: 'Nitaqat',
-    arabicTerm: 'نطاقات',
-    category: 'mena',
-    plain: 'Saudi Arabia’s workforce nationalisation quota system requiring companies to hire a minimum percentage of Saudi nationals.',
-    detail: 'Nitaqat classifies companies into Platinum, Green, Yellow, and Red bands based on their Saudi national (Saudization) ratio. Companies in Red or Yellow bands face restrictions on hiring expats, renewing visas, and government contracts. Startups must plan for Nitaqat compliance from day one in Saudi Arabia.',
-    redFlag: false,
-    founderTip: 'Build your Saudi hiring plan early. Some roles are exempt for startups, but ignoring Nitaqat can block your ability to hire foreign talent.',
-  },
-  {
-    term: 'Emiratisation (Nafis)',
-    arabicTerm: 'توطين',
-    category: 'mena',
-    plain: 'UAE’s policy requiring private sector companies to hire a minimum percentage of UAE nationals.',
-    detail: 'The Nafis programme provides wage subsidies for UAE nationals hired in the private sector. Companies with 50+ employees must meet Emiratisation quotas or pay a monthly contribution per unfilled quota position. Startups under 50 employees are generally exempt.',
-    redFlag: false,
-    founderTip: 'If you plan to scale to 50+ employees in the UAE, factor Emiratisation costs and timelines into your hiring plan.',
-  },
-  {
-    term: 'Maktab (Virtual Office)',
-    arabicTerm: 'مكتب افتراضي',
-    category: 'mena',
-    plain: 'A registered office address service that satisfies free zone or mainland licensing requirements without a physical office.',
-    detail: 'Most free zones allow startups to register with a virtual office (flexi-desk) licence at a fraction of the cost of a physical office. This is common for early-stage startups. Some free zones require physical presence for certain licence types.',
-    redFlag: false,
-    founderTip: 'Start with a flexi-desk or virtual office licence to minimise overhead. Upgrade to a physical office when you have 5+ employees or need client-facing space.',
-  },
-  {
-    term: 'Baladiya (Municipality Approval)',
-    arabicTerm: 'بلدية',
-    category: 'mena',
-    plain: 'Municipal approval required for certain business activities in GCC countries, in addition to the commercial licence.',
-    detail: 'Some business activities (food, healthcare, education, retail) require additional municipality (Baladiya) approvals on top of the standard commercial licence. This adds time and cost to the setup process. Always check activity-specific requirements before incorporating.',
-    redFlag: false,
-    founderTip: 'Map all required approvals before starting your incorporation. Some regulated sectors (fintech, health, education) require 3–5 separate licences.',
-  },
-  {
-    term: 'Zakat',
-    arabicTerm: 'زكاة',
-    category: 'mena',
-    plain: 'An Islamic tax on business wealth, applicable to Saudi-owned companies and Saudi shareholders in Saudi Arabia.',
-    detail: 'Zakat is 2.5% of the zakatable base (broadly: net assets minus fixed assets and long-term investments). It applies to Saudi and GCC national shareholders’ share of the business. Foreign shareholders pay corporate income tax instead. In Saudi Arabia, Zakat is administered by ZATCA.',
-    redFlag: false,
-    founderTip: 'If you have Saudi national co-founders or investors, factor Zakat obligations into your financial model.',
-  },
-  {
-    term: 'Shariah-Compliant Financing',
-    arabicTerm: 'تمويل متوافق مع الشريعة',
-    category: 'mena',
-    plain: 'Financing structures that comply with Islamic law, which prohibits charging or paying interest (riba).',
-    detail: 'Common Shariah-compliant structures include Murabaha (cost-plus financing), Ijara (leasing), Musharaka (partnership/equity), and Sukuk (Islamic bonds). Many GCC investors and family offices prefer or require Shariah-compliant structures. Equity investment is inherently Shariah-compliant; debt with interest is not.',
-    redFlag: false,
-    founderTip: 'If you are raising from GCC family offices or Islamic banks, be prepared to discuss Shariah compliance. Equity rounds are straightforward; debt instruments need structuring.',
-  },
-  {
-    term: 'Hawala',
-    arabicTerm: 'حوالة',
-    category: 'mena',
-    plain: 'An informal value transfer system widely used in the MENA region, based on trust and a network of brokers.',
-    detail: 'Hawala is used for remittances and informal money transfers. It is legal in most GCC countries when licensed. For startups, it is relevant as a competitor or use case in fintech, and as a compliance risk if your platform inadvertently facilitates unlicensed transfers.',
-    redFlag: false,
-    founderTip: 'If you are building a fintech product in MENA, understand how Hawala networks operate — they are your informal competition and a regulatory compliance area.',
-  },
-  {
-    term: 'Vision 2030 (Saudi Arabia)',
-    arabicTerm: 'رؤية 2030',
-    category: 'mena',
-    plain: 'Saudi Arabia’s national transformation plan to diversify the economy away from oil by 2030.',
-    detail: 'Vision 2030 has created massive opportunities for startups in tourism, entertainment, healthcare, education, fintech, and logistics. Government procurement, grants, and accelerator programs are heavily aligned with Vision 2030 sectors. Startups that align their pitch with Vision 2030 themes have an advantage in Saudi fundraising.',
-    redFlag: false,
-    founderTip: 'If you are pitching Saudi investors or government entities, explicitly map your startup to Vision 2030 pillars. It signals strategic alignment.',
-  },
-  {
-    term: 'Monsha’at',
-    arabicTerm: 'منشآت',
-    category: 'mena',
-    plain: 'Saudi Arabia’s General Authority for Small and Medium Enterprises — the primary government body supporting SMEs and startups.',
-    detail: 'Monsha’at provides grants, subsidised loans, training programmes, and access to government procurement for Saudi SMEs and startups. It administers the Kafalah loan guarantee programme and partners with accelerators. Registration with Monsha’at is often a prerequisite for government support programmes.',
-    redFlag: false,
-    founderTip: 'Register your Saudi entity with Monsha’at early. It unlocks access to grants, loan guarantees, and government procurement opportunities.',
-  },
-  {
-    term: 'Hub71 (Abu Dhabi)',
-    arabicTerm: 'هب 71',
-    category: 'mena',
-    plain: 'Abu Dhabi’s flagship tech startup ecosystem, backed by Mubadala and ADQ, offering funding, office space, and market access.',
-    detail: 'Hub71 provides equity-free incentives (office space, housing, health insurance) to accepted startups, plus access to Mubadala’s network and co-investment opportunities. It focuses on deep tech, fintech, and climate tech. Acceptance is competitive but the benefits are substantial.',
-    redFlag: false,
-    founderTip: 'Apply to Hub71 if you are targeting the Abu Dhabi market or seeking Mubadala-connected investors. The non-dilutive benefits alone are worth the application effort.',
-  },
 ];
 
 export const TERM_CATEGORIES = [
@@ -829,5 +701,4 @@ export const TERM_CATEGORIES = [
   { id: 'legal', label: 'Legal' },
   { id: 'duediligence', label: 'Due Diligence' },
   { id: 'metrics', label: 'Metrics & KPIs' },
-  { id: 'mena', label: 'MENA-Specific' },
 ];

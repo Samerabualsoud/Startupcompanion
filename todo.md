@@ -565,3 +565,11 @@
 - [x] Valuation section now includes analyst note and MENA benchmark context inline
 - [x] 31 tests passing, 0 TypeScript errors
 - [x] Save checkpoint
+
+## Round 40 — Ecosystem Database Fix + Glossary Cleanup
+- [ ] Fix admin panel Resource Database tab showing 0 entries (VCs, angels, grants, lawyers) — diagnose query mismatch
+- [ ] Rename "Investor Database" → "Ecosystem Database" everywhere (nav label, page title, tab label, i18n keys)
+- [ ] Remove all 14 MENA-Specific terms from termSheet.ts
+- [ ] Remove MENA-Specific category from TERM_CATEGORIES and TermSheetGlossary.tsx
+- [ ] 31 tests passing, 0 TypeScript errors
+- [ ] Save checkpoint
