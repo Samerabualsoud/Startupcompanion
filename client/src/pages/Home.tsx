@@ -513,6 +513,7 @@ function HomeInner() {
             flex flex-col shrink-0
             transition-transform duration-300 ease-in-out
             w-56 h-full
+            ${!sidebarOpen ? (isRTL ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0') : 'translate-x-0'}
           `}
           style={{
             background: 'white',
@@ -521,9 +522,11 @@ function HomeInner() {
             top: 57,
             height: 'calc(100vh - 57px)',
             // RTL: anchor to right side; LTR: anchor to left side
+            // On desktop (lg+), no transform needed — sidebar is always visible via lg:relative
+            // On mobile, slide in/out based on sidebarOpen
             ...(isRTL
-              ? { right: 0, left: 'auto', transform: sidebarOpen ? 'translateX(0)' : 'translateX(100%)' }
-              : { left: 0, right: 'auto', transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)' }
+              ? { right: 0, left: 'auto' }
+              : { left: 0, right: 'auto' }
             ),
           }}
         >
