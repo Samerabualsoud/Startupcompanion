@@ -84,55 +84,55 @@ function isNewFeature(newUntil?: string): boolean {
 
 const NAV_ITEMS: NavItem[] = [
   // Overview
-  { id: 'dashboard', tier: 'free',     label: 'Founder Dashboard',     shortLabel: 'Dashboard',   navKey: 'navDashboard',   icon: Gauge,       group: 'My Startup',   badge: undefined },
-  { id: 'profile', tier: 'free',       label: 'My Startup Profile',    shortLabel: 'Profile',     navKey: 'navMyStartup',   icon: Building2,   group: 'My Startup' },
-  { id: 'cogs', tier: 'free',          label: 'COGS Calculator',        shortLabel: 'COGS',        navKey: 'navCOGS',        icon: DollarSign,  group: 'My Startup',   newUntil: '2026-04-01' },
-  { id: 'sales', tier: 'free',         label: 'Sales Tracker',          shortLabel: 'Sales',       navKey: 'navSales',       icon: ShoppingCart, group: 'My Startup',  newUntil: '2026-04-01' },
-  { id: 'data-room', tier: 'pro',     label: 'Data Room',              shortLabel: 'Data Room',   navKey: 'navDataRoom',    icon: FolderOpen,  group: 'My Startup',   newUntil: '2026-04-01' },
-  { id: 'cap-table', tier: 'pro',     label: 'Cap Table Manager',      shortLabel: 'Cap Table',   navKey: 'navCapTable',    icon: Users,       group: 'My Startup',   newUntil: '2026-04-01' },
+  { id: 'dashboard', tier: 'free',     label: 'Command Center',     shortLabel: 'Overview',   navKey: 'navDashboard',   icon: Gauge,       group: 'My Company',   badge: undefined },
+  { id: 'profile', tier: 'free',       label: 'Company Profile',    shortLabel: 'Profile',     navKey: 'navMyStartup',   icon: Building2,   group: 'My Company' },
+  { id: 'cogs', tier: 'free',          label: 'Unit Economics',        shortLabel: 'Unit Econ.',        navKey: 'navCOGS',        icon: DollarSign,  group: 'My Company',   newUntil: '2026-04-01' },
+  { id: 'sales', tier: 'free',         label: 'Revenue Intelligence',          shortLabel: 'Revenue',       navKey: 'navSales',       icon: ShoppingCart, group: 'My Company',  newUntil: '2026-04-01' },
+  { id: 'data-room', tier: 'pro',     label: 'Virtual Data Room',              shortLabel: 'Data Room',   navKey: 'navDataRoom',    icon: FolderOpen,  group: 'My Company',   newUntil: '2026-04-01' },
+  { id: 'cap-table', tier: 'pro',     label: 'Capitalization Table',      shortLabel: 'Cap Table',   navKey: 'navCapTable',    icon: Users,       group: 'My Company',   newUntil: '2026-04-01' },
   // Valuation
-  { id: 'valuation', tier: 'free',     label: 'Valuation Calculator', shortLabel: 'Valuation',   navKey: 'navValuation',   icon: TrendingUp,  group: 'Valuation',    badge: '7 methods' },
+  { id: 'valuation', tier: 'free',     label: 'Startup Valuation Engine', shortLabel: 'Valuation',   navKey: 'navValuation',   icon: TrendingUp,  group: 'Valuation',    badge: '7 methods' },
   // Equity & Funding
-  { id: 'equity-split', tier: 'free',  label: 'Co-Founder Equity Split', shortLabel: 'Equity Split',   navKey: 'navEquitySplit', icon: Users,    group: 'Equity & Cap Table' },
-  { id: 'dilution', tier: 'free',      label: 'Dilution Simulator',   shortLabel: 'Dilution',   navKey: 'navDilution',    icon: GitBranch,   group: 'Equity & Cap Table' },
-  { id: 'vesting', tier: 'pro',       label: 'Vesting Schedule Builder', shortLabel: 'Vesting',   navKey: 'navVesting',  icon: Calendar,    group: 'Equity & Cap Table', badge: 'AI' },
+  { id: 'equity-split', tier: 'free',  label: 'Founder Equity Allocation', shortLabel: 'Equity Split',   navKey: 'navEquitySplit', icon: Users,    group: 'Equity & Ownership' },
+  { id: 'dilution', tier: 'free',      label: 'Dilution & Ownership Model',   shortLabel: 'Dilution',   navKey: 'navDilution',    icon: GitBranch,   group: 'Equity & Ownership' },
+  { id: 'vesting', tier: 'pro',       label: 'Equity Vesting Planner', shortLabel: 'Vesting',   navKey: 'navVesting',  icon: Calendar,    group: 'Equity & Ownership', badge: 'AI' },
   // Fundraising
-  { id: 'readiness', tier: 'free',     label: 'Fundraising Readiness', shortLabel: 'Readiness',   navKey: 'navReadiness',  icon: Gauge,       group: 'Fundraising',  badge: '20 checks' },
-  { id: 'pitch-deck', tier: 'free',    label: 'Pitch Deck Scorecard',  shortLabel: 'Pitch Deck',   navKey: 'navPitchDeck', icon: Layers,      group: 'Fundraising' },
-  { id: 'investor-crm', tier: 'pro',  label: 'Investor CRM',          shortLabel: 'Investors',   navKey: 'navInvestorCRM',  icon: Target,      group: 'Fundraising' },
+  { id: 'readiness', tier: 'free',     label: 'Investor Readiness Assessment', shortLabel: 'Readiness',   navKey: 'navReadiness',  icon: Gauge,       group: 'Capital Raising',  badge: '20 checks' },
+  { id: 'pitch-deck', tier: 'free',    label: 'Pitch Deck Evaluator',  shortLabel: 'Pitch Deck',   navKey: 'navPitchDeck', icon: Layers,      group: 'Capital Raising' },
+  { id: 'investor-crm', tier: 'pro',  label: 'Investor Pipeline CRM',          shortLabel: 'Pipeline',   navKey: 'navInvestorCRM',  icon: Target,      group: 'Capital Raising' },
   // Resources
-  { id: 'accelerators', tier: 'free',  label: 'Accelerator Finder',    shortLabel: 'Accelerators',   navKey: 'navAccelerators', icon: Rocket,    group: 'Resources',    newUntil: '2026-04-01' },
-  { id: 'runway', tier: 'free',        label: 'Runway Optimizer',      shortLabel: 'Runway',   navKey: 'navRunway',     icon: BarChart3,   group: 'Resources' },
-  { id: 'term-sheet', tier: 'free',    label: 'Term Sheet Glossary',   shortLabel: 'Term Sheet',   navKey: 'navTermSheet', icon: BookOpen,    group: 'Resources',    badge: '75 terms' },
+  { id: 'accelerators', tier: 'free',  label: 'Accelerator & Incubator Finder',    shortLabel: 'Accelerators',   navKey: 'navAccelerators', icon: Rocket,    group: 'Market Intelligence',    newUntil: '2026-04-01' },
+  { id: 'runway', tier: 'free',        label: 'Cash Runway Planner',      shortLabel: 'Runway',   navKey: 'navRunway',     icon: BarChart3,   group: 'Market Intelligence' },
+  { id: 'term-sheet', tier: 'free',    label: 'Investment Terms Glossary',   shortLabel: 'Glossary',   navKey: 'navTermSheet', icon: BookOpen,    group: 'Market Intelligence',    badge: '75 terms' },
   // My Startup
   // Legal & Jurisdictions
-  { id: 'free-zones', tier: 'free',    label: 'Free Zones & Jurisdictions', shortLabel: 'Free Zones', navKey: 'navFreeZones', icon: Globe,        group: 'Resources',    newUntil: '2026-04-01' },
+  { id: 'free-zones', tier: 'free',    label: 'Jurisdiction & Free Zone Guide', shortLabel: 'Jurisdictions', navKey: 'navFreeZones', icon: Globe,        group: 'Market Intelligence',    newUntil: '2026-04-01' },
   // Database
-  { id: 'resources', tier: 'free',     label: 'Investor Database',     shortLabel: 'Database',   navKey: 'navDatabase',   icon: Building2,   group: 'Database',     newUntil: '2026-04-01' },
-  { id: 'matching', tier: 'pro',      label: 'Investor Matching',     shortLabel: 'Matching',   navKey: 'navMatching',   icon: Target,      group: 'Database',     badge: 'AI' },
+  { id: 'resources', tier: 'free',     label: 'Investor Intelligence Database',     shortLabel: 'Investor Network',   navKey: 'navDatabase',   icon: Building2,   group: 'Investor Network',     newUntil: '2026-04-01' },
+  { id: 'matching', tier: 'pro',      label: 'AI Investor Matching',     shortLabel: 'Matching',   navKey: 'navMatching',   icon: Target,      group: 'Investor Network',     badge: 'AI' },
   // Admin
-  { id: 'admin', tier: 'enterprise',         label: 'Admin Dashboard',       shortLabel: 'Admin',      icon: Gauge,       group: 'Admin' },
+  { id: 'admin', tier: 'enterprise',         label: 'Platform Administration',       shortLabel: 'Admin',      icon: Gauge,       group: 'Admin' },
   // Legal & Documents
-  { id: 'safe-note', tier: 'pro',         label: 'SAFE / Convertible Note', shortLabel: 'SAFE / Note',    navKey: 'navSAFENote',       icon: FileText,    group: 'Legal & Documents', newUntil: '2026-04-01' },
-  { id: 'nda', tier: 'pro',               label: 'NDA Generator',           shortLabel: 'NDA',            navKey: 'navNDA',            icon: ClipboardCheck, group: 'Legal & Documents', newUntil: '2026-04-01' },
-  { id: 'term-sheet-builder', tier: 'enterprise', label: 'Term Sheet Builder',     shortLabel: 'Term Sheet',     navKey: 'navTermSheetBuilder', icon: FileText,   group: 'Legal & Documents', newUntil: '2026-04-01' },
+  { id: 'safe-note', tier: 'pro',         label: 'SAFE & Convertible Note Builder', shortLabel: 'SAFE / Note',    navKey: 'navSAFENote',       icon: FileText,    group: 'Legal & Compliance', newUntil: '2026-04-01' },
+  { id: 'nda', tier: 'pro',               label: 'Non-Disclosure Agreement',           shortLabel: 'NDA',            navKey: 'navNDA',            icon: ClipboardCheck, group: 'Legal & Compliance', newUntil: '2026-04-01' },
+  { id: 'term-sheet-builder', tier: 'enterprise', label: 'Term Sheet Architect',     shortLabel: 'Glossary',     navKey: 'navTermSheetBuilder', icon: FileText,   group: 'Legal & Compliance', newUntil: '2026-04-01' },
   // ESOP moved to My Startup group above
   // Community
-  { id: 'startup-directory', tier: 'free', label: 'Startup Directory',       shortLabel: 'Directory',      navKey: 'navStartupDir',     icon: Globe,       group: 'Database',           newUntil: '2026-04-01' },
-  { id: 'valuation-timeline', tier: 'pro',label: '409A / Valuation History',shortLabel: '409A History',   navKey: 'navValuationTimeline', icon: BarChart3, group: 'My Startup',         newUntil: '2026-04-01' },
+  { id: 'startup-directory', tier: 'free', label: 'Startup Marketplace',       shortLabel: 'Directory',      navKey: 'navStartupDir',     icon: Globe,       group: 'Investor Network',           newUntil: '2026-04-01' },
+  { id: 'valuation-timeline', tier: 'pro',label: 'Valuation History & 409A',shortLabel: '409A History',   navKey: 'navValuationTimeline', icon: BarChart3, group: 'My Company',         newUntil: '2026-04-01' },
   // Equity & Cap Table
-  { id: 'esop', tier: 'pro',              label: 'ESOP / Option Pool',      shortLabel: 'ESOP',           navKey: 'navESOP',           icon: Users2,      group: 'My Startup',         newUntil: '2026-04-01' },
+  { id: 'esop', tier: 'pro',              label: 'ESOP & Option Pool Manager',      shortLabel: 'ESOP',           navKey: 'navESOP',           icon: Users2,      group: 'My Company',         newUntil: '2026-04-01' },
   // AI Tools
-  { id: 'idea-validator', tier: 'free',        label: 'AI Idea Validator',      shortLabel: 'Idea Validator', navKey: 'navIdeaValidator', icon: Sparkles,     group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-fundraising-advisor', tier: 'pro', label: 'AI Fundraising Advisor', shortLabel: 'AI Advisor',   navKey: 'navAIAdvisor',    icon: MessageCircle, group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-market-research', tier: 'pro',     label: 'AI Market Research',     shortLabel: 'Market Research',   navKey: 'navAIMarketResearch', icon: BarChart3,    group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-investor-email', tier: 'pro',      label: 'AI Investor Email',      shortLabel: 'Email Writer',   navKey: 'navAIEmailWriter',  icon: Mail,          group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-term-sheet', tier: 'enterprise',          label: 'AI Term Sheet Analyzer', shortLabel: 'Term Analyzer',   navKey: 'navAITermAnalyzer', icon: FileText,      group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-cofounder-agreement', tier: 'pro', label: 'AI Co-founder Agreement',shortLabel: 'Co-founder AI',   navKey: 'navAICofounder', icon: Users2,        group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-due-diligence', tier: 'enterprise',       label: 'AI Due Diligence',       shortLabel: 'Due Diligence',   navKey: 'navAIDueDiligence', icon: ClipboardCheck,group: 'AI Tools', badge: 'AI' },
+  { id: 'idea-validator', tier: 'free',        label: 'Concept Validation Engine',      shortLabel: 'Concept Val.', navKey: 'navIdeaValidator', icon: Sparkles,     group: 'AI Advisory', badge: 'AI' },
+  { id: 'ai-fundraising-advisor', tier: 'pro', label: 'Fundraising Strategy Advisor', shortLabel: 'Advisor',   navKey: 'navAIAdvisor',    icon: MessageCircle, group: 'AI Advisory', badge: 'AI' },
+  { id: 'ai-market-research', tier: 'pro',     label: 'Market Intelligence Report',     shortLabel: 'Market Intel',   navKey: 'navAIMarketResearch', icon: BarChart3,    group: 'AI Advisory', badge: 'AI' },
+  { id: 'ai-investor-email', tier: 'pro',      label: 'Investor Outreach Writer',      shortLabel: 'Outreach',   navKey: 'navAIEmailWriter',  icon: Mail,          group: 'AI Advisory', badge: 'AI' },
+  { id: 'ai-term-sheet', tier: 'enterprise',          label: 'Term Sheet Intelligence', shortLabel: 'Term Intel',   navKey: 'navAITermAnalyzer', icon: FileText,      group: 'AI Advisory', badge: 'AI' },
+  { id: 'ai-cofounder-agreement', tier: 'pro', label: 'Co-founder Agreement Drafter',shortLabel: 'Co-founder',   navKey: 'navAICofounder', icon: Users2,        group: 'AI Advisory', badge: 'AI' },
+  { id: 'ai-due-diligence', tier: 'enterprise',       label: 'Due Diligence Analyzer',       shortLabel: 'Due Diligence',   navKey: 'navAIDueDiligence', icon: ClipboardCheck,group: 'AI Advisory', badge: 'AI' },
 ];
 
-const GROUPS = ['My Startup', 'Valuation', 'Equity & Cap Table', 'Fundraising', 'Legal & Documents', 'Resources', 'Database', 'AI Tools', 'Admin'];
+const GROUPS = ['My Company', 'Valuation', 'Equity & Ownership', 'Capital Raising', 'Legal & Compliance', 'Market Intelligence', 'Investor Network', 'AI Advisory', 'Admin'];
 const TOOL_COLORS: Record<ToolId, string> = {
   dashboard: '#0F1B2D',
   cogs: '#059669',
@@ -473,7 +473,7 @@ function HomeInner() {
           <button
             onClick={() => {
               generateFullReport({
-                companyName: inputs?.companyName || chatAnswers?.companyName || 'My Startup',
+                companyName: inputs?.companyName || chatAnswers?.companyName || 'My Company',
                 valuation: inputs && summary ? { inputs, summary } : null,
                 readiness,
                 pitchScore,
@@ -526,13 +526,13 @@ function HomeInner() {
               const groupLabel: Record<string, string> = {
                 'Overview': isRTL ? 'نظرة عامة' : 'Overview',
                 'Valuation': t('navGroupValuation'),
-                'Equity & Cap Table': t('navGroupEquity'),
-                'Fundraising': t('navGroupFundraising'),
-                'Resources': t('navGroupResources'),
-                'Database': t('navGroupDatabase'),
-                'My Startup': t('navGroupMyStartup'),
-                'AI Tools': t('navGroupAITools'),
-                'Legal & Documents': t('navGroupLegal'),
+                'Equity & Ownership': t('navGroupEquity'),
+                'Capital Raising': t('navGroupFundraising'),
+                'Market Intelligence': t('navGroupResources'),
+                'Investor Network': t('navGroupDatabase'),
+                'My Company': t('navGroupMyStartup'),
+                'AI Advisory': t('navGroupAITools'),
+                'Legal & Compliance': t('navGroupLegal'),
                 'Admin': 'Admin',
               };
               return (
