@@ -380,7 +380,7 @@ function HomeInner() {
     <div className="min-h-screen flex flex-col bg-background">
 
       {/* ── Top Bar ── */}
-      <header className="shrink-0 border-b border-border bg-card px-4 py-3 flex items-center justify-between z-40 relative">
+      <header className="shrink-0 border-b border-border bg-white px-4 py-3 flex items-center justify-between z-40 relative" style={{ boxShadow: '0 1px 0 oklch(0.91 0.015 60)' }}>
         <div className="flex items-center gap-3">
           {/* Mobile menu button */}
           <button
@@ -390,15 +390,15 @@ function HomeInner() {
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, oklch(0.52 0.22 265), oklch(0.62 0.22 330))' }}>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, oklch(0.62 0.22 30), oklch(0.60 0.24 290))' }}>
               <TrendingUp className="w-4 h-4 text-white" />
             </div>
             <div>
-              <div className="text-sm font-bold text-foreground">
+              <div className="text-sm font-extrabold text-foreground" style={{ fontFamily: 'Nunito, sans-serif', letterSpacing: '-0.01em' }}>
                 Polaris Arabia
               </div>
-              <div className="text-[10px] text-muted-foreground font-mono hidden sm:block">
-                Valuation · Equity · Fundraising · Resources
+              <div className="text-[10px] text-muted-foreground hidden sm:block">
+                Startup Intelligence Platform
               </div>
             </div>
           </div>
@@ -480,8 +480,8 @@ function HomeInner() {
                 dilution,
               });
             }}
-            className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-90 active:scale-95"
-            style={{ background: 'oklch(0.13 0.04 265)', color: 'oklch(0.88 0.01 265)', border: '1px solid oklch(0.24 0.04 265)' }}
+            className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-xl transition-all hover:opacity-90 active:scale-95 text-white"
+            style={{ background: 'linear-gradient(135deg, oklch(0.62 0.22 30), oklch(0.60 0.24 290))' }}
             title="Download Full Report (PDF)"
           >
             <FileDown className="w-3.5 h-3.5" />
@@ -513,10 +513,19 @@ function HomeInner() {
             flex flex-col shrink-0
             transition-transform duration-300 ease-in-out
             w-56 h-full
-            ${isRTL ? 'right-0 border-l border-border' : 'left-0 border-r border-border'}
-            ${sidebarOpen ? 'translate-x-0' : isRTL ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}
-          style={{ background: 'oklch(0.993 0.003 80)', top: 57, height: 'calc(100vh - 57px)' }}
+          style={{
+            background: 'white',
+            borderRight: isRTL ? 'none' : '1.5px solid oklch(0.91 0.015 60)',
+            borderLeft: isRTL ? '1.5px solid oklch(0.91 0.015 60)' : 'none',
+            top: 57,
+            height: 'calc(100vh - 57px)',
+            // RTL: anchor to right side; LTR: anchor to left side
+            ...(isRTL
+              ? { right: 0, left: 'auto', transform: sidebarOpen ? 'translateX(0)' : 'translateX(100%)' }
+              : { left: 0, right: 'auto', transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)' }
+            ),
+          }}
         >
           <div className="flex-1 overflow-y-auto py-3 px-2">
             {GROUPS.map(group => {
@@ -535,9 +544,24 @@ function HomeInner() {
                 'Legal & Compliance': t('navGroupLegal'),
                 'Admin': 'Admin',
               };
+              // Per-group color config
+              const groupColors: Record<string, { header: string; activeBg: string; activeText: string; activeIcon: string }> = {
+                'Overview':           { header: 'oklch(0.52 0.02 60)',   activeBg: 'oklch(0.94 0.01 60)',   activeText: 'oklch(0.30 0.02 60)',   activeIcon: 'oklch(0.40 0.02 60)' },
+                'My Company':         { header: 'oklch(0.55 0.22 30)',   activeBg: 'oklch(0.95 0.05 30)',   activeText: 'oklch(0.45 0.22 30)',   activeIcon: 'oklch(0.55 0.22 30)' },
+                'Valuation':          { header: 'oklch(0.52 0.24 290)',  activeBg: 'oklch(0.94 0.05 290)',  activeText: 'oklch(0.42 0.24 290)',  activeIcon: 'oklch(0.52 0.24 290)' },
+                'Equity & Ownership': { header: 'oklch(0.50 0.20 250)',  activeBg: 'oklch(0.93 0.04 250)',  activeText: 'oklch(0.40 0.20 250)',  activeIcon: 'oklch(0.50 0.20 250)' },
+                'Capital Raising':    { header: 'oklch(0.50 0.20 150)',  activeBg: 'oklch(0.93 0.05 150)',  activeText: 'oklch(0.40 0.20 150)',  activeIcon: 'oklch(0.50 0.20 150)' },
+                'Legal & Compliance': { header: 'oklch(0.50 0.18 330)',  activeBg: 'oklch(0.94 0.04 330)',  activeText: 'oklch(0.40 0.18 330)',  activeIcon: 'oklch(0.50 0.18 330)' },
+                'Market Intelligence':{ header: 'oklch(0.50 0.18 200)',  activeBg: 'oklch(0.93 0.04 200)',  activeText: 'oklch(0.40 0.18 200)',  activeIcon: 'oklch(0.50 0.18 200)' },
+                'Investor Network':   { header: 'oklch(0.55 0.18 55)',   activeBg: 'oklch(0.95 0.05 55)',   activeText: 'oklch(0.45 0.18 55)',   activeIcon: 'oklch(0.55 0.18 55)' },
+                'AI Advisory':        { header: 'oklch(0.52 0.22 290)',  activeBg: 'oklch(0.94 0.05 290)',  activeText: 'oklch(0.42 0.22 290)',  activeIcon: 'oklch(0.52 0.22 290)' },
+                'Admin':              { header: 'oklch(0.45 0.02 60)',   activeBg: 'oklch(0.93 0.01 60)',   activeText: 'oklch(0.30 0.02 60)',   activeIcon: 'oklch(0.45 0.02 60)' },
+              };
+              const gc = groupColors[group] ?? groupColors['Overview'];
               return (
                 <div key={group} className="mb-3">
-                  <div className="text-[9px] font-bold uppercase tracking-widest px-3 mb-1" style={{ color: 'oklch(0.55 0.04 265)' }}>
+                  <div className="text-[9px] font-extrabold uppercase tracking-widest px-3 mb-1.5 flex items-center gap-1.5" style={{ color: gc.header }}>
+                    <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: gc.header }} />
                     {groupLabel[group] || group}
                   </div>
                   {groupItems.map(item => {
@@ -545,35 +569,36 @@ function HomeInner() {
                     const isActive = activeTool === item.id;
                     const isAI = item.badge === 'AI';
                     const showNew = isNewFeature(item.newUntil);
-                    // Effective badge: 'AI' takes priority, then time-based 'New', then static badge
                     const effectiveBadge = isAI ? 'AI' : showNew ? 'New' : item.badge;
-                    // tier field reserved for future monetization — not shown in UI yet
                     return (
                       <button
                         key={item.id}
                         onClick={() => { setActiveTool(item.id); setSidebarOpen(false); }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg mb-0.5 transition-all ${isRTL ? 'text-right flex-row-reverse' : 'text-left'} ${
-                          isActive
-                            ? 'text-white shadow-sm'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
-                        }`}
-                        style={isActive ? { background: 'oklch(0.52 0.22 265)', boxShadow: '0 2px 8px oklch(0.52 0.22 265 / 0.35)' } : {}}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl mb-0.5 transition-all ${isRTL ? 'flex-row-reverse' : ''}`}
+                        style={isActive ? {
+                          background: gc.activeBg,
+                          color: gc.activeText,
+                          fontWeight: 600,
+                        } : {
+                          color: 'oklch(0.50 0.02 60)',
+                        }}
+                        onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'oklch(0.96 0.01 60)'; }}
+                        onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = ''; }}
                       >
-                        <Icon className="w-3.5 h-3.5 shrink-0" />
-                        <span className="text-xs font-medium flex-1 truncate">{item.navKey ? t(item.navKey as any) : item.shortLabel}</span>
-                        {/* Tier badge intentionally hidden — reserved for future monetization */}
+                        <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: isActive ? gc.activeIcon : undefined }} />
+                        <span className={`text-xs flex-1 truncate ${isRTL ? 'text-right' : 'text-left'}`}>{item.navKey ? t(item.navKey as any) : item.shortLabel}</span>
                         {effectiveBadge && !isActive && (
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
                             effectiveBadge === 'AI'
-                              ? 'bg-violet-100 text-violet-700'
+                              ? 'bg-violet-100 text-violet-600'
                               : effectiveBadge === 'New'
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-secondary text-muted-foreground'
+                              ? 'bg-emerald-100 text-emerald-600'
+                              : 'bg-orange-50 text-orange-500'
                           }`}>
                             {effectiveBadge}
                           </span>
                         )}
-                        {isActive && <ChevronRight className={`w-3 h-3 shrink-0 opacity-70 ${isRTL ? 'rotate-180' : ''}`} />}
+                        {isActive && <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: gc.activeIcon }} />}
                       </button>
                     );
                   })}
@@ -601,14 +626,16 @@ function HomeInner() {
         {/* ── Main Content ── */}
         <main className="flex flex-col flex-1 overflow-hidden">
           {/* Tool header bar */}
-          {activeTool !== 'valuation' && activeTool !== 'dashboard' && (
-            <div className="shrink-0 px-5 py-3 border-b border-border bg-card flex items-center gap-3">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm" style={{ background: 'oklch(0.52 0.22 265)' }}>
-                {(() => { const Icon = activeItem.icon; return <Icon className="w-3.5 h-3.5 text-white" />; })()}
+          {activeTool !== 'valuation' && activeTool !== 'dashboard' && activeItem && (
+            <div className={`shrink-0 px-5 py-3 border-b border-border bg-white flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm" style={{ background: 'linear-gradient(135deg, oklch(0.62 0.22 30), oklch(0.60 0.24 290))' }}>
+                {(() => { const Icon = activeItem.icon; return <Icon className="w-4 h-4 text-white" />; })()}
               </div>
-              <div>
-                <div className="text-sm font-bold text-foreground">{activeItem.label}</div>
+              <div className={isRTL ? 'text-right' : ''}>
+                <div className="text-sm font-extrabold text-foreground" style={{ fontFamily: 'Nunito, sans-serif' }}>{activeItem.label}</div>
               </div>
+              <div className="flex-1" />
+              <div className="rainbow-divider hidden lg:block" style={{ width: 40, height: 3 }} />
             </div>
           )}
 
