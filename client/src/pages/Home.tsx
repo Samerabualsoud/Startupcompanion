@@ -177,16 +177,22 @@ function HomeInner() {
   const [, navigate] = useLocation();
   const { t, isRTL } = useLanguage();
 
-  // Persist active tool in URL hash so refresh keeps the same tab
-  const getToolFromHash = (): ToolId => {
+  // Persist active tool across refreshes using localStorage + URL hash
+  const VALID_TOOL_IDS: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator'];
+  const getInitialTool = (): ToolId => {
+    // 1. Check URL hash first (e.g. /app#equity-split)
     const hash = window.location.hash.replace('#', '') as ToolId;
-    const validIds: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator'];
-    return validIds.includes(hash) ? hash : 'dashboard';
+    if (VALID_TOOL_IDS.includes(hash)) return hash;
+    // 2. Fall back to localStorage
+    const saved = localStorage.getItem('polaris_active_tool') as ToolId;
+    if (saved && VALID_TOOL_IDS.includes(saved)) return saved;
+    return 'dashboard';
   };
-  const [activeTool, setActiveToolState] = useState<ToolId>(getToolFromHash);
+  const [activeTool, setActiveToolState] = useState<ToolId>(getInitialTool);
   const setActiveTool = (id: ToolId) => {
     setActiveToolState(id);
-    window.location.hash = id;
+    localStorage.setItem('polaris_active_tool', id);
+    window.history.replaceState(null, '', `/app#${id}`);
   };
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatAnswers, setChatAnswers] = useState<Record<string, any> | null>(null);
@@ -400,7 +406,16 @@ function HomeInner() {
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
-          <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => {
+              if (isAuthenticated) {
+                setActiveTool('dashboard');
+              } else {
+                navigate('/');
+              }
+            }}
+            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity cursor-pointer"
+          >
             <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, oklch(0.62 0.22 30), oklch(0.60 0.24 290))' }}>
               <TrendingUp className="w-4 h-4 text-white" />
             </div>
@@ -412,7 +427,7 @@ function HomeInner() {
                 Startup Intelligence Platform
               </div>
             </div>
-          </div>
+          </button>
         </div>
         <div className="flex items-center gap-2">
             <button
