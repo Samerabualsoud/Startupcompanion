@@ -520,3 +520,9 @@
 - [x] Full Arabic translation of benchmark context panel
 - [x] Expanded disclaimer with financial advisor recommendation
 - [x] 31 tests passing, 0 TypeScript errors
+
+## Round 36 — Runway Planner & Free Zones Rebuild
+- [x] Rebuild RunwayOptimizer: modern design with gradient header, monthly cash flow timeline chart, runway gauge/progress bar, pre-fill from StartupContext (cashOnHand, monthlyBurnRate, mrr), add expense categories management (add/remove), scenario comparison (current vs optimized), investor tips panel
+- [x] Rebuild FreeZones: new layout with AI-powered "Find My Jurisdiction" quiz/recommender, improved card design with visual score bars, better detail modal/drawer with tabbed content, comparison table improvements, added RAKEZ, Qatar QFC, BVI, Cayman, Singapore, Saudi SEZs, Bahrain, Delaware, ADGM, DIFC (10 jurisdictions total)
+- [x] 31 tests passing, 0 TypeScript errors
+- [x] Save checkpoint
