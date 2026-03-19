@@ -454,3 +454,47 @@
 - [x] Update StartupDirectory UI to show logo, MRR, customer count, employee count
 - [x] Update empty state message to guide users to toggle Public in Startup Profile
 - [x] Update description to mention making profile public from Startup Profile page
+
+## Round 32 - Delete Plans & Security Hardening
+- [ ] Add saved plans list + delete button to ESOPPlanner UI (trpc.esop.list + trpc.esop.delete)
+- [ ] Verify COGS delete button is visible and working
+- [ ] Add security headers (helmet) to Express server
+- [ ] Add rate limiting to public procedures (submitListing, getSharedRoom, trackFileView, findMatches)
+- [ ] Add data room password protection option
+- [ ] Sanitize inputs in submitListing (prevent XSS/injection)
+- [ ] Restrict file upload MIME types in data room
+- [ ] Add max file count per data room (limit to 50 files)
+- [ ] Fix matchingRouter.findMatches to require auth
+
+## Round 33 - Crash Fix & Valuation Upgrade
+- [ ] Fix dashboard crash: Cannot read properties of undefined (reading 'icon') in NAV_ITEMS
+- [ ] Upgrade valuation tool: richer results panel with AI narrative summary
+- [ ] Upgrade valuation tool: method comparison bar chart with confidence bands
+- [ ] Upgrade valuation tool: sensitivity analysis table (bull/base/bear scenarios)
+- [ ] Upgrade valuation tool: peer benchmarking section
+- [ ] Upgrade valuation tool: one-click PDF export of valuation report
+- [ ] Upgrade valuation tool: save valuation directly from results panel
+
+## Round 33 - Crash Fix, Valuation Upgrade & Monetization Tiers
+- [ ] Fix dashboard crash: Cannot read properties of undefined (reading 'icon') in NAV_ITEMS
+- [ ] Upgrade valuation tool: AI narrative summary of results
+- [ ] Upgrade valuation tool: sensitivity analysis (bull/base/bear)
+- [ ] Upgrade valuation tool: peer benchmarking by sector/stage
+- [ ] Upgrade valuation tool: improved results UI with method comparison chart
+- [ ] Design monetization tiers: Free / Pro / Enterprise tool classification
+- [ ] Add tier badges to sidebar nav items (Free / Pro / Enterprise)
+- [ ] Add upgrade prompt modal when free users access Pro tools
+- [ ] Add /pricing page with tier breakdown
+
+## Round 33 Completed Items
+
+- [x] Fix dashboard crash: Cannot read properties of undefined (reading icon) when clicking Business Model or Problem nav items
+- [x] Map unknown tool IDs (problem, business-model) to profile in onNavigate with null-guard on activeItem
+- [x] Add AI Analyst tab to ValuationReport with AI narrative generation (trpc.ai.valuationNarrative)
+- [x] Add Sensitivity Analysis tab to ValuationReport (revenue growth, burn rate, gross margin)
+- [x] Add Market Benchmarks panel to AI Analyst tab (ARR multiple, burn multiple, gross margin, revenue growth vs industry)
+- [x] Add valuationNarrative procedure to aiRouter.ts
+- [x] Add tier field to NavItem interface (free | pro | enterprise)
+- [x] Assign tiers to all 33 tools in NAV_ITEMS
+- [x] Display Pro/Enterprise tier badges in sidebar next to tool names
+- [x] Add tier legend (Free/Pro/Enterprise) to sidebar footer

@@ -1056,5 +1056,49 @@ Paragraph 3: Investment thesis — why this team and opportunity deserve capital
       });
       return { summary: response.choices[0].message.content as string };
     }),
+
+  // ── AI Valuation Narrative ─────────────────────────────────────────────────
+  valuationNarrative: protectedProcedure
+    .input(z.object({
+      companyName: z.string(),
+      stage: z.string(),
+      sector: z.string(),
+      blendedValuation: z.number(),
+      valuationLow: z.number(),
+      valuationHigh: z.number(),
+      confidenceScore: z.number(),
+      riskLevel: z.string(),
+      runway: z.number(),
+      burnMultiple: z.number(),
+      impliedARRMultiple: z.number(),
+      currentARR: z.number(),
+      revenueGrowthRate: z.number(),
+      grossMargin: z.number(),
+      methods: z.array(z.object({
+        method: z.string(),
+        value: z.number(),
+        applicability: z.number(),
+        confidence: z.number(),
+      })),
+      language: z.enum(['english', 'arabic']).default('english'),
+    }))
+    .mutation(async ({ input }) => {
+      const fmt = (n: number) => n >= 1e9 ? `$${(n/1e9).toFixed(2)}B` : n >= 1e6 ? `$${(n/1e6).toFixed(2)}M` : n >= 1e3 ? `$${(n/1e3).toFixed(0)}K` : `$${n.toFixed(0)}`;
+      const langNote = input.language === 'arabic' ? ' Respond in Arabic.' : ' Respond in English.';
+      const methodsSummary = input.methods.map(m => `  - ${m.method}: ${fmt(m.value)} (${m.applicability}% weight, ${m.confidence}% confidence)`).join('\n');
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: 'system',
+            content: `You are a senior VC analyst providing a concise, actionable valuation narrative for a startup founder. Write in exactly 4 short paragraphs: (1) headline interpretation of the valuation result, (2) what the range and confidence score mean for their fundraising strategy, (3) the 2 most important strengths and 2 most important risks revealed by the multi-method analysis, (4) specific, concrete next steps the founder should take in the next 90 days to maximize their valuation. Be direct, specific, and avoid generic advice. Do not use bullet points — write in flowing paragraphs.${langNote}`,
+          },
+          {
+            role: 'user',
+            content: `Provide a valuation narrative for:\nCompany: ${input.companyName}\nStage: ${input.stage}\nSector: ${input.sector}\nBlended Valuation: ${fmt(input.blendedValuation)}\nRange: ${fmt(input.valuationLow)} — ${fmt(input.valuationHigh)}\nConfidence Score: ${input.confidenceScore}%\nRisk Level: ${input.riskLevel}\nRunway: ${input.runway === 999 ? 'Profitable' : input.runway + ' months'}\nBurn Multiple: ${input.burnMultiple}x\nImplied ARR Multiple: ${input.impliedARRMultiple}x\nCurrent ARR: ${fmt(input.currentARR)}\nRevenue Growth: ${input.revenueGrowthRate}%\nGross Margin: ${input.grossMargin}%\nMethod Results:\n${methodsSummary}`,
+          },
+        ],
+      });
+      return { narrative: response.choices[0].message.content as string };
+    }),
 });
 

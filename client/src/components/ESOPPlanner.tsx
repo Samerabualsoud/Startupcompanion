@@ -26,7 +26,8 @@ import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Users, Plus, Edit2, XCircle, TrendingUp, Award, Calendar,
-  DollarSign, Percent, FileText, Sparkles, CheckCircle2, Clock, Info
+  DollarSign, Percent, FileText, Sparkles, CheckCircle2, Clock, Info,
+  Trash2, FolderOpen, ChevronDown, ChevronUp
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -163,6 +164,13 @@ export default function ESOPPlanner() {
   const [letterLoading, setLetterLoading] = useState(false);
   const [letterContent, setLetterContent] = useState<string | null>(null);
   const [letterDialog, setLetterDialog] = useState(false);
+  const [showSavedPlans, setShowSavedPlans] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+
+  // ── Load saved plans list ──────────────────────────────────────────────
+  const { data: savedPlans, refetch: refetchPlans } = trpc.esop.list.useQuery(undefined, {
+    enabled: showSavedPlans,
+  });
 
   // ── Load active plan ────────────────────────────────────────────────────
   trpc.esop.getActive.useQuery(undefined, {
@@ -187,7 +195,20 @@ export default function ESOPPlanner() {
 
   // ── Mutations ───────────────────────────────────────────────────────────
   const saveMutation = trpc.esop.save.useMutation({
-    onSuccess: () => { toast.success('Plan saved'); refresh(); },
+    onSuccess: () => { toast.success('Plan saved'); refresh(); refetchPlans(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deletePlanMutation = trpc.esop.delete.useMutation({
+    onSuccess: () => {
+      toast.success('Plan deleted');
+      refetchPlans();
+      setDeleteConfirmId(null);
+      // If we deleted the active plan, reset the editor
+      if (deleteConfirmId === plan.id) {
+        setPlan(p => ({ ...p, id: undefined }));
+      }
+    },
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -331,7 +352,16 @@ export default function ESOPPlanner() {
             Manage your employee equity program following industry best practices
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSavedPlans(v => !v)}
+          >
+            <FolderOpen className="w-3.5 h-3.5 mr-1.5" />
+            Saved Plans
+            {showSavedPlans ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
+          </Button>
           <Button variant="outline" size="sm" onClick={handleAIRecommendation} disabled={aiLoading}>
             <Sparkles className="w-3.5 h-3.5 mr-1.5" />
             {aiLoading ? 'Analyzing…' : 'AI Recommendation'}
@@ -341,6 +371,102 @@ export default function ESOPPlanner() {
           </Button>
         </div>
       </div>
+
+      {/* ── Saved Plans Panel ── */}
+      {showSavedPlans && (
+        <Card className="border border-border shadow-sm">
+          <CardHeader className="pb-2 pt-4">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <FolderOpen className="w-4 h-4 text-purple-500" />
+              Saved Plans ({savedPlans?.length ?? 0})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pb-4">
+            {!savedPlans || savedPlans.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No saved plans yet. Click "Save Plan" to save your current plan.</p>
+            ) : (
+              <div className="space-y-2">
+                {savedPlans.map((p: any) => (
+                  <div
+                    key={p.id}
+                    className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
+                      p.id === plan.id
+                        ? 'border-purple-300 bg-purple-50/50'
+                        : 'border-border hover:bg-secondary/30'
+                    }`}
+                  >
+                    <div
+                      className="flex-1 cursor-pointer"
+                      onClick={() => {
+                        setPlan({
+                          id: p.id,
+                          label: p.label ?? 'ESOP Plan',
+                          totalShares: Number(p.totalShares) || 10_000_000,
+                          currentOptionPool: Number(p.currentOptionPool) || 1_000_000,
+                          pricePerShare: Number(p.pricePerShare) || 0.10,
+                          fmvPerShare: Number(p.fmvPerShare) || 0.10,
+                          vestingMonths: Number(p.vestingMonths) || 48,
+                          cliffMonths: Number(p.cliffMonths) || 12,
+                          grants: (p.grants as Grant[] | null) ?? [],
+                          jurisdiction: p.jurisdiction ?? 'Delaware',
+                          planType: (p.planType as any) ?? 'iso',
+                        });
+                        setShowSavedPlans(false);
+                        toast.success(`Loaded plan: ${p.label ?? 'ESOP Plan'}`);
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-foreground">{p.label ?? 'ESOP Plan'}</span>
+                        {p.id === plan.id && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Active</Badge>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {p.summary?.grantCount ?? 0} grants · {Number(p.currentOptionPool).toLocaleString()} pool shares
+                        {p.updatedAt && ` · Updated ${new Date(p.updatedAt).toLocaleDateString()}`}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 ml-3">
+                      {deleteConfirmId === p.id ? (
+                        <>
+                          <span className="text-xs text-destructive mr-1">Delete?</span>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                            onClick={() => deletePlanMutation.mutate({ id: p.id })}
+                            disabled={deletePlanMutation.isPending}
+                          >
+                            Yes
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                            onClick={() => setDeleteConfirmId(null)}
+                          >
+                            No
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                          onClick={() => setDeleteConfirmId(p.id)}
+                          title="Delete plan"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* ── Pool KPI Cards ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

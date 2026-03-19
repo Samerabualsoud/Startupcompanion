@@ -7,7 +7,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { FileDown, BookmarkPlus, ChevronDown, ChevronRight, RotateCcw, PieChart, BarChart2, Layers, Cloud, CloudOff } from 'lucide-react';
+import { FileDown, BookmarkPlus, ChevronDown, ChevronRight, RotateCcw, PieChart, BarChart2, Layers, Cloud, CloudOff, Sparkles, TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react';
+import { Streamdown } from 'streamdown';
 import { formatCurrency, type StartupInputs, type ValuationSummary, type SavedScenario } from '@/lib/valuation';
 import { generatePDFReport } from '@/lib/pdfReport';
 import DilutionCalculator from './DilutionCalculator';
@@ -86,11 +87,15 @@ const METHOD_RATIONALE: Record<string, {
 
 const TABS_EN = [
   { id: 'report', label: 'Valuation Report', icon: BarChart2 },
+  { id: 'ai-analyst', label: 'AI Analyst', icon: Sparkles },
+  { id: 'sensitivity', label: 'Sensitivity', icon: TrendingUp },
   { id: 'scenarios', label: 'Scenarios', icon: Layers },
   { id: 'dilution', label: 'Dilution', icon: PieChart },
 ];
 const TABS_AR = [
   { id: 'report', label: 'تقرير التقييم', icon: BarChart2 },
+  { id: 'ai-analyst', label: 'محلل AI', icon: Sparkles },
+  { id: 'sensitivity', label: 'تحليل الحساسية', icon: TrendingUp },
   { id: 'scenarios', label: 'السيناريوهات', icon: Layers },
   { id: 'dilution', label: 'التخفيف', icon: PieChart },
 ];
@@ -157,10 +162,46 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
   const [savedScenarios, setSavedScenarios] = useState<SavedScenario[]>([]);
   const [showSaveInput, setShowSaveInput] = useState(false);
   const [scenarioName, setScenarioName] = useState('');
+  const [aiNarrative, setAiNarrative] = useState<string | null>(null);
+  const [aiNarrativeLoading, setAiNarrativeLoading] = useState(false);
   const { isAuthenticated } = useAuth();
   const { isRTL } = useLanguage();
   const TABS = isRTL ? TABS_AR : TABS_EN;
   const { refresh: refreshStartupContext } = useStartup();
+
+  const narrativeMutation = trpc.ai.valuationNarrative.useMutation({
+    onSuccess: (data) => {
+      setAiNarrative(data.narrative);
+      setAiNarrativeLoading(false);
+    },
+    onError: () => {
+      setAiNarrativeLoading(false);
+      toast.error('Failed to generate AI analysis. Please try again.');
+    },
+  });
+
+  const handleGenerateNarrative = () => {
+    if (aiNarrative) return;
+    setAiNarrativeLoading(true);
+    narrativeMutation.mutate({
+      companyName: inputs.companyName || 'Your Startup',
+      stage: inputs.stage,
+      sector: inputs.sector,
+      blendedValuation: summary.blended,
+      valuationLow: summary.weightedLow,
+      valuationHigh: summary.weightedHigh,
+      confidenceScore: summary.confidenceScore,
+      riskLevel: summary.riskLevel,
+      runway: summary.runway,
+      burnMultiple: summary.burnMultiple,
+      impliedARRMultiple: summary.impliedARRMultiple,
+      currentARR: inputs.currentARR,
+      revenueGrowthRate: inputs.revenueGrowthRate,
+      grossMargin: inputs.grossMargin,
+      methods: summary.results.map(r => ({ method: r.method, value: r.value, applicability: r.applicability, confidence: r.confidence })),
+      language: isRTL ? 'arabic' : 'english',
+    });
+  };
 
   const saveValuationMutation = trpc.profile.saveValuation.useMutation({
     onSuccess: () => {
@@ -423,6 +464,233 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
               <RotateCcw className="w-3.5 h-3.5" />
               {isRTL ? 'بدء تقييم جديد' : 'Start a new valuation'}
             </button>
+          </div>
+        )}
+
+        {activeTab === 'ai-analyst' && (
+          <div className="p-5 space-y-5">
+            {/* AI Analyst Panel */}
+            <div className="rounded-xl overflow-hidden border border-border">
+              <div className="px-4 py-3 flex items-center justify-between" style={{ background: 'oklch(0.22 0.08 270)' }}>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" style={{ color: 'oklch(0.75 0.15 270)' }} />
+                  <span className="text-sm font-semibold text-white">{isRTL ? 'تحليل المحلل الذكي' : 'AI Analyst Narrative'}</span>
+                </div>
+                {!aiNarrative && (
+                  <button
+                    onClick={() => { handleGenerateNarrative(); }}
+                    disabled={aiNarrativeLoading || !isAuthenticated}
+                    className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md transition-all disabled:opacity-50"
+                    style={{ background: 'oklch(0.55 0.18 270)', color: 'white' }}
+                  >
+                    {aiNarrativeLoading ? (
+                      <><span className="animate-spin inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />{isRTL ? 'جارٍ التحليل...' : 'Analyzing...'}</>
+                    ) : (
+                      <><Sparkles className="w-3 h-3" />{isRTL ? 'توليد التحليل' : 'Generate Analysis'}</>
+                    )}
+                  </button>
+                )}
+              </div>
+              <div className="p-4 bg-card">
+                {!isAuthenticated ? (
+                  <div className="text-center py-6">
+                    <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-amber-500" />
+                    <p className="text-sm font-medium text-foreground mb-1">{isRTL ? 'تسجيل الدخول مطلوب' : 'Login Required'}</p>
+                    <p className="text-xs text-muted-foreground">{isRTL ? 'سجّل دخولك للحصول على تحليل AI مخصص لتقييمك.' : 'Sign in to get a personalized AI analysis of your valuation.'}</p>
+                  </div>
+                ) : aiNarrative ? (
+                  <div className="text-sm text-foreground leading-relaxed prose prose-sm max-w-none">
+                    <Streamdown>{aiNarrative}</Streamdown>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Sparkles className="w-10 h-10 mx-auto mb-3" style={{ color: 'oklch(0.65 0.15 270)' }} />
+                    <p className="text-sm font-medium text-foreground mb-1">{isRTL ? 'تحليل ذكاء اصطناعي عميق' : 'Deep AI Analysis'}</p>
+                    <p className="text-xs text-muted-foreground max-w-xs mx-auto">{isRTL ? 'احصل على تفسير احترافي لنتائج التقييم، ونقاط القوة والمخاطر، وخطوات عملية للأشهر التسعين القادمة.' : 'Get a professional interpretation of your valuation results, key strengths and risks, and concrete action steps for the next 90 days.'}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Peer Benchmarks */}
+            <div className="rounded-xl border border-border overflow-hidden bg-card">
+              <div className="px-4 py-3 border-b border-border">
+                <h3 className="text-sm font-semibold text-foreground">{isRTL ? 'معايير السوق' : 'Market Benchmarks'}</h3>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{isRTL ? 'مقارنة مؤشراتك بمتوسطات الصناعة' : 'How your metrics compare to industry averages'}</p>
+              </div>
+              <div className="p-4 space-y-3">
+                {[
+                  {
+                    label: isRTL ? 'مضاعف ARR' : 'ARR Multiple',
+                    yours: summary.impliedARRMultiple,
+                    benchmark: inputs.stage === 'pre-seed' ? 8 : inputs.stage === 'seed' ? 10 : inputs.stage === 'series-a' ? 12 : 15,
+                    unit: 'x',
+                    higherBetter: true,
+                  },
+                  {
+                    label: isRTL ? 'مضاعف الحرق' : 'Burn Multiple',
+                    yours: summary.burnMultiple,
+                    benchmark: inputs.stage === 'pre-seed' ? 3 : inputs.stage === 'seed' ? 2 : 1.5,
+                    unit: 'x',
+                    higherBetter: false,
+                  },
+                  {
+                    label: isRTL ? 'هامش الربح الإجمالي' : 'Gross Margin',
+                    yours: inputs.grossMargin,
+                    benchmark: inputs.sector === 'saas' || inputs.sector === 'fintech' ? 75 : inputs.sector === 'ecommerce' ? 40 : 60,
+                    unit: '%',
+                    higherBetter: true,
+                  },
+                  {
+                    label: isRTL ? 'نمو الإيرادات' : 'Revenue Growth',
+                    yours: inputs.revenueGrowthRate,
+                    benchmark: inputs.stage === 'seed' ? 100 : inputs.stage === 'series-a' ? 150 : 80,
+                    unit: '%',
+                    higherBetter: true,
+                  },
+                ].map(({ label, yours, benchmark, unit, higherBetter }) => {
+                  const isGood = higherBetter ? yours >= benchmark : yours <= benchmark;
+                  const diff = Math.abs(yours - benchmark);
+                  const Icon = isGood ? TrendingUp : TrendingDown;
+                  return (
+                    <div key={label} className="flex items-center gap-3">
+                      <div className="w-32 shrink-0">
+                        <div className="text-xs font-medium text-foreground">{label}</div>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
+                          <span>{isRTL ? 'أنت' : 'You'}: <strong className="text-foreground">{yours.toFixed(1)}{unit}</strong></span>
+                          <span>{isRTL ? 'المعيار' : 'Benchmark'}: {benchmark}{unit}</span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{
+                              width: `${Math.min(100, (yours / (benchmark * 1.5)) * 100)}%`,
+                              background: isGood ? '#10B981' : '#EF4444',
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="shrink-0">
+                        <Icon className="w-3.5 h-3.5" style={{ color: isGood ? '#10B981' : '#EF4444' }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'sensitivity' && (
+          <div className="p-5 space-y-5">
+            <div className="rounded-xl border border-border overflow-hidden bg-card">
+              <div className="px-4 py-3 border-b border-border">
+                <h3 className="text-sm font-semibold text-foreground">{isRTL ? 'تحليل الحساسية' : 'Sensitivity Analysis'}</h3>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{isRTL ? 'كيف تتغير قيمتك عند تغيير الافتراضات الرئيسية' : 'How your valuation changes when key assumptions shift'}</p>
+              </div>
+              <div className="p-4 space-y-6">
+                {/* Revenue Growth Sensitivity */}
+                <div>
+                  <div className="text-xs font-semibold text-foreground mb-3">{isRTL ? 'حساسية نمو الإيرادات' : 'Revenue Growth Rate Sensitivity'}</div>
+                  <div className="space-y-2">
+                    {[-30, -15, 0, +15, +30].map(delta => {
+                      const adjustedGrowth = Math.max(0, inputs.revenueGrowthRate + delta);
+                      const scaleFactor = adjustedGrowth / Math.max(1, inputs.revenueGrowthRate);
+                      const adjustedVal = summary.blended * (0.6 + scaleFactor * 0.4);
+                      const isBase = delta === 0;
+                      const isUp = adjustedVal > summary.blended;
+                      return (
+                        <div key={delta} className={`flex items-center gap-3 p-2 rounded-md ${isBase ? 'bg-accent/10 border border-accent/30' : 'bg-secondary/40'}`}>
+                          <div className="w-20 text-[10px] font-mono text-muted-foreground">
+                            {delta === 0 ? (isRTL ? 'الأساس' : 'Base') : `${delta > 0 ? '+' : ''}${delta}%`}
+                          </div>
+                          <div className="text-[10px] font-mono text-muted-foreground w-16">{adjustedGrowth.toFixed(0)}% {isRTL ? 'نمو' : 'growth'}</div>
+                          <div className="flex-1">
+                            <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                              <div className="h-full rounded-full" style={{ width: `${Math.min(100, (adjustedVal / (summary.blended * 1.6)) * 100)}%`, background: isBase ? 'oklch(0.55 0.18 270)' : isUp ? '#10B981' : '#EF4444' }} />
+                            </div>
+                          </div>
+                          <div className={`text-xs font-bold font-mono w-20 text-right ${isBase ? 'text-accent' : isUp ? 'text-green-500' : 'text-red-500'}`}>
+                            {formatCurrency(adjustedVal, true)}
+                          </div>
+                          {!isBase && (
+                            <div className={`text-[9px] font-mono w-14 text-right ${isUp ? 'text-green-500' : 'text-red-500'}`}>
+                              {isUp ? '+' : ''}{(((adjustedVal - summary.blended) / summary.blended) * 100).toFixed(1)}%
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Burn Rate Sensitivity */}
+                <div>
+                  <div className="text-xs font-semibold text-foreground mb-3">{isRTL ? 'حساسية معدل الحرق' : 'Monthly Burn Rate Sensitivity'}</div>
+                  <div className="space-y-2">
+                    {[-40, -20, 0, +20, +40].map(delta => {
+                      const adjustedBurn = Math.max(0, inputs.burnRate * (1 + delta / 100));
+                      const runwayMonths = inputs.cashOnHand > 0 ? Math.min(999, Math.round(inputs.cashOnHand / Math.max(1, adjustedBurn))) : 999;
+                      const burnImpact = delta === 0 ? 0 : -delta * 0.008;
+                      const adjustedVal = summary.blended * (1 + burnImpact);
+                      const isBase = delta === 0;
+                      const isUp = adjustedVal >= summary.blended;
+                      return (
+                        <div key={delta} className={`flex items-center gap-3 p-2 rounded-md ${isBase ? 'bg-accent/10 border border-accent/30' : 'bg-secondary/40'}`}>
+                          <div className="w-20 text-[10px] font-mono text-muted-foreground">
+                            {delta === 0 ? (isRTL ? 'الأساس' : 'Base') : `${delta > 0 ? '+' : ''}${delta}%`}
+                          </div>
+                          <div className="text-[10px] font-mono text-muted-foreground w-24">{formatCurrency(adjustedBurn, true)}/mo</div>
+                          <div className="flex-1 text-[9px] text-muted-foreground">
+                            {runwayMonths === 999 ? (isRTL ? 'رابح' : 'Profitable') : `${runwayMonths}mo ${isRTL ? 'مدة بقاء' : 'runway'}`}
+                          </div>
+                          <div className={`text-xs font-bold font-mono w-20 text-right ${isBase ? 'text-accent' : isUp ? 'text-green-500' : 'text-red-500'}`}>
+                            {formatCurrency(adjustedVal, true)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Gross Margin Sensitivity */}
+                <div>
+                  <div className="text-xs font-semibold text-foreground mb-3">{isRTL ? 'حساسية هامش الربح الإجمالي' : 'Gross Margin Sensitivity'}</div>
+                  <div className="space-y-2">
+                    {[-20, -10, 0, +10, +20].map(delta => {
+                      const adjustedMargin = Math.max(0, Math.min(100, inputs.grossMargin + delta));
+                      const marginImpact = delta * 0.012;
+                      const adjustedVal = summary.blended * (1 + marginImpact);
+                      const isBase = delta === 0;
+                      const isUp = adjustedVal >= summary.blended;
+                      return (
+                        <div key={delta} className={`flex items-center gap-3 p-2 rounded-md ${isBase ? 'bg-accent/10 border border-accent/30' : 'bg-secondary/40'}`}>
+                          <div className="w-20 text-[10px] font-mono text-muted-foreground">
+                            {delta === 0 ? (isRTL ? 'الأساس' : 'Base') : `${delta > 0 ? '+' : ''}${delta}pp`}
+                          </div>
+                          <div className="text-[10px] font-mono text-muted-foreground w-16">{adjustedMargin.toFixed(0)}% {isRTL ? 'هامش' : 'margin'}</div>
+                          <div className="flex-1">
+                            <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                              <div className="h-full rounded-full" style={{ width: `${adjustedMargin}%`, background: isBase ? 'oklch(0.55 0.18 270)' : isUp ? '#10B981' : '#EF4444' }} />
+                            </div>
+                          </div>
+                          <div className={`text-xs font-bold font-mono w-20 text-right ${isBase ? 'text-accent' : isUp ? 'text-green-500' : 'text-red-500'}`}>
+                            {formatCurrency(adjustedVal, true)}
+                          </div>
+                          {!isBase && (
+                            <div className={`text-[9px] font-mono w-14 text-right ${isUp ? 'text-green-500' : 'text-red-500'}`}>
+                              {isUp ? '+' : ''}{(((adjustedVal - summary.blended) / summary.blended) * 100).toFixed(1)}%
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

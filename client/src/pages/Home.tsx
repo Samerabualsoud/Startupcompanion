@@ -72,6 +72,8 @@ interface NavItem {
   /** ISO date string — show 'New' badge until 14 days after this date */
   newUntil?: string;
   group: string;
+  /** Monetization tier: 'free' | 'pro' | 'enterprise' */
+  tier?: 'free' | 'pro' | 'enterprise';
 }
 
 /** Returns true if today is within 14 days of the launch date */
@@ -82,52 +84,52 @@ function isNewFeature(newUntil?: string): boolean {
 
 const NAV_ITEMS: NavItem[] = [
   // Overview
-  { id: 'dashboard',     label: 'Founder Dashboard',     shortLabel: 'Dashboard',   navKey: 'navDashboard',   icon: Gauge,       group: 'My Startup',   badge: undefined },
-  { id: 'profile',       label: 'My Startup Profile',    shortLabel: 'Profile',     navKey: 'navMyStartup',   icon: Building2,   group: 'My Startup' },
-  { id: 'cogs',          label: 'COGS Calculator',        shortLabel: 'COGS',        navKey: 'navCOGS',        icon: DollarSign,  group: 'My Startup',   newUntil: '2026-04-01' },
-  { id: 'sales',         label: 'Sales Tracker',          shortLabel: 'Sales',       navKey: 'navSales',       icon: ShoppingCart, group: 'My Startup',  newUntil: '2026-04-01' },
-  { id: 'data-room',     label: 'Data Room',              shortLabel: 'Data Room',   navKey: 'navDataRoom',    icon: FolderOpen,  group: 'My Startup',   newUntil: '2026-04-01' },
-  { id: 'cap-table',     label: 'Cap Table Manager',      shortLabel: 'Cap Table',   navKey: 'navCapTable',    icon: Users,       group: 'My Startup',   newUntil: '2026-04-01' },
+  { id: 'dashboard', tier: 'free',     label: 'Founder Dashboard',     shortLabel: 'Dashboard',   navKey: 'navDashboard',   icon: Gauge,       group: 'My Startup',   badge: undefined },
+  { id: 'profile', tier: 'free',       label: 'My Startup Profile',    shortLabel: 'Profile',     navKey: 'navMyStartup',   icon: Building2,   group: 'My Startup' },
+  { id: 'cogs', tier: 'free',          label: 'COGS Calculator',        shortLabel: 'COGS',        navKey: 'navCOGS',        icon: DollarSign,  group: 'My Startup',   newUntil: '2026-04-01' },
+  { id: 'sales', tier: 'free',         label: 'Sales Tracker',          shortLabel: 'Sales',       navKey: 'navSales',       icon: ShoppingCart, group: 'My Startup',  newUntil: '2026-04-01' },
+  { id: 'data-room', tier: 'pro',     label: 'Data Room',              shortLabel: 'Data Room',   navKey: 'navDataRoom',    icon: FolderOpen,  group: 'My Startup',   newUntil: '2026-04-01' },
+  { id: 'cap-table', tier: 'pro',     label: 'Cap Table Manager',      shortLabel: 'Cap Table',   navKey: 'navCapTable',    icon: Users,       group: 'My Startup',   newUntil: '2026-04-01' },
   // Valuation
-  { id: 'valuation',     label: 'Valuation Calculator', shortLabel: 'Valuation',   navKey: 'navValuation',   icon: TrendingUp,  group: 'Valuation',    badge: '7 methods' },
+  { id: 'valuation', tier: 'free',     label: 'Valuation Calculator', shortLabel: 'Valuation',   navKey: 'navValuation',   icon: TrendingUp,  group: 'Valuation',    badge: '7 methods' },
   // Equity & Funding
-  { id: 'equity-split',  label: 'Co-Founder Equity Split', shortLabel: 'Equity Split',   navKey: 'navEquitySplit', icon: Users,    group: 'Equity & Cap Table' },
-  { id: 'dilution',      label: 'Dilution Simulator',   shortLabel: 'Dilution',   navKey: 'navDilution',    icon: GitBranch,   group: 'Equity & Cap Table' },
-  { id: 'vesting',       label: 'Vesting Schedule Builder', shortLabel: 'Vesting',   navKey: 'navVesting',  icon: Calendar,    group: 'Equity & Cap Table', badge: 'AI' },
+  { id: 'equity-split', tier: 'free',  label: 'Co-Founder Equity Split', shortLabel: 'Equity Split',   navKey: 'navEquitySplit', icon: Users,    group: 'Equity & Cap Table' },
+  { id: 'dilution', tier: 'free',      label: 'Dilution Simulator',   shortLabel: 'Dilution',   navKey: 'navDilution',    icon: GitBranch,   group: 'Equity & Cap Table' },
+  { id: 'vesting', tier: 'pro',       label: 'Vesting Schedule Builder', shortLabel: 'Vesting',   navKey: 'navVesting',  icon: Calendar,    group: 'Equity & Cap Table', badge: 'AI' },
   // Fundraising
-  { id: 'readiness',     label: 'Fundraising Readiness', shortLabel: 'Readiness',   navKey: 'navReadiness',  icon: Gauge,       group: 'Fundraising',  badge: '20 checks' },
-  { id: 'pitch-deck',    label: 'Pitch Deck Scorecard',  shortLabel: 'Pitch Deck',   navKey: 'navPitchDeck', icon: Layers,      group: 'Fundraising' },
-  { id: 'investor-crm',  label: 'Investor CRM',          shortLabel: 'Investors',   navKey: 'navInvestorCRM',  icon: Target,      group: 'Fundraising' },
+  { id: 'readiness', tier: 'free',     label: 'Fundraising Readiness', shortLabel: 'Readiness',   navKey: 'navReadiness',  icon: Gauge,       group: 'Fundraising',  badge: '20 checks' },
+  { id: 'pitch-deck', tier: 'free',    label: 'Pitch Deck Scorecard',  shortLabel: 'Pitch Deck',   navKey: 'navPitchDeck', icon: Layers,      group: 'Fundraising' },
+  { id: 'investor-crm', tier: 'pro',  label: 'Investor CRM',          shortLabel: 'Investors',   navKey: 'navInvestorCRM',  icon: Target,      group: 'Fundraising' },
   // Resources
-  { id: 'accelerators',  label: 'Accelerator Finder',    shortLabel: 'Accelerators',   navKey: 'navAccelerators', icon: Rocket,    group: 'Resources',    newUntil: '2026-04-01' },
-  { id: 'runway',        label: 'Runway Optimizer',      shortLabel: 'Runway',   navKey: 'navRunway',     icon: BarChart3,   group: 'Resources' },
-  { id: 'term-sheet',    label: 'Term Sheet Glossary',   shortLabel: 'Term Sheet',   navKey: 'navTermSheet', icon: BookOpen,    group: 'Resources',    badge: '75 terms' },
+  { id: 'accelerators', tier: 'free',  label: 'Accelerator Finder',    shortLabel: 'Accelerators',   navKey: 'navAccelerators', icon: Rocket,    group: 'Resources',    newUntil: '2026-04-01' },
+  { id: 'runway', tier: 'free',        label: 'Runway Optimizer',      shortLabel: 'Runway',   navKey: 'navRunway',     icon: BarChart3,   group: 'Resources' },
+  { id: 'term-sheet', tier: 'free',    label: 'Term Sheet Glossary',   shortLabel: 'Term Sheet',   navKey: 'navTermSheet', icon: BookOpen,    group: 'Resources',    badge: '75 terms' },
   // My Startup
   // Legal & Jurisdictions
-  { id: 'free-zones',    label: 'Free Zones & Jurisdictions', shortLabel: 'Free Zones', navKey: 'navFreeZones', icon: Globe,        group: 'Resources',    newUntil: '2026-04-01' },
+  { id: 'free-zones', tier: 'free',    label: 'Free Zones & Jurisdictions', shortLabel: 'Free Zones', navKey: 'navFreeZones', icon: Globe,        group: 'Resources',    newUntil: '2026-04-01' },
   // Database
-  { id: 'resources',     label: 'Investor Database',     shortLabel: 'Database',   navKey: 'navDatabase',   icon: Building2,   group: 'Database',     newUntil: '2026-04-01' },
-  { id: 'matching',      label: 'Investor Matching',     shortLabel: 'Matching',   navKey: 'navMatching',   icon: Target,      group: 'Database',     badge: 'AI' },
+  { id: 'resources', tier: 'free',     label: 'Investor Database',     shortLabel: 'Database',   navKey: 'navDatabase',   icon: Building2,   group: 'Database',     newUntil: '2026-04-01' },
+  { id: 'matching', tier: 'pro',      label: 'Investor Matching',     shortLabel: 'Matching',   navKey: 'navMatching',   icon: Target,      group: 'Database',     badge: 'AI' },
   // Admin
-  { id: 'admin',         label: 'Admin Dashboard',       shortLabel: 'Admin',      icon: Gauge,       group: 'Admin' },
+  { id: 'admin', tier: 'enterprise',         label: 'Admin Dashboard',       shortLabel: 'Admin',      icon: Gauge,       group: 'Admin' },
   // Legal & Documents
-  { id: 'safe-note',         label: 'SAFE / Convertible Note', shortLabel: 'SAFE / Note',    navKey: 'navSAFENote',       icon: FileText,    group: 'Legal & Documents', newUntil: '2026-04-01' },
-  { id: 'nda',               label: 'NDA Generator',           shortLabel: 'NDA',            navKey: 'navNDA',            icon: ClipboardCheck, group: 'Legal & Documents', newUntil: '2026-04-01' },
-  { id: 'term-sheet-builder', label: 'Term Sheet Builder',     shortLabel: 'Term Sheet',     navKey: 'navTermSheetBuilder', icon: FileText,   group: 'Legal & Documents', newUntil: '2026-04-01' },
+  { id: 'safe-note', tier: 'pro',         label: 'SAFE / Convertible Note', shortLabel: 'SAFE / Note',    navKey: 'navSAFENote',       icon: FileText,    group: 'Legal & Documents', newUntil: '2026-04-01' },
+  { id: 'nda', tier: 'pro',               label: 'NDA Generator',           shortLabel: 'NDA',            navKey: 'navNDA',            icon: ClipboardCheck, group: 'Legal & Documents', newUntil: '2026-04-01' },
+  { id: 'term-sheet-builder', tier: 'enterprise', label: 'Term Sheet Builder',     shortLabel: 'Term Sheet',     navKey: 'navTermSheetBuilder', icon: FileText,   group: 'Legal & Documents', newUntil: '2026-04-01' },
   // ESOP moved to My Startup group above
   // Community
-  { id: 'startup-directory', label: 'Startup Directory',       shortLabel: 'Directory',      navKey: 'navStartupDir',     icon: Globe,       group: 'Database',           newUntil: '2026-04-01' },
-  { id: 'valuation-timeline',label: '409A / Valuation History',shortLabel: '409A History',   navKey: 'navValuationTimeline', icon: BarChart3, group: 'My Startup',         newUntil: '2026-04-01' },
+  { id: 'startup-directory', tier: 'free', label: 'Startup Directory',       shortLabel: 'Directory',      navKey: 'navStartupDir',     icon: Globe,       group: 'Database',           newUntil: '2026-04-01' },
+  { id: 'valuation-timeline', tier: 'pro',label: '409A / Valuation History',shortLabel: '409A History',   navKey: 'navValuationTimeline', icon: BarChart3, group: 'My Startup',         newUntil: '2026-04-01' },
   // Equity & Cap Table
-  { id: 'esop',              label: 'ESOP / Option Pool',      shortLabel: 'ESOP',           navKey: 'navESOP',           icon: Users2,      group: 'My Startup',         newUntil: '2026-04-01' },
+  { id: 'esop', tier: 'pro',              label: 'ESOP / Option Pool',      shortLabel: 'ESOP',           navKey: 'navESOP',           icon: Users2,      group: 'My Startup',         newUntil: '2026-04-01' },
   // AI Tools
-  { id: 'idea-validator',        label: 'AI Idea Validator',      shortLabel: 'Idea Validator', navKey: 'navIdeaValidator', icon: Sparkles,     group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-fundraising-advisor', label: 'AI Fundraising Advisor', shortLabel: 'AI Advisor',   navKey: 'navAIAdvisor',    icon: MessageCircle, group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-market-research',     label: 'AI Market Research',     shortLabel: 'Market Research',   navKey: 'navAIMarketResearch', icon: BarChart3,    group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-investor-email',      label: 'AI Investor Email',      shortLabel: 'Email Writer',   navKey: 'navAIEmailWriter',  icon: Mail,          group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-term-sheet',          label: 'AI Term Sheet Analyzer', shortLabel: 'Term Analyzer',   navKey: 'navAITermAnalyzer', icon: FileText,      group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-cofounder-agreement', label: 'AI Co-founder Agreement',shortLabel: 'Co-founder AI',   navKey: 'navAICofounder', icon: Users2,        group: 'AI Tools', badge: 'AI' },
-  { id: 'ai-due-diligence',       label: 'AI Due Diligence',       shortLabel: 'Due Diligence',   navKey: 'navAIDueDiligence', icon: ClipboardCheck,group: 'AI Tools', badge: 'AI' },
+  { id: 'idea-validator', tier: 'free',        label: 'AI Idea Validator',      shortLabel: 'Idea Validator', navKey: 'navIdeaValidator', icon: Sparkles,     group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-fundraising-advisor', tier: 'pro', label: 'AI Fundraising Advisor', shortLabel: 'AI Advisor',   navKey: 'navAIAdvisor',    icon: MessageCircle, group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-market-research', tier: 'pro',     label: 'AI Market Research',     shortLabel: 'Market Research',   navKey: 'navAIMarketResearch', icon: BarChart3,    group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-investor-email', tier: 'pro',      label: 'AI Investor Email',      shortLabel: 'Email Writer',   navKey: 'navAIEmailWriter',  icon: Mail,          group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-term-sheet', tier: 'enterprise',          label: 'AI Term Sheet Analyzer', shortLabel: 'Term Analyzer',   navKey: 'navAITermAnalyzer', icon: FileText,      group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-cofounder-agreement', tier: 'pro', label: 'AI Co-founder Agreement',shortLabel: 'Co-founder AI',   navKey: 'navAICofounder', icon: Users2,        group: 'AI Tools', badge: 'AI' },
+  { id: 'ai-due-diligence', tier: 'enterprise',       label: 'AI Due Diligence',       shortLabel: 'Due Diligence',   navKey: 'navAIDueDiligence', icon: ClipboardCheck,group: 'AI Tools', badge: 'AI' },
 ];
 
 const GROUPS = ['My Startup', 'Valuation', 'Equity & Cap Table', 'Fundraising', 'Legal & Documents', 'Resources', 'Database', 'AI Tools', 'Admin'];
@@ -227,7 +229,7 @@ function HomeInner() {
     setChatKey(k => k + 1);
   };
 
-  const activeItem = NAV_ITEMS.find(n => n.id === activeTool)!;
+  const activeItem = NAV_ITEMS.find(n => n.id === activeTool) ?? { id: activeTool, label: activeTool, shortLabel: activeTool, icon: Layers, group: '', navKey: undefined };
 
   const renderTool = () => {
     switch (activeTool) {
@@ -355,7 +357,15 @@ function HomeInner() {
       case 'esop':                       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ESOPPlanner /></div>;
       case 'startup-directory':          return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><StartupDirectory /></div>;
       case 'valuation-timeline':         return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ValuationTimeline /></div>;
-      case 'dashboard':                  return <FounderDashboard onNavigate={(id) => setActiveTool(id as ToolId)} />;
+      case 'dashboard':                  return <FounderDashboard onNavigate={(id) => {
+        // Map profile sub-section IDs back to the profile page
+        const profileSections = ['problem', 'business-model', 'financials', 'traction'];
+        if (profileSections.includes(id)) {
+          setActiveTool('profile');
+        } else {
+          setActiveTool(id as ToolId);
+        }
+      }} />;
       case 'cogs':                       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><COGSCalculator /></div>;
       case 'sales':                      return <SalesTracker />;
       case 'data-room':                  return <DataRoom />;
@@ -537,6 +547,7 @@ function HomeInner() {
                     const showNew = isNewFeature(item.newUntil);
                     // Effective badge: 'AI' takes priority, then time-based 'New', then static badge
                     const effectiveBadge = isAI ? 'AI' : showNew ? 'New' : item.badge;
+                    const tierBadge = item.tier === 'pro' ? 'Pro' : item.tier === 'enterprise' ? 'Ent' : null;
                     return (
                       <button
                         key={item.id}
@@ -550,6 +561,16 @@ function HomeInner() {
                       >
                         <Icon className="w-3.5 h-3.5 shrink-0" />
                         <span className="text-xs font-medium flex-1 truncate">{item.navKey ? t(item.navKey as any) : item.shortLabel}</span>
+                        {/* Tier badge — shown when not active */}
+                        {tierBadge && !isActive && (
+                          <span className={`text-[8px] font-bold px-1 py-0.5 rounded shrink-0 ${
+                            item.tier === 'enterprise'
+                              ? 'bg-amber-100 text-amber-700'
+                              : 'bg-indigo-100 text-indigo-700'
+                          }`}>
+                            {tierBadge}
+                          </span>
+                        )}
                         {effectiveBadge && !isActive && (
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
                             effectiveBadge === 'AI'
@@ -579,6 +600,21 @@ function HomeInner() {
               <HomeIcon className="w-3.5 h-3.5 shrink-0" />
               <span className="text-xs font-medium">{t('backToHome')}</span>
             </button>
+            {/* Tier legend */}
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              <span className="flex items-center gap-1 text-[8px] font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="text-muted-foreground">Free</span>
+              </span>
+              <span className="flex items-center gap-1 text-[8px] font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                <span className="text-indigo-600">Pro</span>
+              </span>
+              <span className="flex items-center gap-1 text-[8px] font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                <span className="text-amber-600">Enterprise</span>
+              </span>
+            </div>
             <div className="text-[9px] text-muted-foreground text-center leading-relaxed">
               Built for early-stage founders.<br />
               All calculations are estimates only.
