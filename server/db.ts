@@ -17,6 +17,7 @@ import {
   cogsCalculations, type InsertCogsCalculation,
   resourceSubmissions, type InsertResourceSubmission,
   auditLog,
+  platformSettings, type PlatformSettings,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -622,13 +623,57 @@ export async function getPlatformStats() {
   };
 }
 
-export async function banUser(userId: number, banned: boolean) {
+export async function banUser(userId: number, banned: boolean, reason?: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  // Use role field to mark banned users (set to a special state via name convention)
-  // Since we don't have a banned column, we'll add it via a note in the name field
-  // Better: update subscriptionStatus to 'inactive' as a soft ban signal
-  await db.update(users).set({ subscriptionStatus: banned ? 'inactive' : 'inactive' }).where(eq(users.id, userId));
+  await db.update(users).set({
+    isBanned: banned,
+    bannedReason: banned ? (reason ?? null) : null,
+  }).where(eq(users.id, userId));
+}
+
+export async function getAllSavedValuations(limit = 100, offset = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      id: savedValuations.id,
+      userId: savedValuations.userId,
+      label: savedValuations.label,
+      blendedValue: savedValuations.blendedValue,
+      createdAt: savedValuations.createdAt,
+      userName: users.name,
+      userEmail: users.email,
+    })
+    .from(savedValuations)
+    .leftJoin(users, eq(savedValuations.userId, users.id))
+    .orderBy(savedValuations.createdAt)
+    .limit(limit)
+    .offset(offset);
+  return rows;
+}
+
+export async function getPlatformSettings(): Promise<PlatformSettings | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(platformSettings).where(eq(platformSettings.id, 1)).limit(1);
+  if (rows.length > 0) return rows[0];
+  // Create default row
+  await db.insert(platformSettings).values({ id: 1 });
+  const created = await db.select().from(platformSettings).where(eq(platformSettings.id, 1)).limit(1);
+  return created[0] ?? null;
+}
+
+export async function setPlatformSettings(data: Partial<Omit<PlatformSettings, 'id' | 'updatedAt'>>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Ensure row exists
+  const existing = await db.select({ id: platformSettings.id }).from(platformSettings).where(eq(platformSettings.id, 1)).limit(1);
+  if (existing.length === 0) {
+    await db.insert(platformSettings).values({ id: 1, ...data });
+  } else {
+    await db.update(platformSettings).set(data).where(eq(platformSettings.id, 1));
+  }
 }
 
 export async function deleteUser(userId: number) {

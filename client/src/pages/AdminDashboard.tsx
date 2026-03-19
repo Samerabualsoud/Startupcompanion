@@ -1,55 +1,85 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { useAuth } from '@/_core/hooks/useAuth';
 import {
   Shield, CheckCircle2, XCircle, Eye, EyeOff, Users, Building2,
-  Briefcase, Rocket, Loader2, AlertCircle, RefreshCw,
+  Briefcase, Rocket, Loader2, RefreshCw,
   ExternalLink, Search, Clock, TrendingUp, UserCheck,
   Mail, Calendar, BarChart3, Activity, FileText, Database,
   ChevronRight, Trash2, Star, Globe, Hash, ArrowLeft,
-  ClipboardList, Settings, Bell, Package, UserX
+  ClipboardList, Settings, Bell, Package, UserX, Ban, CheckCheck,
+  Info, HelpCircle, AlertTriangle, Megaphone, Lock, Unlock,
+  DollarSign, BookOpen, ToggleLeft, ToggleRight, Save
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import * as Tooltip from '@radix-ui/react-tooltip';
 
-type TabId = 'overview' | 'users' | 'kyc' | 'submissions' | 'resources' | 'audit' | 'analytics';
+type TabId = 'overview' | 'users' | 'kyc' | 'submissions' | 'valuations' | 'audit' | 'analytics' | 'settings';
+
+// ── Tooltip Helper ─────────────────────────────────────────────────────────
+
+function InfoTip({ text }: { text: string }) {
+  return (
+    <Tooltip.Provider delayDuration={200}>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <button type="button" className="inline-flex items-center justify-center w-4 h-4 rounded-full text-muted-foreground hover:text-foreground transition-colors shrink-0">
+            <HelpCircle className="w-3.5 h-3.5" />
+          </button>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content
+            className="z-50 max-w-xs px-3 py-2 text-xs text-white bg-gray-900 rounded-lg shadow-lg leading-relaxed"
+            sideOffset={5}
+          >
+            {text}
+            <Tooltip.Arrow className="fill-gray-900" />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  );
+}
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function StatusBadge({ verified }: { verified: boolean | null }) {
   if (verified === true) return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
       <CheckCircle2 className="w-3 h-3" /> Verified
     </span>
   );
   if (verified === false) return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
       <XCircle className="w-3 h-3" /> Rejected
     </span>
   );
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
       <Clock className="w-3 h-3" /> Pending
     </span>
   );
 }
 
-function StatCard({ label, value, icon: Icon, color, sub }: {
-  label: string; value: number | string; icon: React.ElementType; color: string; sub?: string;
+function StatCard({ label, value, icon: Icon, color, sub, tooltip }: {
+  label: string; value: number | string; icon: React.ElementType; color: string; sub?: string; tooltip?: string;
 }) {
   return (
     <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
       <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: color }}>
         <Icon className="w-5 h-5 text-white" />
       </div>
-      <div>
-        <div className="text-2xl font-bold text-foreground">{value}</div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <div className="text-2xl font-bold text-foreground">{value}</div>
+          {tooltip && <InfoTip text={tooltip} />}
+        </div>
         <div className="text-xs text-muted-foreground">{label}</div>
         {sub && <div className="text-[10px] text-amber-600 font-medium mt-0.5">{sub}</div>}
       </div>
@@ -81,7 +111,7 @@ function KycEntryCard({ entry, type, onVerify, onTogglePublic, isUpdating }: {
           <span className="font-semibold text-sm text-foreground">{name}</span>
           <StatusBadge verified={entry.isVerified ?? null} />
           {entry.isPublic ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700">
               <Eye className="w-3 h-3" /> Public
             </span>
           ) : (
@@ -140,6 +170,9 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'verified' | 'rejected'>('all');
   const [submissionStatusFilter, setSubmissionStatusFilter] = useState<'pending' | 'approved' | 'rejected' | undefined>(undefined);
   const [reviewNote, setReviewNote] = useState<Record<number, string>>({});
+  const [banReason, setBanReason] = useState<Record<number, string>>({});
+  const [settingsDraft, setSettingsDraft] = useState<Record<string, unknown>>({});
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   // Queries
   const { data: stats, refetch: refetchStats } = trpc.admin.getStats.useQuery(undefined, { enabled: user?.role === 'admin' });
@@ -149,7 +182,32 @@ export default function AdminDashboard() {
     { status: submissionStatusFilter },
     { enabled: user?.role === 'admin' }
   );
-  const { data: auditLogs, isLoading: auditLoading } = trpc.admin.getAuditLog.useQuery({ limit: 200, offset: 0 }, { enabled: user?.role === 'admin' && activeTab === 'audit' });
+  const { data: auditLogs, isLoading: auditLoading } = trpc.admin.getAuditLog.useQuery(
+    { limit: 200, offset: 0 },
+    { enabled: user?.role === 'admin' && activeTab === 'audit' }
+  );
+  const { data: allValuations, isLoading: valuationsLoading } = trpc.admin.getAllValuations.useQuery(
+    { limit: 200, offset: 0 },
+    { enabled: user?.role === 'admin' && activeTab === 'valuations' }
+  );
+  const { data: platformSettings, refetch: refetchSettings } = trpc.admin.getPlatformSettings.useQuery(undefined, {
+    enabled: user?.role === 'admin' && activeTab === 'settings',
+  });
+
+  // Sync settings draft when data loads
+  useEffect(() => {
+    if (!settingsLoaded && platformSettings) {
+      setSettingsDraft({
+        announcementText: platformSettings.announcementText ?? '',
+        announcementActive: platformSettings.announcementActive,
+        announcementType: platformSettings.announcementType,
+        maintenanceMode: platformSettings.maintenanceMode,
+        maintenanceMessage: platformSettings.maintenanceMessage ?? '',
+        allowNewRegistrations: platformSettings.allowNewRegistrations,
+      });
+      setSettingsLoaded(true);
+    }
+  }, [platformSettings, settingsLoaded]);
 
   // Mutations
   const verifyMutation = trpc.admin.verifyKyc.useMutation({
@@ -168,8 +226,16 @@ export default function AdminDashboard() {
     onSuccess: () => { toast.success('User deleted'); refetchUsers(); refetchStats(); },
     onError: (e) => toast.error(e.message),
   });
+  const banUserMutation = trpc.admin.banUser.useMutation({
+    onSuccess: () => { toast.success('User ban status updated'); refetchUsers(); },
+    onError: (e) => toast.error(e.message),
+  });
   const reviewSubmissionMutation = trpc.admin.reviewResourceSubmission.useMutation({
     onSuccess: () => { toast.success('Submission reviewed'); refetchSubs(); refetchStats(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const setPlatformSettingsMutation = trpc.admin.setPlatformSettings.useMutation({
+    onSuccess: () => { toast.success('Platform settings saved'); refetchSettings(); },
     onError: (e) => toast.error(e.message),
   });
 
@@ -183,9 +249,10 @@ export default function AdminDashboard() {
     { id: 'users', label: 'Users', icon: Users, badge: stats?.totalUsers },
     { id: 'kyc', label: 'KYC', icon: UserCheck, badge: pendingKycCount },
     { id: 'submissions', label: 'Submissions', icon: ClipboardList, badge: stats?.pendingSubmissions },
-    { id: 'resources', label: 'Resources', icon: Database },
+    { id: 'valuations', label: 'Valuations', icon: TrendingUp },
     { id: 'audit', label: 'Audit Log', icon: Activity },
-    { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   const kycEntries: KycEntry[] = useMemo(() => {
@@ -233,6 +300,14 @@ export default function AdminDashboard() {
     </div>
   );
 
+  const updateDraft = (key: string, value: unknown) => {
+    setSettingsDraft(prev => ({ ...prev, [key]: value }));
+  };
+
+  const savePlatformSettings = () => {
+    setPlatformSettingsMutation.mutate(settingsDraft as Parameters<typeof setPlatformSettingsMutation.mutate>[0]);
+  };
+
   return (
     <div className="space-y-5 max-w-7xl mx-auto">
       {/* ── Header ── */}
@@ -245,12 +320,12 @@ export default function AdminDashboard() {
             <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               Platform Management
             </h2>
-            <p className="text-xs text-muted-foreground">Full control over users, KYC, resources, and analytics</p>
+            <p className="text-xs text-muted-foreground">Full control over users, KYC, content, and platform settings</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {(pendingKycCount > 0 || (stats?.pendingSubmissions ?? 0) > 0) && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
               <Bell className="w-3.5 h-3.5" />
               {pendingKycCount + (stats?.pendingSubmissions ?? 0)} pending
             </div>
@@ -295,24 +370,35 @@ export default function AdminDashboard() {
         <div className="space-y-5">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <StatCard label="Total Users" value={stats?.totalUsers ?? 0} icon={Users} color="oklch(0.35 0.2 270)"
+              tooltip="All registered accounts on the platform, including all user types."
               sub={stats?.pendingSubmissions ? `${stats.pendingSubmissions} pending submissions` : undefined} />
-            <StatCard label="VC Firms" value={stats?.vcCount ?? 0} icon={Building2} color="oklch(0.45 0.2 270)" />
-            <StatCard label="Angel Investors" value={stats?.angelCount ?? 0} icon={Star} color="oklch(0.4 0.1 280)" />
-            <StatCard label="Startups" value={stats?.startupCount ?? 0} icon={Rocket} color="oklch(0.35 0.12 145)" />
+            <StatCard label="VC Firms" value={stats?.vcCount ?? 0} icon={Building2} color="oklch(0.45 0.2 270)"
+              tooltip="Number of VC firm KYC profiles submitted (verified + unverified)." />
+            <StatCard label="Angel Investors" value={stats?.angelCount ?? 0} icon={Star} color="oklch(0.4 0.1 280)"
+              tooltip="Number of angel investor KYC profiles submitted." />
+            <StatCard label="Startups" value={stats?.startupCount ?? 0} icon={Rocket} color="oklch(0.35 0.12 145)"
+              tooltip="Number of startup KYC profiles submitted." />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <StatCard label="Venture Lawyers" value={stats?.lawyerCount ?? 0} icon={Briefcase} color="oklch(0.45 0.08 200)" />
-            <StatCard label="Saved Valuations" value={stats?.savedValuationCount ?? 0} icon={TrendingUp} color="oklch(0.5 0.12 60)" />
+            <StatCard label="Venture Lawyers" value={stats?.lawyerCount ?? 0} icon={Briefcase} color="oklch(0.45 0.08 200)"
+              tooltip="Number of venture lawyer KYC profiles submitted." />
+            <StatCard label="Saved Valuations" value={stats?.savedValuationCount ?? 0} icon={TrendingUp} color="oklch(0.5 0.12 60)"
+              tooltip="Total number of valuations saved by all users across the platform." />
             <StatCard label="Pending KYC" value={pendingKycCount} icon={Clock} color="oklch(0.6 0.15 50)"
+              tooltip="KYC profiles awaiting your review. These are not yet visible to other users."
               sub={pendingKycCount > 0 ? 'Needs review' : undefined} />
             <StatCard label="Pending Submissions" value={stats?.pendingSubmissions ?? 0} icon={ClipboardList} color="oklch(0.5 0.1 340)"
+              tooltip="Self-registration requests from VCs, angels, lawyers, and grant providers waiting for approval."
               sub={(stats?.pendingSubmissions ?? 0) > 0 ? 'Self-registrations' : undefined} />
           </div>
 
           {/* Recent Users */}
           <div className="rounded-xl border border-border bg-card overflow-hidden">
             <div className="px-4 py-3 border-b border-border bg-secondary/20 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-foreground">Recent Signups</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-foreground">Recent Signups</h3>
+                <InfoTip text="The 5 most recently registered users on the platform." />
+              </div>
               <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => setActiveTab('users')}>
                 View All <ChevronRight className="w-3 h-3" />
               </Button>
@@ -344,7 +430,7 @@ export default function AdminDashboard() {
               { label: 'Review KYC', icon: UserCheck, tab: 'kyc' as TabId, badge: pendingKycCount },
               { label: 'Review Submissions', icon: ClipboardList, tab: 'submissions' as TabId, badge: stats?.pendingSubmissions },
               { label: 'Manage Users', icon: Users, tab: 'users' as TabId },
-              { label: 'Audit Log', icon: Activity, tab: 'audit' as TabId },
+              { label: 'Platform Settings', icon: Settings, tab: 'settings' as TabId },
             ].map(action => (
               <button key={action.label} onClick={() => setActiveTab(action.tab)}
                 className="flex items-center gap-2 p-3 rounded-xl border border-border bg-card hover:bg-secondary/30 transition-colors text-left">
@@ -362,6 +448,12 @@ export default function AdminDashboard() {
       {/* ── Users Tab ── */}
       {activeTab === 'users' && (
         <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-sm font-semibold text-foreground">User Management</h3>
+              <InfoTip text="Manage all registered users. You can promote/demote admins, ban users (prevents login), or permanently delete accounts." />
+            </div>
+          </div>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -373,21 +465,24 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-center h-32"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
           ) : (
             <div className="rounded-xl border border-border overflow-hidden">
-              <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto] gap-0 border-b border-border bg-secondary/30 px-4 py-2.5">
-                {['User', 'Type', 'KYC', 'Role', 'Plan', 'Joined', 'Actions'].map(h => (
+              <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto_auto] gap-0 border-b border-border bg-secondary/30 px-4 py-2.5">
+                {['User', 'Type', 'KYC', 'Role', 'Plan', 'Status', 'Joined', 'Actions'].map(h => (
                   <div key={h} className="text-xs font-semibold text-muted-foreground px-2">{h}</div>
                 ))}
               </div>
               <div className="divide-y divide-border">
                 {filteredUsers.map(u => (
-                  <div key={u.id} className="grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto] gap-0 px-4 py-3 hover:bg-secondary/20 transition-colors items-center">
+                  <div key={u.id} className={`grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto_auto] gap-0 px-4 py-3 hover:bg-secondary/20 transition-colors items-center ${u.isBanned ? 'opacity-60 bg-red-50/30' : ''}`}>
                     <div className="flex items-center gap-3 min-w-0 px-2">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                        style={{ background: u.role === 'admin' ? 'oklch(0.45 0.2 270)' : 'oklch(0.35 0.2 270)' }}>
+                        style={{ background: u.isBanned ? '#EF4444' : u.role === 'admin' ? 'oklch(0.45 0.2 270)' : 'oklch(0.35 0.2 270)' }}>
                         {(u.name ?? u.email ?? '?').charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <div className="font-medium text-sm text-foreground truncate">{u.name ?? 'Unnamed'}</div>
+                        <div className="font-medium text-sm text-foreground truncate flex items-center gap-1">
+                          {u.name ?? 'Unnamed'}
+                          {u.isBanned && <span className="text-[10px] text-red-600 font-bold">[BANNED]</span>}
+                        </div>
                         <div className="text-xs text-muted-foreground flex items-center gap-1 truncate">
                           <Mail className="w-2.5 h-2.5 shrink-0" />{u.email}
                         </div>
@@ -400,18 +495,25 @@ export default function AdminDashboard() {
                     </div>
                     <div className="px-2 flex justify-center">
                       {u.kycCompleted
-                        ? <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                        : <XCircle className="w-4 h-4 text-muted-foreground opacity-40" />}
+                        ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        : <Clock className="w-4 h-4 text-muted-foreground opacity-40" />}
                     </div>
                     <div className="px-2">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-semibold whitespace-nowrap ${
-                        u.role === 'admin' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-secondary text-muted-foreground'
+                        u.role === 'admin' ? 'bg-amber-100 text-amber-700' : 'bg-secondary text-muted-foreground'
                       }`}>{u.role}</span>
                     </div>
                     <div className="px-2">
                       <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${
                         u.subscriptionStatus === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-secondary text-muted-foreground'
                       }`}>{u.subscriptionPlan ?? u.subscriptionStatus ?? 'free'}</span>
+                    </div>
+                    <div className="px-2">
+                      {u.isBanned ? (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-semibold whitespace-nowrap">Banned</span>
+                      ) : (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap">Active</span>
+                      )}
                     </div>
                     <div className="px-2 text-xs text-muted-foreground whitespace-nowrap">
                       {u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : 'N/A'}
@@ -422,6 +524,19 @@ export default function AdminDashboard() {
                         disabled={setRoleMutation.isPending}
                         className="h-7 text-xs whitespace-nowrap">
                         {u.role === 'admin' ? 'Demote' : 'Admin'}
+                      </Button>
+                      <Button variant="outline" size="sm"
+                        onClick={() => {
+                          if (u.isBanned) {
+                            banUserMutation.mutate({ userId: u.id, banned: false });
+                          } else {
+                            const reason = banReason[u.id] || prompt(`Ban reason for ${u.email} (optional):`);
+                            banUserMutation.mutate({ userId: u.id, banned: true, reason: reason ?? undefined });
+                          }
+                        }}
+                        disabled={banUserMutation.isPending}
+                        className={`h-7 text-xs whitespace-nowrap ${u.isBanned ? 'text-emerald-600 border-emerald-200 hover:bg-emerald-50' : 'text-orange-600 border-orange-200 hover:bg-orange-50'}`}>
+                        {u.isBanned ? <><Unlock className="w-3 h-3" /></> : <><Ban className="w-3 h-3" /></>}
                       </Button>
                       <Button variant="outline" size="sm"
                         onClick={() => {
@@ -448,6 +563,10 @@ export default function AdminDashboard() {
       {/* ── KYC Tab ── */}
       {activeTab === 'kyc' && (
         <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground">KYC Review</h3>
+            <InfoTip text="KYC (Know Your Customer) profiles are submitted by VCs, angels, lawyers, and startups. Verifying a profile marks it as trusted. Setting it to Public makes it visible in the investor/resource directory." />
+          </div>
           <div className="flex flex-wrap gap-2">
             <div className="flex gap-1 p-1 rounded-lg bg-secondary/40">
               {(['vcs', 'angels', 'lawyers', 'startups'] as const).map(t => (
@@ -501,9 +620,12 @@ export default function AdminDashboard() {
       {activeTab === 'submissions' && (
         <div className="space-y-4">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm text-muted-foreground flex-1">
-              Self-registration requests from VCs, angels, lawyers, and grant providers.
-            </p>
+            <div className="flex items-center gap-1.5 flex-1">
+              <p className="text-sm text-muted-foreground">
+                Self-registration requests from VCs, angels, lawyers, and grant providers.
+              </p>
+              <InfoTip text="When someone fills in the 'Add yourself to the directory' form, it creates a submission here. Approving it adds them to the public directory. Rejecting sends no notification — you may want to email them separately." />
+            </div>
             <div className="flex gap-1 p-1 rounded-lg bg-secondary/40">
               {([undefined, 'pending', 'approved', 'rejected'] as const).map(s => (
                 <button key={String(s)} onClick={() => setSubmissionStatusFilter(s)}
@@ -578,40 +700,80 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* ── Resources Tab ── */}
-      {activeTab === 'resources' && (
+      {/* ── Valuations Tab ── */}
+      {activeTab === 'valuations' && (
         <div className="space-y-4">
-          <div className="rounded-xl border border-border bg-card p-6 text-center">
-            <Database className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-40" />
-            <h3 className="text-sm font-semibold text-foreground mb-1">Resource Database Management</h3>
-            <p className="text-xs text-muted-foreground mb-4">
-              The resource database contains VCs, angels, grants, and lawyers. Use the Database panel in the Management UI to directly edit records, or approve self-registration submissions from the Submissions tab.
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-left">
-              {[
-                { label: 'VC Firms', icon: Building2, color: 'oklch(0.35 0.2 270)' },
-                { label: 'Angel Investors', icon: Users, color: 'oklch(0.45 0.2 270)' },
-                { label: 'Grants', icon: Package, color: 'oklch(0.35 0.12 145)' },
-                { label: 'Venture Lawyers', icon: Briefcase, color: 'oklch(0.4 0.1 280)' },
-              ].map(r => (
-                <div key={r.label} className="rounded-lg border border-border p-3 flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: r.color }}>
-                    <r.icon className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-xs font-medium text-foreground">{r.label}</span>
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-4">
-              To add or edit resource entries directly, use the <strong>Database</strong> tab in the Management UI sidebar.
-            </p>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground">All Saved Valuations</h3>
+            <InfoTip text="Every valuation that a user has saved. Blended Value is the weighted average across all 7 valuation methods. You can use this data to understand how founders are valuing their startups." />
           </div>
+          {valuationsLoading ? (
+            <div className="flex items-center justify-center h-32"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
+          ) : (allValuations ?? []).length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <TrendingUp className="w-10 h-10 text-muted-foreground opacity-30 mb-3" />
+              <p className="text-sm font-medium text-foreground mb-1">No valuations saved yet</p>
+              <p className="text-xs text-muted-foreground">Users haven't saved any valuations</p>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-border overflow-hidden">
+              <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-0 border-b border-border bg-secondary/30 px-4 py-2.5">
+                {['Label', 'User', 'Blended Value', 'Date', ''].map(h => (
+                  <div key={h} className="text-xs font-semibold text-muted-foreground px-2">{h}</div>
+                ))}
+              </div>
+              <div className="divide-y divide-border max-h-[600px] overflow-y-auto">
+                {(allValuations ?? []).map(v => (
+                  <div key={v.id} className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-0 px-4 py-3 hover:bg-secondary/20 transition-colors items-center">
+                    <div className="px-2">
+                      <div className="text-sm font-medium text-foreground">{v.label}</div>
+                    </div>
+                    <div className="px-2">
+                      <div className="text-xs text-foreground">{v.userName ?? 'Unknown'}</div>
+                      <div className="text-[10px] text-muted-foreground">{v.userEmail}</div>
+                    </div>
+                    <div className="px-2 text-sm font-mono font-semibold text-emerald-600">
+                      {v.blendedValue ? `$${(v.blendedValue / 1e6).toFixed(2)}M` : '—'}
+                    </div>
+                    <div className="px-2 text-xs text-muted-foreground whitespace-nowrap">
+                      {new Date(v.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
+                    </div>
+                    <div className="px-2 text-xs text-muted-foreground">#{v.id}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="px-4 py-2.5 border-t border-border bg-secondary/10 flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">{(allValuations ?? []).length} valuations total</p>
+                <button
+                  onClick={() => {
+                    const csv = ['ID,Label,User,Email,Blended Value,Date',
+                      ...(allValuations ?? []).map(v =>
+                        `${v.id},"${v.label}","${v.userName ?? ''}","${v.userEmail ?? ''}","${v.blendedValue ?? ''}","${new Date(v.createdAt).toLocaleDateString()}"`
+                      )
+                    ].join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = 'valuations.csv'; a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="text-xs text-indigo-600 hover:underline font-medium flex items-center gap-1"
+                >
+                  <FileText className="w-3.5 h-3.5" /> Export CSV
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* ── Audit Log Tab ── */}
       {activeTab === 'audit' && (
         <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground">Audit Log</h3>
+            <InfoTip text="A chronological record of every admin action taken on the platform — KYC approvals, user role changes, bans, and setting updates. This cannot be edited or deleted." />
+          </div>
           {auditLoading ? (
             <div className="flex items-center justify-center h-32"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
           ) : (auditLogs ?? []).length === 0 ? (
@@ -654,6 +816,10 @@ export default function AdminDashboard() {
       {/* ── Analytics Tab ── */}
       {activeTab === 'analytics' && (
         <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground">Platform Analytics</h3>
+            <InfoTip text="High-level metrics about platform usage. For detailed page views and session data, check the Dashboard panel in the Management UI sidebar." />
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="rounded-xl border border-border bg-card p-5 text-center">
               <div className="text-3xl font-bold text-foreground mb-1">{stats?.totalUsers ?? 0}</div>
@@ -671,7 +837,10 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="rounded-xl border border-border bg-card p-6">
-            <h3 className="text-sm font-semibold text-foreground mb-4">User Type Breakdown</h3>
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="text-sm font-semibold text-foreground">User Type Breakdown</h3>
+              <InfoTip text="Distribution of user types across all registered accounts." />
+            </div>
             <div className="space-y-3">
               {[
                 { label: 'VC Firms', value: stats?.vcCount ?? 0, total: stats?.totalUsers ?? 1, color: 'oklch(0.35 0.2 270)' },
@@ -697,6 +866,149 @@ export default function AdminDashboard() {
             <p className="text-xs text-muted-foreground">
               For detailed analytics including page views and user sessions, check the <strong>Dashboard</strong> panel in the Management UI.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Platform Settings Tab ── */}
+      {activeTab === 'settings' && (
+        <div className="space-y-5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-foreground">Platform Settings</h3>
+              <InfoTip text="Global settings that affect all users on the platform. Changes take effect immediately after saving." />
+            </div>
+            <Button size="sm" className="gap-1.5 h-8 text-xs"
+              style={{ background: 'oklch(0.35 0.2 270)' }}
+              disabled={setPlatformSettingsMutation.isPending}
+              onClick={savePlatformSettings}>
+              {setPlatformSettingsMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+              Save Changes
+            </Button>
+          </div>
+
+          {/* Announcement Banner */}
+          <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-border pb-3">
+              <Megaphone className="w-4 h-4 text-indigo-500" />
+              <h4 className="text-sm font-semibold text-foreground">Announcement Banner</h4>
+              <InfoTip text="Displays a banner at the top of the platform visible to all users. Use it for maintenance notices, new feature announcements, or important updates." />
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-medium text-foreground">Active</label>
+                  <InfoTip text="Toggle to show or hide the announcement banner. The text is saved even when inactive." />
+                </div>
+                <button
+                  onClick={() => updateDraft('announcementActive', !(settingsDraft.announcementActive ?? platformSettings?.announcementActive))}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${settingsDraft.announcementActive ?? platformSettings?.announcementActive ? 'bg-indigo-500' : 'bg-secondary'}`}
+                >
+                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${settingsDraft.announcementActive ?? platformSettings?.announcementActive ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </button>
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <label className="text-xs font-medium text-foreground">Banner Text</label>
+                  <InfoTip text="The message shown in the announcement banner. Keep it concise — under 120 characters works best." />
+                </div>
+                <Input
+                  value={(settingsDraft.announcementText as string) ?? platformSettings?.announcementText ?? ''}
+                  onChange={e => updateDraft('announcementText', e.target.value)}
+                  placeholder="e.g. We're launching a new feature next week! Stay tuned."
+                  className="text-sm"
+                  maxLength={500}
+                />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <label className="text-xs font-medium text-foreground">Banner Type</label>
+                  <InfoTip text="Controls the color of the banner. Info = blue, Warning = amber, Success = green, Error = red." />
+                </div>
+                <div className="flex gap-2">
+                  {(['info', 'warning', 'success', 'error'] as const).map(t => (
+                    <button key={t}
+                      onClick={() => updateDraft('announcementType', t)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all border ${
+                        (settingsDraft.announcementType ?? platformSettings?.announcementType) === t
+                          ? t === 'info' ? 'bg-blue-100 text-blue-700 border-blue-300'
+                            : t === 'warning' ? 'bg-amber-100 text-amber-700 border-amber-300'
+                            : t === 'success' ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
+                            : 'bg-red-100 text-red-700 border-red-300'
+                          : 'border-border text-muted-foreground hover:bg-secondary/50'
+                      }`}>{t}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Access Control */}
+          <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-border pb-3">
+              <Lock className="w-4 h-4 text-red-500" />
+              <h4 className="text-sm font-semibold text-foreground">Access Control</h4>
+              <InfoTip text="Control who can access the platform and how." />
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-medium text-foreground">Allow New Registrations</span>
+                    <InfoTip text="When disabled, new users cannot create accounts. Existing users can still log in. Use this to run a closed beta or pause growth temporarily." />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">Allow new users to register on the platform</p>
+                </div>
+                <button
+                  onClick={() => updateDraft('allowNewRegistrations', !(settingsDraft.allowNewRegistrations ?? platformSettings?.allowNewRegistrations ?? true))}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${settingsDraft.allowNewRegistrations ?? platformSettings?.allowNewRegistrations ?? true ? 'bg-emerald-500' : 'bg-secondary'}`}
+                >
+                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${settingsDraft.allowNewRegistrations ?? platformSettings?.allowNewRegistrations ?? true ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-medium text-foreground">Maintenance Mode</span>
+                    <InfoTip text="When enabled, all non-admin users will see a maintenance page instead of the platform. Admins can still access everything normally." />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">Show maintenance page to all non-admin users</p>
+                </div>
+                <button
+                  onClick={() => updateDraft('maintenanceMode', !(settingsDraft.maintenanceMode ?? platformSettings?.maintenanceMode))}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${settingsDraft.maintenanceMode ?? platformSettings?.maintenanceMode ? 'bg-red-500' : 'bg-secondary'}`}
+                >
+                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${settingsDraft.maintenanceMode ?? platformSettings?.maintenanceMode ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </button>
+              </div>
+
+              {(settingsDraft.maintenanceMode ?? platformSettings?.maintenanceMode) && (
+                <div>
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <label className="text-xs font-medium text-foreground">Maintenance Message</label>
+                    <InfoTip text="The message shown to users during maintenance. Be specific about expected downtime if known." />
+                  </div>
+                  <Input
+                    value={(settingsDraft.maintenanceMessage as string) ?? platformSettings?.maintenanceMessage ?? ''}
+                    onChange={e => updateDraft('maintenanceMessage', e.target.value)}
+                    placeholder="e.g. We're upgrading our systems. Back in 2 hours."
+                    className="text-sm"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Settings Info */}
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 flex gap-3">
+            <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+            <div className="text-xs text-blue-700 leading-relaxed">
+              <strong>Note: </strong>Settings are saved to the database and take effect immediately. To manage individual resource entries (VCs, angels, grants, lawyers), use the <strong>Database</strong> panel in the Management UI sidebar.
+              {platformSettings?.updatedAt && (
+                <span className="block mt-1 text-blue-600">Last updated: {new Date(platformSettings.updatedAt).toLocaleString()}</span>
+              )}
+            </div>
           </div>
         </div>
       )}

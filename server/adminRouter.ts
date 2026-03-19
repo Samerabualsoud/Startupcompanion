@@ -70,6 +70,25 @@ export const adminRouter = router({
       return { success: true };
     }),
 
+  banUser: adminProcedure
+    .input(z.object({
+      userId: z.number().int().positive(),
+      banned: z.boolean(),
+      reason: z.string().max(500).optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await db.banUser(input.userId, input.banned, input.reason);
+      await db.addAuditLog({
+        adminId: ctx.user.id,
+        adminEmail: ctx.user.email,
+        action: input.banned ? "ban_user" : "unban_user",
+        targetType: "user",
+        targetId: input.userId,
+        details: { reason: input.reason },
+      });
+      return { success: true };
+    }),
+
   // ── KYC Management ────────────────────────────────────────────────────────
   getKycSubmissions: adminProcedure.query(async () => {
     return db.getAllKycSubmissions();
@@ -137,5 +156,43 @@ export const adminRouter = router({
         details: { adminNote: input.adminNote },
       });
       return result;
+    }),
+
+  // ── All Saved Valuations ──────────────────────────────────────────────────
+  getAllValuations: adminProcedure
+    .input(z.object({
+      limit: z.number().int().min(1).max(500).default(100),
+      offset: z.number().int().min(0).default(0),
+    }))
+    .query(async ({ input }) => {
+      return db.getAllSavedValuations(input.limit, input.offset);
+    }),
+
+  // ── Platform Settings ─────────────────────────────────────────────────────
+  getPlatformSettings: adminProcedure.query(async () => {
+    return db.getPlatformSettings();
+  }),
+
+  setPlatformSettings: adminProcedure
+    .input(z.object({
+      announcementText: z.string().max(500).optional().nullable(),
+      announcementActive: z.boolean().optional(),
+      announcementType: z.enum(['info', 'warning', 'success', 'error']).optional(),
+      maintenanceMode: z.boolean().optional(),
+      maintenanceMessage: z.string().max(500).optional().nullable(),
+      allowNewRegistrations: z.boolean().optional(),
+      featuredStartupIds: z.array(z.number().int()).optional().nullable(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await db.setPlatformSettings({ ...input, updatedBy: ctx.user.id });
+      await db.addAuditLog({
+        adminId: ctx.user.id,
+        adminEmail: ctx.user.email,
+        action: "update_platform_settings",
+        targetType: "platform_settings",
+        targetId: 1,
+        details: input,
+      });
+      return { success: true };
     }),
 });

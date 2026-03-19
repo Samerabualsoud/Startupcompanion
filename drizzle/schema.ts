@@ -24,6 +24,8 @@ export const users = mysqlTable("users", {
   subscriptionStatus: mysqlEnum("subscriptionStatus", ["active", "canceled", "past_due", "trialing", "inactive"]).default("inactive").notNull(),
   subscriptionPlan: varchar("subscriptionPlan", { length: 32 }),
   subscriptionCurrentPeriodEnd: timestamp("subscriptionCurrentPeriodEnd"),
+  isBanned: boolean("isBanned").default(false).notNull(),
+  bannedReason: text("bannedReason"),
 });
 
 export type User = typeof users.$inferSelect;
@@ -594,3 +596,19 @@ export const auditLog = mysqlTable('audit_log', {
 });
 export type AuditLog = typeof auditLog.$inferSelect;
 export type InsertAuditLog = typeof auditLog.$inferInsert;
+
+// ── Platform Settings (singleton row, id=1) ────────────────────────────────
+export const platformSettings = mysqlTable('platform_settings', {
+  id: int('id').autoincrement().primaryKey(),
+  announcementText: text('announcementText'),
+  announcementActive: boolean('announcementActive').default(false).notNull(),
+  announcementType: mysqlEnum('announcementType', ['info', 'warning', 'success', 'error']).default('info').notNull(),
+  maintenanceMode: boolean('maintenanceMode').default(false).notNull(),
+  maintenanceMessage: text('maintenanceMessage'),
+  featuredStartupIds: json('featuredStartupIds'),
+  allowNewRegistrations: boolean('allowNewRegistrations').default(true).notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  updatedBy: int('updatedBy'),
+});
+export type PlatformSettings = typeof platformSettings.$inferSelect;
+export type InsertPlatformSettings = typeof platformSettings.$inferInsert;

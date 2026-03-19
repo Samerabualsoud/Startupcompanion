@@ -148,6 +148,13 @@
       "when": 1773876550145,
       "tag": "0020_lying_marvex",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1773887740580,
+      "tag": "0021_nifty_goblin_queen",
+      "breakpoints": true
     }
   ]
 }

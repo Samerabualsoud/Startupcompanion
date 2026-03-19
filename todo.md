@@ -526,3 +526,23 @@
 - [x] Rebuild FreeZones: new layout with AI-powered "Find My Jurisdiction" quiz/recommender, improved card design with visual score bars, better detail modal/drawer with tabbed content, comparison table improvements, added RAKEZ, Qatar QFC, BVI, Cayman, Singapore, Saudi SEZs, Bahrain, Delaware, ADGM, DIFC (10 jurisdictions total)
 - [x] 31 tests passing, 0 TypeScript errors
 - [x] Save checkpoint
+
+## Round 37 — Glossary Enrichment
+- [ ] Expand termSheet.ts: add 40+ new terms (MENA-specific, valuation, metrics, equity, legal) bringing total to 75+ terms
+- [ ] Add new categories: 'metrics' (KPIs, ARR, MRR, CAC, LTV, etc.) and 'mena' (MENA-specific terms)
+- [ ] Add Arabic translations for term names and plain explanations
+- [ ] Improve TermSheetGlossary UI: alphabet index, "MENA" filter badge, term count per category, better empty state
+- [ ] 31 tests passing, 0 TypeScript errors
+- [ ] Save checkpoint
+
+## Round 38 — Admin Full Control + Tooltips + Runway UX
+- [x] Admin panel: Users tab — list all users, search/filter, change role, ban/unban, delete, view profile
+- [x] Admin panel: Platform Stats tab — total users, signups per day chart, tool usage counts, top sectors/stages
+- [x] Admin panel: Content tab — manage resource database entries (VCs, angels, grants, lawyers), approve/reject community submissions
+- [x] Admin panel: Site Settings tab — toggle maintenance mode, set announcement banner text, manage featured startups
+- [x] Admin panel: Valuations tab — view all saved valuations across users, export CSV
+- [x] Runway Planner: fix slider/range input color (visible thumb + track with custom RunwaySlider component)
+- [x] Runway Planner: add Info tooltip (?) to every input field, slider, and result metric
+- [x] Runway Planner: explain "Cut %" slider, "Monthly Revenue Growth", "Optimised Burn" concept inline
+- [x] 31 tests passing, 0 TypeScript errors
+- [x] Save checkpoint
