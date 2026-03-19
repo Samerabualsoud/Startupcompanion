@@ -349,25 +349,59 @@ export default function SalesTracker() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Total Revenue', value: fmt(kpis.totalRevenue, currency), sub: `${kpis.wonCount} won deals`, icon: DollarSign, color: 'text-green-600' },
-          { label: 'Pipeline Value', value: fmt(kpis.pipeline, currency), sub: `${kpis.activeCount} active deals`, icon: GitMerge, color: 'text-blue-600' },
-          { label: 'Weighted Pipeline', value: fmt(kpis.weighted, currency), sub: 'probability-adjusted', icon: BarChart3, color: 'text-purple-600' },
-          { label: 'Win Rate', value: `${kpis.winRate.toFixed(1)}%`, sub: `Avg deal: ${fmt(kpis.avgDealSize, currency)}`, icon: TrendingUp, color: kpis.winRate >= 30 ? 'text-green-600' : 'text-orange-500' },
+          {
+            label: isRTL ? 'إجمالي الإيرادات' : 'Total Revenue',
+            value: fmt(kpis.totalRevenue, currency),
+            sub: isRTL ? `${kpis.wonCount} صفقة مُغلقة` : `${kpis.wonCount} deals closed`,
+            icon: DollarSign,
+            iconBg: 'bg-emerald-100',
+            iconColor: 'text-emerald-600',
+            valueColor: 'text-emerald-600',
+            accent: 'border-l-4 border-l-emerald-500',
+          },
+          {
+            label: isRTL ? 'قيمة خط الأنابيب' : 'Pipeline Value',
+            value: fmt(kpis.pipeline, currency),
+            sub: isRTL ? `${kpis.activeCount} صفقة نشطة` : `${kpis.activeCount} active deals`,
+            icon: GitMerge,
+            iconBg: 'bg-blue-100',
+            iconColor: 'text-blue-600',
+            valueColor: 'text-blue-600',
+            accent: 'border-l-4 border-l-blue-500',
+          },
+          {
+            label: isRTL ? 'خط الأنابيب المرجّح' : 'Weighted Pipeline',
+            value: fmt(kpis.weighted, currency),
+            sub: isRTL ? 'مُعدَّل حسب الاحتمالية' : 'probability-adjusted',
+            icon: BarChart3,
+            iconBg: 'bg-violet-100',
+            iconColor: 'text-violet-600',
+            valueColor: 'text-violet-600',
+            accent: 'border-l-4 border-l-violet-500',
+          },
+          {
+            label: isRTL ? 'معدل الفوز' : 'Win Rate',
+            value: `${kpis.winRate.toFixed(1)}%`,
+            sub: isRTL ? `متوسط الصفقة: ${fmt(kpis.avgDealSize, currency)}` : `Avg deal: ${fmt(kpis.avgDealSize, currency)}`,
+            icon: TrendingUp,
+            iconBg: kpis.winRate >= 30 ? 'bg-emerald-100' : 'bg-orange-100',
+            iconColor: kpis.winRate >= 30 ? 'text-emerald-600' : 'text-orange-500',
+            valueColor: kpis.winRate >= 30 ? 'text-emerald-600' : 'text-orange-500',
+            accent: kpis.winRate >= 30 ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-orange-400',
+          },
         ].map(card => (
-          <Card key={card.label}>
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">{card.label}</p>
-                  <p className={`text-xl font-bold ${card.color}`}>{card.value}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{card.sub}</p>
-                </div>
-                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                  <card.icon className="w-4 h-4 text-muted-foreground" />
-                </div>
+          <div key={card.label} className={`rounded-xl bg-card border border-border shadow-sm p-4 flex flex-col gap-3 ${card.accent}`}>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{card.label}</p>
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${card.iconBg}`}>
+                <card.icon className={`w-4 h-4 ${card.iconColor}`} />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div>
+              <p className={`text-2xl font-bold tracking-tight ${card.valueColor}`}>{card.value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
+            </div>
+          </div>
         ))}
       </div>
 
@@ -388,35 +422,52 @@ export default function SalesTracker() {
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search deals…" className="pl-9 h-9" />
+              <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder={isRTL ? 'بحث في الصفقات…' : 'Search deals…'} className="pl-9 h-9" />
+            </div>
+            <div className="text-xs text-muted-foreground shrink-0">
+              {isRTL ? `${filtered.length} صفقة` : `${filtered.length} deals`}
             </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 overflow-x-auto">
-            {(Object.keys(STAGE_CONFIG) as DealStage[]).map(stage => {
-              const cfg = STAGE_CONFIG[stage];
-              const deals = stageGroups[stage];
-              const total = deals.reduce((s, d) => s + (d.dealValue ?? d.amount), 0);
-              return (
-                <div key={stage} className="flex flex-col min-w-[160px]">
-                  <div className={`flex items-center justify-between p-2 rounded-t-lg ${cfg.bg}`}>
-                    <div className="flex items-center gap-1.5">
-                      <cfg.icon className={`w-3.5 h-3.5 ${cfg.color}`} />
-                      <span className={`text-xs font-semibold ${cfg.color}`}>{cfg.label}</span>
+          {/* Kanban Board */}
+          <div className="overflow-x-auto pb-2">
+            <div className="flex gap-3 min-w-max">
+              {(Object.keys(STAGE_CONFIG) as DealStage[]).map(stage => {
+                const cfg = STAGE_CONFIG[stage];
+                const deals = stageGroups[stage];
+                const total = deals.reduce((s, d) => s + (d.dealValue ?? d.amount), 0);
+                const isWon = stage === 'closed_won';
+                const isLost = stage === 'closed_lost';
+                return (
+                  <div key={stage} className="flex flex-col w-[200px] shrink-0">
+                    {/* Column Header */}
+                    <div className={`rounded-t-xl px-3 py-2.5 ${cfg.bg} border border-b-0 border-border`}>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <cfg.icon className={`w-3.5 h-3.5 ${cfg.color}`} />
+                          <span className={`text-xs font-bold ${cfg.color}`}>{cfg.label}</span>
+                        </div>
+                        <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${cfg.bg} ${cfg.color} border border-current/20`}>{deals.length}</span>
+                      </div>
+                      <p className="text-xs font-medium text-muted-foreground">{fmt(total, currency)}</p>
                     </div>
-                    <Badge variant="secondary" className="text-xs h-5 px-1.5">{deals.length}</Badge>
+                    {/* Cards */}
+                    <div className={`flex-1 space-y-2 p-2 rounded-b-xl border border-t-0 border-border min-h-[200px] ${
+                      isWon ? 'bg-emerald-50/40' : isLost ? 'bg-red-50/40' : 'bg-muted/10'
+                    }`}>
+                      {deals.map(deal => <DealCard key={deal.id} deal={deal} />)}
+                      {deals.length === 0 && (
+                        <div className="flex flex-col items-center justify-center py-8 gap-1">
+                          <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center">
+                            <cfg.icon className="w-4 h-4 text-muted-foreground/50" />
+                          </div>
+                          <p className="text-[11px] text-muted-foreground/60">{isRTL ? 'لا توجد صفقات' : 'No deals'}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground text-center py-1 bg-muted/30 border-x border-border">
-                    {fmt(total, currency)}
-                  </div>
-                  <div className="flex-1 space-y-2 p-2 bg-muted/10 rounded-b-lg border border-border border-t-0 min-h-[100px]">
-                    {deals.map(deal => <DealCard key={deal.id} deal={deal} />)}
-                    {deals.length === 0 && (
-                      <p className="text-xs text-muted-foreground text-center py-4">No deals</p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </TabsContent>
 

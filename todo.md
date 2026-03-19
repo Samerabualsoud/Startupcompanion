@@ -573,3 +573,16 @@
 - [ ] Remove MENA-Specific category from TERM_CATEGORIES and TermSheetGlossary.tsx
 - [ ] 31 tests passing, 0 TypeScript errors
 - [ ] Save checkpoint
+
+## Round 41 — My Company UI Redesign
+- [ ] Read StartupProfile.tsx and understand current layout, tabs, and data structure
+- [ ] Redesign My Company: new hero header with company logo placeholder, gradient banner, key metrics row, tabbed sections (Overview, Financials, Team, Documents), modern card layout
+- [ ] 0 TypeScript errors
+- [ ] Save checkpoint
+
+## Round 41 — Glossary Language Fix + My Company Redesign
+- [ ] Fix termSheet.ts syntax error (duplicate bracket from MENA removal)
+- [ ] Fix TermSheetGlossary: show term name in active language only (EN or AR, not both)
+- [ ] Redesign My Company (StartupProfile.tsx): hero header, key metrics row, tabbed layout
+- [ ] 0 TypeScript errors
+- [ ] Save checkpoint

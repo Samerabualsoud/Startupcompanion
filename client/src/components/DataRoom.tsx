@@ -234,52 +234,81 @@ export default function DataRoom() {
   return (
     <div className={`flex h-full ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
       {/* ── Left Panel: Room List ── */}
-      <div className="w-64 shrink-0 border-r border-border flex flex-col" style={{ background: 'oklch(0.35 0.2 270)' }}>
-        <div className="p-4 border-b border-border/30">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-white">Data Rooms</h2>
+      <div className="w-64 shrink-0 border-r border-border flex flex-col bg-card">
+        {/* Sidebar Header */}
+        <div className="px-4 pt-4 pb-3 border-b border-border">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center">
+                <FolderOpen className="w-3.5 h-3.5 text-indigo-600" />
+              </div>
+              <h2 className="text-sm font-bold text-foreground">Data Rooms</h2>
+            </div>
             <Button
               size="sm"
               variant="ghost"
-              className="h-7 w-7 p-0 text-white/60 hover:text-white hover:bg-white/10"
+              className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
               onClick={() => setShowCreateRoom(true)}
+              title="New data room"
             >
               <Plus className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-[10px] text-white/40">Secure document sharing with activity tracking</p>
+          <p className="text-[10px] text-muted-foreground leading-relaxed">
+            Secure document sharing with viewer tracking
+          </p>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        {/* Room List */}
+        <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
           {roomsLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-5 h-5 animate-spin text-white/40" />
+            <div className="flex items-center justify-center py-10">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
             </div>
           ) : rooms.length === 0 ? (
-            <div className="text-center py-8 px-3">
-              <FolderOpen className="w-8 h-8 mx-auto mb-2 text-white/20" />
-              <p className="text-[11px] text-white/40">No data rooms yet. Create one to get started.</p>
+            <div className="text-center py-10 px-4">
+              <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <FolderOpen className="w-6 h-6 text-muted-foreground/40" />
+              </div>
+              <p className="text-xs font-medium text-muted-foreground mb-1">No data rooms yet</p>
+              <p className="text-[10px] text-muted-foreground/60">Create your first room to start sharing documents securely.</p>
             </div>
           ) : (
             rooms.map(room => (
               <button
                 key={room.id}
                 onClick={() => setSelectedRoomId(room.id)}
-                className={`w-full text-left p-2.5 rounded-lg transition-all ${
+                className={`w-full text-left px-3 py-2.5 rounded-lg transition-all group ${
                   selectedRoomId === room.id
-                    ? 'bg-white/15 text-white'
-                    : 'text-white/70 hover:bg-white/8 hover:text-white'
+                    ? 'bg-indigo-50 border border-indigo-200/60'
+                    : 'hover:bg-muted/60 border border-transparent'
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <FolderOpen className="w-4 h-4 shrink-0" style={{ color: room.isShared ? '#10B981' : 'oklch(0.45 0.2 270)' }} />
+                <div className="flex items-start gap-2.5">
+                  <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${
+                    selectedRoomId === room.id ? 'bg-indigo-100' : 'bg-muted'
+                  }`}>
+                    <FolderOpen className={`w-3.5 h-3.5 ${
+                      room.isShared ? 'text-emerald-500' : selectedRoomId === room.id ? 'text-indigo-600' : 'text-muted-foreground'
+                    }`} />
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold truncate">{room.name}</div>
+                    <div className={`text-xs font-semibold truncate ${
+                      selectedRoomId === room.id ? 'text-indigo-700' : 'text-foreground'
+                    }`}>{room.name}</div>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      {room.isShared && (
-                        <Badge className="text-[9px] h-3.5 px-1 bg-green-500/20 text-green-400 border-0">Shared</Badge>
+                      {room.isShared ? (
+                        <span className="text-[9px] font-medium text-emerald-600 flex items-center gap-0.5">
+                          <Unlock className="w-2.5 h-2.5" /> Shared
+                        </span>
+                      ) : (
+                        <span className="text-[9px] text-muted-foreground/50 flex items-center gap-0.5">
+                          <Lock className="w-2.5 h-2.5" /> Private
+                        </span>
                       )}
-                      <span className="text-[10px] text-white/30">{room.viewCount} views</span>
+                      {room.viewCount > 0 && (
+                        <span className="text-[9px] text-muted-foreground">· {room.viewCount} views</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -288,10 +317,10 @@ export default function DataRoom() {
           )}
         </div>
 
-        <div className="p-3 border-t border-border/30">
+        {/* Sidebar Footer */}
+        <div className="p-3 border-t border-border">
           <Button
-            className="w-full h-8 text-xs"
-            style={{ background: 'oklch(0.45 0.2 270)' }}
+            className="w-full h-8 text-xs bg-indigo-600 hover:bg-indigo-700 text-white"
             onClick={() => setShowCreateRoom(true)}
           >
             <Plus className="w-3.5 h-3.5 mr-1.5" /> New Data Room
@@ -302,34 +331,57 @@ export default function DataRoom() {
       {/* ── Main Content ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {!selectedRoom ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center max-w-sm">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'oklch(0.38 0.18 270)' }}>
-                <FolderOpen className="w-8 h-8" style={{ color: 'oklch(0.45 0.2 270)' }} />
+          <div className="flex-1 flex items-center justify-center bg-muted/20">
+            <div className="text-center max-w-md px-6">
+              {/* Illustration */}
+              <div className="relative mx-auto mb-6 w-24 h-24">
+                <div className="absolute inset-0 rounded-2xl bg-indigo-100 rotate-6" />
+                <div className="absolute inset-0 rounded-2xl bg-indigo-50 -rotate-3" />
+                <div className="relative w-24 h-24 rounded-2xl bg-white border border-indigo-200 shadow-sm flex items-center justify-center">
+                  <FolderOpen className="w-10 h-10 text-indigo-500" />
+                </div>
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">Select or Create a Data Room</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Organize your startup documents and share them securely with investors, advisors, or partners.
+              <h3 className="text-xl font-bold text-foreground mb-2">Virtual Data Room</h3>
+              <p className="text-sm text-muted-foreground mb-2 leading-relaxed">
+                Organize your startup documents into secure, shareable rooms for investor due diligence.
               </p>
-              <Button onClick={() => setShowCreateRoom(true)} style={{ background: 'oklch(0.45 0.2 270)' }}>
-                <Plus className="w-4 h-4 mr-2" /> Create Data Room
+              <div className="flex flex-col gap-1.5 mb-6 text-left">
+                {[
+                  { icon: Lock, text: isRTL ? 'مشاركة آمنة مع رابط مخصص' : 'Secure sharing with a custom link' },
+                  { icon: Eye, text: isRTL ? 'تتبع من فتح الملفات وشاهدها' : 'Track who opened files and when' },
+                  { icon: Users, text: isRTL ? 'التحكم في ما يراه المستثمرون' : 'Control exactly what investors see' },
+                ].map(({ icon: Icon, text }) => (
+                  <div key={text} className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-card border border-border">
+                    <Icon className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                    <span className="text-xs text-muted-foreground">{text}</span>
+                  </div>
+                ))}
+              </div>
+              <Button
+                onClick={() => setShowCreateRoom(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                {isRTL ? 'إنشاء غرفة بيانات' : 'Create Data Room'}
               </Button>
             </div>
           </div>
         ) : (
           <>
             {/* Header */}
-            <div className="shrink-0 px-5 py-3.5 border-b border-border flex items-center justify-between" style={{ background: 'oklch(0.35 0.2 270)' }}>
+            <div className="shrink-0 px-5 py-3 border-b border-border flex items-center justify-between bg-card">
               <div className="flex items-center gap-3">
-                <FolderOpen className="w-5 h-5" style={{ color: 'oklch(0.45 0.2 270)' }} />
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
+                  <FolderOpen className="w-4 h-4 text-indigo-600" />
+                </div>
                 <div>
-                  <h2 className="text-sm font-bold text-white">{selectedRoom.name}</h2>
+                  <h2 className="text-sm font-bold text-foreground">{selectedRoom.name}</h2>
                   {selectedRoom.description && (
-                    <p className="text-[11px] text-white/50">{selectedRoom.description}</p>
+                    <p className="text-[11px] text-muted-foreground">{selectedRoom.description}</p>
                   )}
                 </div>
                 {selectedRoom.isShared && (
-                  <Badge className="bg-green-500/20 text-green-400 border-0 text-[10px]">
+                  <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-[10px] font-medium">
                     <Unlock className="w-2.5 h-2.5 mr-1" /> Shared · {selectedRoom.viewCount} views
                   </Badge>
                 )}
@@ -337,16 +389,15 @@ export default function DataRoom() {
               <div className="flex items-center gap-2">
                 <Button
                   size="sm"
-                  variant="ghost"
-                  className="h-8 text-white/70 hover:text-white hover:bg-white/10 text-xs gap-1.5"
+                  variant="outline"
+                  className="h-8 text-xs gap-1.5"
                   onClick={() => { setShowActivity(true); }}
                 >
                   <Activity className="w-3.5 h-3.5" /> Activity
                 </Button>
                 <Button
                   size="sm"
-                  className="h-8 text-xs gap-1.5"
-                  style={{ background: 'oklch(0.45 0.2 270)' }}
+                  className="h-8 text-xs gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white"
                   onClick={() => { setShareUrl(selectedRoom.shareToken ? `${window.location.origin}/data-room/${selectedRoom.shareToken}` : null); setShowShareModal(true); }}
                 >
                   <Share2 className="w-3.5 h-3.5" /> Share
@@ -513,50 +564,56 @@ export default function DataRoom() {
         {showActivity && selectedRoom && (
           <motion.div
             initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 320, opacity: 1 }}
+            animate={{ width: 300, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            className="shrink-0 border-l border-border flex flex-col overflow-hidden"
-            style={{ background: 'oklch(0.35 0.2 270)' }}
+            className="shrink-0 border-l border-border flex flex-col overflow-hidden bg-card"
           >
-            <div className="p-4 border-b border-border/30 flex items-center justify-between">
+            <div className="p-4 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4" style={{ color: 'oklch(0.45 0.2 270)' }} />
-                <h3 className="text-sm font-bold text-white">Activity Log</h3>
+                <div className="w-6 h-6 rounded-md bg-indigo-100 flex items-center justify-center">
+                  <Activity className="w-3.5 h-3.5 text-indigo-600" />
+                </div>
+                <h3 className="text-sm font-bold text-foreground">Activity Log</h3>
               </div>
-              <button onClick={() => setShowActivity(false)} className="text-white/40 hover:text-white">
+              <button onClick={() => setShowActivity(false)} className="text-muted-foreground hover:text-foreground transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-3 space-y-2">
               {activityLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-5 h-5 animate-spin text-white/40" />
+                <div className="flex items-center justify-center py-10">
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                 </div>
               ) : activity.length === 0 ? (
-                <div className="text-center py-8">
-                  <Eye className="w-8 h-8 mx-auto mb-2 text-white/20" />
-                  <p className="text-[11px] text-white/40">No activity yet. Share the link to start tracking.</p>
+                <div className="text-center py-10 px-4">
+                  <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                    <Eye className="w-5 h-5 text-muted-foreground/40" />
+                  </div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">No activity yet</p>
+                  <p className="text-[10px] text-muted-foreground/60">Share the link to start tracking viewer activity.</p>
                 </div>
               ) : (
                 activity.map((entry: ActivityEntry) => (
-                  <div key={entry.id} className="p-2.5 rounded-lg" style={{ background: 'oklch(0.38 0.18 270)' }}>
+                  <div key={entry.id} className="p-2.5 rounded-lg border border-border bg-background hover:bg-muted/30 transition-colors">
                     <div className="flex items-start gap-2">
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: 'oklch(0.45 0.2 270)20' }}>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                        entry.action === 'room_opened' ? 'bg-indigo-100' : 'bg-blue-100'
+                      }`}>
                         {entry.action === 'room_opened' ? (
-                          <Eye className="w-3 h-3" style={{ color: 'oklch(0.45 0.2 270)' }} />
+                          <Eye className="w-3 h-3 text-indigo-600" />
                         ) : (
-                          <FileText className="w-3 h-3" style={{ color: 'oklch(0.45 0.2 270)' }} />
+                          <FileText className="w-3 h-3 text-blue-600" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[11px] font-semibold text-white">
+                        <div className="text-[11px] font-semibold text-foreground">
                           {entry.viewerName ?? entry.viewerEmail ?? 'Anonymous'}
                         </div>
-                        <div className="text-[10px] text-white/50">
+                        <div className="text-[10px] text-muted-foreground">
                           {ACTION_LABELS[entry.action] ?? entry.action}
-                          {entry.fileName && <span className="text-white/70"> · {entry.fileName}</span>}
+                          {entry.fileName && <span className="text-foreground/70"> · {entry.fileName}</span>}
                         </div>
-                        <div className="text-[10px] text-white/30 mt-0.5 flex items-center gap-1">
+                        <div className="text-[10px] text-muted-foreground/60 mt-0.5 flex items-center gap-1">
                           <Clock className="w-2.5 h-2.5" />
                           {timeAgo(entry.createdAt)}
                         </div>
@@ -566,8 +623,8 @@ export default function DataRoom() {
                 ))
               )}
             </div>
-            <div className="p-3 border-t border-border/30">
-              <div className="flex items-center gap-2 text-[11px] text-white/40">
+            <div className="p-3 border-t border-border">
+              <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                 <Users className="w-3.5 h-3.5" />
                 {activity.length} total events tracked
               </div>
