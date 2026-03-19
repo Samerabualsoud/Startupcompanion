@@ -20,7 +20,7 @@ import {
 import { toast } from 'sonner';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
-type TabId = 'overview' | 'users' | 'kyc' | 'submissions' | 'valuations' | 'audit' | 'analytics' | 'settings';
+type TabId = 'overview' | 'users' | 'kyc' | 'submissions' | 'resources' | 'valuations' | 'audit' | 'analytics' | 'settings';
 
 // ── Tooltip Helper ─────────────────────────────────────────────────────────
 
@@ -173,6 +173,9 @@ export default function AdminDashboard() {
   const [banReason, setBanReason] = useState<Record<number, string>>({});
   const [settingsDraft, setSettingsDraft] = useState<Record<string, unknown>>({});
   const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [resourceSubTab, setResourceSubTab] = useState<'vcs' | 'angels' | 'grants' | 'lawyers'>('vcs');
+  const [editingResource, setEditingResource] = useState<{ type: string; item: Record<string, unknown> } | null>(null);
+  const [editDraft, setEditDraft] = useState<Record<string, unknown>>({});
 
   // Queries
   const { data: stats, refetch: refetchStats } = trpc.admin.getStats.useQuery(undefined, { enabled: user?.role === 'admin' });
@@ -192,6 +195,9 @@ export default function AdminDashboard() {
   );
   const { data: platformSettings, refetch: refetchSettings } = trpc.admin.getPlatformSettings.useQuery(undefined, {
     enabled: user?.role === 'admin' && activeTab === 'settings',
+  });
+  const { data: resourceDb, isLoading: resourceDbLoading, refetch: refetchResourceDb } = trpc.admin.getResourceDatabase.useQuery(undefined, {
+    enabled: user?.role === 'admin' && activeTab === 'resources',
   });
 
   // Sync settings draft when data loads
@@ -238,6 +244,14 @@ export default function AdminDashboard() {
     onSuccess: () => { toast.success('Platform settings saved'); refetchSettings(); },
     onError: (e) => toast.error(e.message),
   });
+  const deleteVCMutation = trpc.admin.deleteVC.useMutation({ onSuccess: () => { toast.success('VC deleted'); refetchResourceDb(); }, onError: (e) => toast.error(e.message) });
+  const deleteAngelMutation = trpc.admin.deleteAngel.useMutation({ onSuccess: () => { toast.success('Angel deleted'); refetchResourceDb(); }, onError: (e) => toast.error(e.message) });
+  const deleteGrantMutation = trpc.admin.deleteGrant.useMutation({ onSuccess: () => { toast.success('Grant deleted'); refetchResourceDb(); }, onError: (e) => toast.error(e.message) });
+  const deleteLawyerMutation = trpc.admin.deleteLawyer.useMutation({ onSuccess: () => { toast.success('Lawyer deleted'); refetchResourceDb(); }, onError: (e) => toast.error(e.message) });
+  const updateVCMutation = trpc.admin.updateVC.useMutation({ onSuccess: () => { toast.success('VC updated'); refetchResourceDb(); setEditingResource(null); }, onError: (e) => toast.error(e.message) });
+  const updateAngelMutation = trpc.admin.updateAngel.useMutation({ onSuccess: () => { toast.success('Angel updated'); refetchResourceDb(); setEditingResource(null); }, onError: (e) => toast.error(e.message) });
+  const updateGrantMutation = trpc.admin.updateGrant.useMutation({ onSuccess: () => { toast.success('Grant updated'); refetchResourceDb(); setEditingResource(null); }, onError: (e) => toast.error(e.message) });
+  const updateLawyerMutation = trpc.admin.updateLawyer.useMutation({ onSuccess: () => { toast.success('Lawyer updated'); refetchResourceDb(); setEditingResource(null); }, onError: (e) => toast.error(e.message) });
 
   const pendingKycCount = (submissions?.vcs?.filter((e: KycEntry) => e.isVerified === null).length ?? 0)
     + (submissions?.angels?.filter((e: KycEntry) => e.isVerified === null).length ?? 0)
@@ -249,6 +263,7 @@ export default function AdminDashboard() {
     { id: 'users', label: 'Users', icon: Users, badge: stats?.totalUsers },
     { id: 'kyc', label: 'KYC', icon: UserCheck, badge: pendingKycCount },
     { id: 'submissions', label: 'Submissions', icon: ClipboardList, badge: stats?.pendingSubmissions },
+    { id: 'resources', label: 'Resource Database', icon: Database },
     { id: 'valuations', label: 'Valuations', icon: TrendingUp },
     { id: 'audit', label: 'Audit Log', icon: Activity },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
@@ -867,6 +882,186 @@ export default function AdminDashboard() {
               For detailed analytics including page views and user sessions, check the <strong>Dashboard</strong> panel in the Management UI.
             </p>
           </div>
+        </div>
+      )}
+
+      {/* ── Resource Database Tab ── */}
+      {activeTab === 'resources' && (
+        <div className="space-y-4">
+          {/* Edit Modal */}
+          {editingResource && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setEditingResource(null)}>
+              <div className="bg-card rounded-2xl border border-border shadow-xl p-6 w-full max-w-lg space-y-4" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-foreground">Edit {editingResource.type.replace(/_/g, ' ')}</h3>
+                  <button onClick={() => setEditingResource(null)} className="text-muted-foreground hover:text-foreground text-lg leading-none">&times;</button>
+                </div>
+                <div className="space-y-3">
+                  {Object.entries(editDraft).filter(([k]) => !['id','createdAt','updatedAt','userId','isVerified','isPublic'].includes(k)).map(([key, val]) => (
+                    <div key={key}>
+                      <label className="text-xs font-medium text-muted-foreground capitalize mb-1 block">{key.replace(/([A-Z])/g, ' $1')}</label>
+                      {typeof val === 'boolean' ? (
+                        <button onClick={() => setEditDraft(d => ({ ...d, [key]: !val }))}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                            val ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-secondary text-muted-foreground border-border'
+                          }`}>{val ? 'Active' : 'Inactive'}</button>
+                      ) : (
+                        <Input value={String(val ?? '')} onChange={e => setEditDraft(d => ({ ...d, [key]: e.target.value }))}
+                          className="h-8 text-xs" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Button size="sm" className="flex-1 text-xs" style={{ background: 'oklch(0.35 0.2 270)' }}
+                    disabled={updateVCMutation.isPending || updateAngelMutation.isPending || updateGrantMutation.isPending || updateLawyerMutation.isPending}
+                    onClick={() => {
+                      const id = editDraft.id as number;
+                      if (editingResource.type === 'vc') updateVCMutation.mutate({ id, ...editDraft } as Parameters<typeof updateVCMutation.mutate>[0]);
+                      else if (editingResource.type === 'angel') updateAngelMutation.mutate({ id, ...editDraft } as Parameters<typeof updateAngelMutation.mutate>[0]);
+                      else if (editingResource.type === 'grant') updateGrantMutation.mutate({ id, ...editDraft } as Parameters<typeof updateGrantMutation.mutate>[0]);
+                      else if (editingResource.type === 'lawyer') updateLawyerMutation.mutate({ id, ...editDraft } as Parameters<typeof updateLawyerMutation.mutate>[0]);
+                    }}>
+                    Save Changes
+                  </Button>
+                  <Button variant="outline" size="sm" className="text-xs" onClick={() => setEditingResource(null)}>Cancel</Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-foreground">Resource Database</h3>
+              <InfoTip text="All entries in the platform's resource directory: VC firms, angel investors, grants, and venture lawyers. You can edit or permanently delete any entry. Deleted entries cannot be recovered." />
+            </div>
+            <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs" onClick={() => refetchResourceDb()}>
+              <RefreshCw className="w-3.5 h-3.5" /> Refresh
+            </Button>
+          </div>
+
+          {/* Subtabs */}
+          <div className="flex gap-1 p-1 rounded-xl bg-secondary/40">
+            {([
+              { id: 'vcs', label: 'VC Firms', count: resourceDb?.vcs?.length },
+              { id: 'angels', label: 'Angel Investors', count: resourceDb?.angels?.length },
+              { id: 'grants', label: 'Grants & Programs', count: resourceDb?.grants?.length },
+              { id: 'lawyers', label: 'Venture Lawyers', count: resourceDb?.lawyers?.length },
+            ] as const).map(sub => (
+              <button key={sub.id} onClick={() => setResourceSubTab(sub.id)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap"
+                style={resourceSubTab === sub.id
+                  ? { background: 'white', color: 'oklch(0.35 0.2 270)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }
+                  : { color: 'oklch(0.5 0.03 240)' }}>
+                {sub.label}
+                {sub.count != null && (
+                  <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary text-muted-foreground">{sub.count}</span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {resourceDbLoading ? (
+            <div className="flex items-center justify-center h-32"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
+          ) : (() => {
+            const items = (resourceSubTab === 'vcs' ? resourceDb?.vcs
+              : resourceSubTab === 'angels' ? resourceDb?.angels
+              : resourceSubTab === 'grants' ? resourceDb?.grants
+              : resourceDb?.lawyers) as Record<string, unknown>[] | undefined;
+
+            const colMap: Record<string, string[]> = {
+              vcs: ['name', 'hqCity', 'hqCountry', 'website', 'checkSizeMin', 'checkSizeMax', 'isActive'],
+              angels: ['name', 'location', 'checkSizeMin', 'checkSizeMax', 'isActive'],
+              grants: ['name', 'provider', 'amountMin', 'amountMax', 'isActive'],
+              lawyers: ['name', 'firm', 'location', 'isActive'],
+            };
+            const cols = colMap[resourceSubTab];
+
+            const handleDelete = (id: number) => {
+              if (!confirm('Permanently delete this entry? This cannot be undone.')) return;
+              if (resourceSubTab === 'vcs') deleteVCMutation.mutate({ id });
+              else if (resourceSubTab === 'angels') deleteAngelMutation.mutate({ id });
+              else if (resourceSubTab === 'grants') deleteGrantMutation.mutate({ id });
+              else if (resourceSubTab === 'lawyers') deleteLawyerMutation.mutate({ id });
+            };
+
+            const handleEdit = (item: Record<string, unknown>) => {
+              setEditDraft({ ...item });
+              setEditingResource({ type: resourceSubTab === 'vcs' ? 'vc' : resourceSubTab === 'angels' ? 'angel' : resourceSubTab === 'grants' ? 'grant' : 'lawyer', item });
+            };
+
+            if (!items || items.length === 0) return (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <Database className="w-10 h-10 text-muted-foreground opacity-30 mb-3" />
+                <p className="text-sm font-medium text-foreground mb-1">No entries yet</p>
+                <p className="text-xs text-muted-foreground">Add entries via the resource directory tools</p>
+              </div>
+            );
+
+            return (
+              <div className="rounded-xl border border-border overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-border bg-secondary/30">
+                        <th className="text-left px-4 py-2.5 font-semibold text-muted-foreground">#</th>
+                        {cols.map(c => (
+                          <th key={c} className="text-left px-4 py-2.5 font-semibold text-muted-foreground capitalize">
+                            {c.replace(/([A-Z])/g, ' $1').replace(/([Mm]in|[Mm]ax)/, ' $1')}
+                          </th>
+                        ))}
+                        <th className="text-right px-4 py-2.5 font-semibold text-muted-foreground">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {items.map((item) => (
+                        <tr key={item.id as number} className="hover:bg-secondary/20 transition-colors">
+                          <td className="px-4 py-3 text-muted-foreground font-mono">#{item.id as number}</td>
+                          {cols.map(c => (
+                            <td key={c} className="px-4 py-3 max-w-[200px]">
+                              {c === 'isActive' ? (
+                                <span className={`px-2 py-0.5 rounded-full font-semibold ${
+                                  item[c] ? 'bg-emerald-100 text-emerald-700' : 'bg-secondary text-muted-foreground'
+                                }`}>{item[c] ? 'Active' : 'Inactive'}</span>
+                              ) : c === 'website' && item[c] ? (
+                                <a href={item[c] as string} target="_blank" rel="noreferrer"
+                                  className="text-indigo-600 hover:underline truncate block max-w-[150px]">
+                                  {(item[c] as string).replace(/^https?:\/\//, '')}
+                                </a>
+                              ) : c.includes('Min') || c.includes('Max') ? (
+                                <span className="font-mono">{item[c] != null ? `$${Number(item[c]).toLocaleString()}` : '—'}</span>
+                              ) : (
+                                <span className="truncate block max-w-[180px]" title={String(item[c] ?? '')}>
+                                  {String(item[c] ?? '—')}
+                                </span>
+                              )}
+                            </td>
+                          ))}
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-1.5 justify-end">
+                              <button onClick={() => handleEdit(item)}
+                                className="p-1.5 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+                                title="Edit">
+                                <FileText className="w-3.5 h-3.5" />
+                              </button>
+                              <button onClick={() => handleDelete(item.id as number)}
+                                className="p-1.5 rounded-lg hover:bg-red-50 transition-colors text-muted-foreground hover:text-red-600"
+                                title="Delete permanently">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="px-4 py-2.5 border-t border-border bg-secondary/10">
+                  <p className="text-xs text-muted-foreground">{items.length} entries in {resourceSubTab === 'vcs' ? 'VC Firms' : resourceSubTab === 'angels' ? 'Angel Investors' : resourceSubTab === 'grants' ? 'Grants & Programs' : 'Venture Lawyers'}</p>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 

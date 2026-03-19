@@ -18,6 +18,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   captable: '#0EA5E9',
   legal: '#8B5CF6',
   duediligence: '#EC4899',
+  metrics: '#059669',
+  mena: '#B45309',
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -30,6 +32,8 @@ const CATEGORY_LABELS: Record<string, string> = {
   captable: 'Cap Table',
   legal: 'Legal',
   duediligence: 'Due Diligence',
+  metrics: 'Metrics & KPIs',
+  mena: 'MENA-Specific',
 };
 
 function TermCard({ term, index }: { term: TermDefinition; index: number }) {
@@ -60,8 +64,15 @@ function TermCard({ term, index }: { term: TermDefinition; index: number }) {
                 </span>
               )}
             </div>
-            <div className="text-sm font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-              {term.term}
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-sm font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                {term.term}
+              </span>
+              {term.arabicTerm && (
+                <span className="text-xs text-muted-foreground" dir="rtl" style={{ fontFamily: 'sans-serif' }}>
+                  {term.arabicTerm}
+                </span>
+              )}
             </div>
             <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{term.plain}</div>
           </div>

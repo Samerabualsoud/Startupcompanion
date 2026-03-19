@@ -195,4 +195,116 @@ export const adminRouter = router({
       });
       return { success: true };
     }),
+
+  // ── Resource Database CRUD ────────────────────────────────────────────────
+  getResourceDatabase: adminProcedure.query(async () => {
+    const [vcs, angels, grantsList, lawyers] = await Promise.all([
+      db.adminGetAllVcFirms(),
+      db.adminGetAllAngelInvestors(),
+      db.adminGetAllGrants(),
+      db.adminGetAllVentureLawyers(),
+    ]);
+    return { vcs, angels, grants: grantsList, lawyers };
+  }),
+
+  deleteVC: adminProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      await db.adminDeleteVcFirm(input.id);
+      await db.addAuditLog({ adminId: ctx.user.id, adminEmail: ctx.user.email, action: 'delete_vc', targetType: 'vc_firm', targetId: input.id });
+      return { success: true };
+    }),
+
+  deleteAngel: adminProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      await db.adminDeleteAngelInvestor(input.id);
+      await db.addAuditLog({ adminId: ctx.user.id, adminEmail: ctx.user.email, action: 'delete_angel', targetType: 'angel_investor', targetId: input.id });
+      return { success: true };
+    }),
+
+  deleteGrant: adminProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      await db.adminDeleteGrant(input.id);
+      await db.addAuditLog({ adminId: ctx.user.id, adminEmail: ctx.user.email, action: 'delete_grant', targetType: 'grant', targetId: input.id });
+      return { success: true };
+    }),
+
+  deleteLawyer: adminProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      await db.adminDeleteVentureLawyer(input.id);
+      await db.addAuditLog({ adminId: ctx.user.id, adminEmail: ctx.user.email, action: 'delete_lawyer', targetType: 'venture_lawyer', targetId: input.id });
+      return { success: true };
+    }),
+
+  updateVC: adminProcedure
+    .input(z.object({
+      id: z.number().int().positive(),
+      name: z.string().min(1).max(256).optional(),
+      description: z.string().optional().nullable(),
+      website: z.string().optional().nullable(),
+      hqCity: z.string().optional().nullable(),
+      hqCountry: z.string().optional().nullable(),
+      checkSizeMin: z.number().optional().nullable(),
+      checkSizeMax: z.number().optional().nullable(),
+      isActive: z.boolean().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
+      await db.adminUpdateVcFirm(id, data);
+      await db.addAuditLog({ adminId: ctx.user.id, adminEmail: ctx.user.email, action: 'update_vc', targetType: 'vc_firm', targetId: id, details: data });
+      return { success: true };
+    }),
+
+  updateAngel: adminProcedure
+    .input(z.object({
+      id: z.number().int().positive(),
+      name: z.string().min(1).max(256).optional(),
+      bio: z.string().optional().nullable(),
+      location: z.string().optional().nullable(),
+      checkSizeMin: z.number().optional().nullable(),
+      checkSizeMax: z.number().optional().nullable(),
+      isActive: z.boolean().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
+      await db.adminUpdateAngelInvestor(id, data);
+      await db.addAuditLog({ adminId: ctx.user.id, adminEmail: ctx.user.email, action: 'update_angel', targetType: 'angel_investor', targetId: id, details: data });
+      return { success: true };
+    }),
+
+  updateGrant: adminProcedure
+    .input(z.object({
+      id: z.number().int().positive(),
+      name: z.string().min(1).max(256).optional(),
+      provider: z.string().optional(),
+      description: z.string().optional().nullable(),
+      amountMin: z.number().optional().nullable(),
+      amountMax: z.number().optional().nullable(),
+      isActive: z.boolean().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
+      await db.adminUpdateGrant(id, data);
+      await db.addAuditLog({ adminId: ctx.user.id, adminEmail: ctx.user.email, action: 'update_grant', targetType: 'grant', targetId: id, details: data });
+      return { success: true };
+    }),
+
+  updateLawyer: adminProcedure
+    .input(z.object({
+      id: z.number().int().positive(),
+      name: z.string().min(1).max(256).optional(),
+      firm: z.string().optional().nullable(),
+      bio: z.string().optional().nullable(),
+      location: z.string().optional().nullable(),
+      isActive: z.boolean().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
+      await db.adminUpdateVentureLawyer(id, data);
+      await db.addAuditLog({ adminId: ctx.user.id, adminEmail: ctx.user.email, action: 'update_lawyer', targetType: 'venture_lawyer', targetId: id, details: data });
+      return { success: true };
+    }),
 });
