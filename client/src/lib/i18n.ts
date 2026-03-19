@@ -235,7 +235,7 @@ export const translations = {
     navSAFENote: 'SAFE & Convertible Note',
     navNDA: 'Non-Disclosure Agreement',
     navESOP: 'ESOP & Option Pool',
-    navStartupDir: 'Startup Marketplace',
+    navStartupDir: 'Startup Directory',
     navValuationTimeline: 'Valuation History & 409A',
     navGroupLegal: 'Legal & Compliance',
     navTermSheetBuilder: 'Term Sheet Architect',

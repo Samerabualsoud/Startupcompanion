@@ -118,7 +118,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'term-sheet-builder', tier: 'enterprise', label: 'Term Sheet Architect',     shortLabel: 'Glossary',     navKey: 'navTermSheetBuilder', icon: FileText,   group: 'Legal & Compliance', newUntil: '2026-04-01' },
   // ESOP moved to My Startup group above
   // Community
-  { id: 'startup-directory', tier: 'free', label: 'Startup Marketplace',       shortLabel: 'Directory',      navKey: 'navStartupDir',     icon: Globe,       group: 'Investor Network',           newUntil: '2026-04-01' },
+  { id: 'startup-directory', tier: 'free', label: 'Startup Directory',       shortLabel: 'Directory',      navKey: 'navStartupDir',     icon: Globe,       group: 'Investor Network',           newUntil: '2026-04-01' },
   { id: 'valuation-timeline', tier: 'pro',label: 'Valuation History & 409A',shortLabel: '409A History',   navKey: 'navValuationTimeline', icon: BarChart3, group: 'My Company',         newUntil: '2026-04-01' },
   // Equity & Cap Table
   { id: 'esop', tier: 'pro',              label: 'ESOP & Option Pool Manager',      shortLabel: 'ESOP',           navKey: 'navESOP',           icon: Users2,      group: 'My Company',         newUntil: '2026-04-01' },
