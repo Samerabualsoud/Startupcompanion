@@ -177,7 +177,17 @@ function HomeInner() {
   const [, navigate] = useLocation();
   const { t, isRTL } = useLanguage();
 
-  const [activeTool, setActiveTool] = useState<ToolId>('dashboard');
+  // Persist active tool in URL hash so refresh keeps the same tab
+  const getToolFromHash = (): ToolId => {
+    const hash = window.location.hash.replace('#', '') as ToolId;
+    const validIds: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator'];
+    return validIds.includes(hash) ? hash : 'dashboard';
+  };
+  const [activeTool, setActiveToolState] = useState<ToolId>(getToolFromHash);
+  const setActiveTool = (id: ToolId) => {
+    setActiveToolState(id);
+    window.location.hash = id;
+  };
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatAnswers, setChatAnswers] = useState<Record<string, any> | null>(null);
   const [chatComplete, setChatComplete] = useState(false);
