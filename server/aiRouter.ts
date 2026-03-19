@@ -564,13 +564,42 @@ Return JSON with exactly this structure:
           sector: z.string().optional().default(""),
           stage: z.string().optional().default(""),
           country: z.string().optional().default(""),
+          problem: z.string().optional().default(""),
+          solution: z.string().optional().default(""),
+          businessModel: z.string().optional().default(""),
+          mrr: z.number().optional(),
+          currentARR: z.number().optional(),
+          monthlyBurnRate: z.number().optional(),
+          numberOfCustomers: z.number().optional(),
+          teamSize: z.number().optional(),
+          targetRaise: z.number().optional(),
+          runwayMonths: z.number().optional(),
+          grossMargin: z.number().optional(),
+          revenueGrowthRate: z.number().optional(),
         }).optional(),
         language: z.enum(['english', 'arabic']).default('english'),
       })
     )
     .mutation(async ({ input }) => {
-      const contextStr = input.startupContext
-        ? `\nStartup context: ${JSON.stringify(input.startupContext)}`
+      const ctx = input.startupContext;
+      const contextStr = ctx
+        ? `\n\nFOUNDER'S STARTUP PROFILE (use this to give highly personalized advice — always reference specific numbers and facts from this profile):
+- Company: ${ctx.name || 'Not specified'}
+- Sector: ${ctx.sector || 'Not specified'}
+- Stage: ${ctx.stage || 'Not specified'}
+- Country: ${ctx.country || 'Not specified'}
+- Problem being solved: ${ctx.problem || 'Not specified'}
+- Solution: ${ctx.solution || 'Not specified'}
+- Business model: ${ctx.businessModel || 'Not specified'}
+- MRR: ${ctx.mrr ? `$${ctx.mrr.toLocaleString()}` : 'Not specified'}
+- ARR: ${ctx.currentARR ? `$${ctx.currentARR.toLocaleString()}` : 'Not specified'}
+- Monthly burn rate: ${ctx.monthlyBurnRate ? `$${ctx.monthlyBurnRate.toLocaleString()}` : 'Not specified'}
+- Customers: ${ctx.numberOfCustomers ?? 'Not specified'}
+- Team size: ${ctx.teamSize ?? 'Not specified'}
+- Fundraising target: ${ctx.targetRaise ? `$${ctx.targetRaise.toLocaleString()}` : 'Not specified'}
+- Runway: ${ctx.runwayMonths ? `${ctx.runwayMonths} months` : 'Not specified'}
+- Gross margin: ${ctx.grossMargin ? `${ctx.grossMargin}%` : 'Not specified'}
+- Revenue growth rate: ${ctx.revenueGrowthRate ? `${ctx.revenueGrowthRate}% MoM` : 'Not specified'}`
         : "";
       const langNote = input.language === 'arabic'
         ? '\nIMPORTANT: Respond entirely in Arabic (العربية).'

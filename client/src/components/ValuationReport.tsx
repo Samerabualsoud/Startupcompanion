@@ -454,9 +454,39 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
               </div>
             </div>
 
-            {/* Disclaimer */}
-            <div className="p-3 rounded-md bg-secondary/60 text-[10px] text-muted-foreground leading-relaxed">
-              {isRTL ? <><strong>تنبيه:</strong> هذا التقييم لأغراض التخطيط والتعليم فقط. تعتمد التقييمات الفعلية على مفاوضات المستثمرين وظروف السوق والعناية الواجبة. استشر مستشاراً مالياً مؤهلاً قبل اتخاذ قرارات الاستثمار.</> : <><strong>Disclaimer:</strong> This valuation is for planning and educational purposes only. Actual valuations depend on investor negotiations, market conditions, and due diligence. Consult a qualified financial advisor before making investment decisions.</>}
+            {/* MENA Benchmark Context & Disclaimer */}
+            <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 overflow-hidden">
+              <div className="px-4 py-2.5 border-b border-amber-200 dark:border-amber-800 flex items-center gap-2">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                <span className="text-xs font-semibold text-amber-800 dark:text-amber-400">{isRTL ? 'السياق والمعايير المرجعية' : 'Context & Market Benchmarks'}</span>
+              </div>
+              <div className="p-4 space-y-3 text-[11px] text-amber-900 dark:text-amber-300 leading-relaxed">
+                {isRTL ? (
+                  <>
+                    <p><strong>هذا تقييم ما قبل الاستثمار (Pre-money).</strong> يمثل قيمة شركتك قبل استلام أي تمويل جديد. التقييم بعد الاستثمار (Post-money) = التقييم قبل الاستثمار + مبلغ التمويل المستلم.</p>
+                    <p><strong>معايير منطقة MENA حسب المرحلة (2024):</strong></p>
+                    <ul className="space-y-1 list-none">
+                      <li>• <strong>ما قبل البذرة:</strong> 00K – M | مضاعف ARR: 5–10x | مضاعف الإيرادات: 3–6x</li>
+                      <li>• <strong>البذرة:</strong> M – M | مضاعف ARR: 8–15x | نمو الإيرادات: 100%+ سنوياً</li>
+                      <li>• <strong>السلسلة A:</strong> 0M – 0M | مضاعف ARR: 10–20x | نمو الإيرادات: 150%+ سنوياً</li>
+                    </ul>
+                    <p><strong>تحذير:</strong> التقييم المرتفع لا يضمن اهتمام المستثمرين. يقيّم المستثمرون جودة الفريق وحجم السوق والنمو والميزة التنافسية — وليس الأرقام فحسب. استخدم هذا كنقطة بداية للتفاوض.</p>
+                    <p className="text-amber-700 dark:text-amber-400"><strong>تنبيه:</strong> هذا التقييم لأغراض التخطيط والتعليم فقط. تعتمد التقييمات الفعلية على مفاوضات المستثمرين وظروف السوق والعناية الواجبة. استشر مستشاراً مالياً مؤهلاً قبل اتخاذ قرارات الاستثمار.</p>
+                  </>
+                ) : (
+                  <>
+                    <p><strong>This is a pre-money valuation.</strong> It represents your company's value before receiving any new investment. Post-money valuation = pre-money valuation + investment amount received.</p>
+                    <p><strong>MENA market benchmarks by stage (2024):</strong></p>
+                    <ul className="space-y-1 list-none">
+                      <li>• <strong>Pre-Seed:</strong> 00K – M | ARR multiple: 5–10x | Revenue multiple: 3–6x</li>
+                      <li>• <strong>Seed:</strong> M – M | ARR multiple: 8–15x | Revenue growth: 100%+ YoY</li>
+                      <li>• <strong>Series A:</strong> 0M – 0M | ARR multiple: 10–20x | Revenue growth: 150%+ YoY</li>
+                    </ul>
+                    <p><strong>Important:</strong> A high valuation does not guarantee investor interest. Investors evaluate team quality, market size, traction, and competitive moat — not just numbers. Use this as a starting point for negotiation, not a final answer.</p>
+                    <p className="text-amber-700 dark:text-amber-400"><strong>Disclaimer:</strong> This valuation is for planning and educational purposes only. Actual valuations depend on investor negotiations, market conditions, and due diligence. Consult a qualified financial advisor before making investment decisions.</p>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Start Over */}

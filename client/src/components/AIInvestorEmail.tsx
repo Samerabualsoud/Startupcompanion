@@ -3,9 +3,10 @@
  * Generates personalized cold outreach emails to investors
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useStartup } from '@/contexts/StartupContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Copy, Check, Loader2, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -40,12 +41,34 @@ function CopyButton({ text }: { text: string }) {
 
 export default function AIInvestorEmail() {
   const { t, lang } = useLanguage();
+  const { snapshot } = useStartup();
   const [form, setForm] = useState({
     startupName: '', founderName: '', sector: '', stage: 'Seed',
     oneLiner: '', traction: '', askAmount: '',
     investorName: '', investorFirm: '', investorFocus: '',
     emailTone: 'conversational' as 'formal' | 'conversational' | 'bold',
   });
+
+  // Auto-populate from startup profile when it loads
+  useEffect(() => {
+    if (snapshot.companyName) {
+      const tractionParts = [
+        snapshot.mrr ? `MRR: $${snapshot.mrr.toLocaleString()}` : '',
+        snapshot.currentARR ? `ARR: $${snapshot.currentARR.toLocaleString()}` : '',
+        snapshot.numberOfCustomers ? `${snapshot.numberOfCustomers} customers` : '',
+        snapshot.monthlyActiveUsers ? `${snapshot.monthlyActiveUsers} MAU` : '',
+      ].filter(Boolean);
+      setForm(prev => ({
+        ...prev,
+        startupName: prev.startupName || snapshot.companyName,
+        sector: prev.sector || snapshot.sector || '',
+        stage: prev.stage !== 'Seed' ? prev.stage : (snapshot.stage || 'Seed'),
+        oneLiner: prev.oneLiner || snapshot.tagline || '',
+        traction: prev.traction || tractionParts.join(', '),
+        askAmount: prev.askAmount || (snapshot.targetRaise ? `$${(snapshot.targetRaise / 1e6).toFixed(1)}M` : ''),
+      }));
+    }
+  }, [snapshot.companyName]);
   const [result, setResult] = useState<EmailResult | null>(null);
   const [showFollowUp, setShowFollowUp] = useState(false);
 

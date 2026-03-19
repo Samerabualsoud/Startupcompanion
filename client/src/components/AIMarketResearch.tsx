@@ -3,7 +3,7 @@
  * Generates comprehensive market research reports using AI
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useStartup } from '@/contexts/StartupContext';
 import { SECTORS, REGIONS } from '@shared/dropdowns';
 
 type ResearchResult = {
@@ -35,6 +36,7 @@ type ResearchResult = {
 
 export default function AIMarketResearch() {
   const { t, lang } = useLanguage();
+  const { snapshot } = useStartup();
   const [form, setForm] = useState({
     companyName: '',
     sector: '',
@@ -42,6 +44,19 @@ export default function AIMarketResearch() {
     productDescription: '',
     geography: '',
   });
+
+  // Auto-populate from startup profile when it loads
+  useEffect(() => {
+    if (snapshot.companyName) {
+      setForm(prev => ({
+        companyName: prev.companyName || snapshot.companyName,
+        sector: prev.sector || snapshot.sector || '',
+        targetMarket: prev.targetMarket || snapshot.targetCustomer || '',
+        productDescription: prev.productDescription || snapshot.solution || snapshot.description || '',
+        geography: prev.geography || snapshot.country || '',
+      }));
+    }
+  }, [snapshot.companyName]);
   const [result, setResult] = useState<ResearchResult | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>('marketSize');
 
