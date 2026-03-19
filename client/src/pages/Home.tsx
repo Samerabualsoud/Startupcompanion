@@ -21,7 +21,7 @@ import { getLoginUrl } from '@/const';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import StartupProfile from './StartupProfile';
-import { StartupProvider } from '@/contexts/StartupContext';
+import { StartupProvider, useStartup } from '@/contexts/StartupContext';
 import { buildInputsFromAnswers } from '@/lib/chatFlow';
 import { runValuation, type StartupInputs, type ValuationSummary } from '@/lib/valuation';
 import { generateFullReport } from '@/lib/fullReport';
@@ -184,6 +184,7 @@ function HomeInner() {
   const [chatKey, setChatKey] = useState(0);
   const [linkCopied, setLinkCopied] = useState(false);
   const { readiness, pitchScore, dilution } = useReport();
+  const { snapshot: startupSnapshot } = useStartup();
 
   // Restore from shared URL on first load
   useEffect(() => {
@@ -473,7 +474,8 @@ function HomeInner() {
           <button
             onClick={() => {
               generateFullReport({
-                companyName: inputs?.companyName || chatAnswers?.companyName || 'My Company',
+                companyName: startupSnapshot?.companyName || inputs?.companyName || chatAnswers?.companyName || 'My Company',
+                profile: startupSnapshot,
                 valuation: inputs && summary ? { inputs, summary } : null,
                 readiness,
                 pitchScore,

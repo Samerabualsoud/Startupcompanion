@@ -687,3 +687,101 @@ export async function getUsersWithStats(limit = 50, offset = 0) {
   if (!db) return [];
   return db.select().from(users).limit(limit).offset(offset);
 }
+
+// ── Admin Resource Database CRUD ──────────────────────────────────────────
+
+export async function adminGetAllVcFirms() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(vcFirms).orderBy(vcFirms.createdAt);
+}
+
+export async function adminDeleteVcFirm(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(vcFirms).where(eq(vcFirms.id, id));
+}
+
+export async function adminUpdateVcFirm(id: number, data: Partial<Omit<typeof vcFirms.$inferInsert, 'id' | 'createdAt'>>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(vcFirms).set(data).where(eq(vcFirms.id, id));
+}
+
+export async function adminCreateVcFirm(data: Omit<typeof vcFirms.$inferInsert, 'id' | 'createdAt'>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(vcFirms).values(data);
+}
+
+export async function adminGetAllAngelInvestors() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(angelInvestors).orderBy(angelInvestors.createdAt);
+}
+
+export async function adminDeleteAngelInvestor(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(angelInvestors).where(eq(angelInvestors.id, id));
+}
+
+export async function adminUpdateAngelInvestor(id: number, data: Partial<Omit<typeof angelInvestors.$inferInsert, 'id' | 'createdAt'>>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(angelInvestors).set(data).where(eq(angelInvestors.id, id));
+}
+
+export async function adminCreateAngelInvestor(data: Omit<typeof angelInvestors.$inferInsert, 'id' | 'createdAt'>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(angelInvestors).values(data);
+}
+
+export async function adminGetAllGrants() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(grants).orderBy(grants.createdAt);
+}
+
+export async function adminDeleteGrant(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(grants).where(eq(grants.id, id));
+}
+
+export async function adminUpdateGrant(id: number, data: Partial<Omit<typeof grants.$inferInsert, 'id' | 'createdAt'>>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(grants).set(data).where(eq(grants.id, id));
+}
+
+export async function adminCreateGrant(data: Omit<typeof grants.$inferInsert, 'id' | 'createdAt'>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(grants).values(data);
+}
+
+export async function adminGetAllVentureLawyers() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(ventureLawyers).orderBy(ventureLawyers.createdAt);
+}
+
+export async function adminDeleteVentureLawyer(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(ventureLawyers).where(eq(ventureLawyers.id, id));
+}
+
+export async function adminUpdateVentureLawyer(id: number, data: Partial<Omit<typeof ventureLawyers.$inferInsert, 'id' | 'createdAt'>>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(ventureLawyers).set(data).where(eq(ventureLawyers.id, id));
+}
+
+export async function adminCreateVentureLawyer(data: Omit<typeof ventureLawyers.$inferInsert, 'id' | 'createdAt'>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(ventureLawyers).values(data);
+}

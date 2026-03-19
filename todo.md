@@ -546,3 +546,22 @@
 - [x] Runway Planner: explain "Cut %" slider, "Monthly Revenue Growth", "Optimised Burn" concept inline
 - [x] 31 tests passing, 0 TypeScript errors
 - [x] Save checkpoint
+
+## Round 39 — Admin Full CRUD for Resource Database
+- [ ] Rename "Investor Database" tab to "Resource Database" in admin panel
+- [ ] Add per-type subtabs: VCs | Angels | Grants | Venture Lawyers (each with own table)
+- [ ] Add delete button per row for every resource type (with confirmation dialog)
+- [ ] Add edit capability per row (inline edit or modal) for all resource types
+- [ ] Add adminRouter procedures: deleteVC, deleteAngel, deleteGrant, deleteLawyer, updateVC, updateAngel, updateGrant, updateLawyer
+- [ ] Add "Add New" button per resource type so admin can create entries directly
+- [ ] 31 tests passing, 0 TypeScript errors
+- [ ] Save checkpoint
+
+## Round 39 — Full Report Fix [DONE]
+- [x] Read fullReport.ts and understand what data it receives and renders
+- [x] Fix incorrect/missing data in the full report: now pulls company name, sector, stage, financials, team from StartupContext (always available)
+- [x] Added "Company Overview" section to report (always renders from profile: problem/solution, financials grid, traction metrics, team members)
+- [x] All sections now show "empty notice" with instructions when data is missing, instead of silently omitting the section
+- [x] Valuation section now includes analyst note and MENA benchmark context inline
+- [x] 31 tests passing, 0 TypeScript errors
+- [x] Save checkpoint
