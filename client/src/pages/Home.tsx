@@ -547,7 +547,7 @@ function HomeInner() {
                     const showNew = isNewFeature(item.newUntil);
                     // Effective badge: 'AI' takes priority, then time-based 'New', then static badge
                     const effectiveBadge = isAI ? 'AI' : showNew ? 'New' : item.badge;
-                    const tierBadge = item.tier === 'pro' ? 'Pro' : item.tier === 'enterprise' ? 'Ent' : null;
+                    // tier field reserved for future monetization — not shown in UI yet
                     return (
                       <button
                         key={item.id}
@@ -561,16 +561,7 @@ function HomeInner() {
                       >
                         <Icon className="w-3.5 h-3.5 shrink-0" />
                         <span className="text-xs font-medium flex-1 truncate">{item.navKey ? t(item.navKey as any) : item.shortLabel}</span>
-                        {/* Tier badge — shown when not active */}
-                        {tierBadge && !isActive && (
-                          <span className={`text-[8px] font-bold px-1 py-0.5 rounded shrink-0 ${
-                            item.tier === 'enterprise'
-                              ? 'bg-amber-100 text-amber-700'
-                              : 'bg-indigo-100 text-indigo-700'
-                          }`}>
-                            {tierBadge}
-                          </span>
-                        )}
+                        {/* Tier badge intentionally hidden — reserved for future monetization */}
                         {effectiveBadge && !isActive && (
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
                             effectiveBadge === 'AI'
@@ -600,21 +591,6 @@ function HomeInner() {
               <HomeIcon className="w-3.5 h-3.5 shrink-0" />
               <span className="text-xs font-medium">{t('backToHome')}</span>
             </button>
-            {/* Tier legend */}
-            <div className="flex items-center justify-center gap-2 flex-wrap">
-              <span className="flex items-center gap-1 text-[8px] font-semibold">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span className="text-muted-foreground">Free</span>
-              </span>
-              <span className="flex items-center gap-1 text-[8px] font-semibold">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                <span className="text-indigo-600">Pro</span>
-              </span>
-              <span className="flex items-center gap-1 text-[8px] font-semibold">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                <span className="text-amber-600">Enterprise</span>
-              </span>
-            </div>
             <div className="text-[9px] text-muted-foreground text-center leading-relaxed">
               Built for early-stage founders.<br />
               All calculations are estimates only.
