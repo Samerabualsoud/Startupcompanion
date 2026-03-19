@@ -389,10 +389,18 @@ export const resourcesRouter = router({
   getPublicStartups: publicProcedure
     .query(async () => {
       try {
-        const startups = await db.getPublicKycStartupProfiles();
-        return startups.map((s: any) => ({
-          id: s.id,
-          companyName: s.companyName,
+        // Pull from both tables:
+        // 1. kyc_startup_profiles: submitted via KYC onboarding flow
+        // 2. startup_profiles: the full detailed profile page (isPublic toggle)
+        const [kycStartups, fullProfiles] = await Promise.all([
+          db.getPublicKycStartupProfiles(),
+          db.getPublicStartupProfiles(),
+        ]);
+
+        // Normalize KYC profiles to a common shape
+        const fromKyc = kycStartups.map((s: any) => ({
+          id: `kyc-${s.id}`,
+          companyName: s.companyName as string,
           tagline: s.tagline || '',
           description: s.description || '',
           website: s.website || '',
@@ -405,8 +413,48 @@ export const resourcesRouter = router({
           linkedinUrl: s.linkedinUrl || '',
           twitterUrl: s.twitterUrl || '',
           isVerified: s.isVerified || false,
+          logoUrl: null as string | null,
+          employeeCount: null as number | null,
+          mrr: null as number | null,
+          numberOfCustomers: null as number | null,
         }));
-      } catch {
+
+        // Normalize full startup profiles to the same shape
+        // Note: startupProfiles uses 'name' (not 'companyName') and 'websiteUrl' (not 'website')
+        const fromFull = fullProfiles.map((s: any) => ({
+          id: `profile-${s.id}`,
+          companyName: s.name as string,
+          tagline: s.tagline || '',
+          description: s.description || '',
+          website: s.websiteUrl || '',
+          sector: s.sector || '',
+          stage: s.stage || '',
+          country: s.country || '',
+          city: s.city || '',
+          teamSize: s.employeeCount || null,
+          targetRaise: s.targetRaise || null,
+          linkedinUrl: s.linkedinUrl || '',
+          twitterUrl: s.twitterUrl || '',
+          isVerified: false,
+          logoUrl: s.logoUrl || null,
+          employeeCount: s.employeeCount || null,
+          mrr: s.mrr || null,
+          numberOfCustomers: s.numberOfCustomers || null,
+        }));
+
+        // Merge: full profiles take priority; deduplicate by company name
+        const seen = new Set<string>();
+        const merged: typeof fromFull = [];
+        for (const p of [...fromFull, ...fromKyc]) {
+          const key = p.companyName.toLowerCase().trim();
+          if (!seen.has(key)) {
+            seen.add(key);
+            merged.push(p);
+          }
+        }
+        return merged;
+      } catch (err) {
+        console.error('[getPublicStartups] Error:', err);
         return [];
       }
     }),

@@ -345,6 +345,13 @@ export async function getPublicKycStartupProfiles() {
   return db.select().from(kycStartupProfiles).where(eq(kycStartupProfiles.isPublic, true));
 }
 
+// Query the full startup_profiles table for public profiles (set via the Startup Profile page)
+export async function getPublicStartupProfiles() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(startupProfiles).where(eq(startupProfiles.isPublic, true));
+}
+
 // ── Password Reset Tokens ──────────────────────────────────────────────────
 
 export async function createPasswordResetToken(userId: number): Promise<string> {

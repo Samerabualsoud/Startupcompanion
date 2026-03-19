@@ -950,5 +950,111 @@ Provide:
       });
       return { analysis: response.choices[0].message.content as string };
     }),
+
+  // ── Executive Summary for Full Report ─────────────────────────────────────
+  generateExecutiveSummary: protectedProcedure
+    .input(
+      z.object({
+        companyName: z.string(),
+        tagline: z.string().optional().default(''),
+        sector: z.string().optional().default(''),
+        stage: z.string().optional().default(''),
+        country: z.string().optional().default(''),
+        foundedYear: z.number().nullable().optional(),
+        problem: z.string().optional().default(''),
+        solution: z.string().optional().default(''),
+        businessModel: z.string().optional().default(''),
+        targetCustomer: z.string().optional().default(''),
+        competitiveAdvantage: z.string().optional().default(''),
+        currentARR: z.number().nullable().optional(),
+        mrr: z.number().nullable().optional(),
+        monthlyBurnRate: z.number().nullable().optional(),
+        cashOnHand: z.number().nullable().optional(),
+        totalRaised: z.number().nullable().optional(),
+        targetRaise: z.number().nullable().optional(),
+        grossMargin: z.number().nullable().optional(),
+        revenueGrowthRate: z.number().nullable().optional(),
+        numberOfCustomers: z.number().nullable().optional(),
+        monthlyActiveUsers: z.number().nullable().optional(),
+        churnRate: z.number().nullable().optional(),
+        ltv: z.number().nullable().optional(),
+        cac: z.number().nullable().optional(),
+        npsScore: z.number().nullable().optional(),
+        employeeCount: z.number().nullable().optional(),
+        latestValuation: z.number().nullable().optional(),
+        readinessScore: z.number().nullable().optional(),
+        pitchScore: z.number().nullable().optional(),
+        runway: z.number().nullable().optional(),
+        language: z.enum(['english', 'arabic']).default('english'),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const langNote = input.language === 'arabic'
+        ? '\nIMPORTANT: Write entirely in Arabic (\u0627\u0644\u0639\u0631\u0628\u064a\u0629). Use professional Arabic business language.'
+        : '';
+
+      const fmt = (v: number | null | undefined, prefix = '$') =>
+        v == null ? 'N/A'
+        : v >= 1_000_000 ? `${prefix}${(v / 1_000_000).toFixed(1)}M`
+        : v >= 1_000 ? `${prefix}${(v / 1_000).toFixed(0)}K`
+        : `${prefix}${v.toLocaleString()}`;
+
+      const metrics = [
+        input.currentARR ? `ARR: ${fmt(input.currentARR)}` : null,
+        input.mrr ? `MRR: ${fmt(input.mrr)}` : null,
+        input.monthlyBurnRate ? `Monthly Burn: ${fmt(input.monthlyBurnRate)}` : null,
+        input.cashOnHand ? `Cash on Hand: ${fmt(input.cashOnHand)}` : null,
+        input.totalRaised ? `Total Raised: ${fmt(input.totalRaised)}` : null,
+        input.grossMargin ? `Gross Margin: ${input.grossMargin.toFixed(1)}%` : null,
+        input.revenueGrowthRate ? `Revenue Growth: ${input.revenueGrowthRate.toFixed(1)}%` : null,
+        input.numberOfCustomers ? `Customers: ${input.numberOfCustomers.toLocaleString()}` : null,
+        input.monthlyActiveUsers ? `MAU: ${input.monthlyActiveUsers.toLocaleString()}` : null,
+        input.churnRate ? `Churn Rate: ${input.churnRate.toFixed(1)}%` : null,
+        input.ltv ? `LTV: ${fmt(input.ltv)}` : null,
+        input.cac ? `CAC: ${fmt(input.cac)}` : null,
+        input.npsScore ? `NPS: ${input.npsScore}` : null,
+        input.employeeCount ? `Team Size: ${input.employeeCount}` : null,
+        input.latestValuation ? `Latest Valuation: ${fmt(input.latestValuation)}` : null,
+        input.runway ? `Runway: ${input.runway} months` : null,
+        input.readinessScore ? `Fundraising Readiness: ${input.readinessScore}/100` : null,
+        input.pitchScore ? `Pitch Score: ${input.pitchScore}/100` : null,
+      ].filter(Boolean).join('\n');
+
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: 'system',
+            content: `You are a senior investment analyst writing executive summaries for startup investor reports. Write in a professional, concise, and compelling tone. Focus on the investment thesis, traction, and opportunity. Do not use bullet points — write in flowing paragraphs.${langNote}`,
+          },
+          {
+            role: 'user',
+            content: `Write a 3-paragraph executive summary for this startup investor report:
+
+Company: ${input.companyName}
+Tagline: ${input.tagline || 'N/A'}
+Sector: ${input.sector || 'N/A'}
+Stage: ${input.stage || 'N/A'}
+Country: ${input.country || 'N/A'}
+Founded: ${input.foundedYear || 'N/A'}
+
+Problem: ${input.problem || 'N/A'}
+Solution: ${input.solution || 'N/A'}
+Business Model: ${input.businessModel || 'N/A'}
+Target Customer: ${input.targetCustomer || 'N/A'}
+Competitive Advantage: ${input.competitiveAdvantage || 'N/A'}
+
+Key Metrics:
+${metrics || 'Not yet provided'}
+
+Fundraising Target: ${fmt(input.targetRaise)}
+
+Paragraph 1: Company overview — what they do, the problem they solve, and why now.
+Paragraph 2: Traction and business metrics — key numbers, growth, and proof points.
+Paragraph 3: Investment thesis — why this team and opportunity deserve capital, and what the raise will achieve.`,
+          },
+        ],
+      });
+      return { summary: response.choices[0].message.content as string };
+    }),
 });
 

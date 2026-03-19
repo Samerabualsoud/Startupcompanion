@@ -1,6 +1,6 @@
 /**
  * Startup Directory
- * Public-facing directory of verified startups on the platform
+ * Public-facing directory of startups on the platform with isPublic=true
  */
 
 import { useState, useMemo } from 'react';
@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, Search, MapPin, ExternalLink, Linkedin, Twitter, Users, DollarSign } from 'lucide-react';
+import { Building2, Search, MapPin, ExternalLink, Linkedin, Twitter, Users, DollarSign, TrendingUp, ShoppingCart } from 'lucide-react';
 import { SECTORS, STARTUP_STAGES, COUNTRIES } from '@shared/dropdowns';
 
 const STAGE_COLORS: Record<string, string> = {
@@ -28,13 +28,19 @@ function getInitials(name: string): string {
 
 function getAvatarColor(name: string): string {
   const colors = [
-    'oklch(0.45 0.12 30)',
-    'oklch(0.35 0.08 240)',
-    'oklch(0.40 0.10 160)',
-    'oklch(0.38 0.10 280)',
-    'oklch(0.42 0.12 50)',
+    'oklch(0.45 0.18 270)',
+    'oklch(0.40 0.15 200)',
+    'oklch(0.42 0.16 160)',
+    'oklch(0.38 0.14 30)',
+    'oklch(0.43 0.17 310)',
   ];
   return colors[name.charCodeAt(0) % colors.length];
+}
+
+function fmtMoney(v: number): string {
+  if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`;
+  if (v >= 1_000) return `$${(v / 1_000).toFixed(0)}K`;
+  return `$${v.toLocaleString()}`;
 }
 
 export default function StartupDirectory() {
@@ -85,7 +91,8 @@ export default function StartupDirectory() {
           )}
         </div>
         <p className="text-sm text-muted-foreground">
-          Discover MENA startups building on Polaris Arabia — searchable by sector, stage, and country.
+          Discover startups building on Polaris Arabia — searchable by sector, stage, and country.
+          Make your profile public from the <strong>Startup Profile</strong> page to appear here.
         </p>
       </div>
 
@@ -149,7 +156,7 @@ export default function StartupDirectory() {
       {isLoading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-48 rounded-xl bg-muted animate-pulse" />
+            <div key={i} className="h-52 rounded-xl bg-muted animate-pulse" />
           ))}
         </div>
       )}
@@ -158,10 +165,13 @@ export default function StartupDirectory() {
       {!isLoading && filtered.length === 0 && (
         <div className="text-center py-16">
           <Building2 className="w-10 h-10 mx-auto mb-3 text-muted-foreground opacity-40" />
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm font-medium text-foreground mb-1">
+            {hasFilters ? 'No startups match your filters' : 'No public startups yet'}
+          </p>
+          <p className="text-xs text-muted-foreground max-w-xs mx-auto">
             {hasFilters
-              ? 'No startups match your filters. Try adjusting your search.'
-              : 'No startups in the directory yet. Be the first to add yours via the KYC onboarding!'}
+              ? 'Try adjusting your search or clearing filters.'
+              : 'Go to Startup Profile → toggle "Public" → save your profile to appear here.'}
           </p>
         </div>
       )}
@@ -174,12 +184,20 @@ export default function StartupDirectory() {
               <CardContent className="p-5">
                 {/* Logo / Avatar + Name */}
                 <div className="flex items-start gap-3 mb-3">
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-sm font-bold shrink-0"
-                    style={{ background: getAvatarColor(startup.companyName) }}
-                  >
-                    {getInitials(startup.companyName)}
-                  </div>
+                  {startup.logoUrl ? (
+                    <img
+                      src={startup.logoUrl}
+                      alt={startup.companyName}
+                      className="w-10 h-10 rounded-lg object-cover shrink-0 border border-border"
+                    />
+                  ) : (
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-sm font-bold shrink-0"
+                      style={{ background: getAvatarColor(startup.companyName) }}
+                    >
+                      {getInitials(startup.companyName)}
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-foreground text-sm truncate">{startup.companyName}</div>
                     {startup.tagline && (
@@ -213,23 +231,35 @@ export default function StartupDirectory() {
                 </div>
 
                 {/* Meta */}
-                <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mb-3">
                   {startup.country && (
                     <div className="flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
                       <span>{startup.city ? `${startup.city}, ` : ''}{startup.country}</span>
                     </div>
                   )}
-                  {startup.teamSize && (
+                  {(startup.teamSize || startup.employeeCount) && (
                     <div className="flex items-center gap-1">
                       <Users className="w-3 h-3" />
-                      <span>{startup.teamSize} people</span>
+                      <span>{startup.teamSize || startup.employeeCount} people</span>
+                    </div>
+                  )}
+                  {startup.mrr && (
+                    <div className="flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3 text-green-500" />
+                      <span className="text-green-600 font-medium">{fmtMoney(startup.mrr)}/mo</span>
+                    </div>
+                  )}
+                  {startup.numberOfCustomers && (
+                    <div className="flex items-center gap-1">
+                      <ShoppingCart className="w-3 h-3" />
+                      <span>{startup.numberOfCustomers.toLocaleString()} customers</span>
                     </div>
                   )}
                   {startup.targetRaise && (
                     <div className="flex items-center gap-1">
                       <DollarSign className="w-3 h-3" />
-                      <span>Raising {startup.targetRaise >= 1_000_000 ? `$${(startup.targetRaise / 1_000_000).toFixed(1)}M` : `$${(startup.targetRaise / 1_000).toFixed(0)}K`}</span>
+                      <span>Raising {fmtMoney(startup.targetRaise)}</span>
                     </div>
                   )}
                 </div>

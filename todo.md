@@ -437,3 +437,20 @@
 - [x] Updated FounderDashboard workspace completion % to include new profile fields
 - [x] 31 tests passing, 0 TypeScript errors
 - [x] Save checkpoint and push to GitHub
+
+## Round 31 — Comprehensive Full Report
+- [ ] Add AI executive summary tRPC procedure to aiRouter.ts (takes all startup data, returns 3-paragraph summary)
+- [ ] Rebuild fullReport.ts: 10+ sections (Cover, Executive Summary, Startup Profile, Problem & Solution, Business Model, Financial Metrics, Traction, Valuation, COGS, ESOP, Sales, Team, Milestones, Fundraising Readiness, Pitch Deck Score, Dilution, Appendix)
+- [ ] Wire Full Report button in Home.tsx: pass StartupContext snapshot + all tool data
+- [ ] Add loading state to Full Report button (AI generation takes time)
+- [ ] 0 TypeScript errors, tests passing
+- [ ] Save checkpoint
+
+## Round 31 Completed Items
+- [x] Fix startup directory to show profiles with isPublic=true from startup_profiles table
+- [x] Add getPublicStartupProfiles() db function querying startup_profiles table
+- [x] Update getPublicStartups procedure to merge both kyc_startup_profiles and startup_profiles
+- [x] Deduplicate by company name (full profiles take priority over KYC profiles)
+- [x] Update StartupDirectory UI to show logo, MRR, customer count, employee count
+- [x] Update empty state message to guide users to toggle Public in Startup Profile
+- [x] Update description to mention making profile public from Startup Profile page
