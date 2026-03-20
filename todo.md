@@ -596,3 +596,16 @@
 - [x] Wire both new tools to sidebar nav (Legal & Compliance + Equity & Ownership groups)
 - [x] Add search to Term Sheet Glossary (already existed — confirmed working)
 - [x] 31 tests passing, 0 TypeScript errors
+
+## Round 27 — Unified Equity Engine
+- [ ] Audit all equity-related components: ZestEquity, CoFounderEquitySplit, AdvancedDilutionSimulator, OQALNotes, CapTableManager
+- [ ] Design unified equity DB schema: cap_table_shareholders, cap_table_instruments (SAFE/OQAL/convertible), esop_pools
+- [ ] Build shared equity calculation engine (shared/equityEngine.ts): share counts, ESOP %, dilution, note conversion
+- [ ] Build equityRouter tRPC procedures: get/upsert shareholders, instruments, ESOP pool
+- [ ] Rebuild ZestEquity to use unified model as source of truth
+- [ ] Wire CoFounderEquitySplit to read/write to cap_table_shareholders
+- [ ] Wire AdvancedDilutionSimulator to read from cap_table_shareholders + instruments
+- [ ] Wire OQALNotes to read/write to cap_table_instruments
+- [ ] Update dashboard to show live cap table summary (total shares, ESOP %, top shareholders)
+- [ ] 0 TypeScript errors
+- [ ] Save checkpoint

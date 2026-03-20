@@ -1,15 +1,18 @@
 /**
  * CoFounderEquitySplit — Equity split calculator based on 7 best-practice factors
- * Redesigned: clearer wording, improved visual hierarchy, enhanced factor sliders
+ * Connected to the unified cap table (ZestEquity) as source of truth.
+ * Reads founders from cap table, writes recommended shares back.
  */
-
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Users, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, Users, Info, ChevronDown, ChevronUp, Link2, RefreshCw } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToolState } from '@/hooks/useToolState';
+import { useCapTable } from '@/hooks/useCapTable';
+import type { CapTableShareholder } from '@shared/equity';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface FounderFactors {
   ideaOrigin: number;       // 0-10
@@ -21,14 +24,11 @@ interface FounderFactors {
   riskTolerance: number;    // 0-10
 }
 
-interface Founder {
-  id: string;
-  name: string;
-  role: string;
-  factors: FounderFactors;
-}
+// Per-founder local factor scores (stored in component state, not DB)
+// The actual shares are stored in the cap table
+type FactorKey = keyof FounderFactors;
 
-const FACTOR_WEIGHTS = {
+const FACTOR_WEIGHTS: Record<FactorKey, number> = {
   ideaOrigin: 0.10,
   commitment: 0.25,
   domainExpertise: 0.15,
@@ -37,8 +37,6 @@ const FACTOR_WEIGHTS = {
   priorExits: 0.10,
   riskTolerance: 0.05,
 };
-
-type FactorKey = keyof FounderFactors;
 
 interface FactorConfig {
   label: string;
@@ -53,111 +51,62 @@ interface FactorConfig {
 
 const FACTOR_CONFIG: Record<FactorKey, FactorConfig> = {
   ideaOrigin: {
-    label: 'Idea Origin',
-    labelAr: 'أصل الفكرة',
-    weight: '10%',
-    desc: 'Who conceived the core business idea?',
-    descAr: 'من صاحب الفكرة الأصلية للمشروع؟',
-    low: 'Joined later',
-    mid: 'Co-developed',
-    high: 'Sole originator',
+    label: 'Idea Origin', labelAr: 'أصل الفكرة', weight: '10%',
+    desc: 'Who conceived the core business idea?', descAr: 'من صاحب الفكرة الأصلية للمشروع؟',
+    low: 'Joined later', mid: 'Co-developed', high: 'Sole originator',
   },
   commitment: {
-    label: 'Full-Time Commitment',
-    labelAr: 'الالتزام بالدوام الكامل',
-    weight: '25%',
-    desc: 'How committed is this founder to the company?',
-    descAr: 'ما مدى التزام هذا المؤسس بالشركة؟',
-    low: 'Advisory only',
-    mid: 'Transitioning',
-    high: 'Full-time, day 1',
+    label: 'Full-Time Commitment', labelAr: 'الالتزام بالدوام الكامل', weight: '25%',
+    desc: 'How committed is this founder to the company?', descAr: 'ما مدى التزام هذا المؤسس بالشركة؟',
+    low: 'Advisory only', mid: 'Transitioning', high: 'Full-time, day 1',
   },
   domainExpertise: {
-    label: 'Domain Expertise',
-    labelAr: 'الخبرة في المجال',
-    weight: '15%',
-    desc: 'Relevant industry knowledge and experience.',
-    descAr: 'المعرفة والخبرة في هذا القطاع تحديداً.',
-    low: 'No experience',
-    mid: 'Adjacent field',
-    high: '10+ years in space',
+    label: 'Domain Expertise', labelAr: 'الخبرة في المجال', weight: '15%',
+    desc: 'Relevant industry knowledge and experience.', descAr: 'المعرفة والخبرة في هذا القطاع تحديداً.',
+    low: 'No experience', mid: 'Adjacent field', high: '10+ years in space',
   },
   technicalContrib: {
-    label: 'Technical / Product Contribution',
-    labelAr: 'المساهمة التقنية / المنتج',
-    weight: '20%',
-    desc: 'Building the core product or technology.',
-    descAr: 'بناء المنتج الأساسي أو التقنية.',
-    low: 'Non-technical',
-    mid: 'Partial build',
-    high: 'Core builder',
+    label: 'Technical / Product Contribution', labelAr: 'المساهمة التقنية / المنتج', weight: '20%',
+    desc: 'Building the core product or technology.', descAr: 'بناء المنتج الأساسي أو التقنية.',
+    low: 'Non-technical', mid: 'Partial build', high: 'Core builder',
   },
   networkSales: {
-    label: 'Network & Sales Value',
-    labelAr: 'قيمة الشبكة والمبيعات',
-    weight: '15%',
-    desc: 'Access to key customers, investors, or partners.',
-    descAr: 'الوصول إلى عملاء أو مستثمرين أو شركاء رئيسيين.',
-    low: 'No network',
-    mid: 'Moderate reach',
-    high: 'Direct access',
+    label: 'Network & Sales Value', labelAr: 'قيمة الشبكة والمبيعات', weight: '15%',
+    desc: 'Access to key customers, investors, or partners.', descAr: 'الوصول إلى عملاء أو مستثمرين أو شركاء رئيسيين.',
+    low: 'No network', mid: 'Moderate reach', high: 'Direct access',
   },
   priorExits: {
-    label: 'Startup Experience & Exits',
-    labelAr: 'خبرة الشركات الناشئة والخروج',
-    weight: '10%',
-    desc: 'Previous startup experience and successful exits.',
-    descAr: 'خبرة سابقة في الشركات الناشئة وعمليات الخروج.',
-    low: 'First startup',
-    mid: 'One exit / senior role',
-    high: 'Multiple exits',
+    label: 'Startup Experience & Exits', labelAr: 'خبرة الشركات الناشئة والخروج', weight: '10%',
+    desc: 'Previous startup experience and successful exits.', descAr: 'خبرة سابقة في الشركات الناشئة وعمليات الخروج.',
+    low: 'First startup', mid: 'One exit / senior role', high: 'Multiple exits',
   },
   riskTolerance: {
-    label: 'Financial Risk Taken',
-    labelAr: 'المخاطرة المالية',
-    weight: '5%',
-    desc: 'Personal financial sacrifice made for the company.',
-    descAr: 'التضحية المالية الشخصية من أجل الشركة.',
-    low: 'No financial risk',
-    mid: 'Moderate sacrifice',
-    high: 'Quit job + savings',
+    label: 'Financial Risk Taken', labelAr: 'المخاطرة المالية', weight: '5%',
+    desc: 'Personal financial sacrifice made for the company.', descAr: 'التضحية المالية الشخصية من أجل الشركة.',
+    low: 'No financial risk', mid: 'Moderate sacrifice', high: 'Quit job + savings',
   },
 };
 
 const FOUNDER_COLORS = [
-  { main: '#6366F1', bg: '#EEF2FF', border: '#C7D2FE' },  // indigo
-  { main: '#8B5CF6', bg: '#F5F3FF', border: '#DDD6FE' },  // violet
-  { main: '#EC4899', bg: '#FDF2F8', border: '#FBCFE8' },  // pink
-  { main: '#10B981', bg: '#ECFDF5', border: '#A7F3D0' },  // emerald
-  { main: '#F59E0B', bg: '#FFFBEB', border: '#FDE68A' },  // amber
-  { main: '#3B82F6', bg: '#EFF6FF', border: '#BFDBFE' },  // blue
+  { main: '#6366F1', bg: '#EEF2FF', border: '#C7D2FE' },
+  { main: '#8B5CF6', bg: '#F5F3FF', border: '#DDD6FE' },
+  { main: '#EC4899', bg: '#FDF2F8', border: '#FBCFE8' },
+  { main: '#10B981', bg: '#ECFDF5', border: '#A7F3D0' },
+  { main: '#F59E0B', bg: '#FFFBEB', border: '#FDE68A' },
+  { main: '#3B82F6', bg: '#EFF6FF', border: '#BFDBFE' },
 ];
 
-const DEFAULT_FOUNDERS: Founder[] = [
-  {
-    id: nanoid(),
-    name: 'Founder 1',
-    role: 'CEO / Product',
-    factors: { ideaOrigin: 8, commitment: 10, domainExpertise: 7, technicalContrib: 5, networkSales: 7, priorExits: 5, riskTolerance: 8 },
-  },
-  {
-    id: nanoid(),
-    name: 'Founder 2',
-    role: 'CTO / Engineering',
-    factors: { ideaOrigin: 5, commitment: 10, domainExpertise: 8, technicalContrib: 10, networkSales: 4, priorExits: 3, riskTolerance: 7 },
-  },
-];
+const DEFAULT_FACTORS: FounderFactors = {
+  ideaOrigin: 5, commitment: 8, domainExpertise: 5,
+  technicalContrib: 5, networkSales: 5, priorExits: 3, riskTolerance: 5,
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function calcWeightedScore(factors: FounderFactors): number {
   return Object.entries(FACTOR_WEIGHTS).reduce((sum, [key, weight]) => {
     return sum + (factors[key as FactorKey] * weight);
   }, 0);
-}
-
-function calcSplits(founders: Founder[]): { id: string; name: string; score: number; pct: number }[] {
-  const scores = founders.map(f => ({ id: f.id, name: f.name, score: calcWeightedScore(f.factors) }));
-  const total = scores.reduce((s, f) => s + f.score, 0);
-  return scores.map(f => ({ ...f, pct: total > 0 ? Math.round((f.score / total) * 1000) / 10 : 0 }));
 }
 
 function getScoreLabel(value: number, cfg: FactorConfig): string {
@@ -166,28 +115,20 @@ function getScoreLabel(value: number, cfg: FactorConfig): string {
   return cfg.high;
 }
 
+// ─── Factor Slider ────────────────────────────────────────────────────────────
+
 function FactorSlider({
-  factorKey,
-  value,
-  onChange,
-  isRTL,
-}: {
-  factorKey: FactorKey;
-  value: number;
-  onChange: (v: number) => void;
-  isRTL: boolean;
-}) {
+  factorKey, value, onChange, isRTL,
+}: { factorKey: FactorKey; value: number; onChange: (v: number) => void; isRTL: boolean }) {
   const cfg = FACTOR_CONFIG[factorKey];
   const pct = value * 10;
   const color = value >= 7 ? '#10B981' : value >= 4 ? '#F59E0B' : '#EF4444';
-  const bgColor = value >= 7 ? '#ECFDF5' : value >= 4 ? '#FFFBEB' : '#FEF2F2';
   const label = isRTL ? cfg.labelAr : cfg.label;
   const desc = isRTL ? cfg.descAr : cfg.desc;
   const scoreLabel = getScoreLabel(value, cfg);
 
   return (
     <div className="space-y-2">
-      {/* Label row */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <span className="text-xs font-semibold text-foreground truncate">{label}</span>
@@ -199,75 +140,121 @@ function FactorSlider({
               <p className="mt-1 opacity-60">Weight: {cfg.weight}</p>
             </div>
           </div>
-          <span className="text-[9px] text-muted-foreground/50 font-mono shrink-0">{cfg.weight}</span>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span
-            className="text-[10px] font-medium px-1.5 py-0.5 rounded-md"
-            style={{ background: bgColor, color }}
-          >
-            {scoreLabel}
-          </span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-[10px] text-muted-foreground italic">{scoreLabel}</span>
           <span className="text-xs font-bold tabular-nums" style={{ color }}>{value}/10</span>
         </div>
       </div>
-      {/* Slider */}
-      <div className="relative">
-        <input
-          type="range"
-          min={0}
-          max={10}
-          step={1}
-          value={value}
-          onChange={e => onChange(parseInt(e.target.value))}
-          className="w-full h-2 rounded-full appearance-none cursor-pointer focus:outline-none"
-          style={{
-            background: `linear-gradient(to right, ${color} ${pct}%, hsl(var(--muted)) ${pct}%)`,
-          }}
-        />
-        {/* Tick marks */}
-        <div className="flex justify-between mt-0.5 px-0.5">
-          {[0, 2, 4, 6, 8, 10].map(tick => (
-            <div key={tick} className="flex flex-col items-center">
-              <div className={`w-0.5 h-1 rounded-full ${value >= tick ? 'opacity-0' : 'bg-muted-foreground/20'}`} />
-            </div>
-          ))}
-        </div>
+      <div className="relative h-2 rounded-full bg-muted overflow-hidden">
+        <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-200" style={{ width: `${pct}%`, background: color }} />
       </div>
+      <input
+        type="range" min={0} max={10} step={1} value={value}
+        onChange={e => onChange(parseInt(e.target.value))}
+        className="w-full h-1 opacity-0 absolute"
+        style={{ marginTop: -12 }}
+      />
+      <input
+        type="range" min={0} max={10} step={1} value={value}
+        onChange={e => onChange(parseInt(e.target.value))}
+        className="w-full accent-indigo-500"
+      />
     </div>
   );
 }
 
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 export default function CoFounderEquitySplit() {
   const { lang } = useLanguage();
   const isRTL = lang === 'ar';
-  const { state: founders, setState: setFounders } = useToolState<Founder[]>('equity_split', DEFAULT_FOUNDERS);
+  const { state, isLoading, computed, setShareholders } = useCapTable();
   const [showVesting, setShowVesting] = useState(false);
 
-  const splits = useMemo(() => calcSplits(founders), [founders]);
+  // Local factor scores per founder (keyed by founder ID)
+  // These are scoring inputs only — actual shares live in the cap table
+  const [factorMap, setFactorMap] = useState<Record<string, FounderFactors>>({});
 
-  const addFounder = () => {
+  if (isLoading || !state) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  const capState = state!;
+  const founders = capState.shareholders.filter(s => s.type === 'founder');
+  const totalFounderShares = founders.reduce((sum, f) => sum + f.shares, 0);
+  const totalSharesBasic = computed?.totalSharesBasic ?? 0;
+
+  // Get or initialize factor scores for a founder
+  function getFactors(id: string): FounderFactors {
+    return factorMap[id] ?? { ...DEFAULT_FACTORS };
+  }
+
+  // Compute recommended splits from factor scores
+  const splits = useMemo(() => {
+    const scores = founders.map(f => ({
+      id: f.id,
+      name: f.name,
+      score: calcWeightedScore(getFactors(f.id)),
+    }));
+    const total = scores.reduce((s, f) => s + f.score, 0);
+    return scores.map(f => ({
+      ...f,
+      pct: total > 0 ? Math.round((f.score / total) * 1000) / 10 : 0,
+    }));
+  }, [founders, factorMap]);
+
+  function updateFactor(id: string, factor: FactorKey, value: number) {
+    setFactorMap(prev => ({
+      ...prev,
+      [id]: { ...(prev[id] ?? DEFAULT_FACTORS), [factor]: value },
+    }));
+  }
+
+  // Apply recommended split to cap table shares
+  function applyRecommendedSplit() {
+    const totalShares = totalFounderShares > 0 ? totalFounderShares : 9_000_000;
+    const updated = capState.shareholders.map(sh => {
+      if (sh.type !== 'founder') return sh;
+      const split = splits.find(s => s.id === sh.id);
+      if (!split) return sh;
+      return { ...sh, shares: Math.round(totalShares * split.pct / 100) };
+    });
+    setShareholders(updated);
+  }
+
+  // Add a new founder to the cap table
+  function addFounder() {
     if (founders.length >= 6) return;
-    setFounders(prev => [...prev, {
+    const idx = capState.shareholders.length;
+    const COLORS = ['#4F6EF7', '#C4614A', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'];
+    const newHolder: CapTableShareholder = {
       id: nanoid(),
-      name: `Founder ${prev.length + 1}`,
-      role: 'Co-Founder',
-      factors: { ideaOrigin: 5, commitment: 8, domainExpertise: 5, technicalContrib: 5, networkSales: 5, priorExits: 3, riskTolerance: 5 },
-    }]);
-  };
+      name: `Founder ${founders.length + 1}`,
+      type: 'founder',
+      shareClass: 'common',
+      shares: 1_000_000,
+      pricePerShare: 0,
+      vestingMonths: 48,
+      cliffMonths: 12,
+      vestingStartDate: new Date().toISOString().split('T')[0],
+      color: COLORS[founders.length % COLORS.length],
+    };
+    setShareholders([...capState.shareholders, newHolder]);
+  }
 
-  const removeFounder = (id: string) => {
-    if (founders.length <= 2) return;
-    setFounders(prev => prev.filter(f => f.id !== id));
-  };
+  function removeFounder(id: string) {
+    if (founders.length <= 1) return;
+    setShareholders(capState.shareholders.filter(s => s.id !== id));
+  }
 
-  const updateFounder = (id: string, field: keyof Founder, value: any) => {
-    setFounders(prev => prev.map(f => f.id === id ? { ...f, [field]: value } : f));
-  };
-
-  const updateFactor = (id: string, factor: FactorKey, value: number) => {
-    setFounders(prev => prev.map(f => f.id === id ? { ...f, factors: { ...f.factors, [factor]: value } } : f));
-  };
+  function updateFounderName(id: string, name: string) {
+    setShareholders(capState.shareholders.map(s => s.id === id ? { ...s, name } : s));
+  }
 
   const pieData = splits.map((s, i) => ({
     name: founders.find(f => f.id === s.id)?.name || s.name,
@@ -278,23 +265,35 @@ export default function CoFounderEquitySplit() {
   return (
     <div className={`space-y-5 ${isRTL ? 'rtl' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <div>
-        <h2 className="text-xl font-bold text-foreground mb-1">
-          {isRTL ? 'توزيع حصص المؤسسين' : 'Co-Founder Equity Split'}
-        </h2>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          {isRTL
-            ? 'قيّم كل مؤسس عبر 7 عوامل أساسية. تحسب الأداة توزيعاً عادلاً مرجّحاً بناءً على مساهمة كل شخص.'
-            : 'Rate each founder across 7 key factors. The calculator recommends a fair, weighted split based on each person\'s actual contribution.'}
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-bold text-foreground mb-1">
+            {isRTL ? 'توزيع حصص المؤسسين' : 'Co-Founder Equity Split'}
+          </h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {isRTL
+              ? 'قيّم كل مؤسس عبر 7 عوامل أساسية. تحسب الأداة توزيعاً عادلاً مرجّحاً بناءً على مساهمة كل شخص.'
+              : 'Rate each founder across 7 key factors. The calculator recommends a fair, weighted split based on each person\'s actual contribution.'}
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-full shrink-0">
+          <Link2 className="w-3 h-3" />
+          <span>Synced with Cap Table</span>
+        </div>
       </div>
 
       {/* Results Summary */}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="px-4 py-3 border-b border-border bg-muted/20">
+        <div className="px-4 py-3 border-b border-border bg-muted/20 flex items-center justify-between">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
             {isRTL ? 'التوزيع الموصى به' : 'Recommended Split'}
           </h3>
+          <button
+            onClick={applyRecommendedSplit}
+            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+          >
+            Apply to Cap Table
+          </button>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
@@ -304,21 +303,15 @@ export default function CoFounderEquitySplit() {
                 <PieChart>
                   <Pie
                     data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={85}
-                    paddingAngle={3}
-                    dataKey="value"
-                    strokeWidth={2}
-                    stroke="hsl(var(--background))"
+                    cx="50%" cy="50%"
+                    innerRadius={50} outerRadius={85}
+                    paddingAngle={3} dataKey="value"
+                    strokeWidth={2} stroke="hsl(var(--background))"
                   >
-                    {pieData.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
+                    {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                   </Pie>
                   <Tooltip
-                    formatter={(v: any) => [`${v}%`, isRTL ? 'الحصة' : 'Equity']}
+                    formatter={(v: number) => [`${v}%`, isRTL ? 'الحصة' : 'Equity']}
                     contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid hsl(var(--border))' }}
                   />
                 </PieChart>
@@ -330,15 +323,20 @@ export default function CoFounderEquitySplit() {
               {splits.map((s, i) => {
                 const founder = founders.find(f => f.id === s.id);
                 const colors = FOUNDER_COLORS[i % FOUNDER_COLORS.length];
+                const currentSharePct = totalSharesBasic > 0 && founder
+                  ? ((founder.shares / totalSharesBasic) * 100).toFixed(1)
+                  : '0';
                 return (
                   <div key={s.id}>
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: colors.main }} />
                         <span className="text-xs font-semibold text-foreground">{founder?.name}</span>
-                        <span className="text-[10px] text-muted-foreground">{founder?.role}</span>
                       </div>
-                      <span className="text-sm font-bold" style={{ color: colors.main }}>{s.pct}%</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-muted-foreground">Current: {currentSharePct}%</span>
+                        <span className="text-sm font-bold" style={{ color: colors.main }}>→ {s.pct}%</span>
+                      </div>
                     </div>
                     <div className="h-2 rounded-full bg-muted overflow-hidden">
                       <motion.div
@@ -365,8 +363,8 @@ export default function CoFounderEquitySplit() {
             </div>
             <div className="text-xs text-amber-700 leading-relaxed">
               {isRTL
-                ? 'تُظهر الأبحاث أن التوزيع المتساوي (50/50) كثيراً ما يؤدي إلى نزاعات. فارق بسيط (مثل 55/45) مع تعريف واضح للأدوار وجداول استحقاق يُنتج نتائج أفضل. يجب أن تخضع جميع الحصص لـ <strong>جدول استحقاق 4 سنوات مع فترة انتظار سنة</strong>.'
-                : 'Research shows equal splits (50/50) often lead to co-founder conflicts. A slight imbalance (e.g., 55/45) with clear role definitions and vesting schedules tends to produce better outcomes. All splits should be subject to a <strong>4-year vesting schedule with a 1-year cliff</strong>.'}
+                ? 'تُظهر الأبحاث أن التوزيع المتساوي (50/50) كثيراً ما يؤدي إلى نزاعات. فارق بسيط (مثل 55/45) مع تعريف واضح للأدوار وجداول استحقاق يُنتج نتائج أفضل. يجب أن تخضع جميع الحصص لـ جدول استحقاق 4 سنوات مع فترة انتظار سنة.'
+                : 'Research shows equal splits (50/50) often lead to co-founder conflicts. A slight imbalance (e.g., 55/45) with clear role definitions and vesting schedules tends to produce better outcomes. All splits should be subject to a 4-year vesting schedule with a 1-year cliff.'}
             </div>
           </div>
         </div>
@@ -377,6 +375,7 @@ export default function CoFounderEquitySplit() {
         {founders.map((founder, fi) => {
           const colors = FOUNDER_COLORS[fi % FOUNDER_COLORS.length];
           const split = splits.find(s => s.id === founder.id);
+          const factors = getFactors(founder.id);
           return (
             <motion.div
               key={founder.id}
@@ -391,45 +390,33 @@ export default function CoFounderEquitySplit() {
                 style={{ background: colors.bg, borderBottomColor: colors.border }}
               >
                 <div className="flex items-center gap-3">
-                  {/* Avatar */}
                   <div
                     className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm"
                     style={{ background: colors.main }}
                   >
                     {fi + 1}
                   </div>
-                  {/* Name + Role inputs */}
                   <div className="flex flex-col gap-0.5">
                     <input
                       value={founder.name}
-                      onChange={e => updateFounder(founder.id, 'name', e.target.value)}
-                      className="text-sm font-bold bg-transparent border-0 border-b border-dashed focus:outline-none focus:border-current text-foreground w-28"
+                      onChange={e => updateFounderName(founder.id, e.target.value)}
+                      className="text-sm font-bold bg-transparent border-0 border-b border-dashed focus:outline-none focus:border-current text-foreground w-32"
                       style={{ borderColor: `${colors.main}40` }}
                       placeholder="Name"
                     />
-                    <input
-                      value={founder.role}
-                      onChange={e => updateFounder(founder.id, 'role', e.target.value)}
-                      className="text-xs bg-transparent border-0 border-b border-dashed focus:outline-none focus:border-current text-muted-foreground w-32"
-                      style={{ borderColor: `${colors.main}30` }}
-                      placeholder="Role (e.g. CEO)"
-                    />
+                    <div className="text-xs text-muted-foreground">{founder.shares.toLocaleString()} shares</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  {/* Equity badge */}
                   <div className="text-right">
-                    <div
-                      className="text-2xl font-bold leading-none"
-                      style={{ color: colors.main }}
-                    >
+                    <div className="text-2xl font-bold leading-none" style={{ color: colors.main }}>
                       {split?.pct ?? 0}%
                     </div>
                     <div className="text-[9px] text-muted-foreground mt-0.5">
                       {isRTL ? 'الحصة المقترحة' : 'recommended'}
                     </div>
                   </div>
-                  {founders.length > 2 && (
+                  {founders.length > 1 && (
                     <button
                       onClick={() => removeFounder(founder.id)}
                       className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
@@ -450,7 +437,7 @@ export default function CoFounderEquitySplit() {
                     <FactorSlider
                       key={key}
                       factorKey={key}
-                      value={founder.factors[key]}
+                      value={factors[key]}
                       onChange={v => updateFactor(founder.id, key, v)}
                       isRTL={isRTL}
                     />
@@ -516,16 +503,8 @@ export default function CoFounderEquitySplit() {
                     {isRTL ? 'التسريع المزدوج:' : 'Double-trigger acceleration:'}
                   </strong>{' '}
                   {isRTL
-                    ? 'إذا تم الاستحواذ على الشركة وأُنهي عقد المؤسس قسراً، يجب أن تستحق جميع الأسهم غير المستحقة فوراً. أدرج هذا البند دائماً في اتفاقية المؤسسين.'
+                    ? 'إذا تم الاستحواذ على الشركة وأُنهي عقد المؤسس قسراً، يجب أن تستحق جميع الأسهم غير المستحقة فوراً.'
                     : 'If the company is acquired AND a founder is involuntarily terminated, all unvested shares should immediately vest. Always include this clause in your founders\' agreement.'}
-                </div>
-                <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-xs text-blue-700 leading-relaxed">
-                  <strong>
-                    {isRTL ? 'الاستحقاق العكسي للمؤسسين الحاليين:' : 'Reverse vesting for existing founders:'}
-                  </strong>{' '}
-                  {isRTL
-                    ? 'إذا أضفت مؤسساً مشاركاً جديداً بعد تأسيس الشركة، فكّر في منحه جدول استحقاق جديد لمدة 4 سنوات. قد يرغب المؤسسون الحاليون في "إعادة الاستحقاق" لإظهار الالتزام للمستثمرين الجدد.'
-                    : 'If you\'re adding a new co-founder after the company already exists, consider giving them a fresh 4-year vest on their shares. Existing founders may want to "re-vest" to show commitment to new investors.'}
                 </div>
               </div>
             </motion.div>

@@ -1,44 +1,15 @@
 /**
  * OQALNotes — Shariah-compliant OQAL Note calculator and tracker
- * Based on the OQAL Note structure: Qard Hassan + Promise to Sell Shares
- * Modeled on KISS (500 Startups) adapted for Saudi/Islamic law
+ * Connected to the unified cap table (ZestEquity) as source of truth.
+ * OQAL notes are stored as CapTableInstrument with type='oqal_note'.
  */
-
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, FileText, Info, ChevronDown, ChevronUp, Shield, TrendingUp, DollarSign, Calendar, Users } from 'lucide-react';
+import { Plus, Trash2, FileText, Info, ChevronDown, ChevronUp, Shield, TrendingUp, DollarSign, Users, Link2, RefreshCw } from 'lucide-react';
 import { nanoid } from 'nanoid';
-import { useToolState } from '@/hooks/useToolState';
+import { useCapTable } from '@/hooks/useCapTable';
 import { useLanguage } from '@/contexts/LanguageContext';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface OQALNote {
-  id: string;
-  investorName: string;
-  investmentAmount: number;         // SAR or USD
-  currency: 'SAR' | 'USD';
-  valuationCap: number;             // pre-money valuation cap
-  discountRate: number;             // % discount on next round price
-  issueDate: string;                // ISO date string
-  maturityMonths: number;           // months until maturity (typically 18-24)
-  conversionTrigger: 'qualified_round' | 'maturity' | 'change_of_control';
-  qualifiedRoundThreshold: number;  // minimum round size to trigger conversion
-  status: 'active' | 'converted' | 'repaid';
-  notes: string;
-}
-
-interface OQALState {
-  notes: OQALNote[];
-  companyValuation: number;
-  currency: 'SAR' | 'USD';
-}
-
-const DEFAULT_STATE: OQALState = {
-  notes: [],
-  companyValuation: 5_000_000,
-  currency: 'SAR',
-};
+import type { CapTableInstrument } from '@shared/equity';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -49,14 +20,17 @@ function fmt(n: number, currency: 'SAR' | 'USD'): string {
   return `${symbol}${n.toFixed(0)}`;
 }
 
-function calcConversionPrice(note: OQALNote, nextRoundPrice: number): number {
-  const capPrice = note.valuationCap > 0 ? note.valuationCap / 10_000_000 : Infinity; // assume 10M shares
-  const discountPrice = nextRoundPrice * (1 - note.discountRate / 100);
-  return Math.min(capPrice, discountPrice, nextRoundPrice);
+function calcConversionPrice(note: CapTableInstrument, nextRoundPricePerShare: number, totalShares: number): number {
+  const capPrice = note.valuationCap > 0 && totalShares > 0
+    ? note.valuationCap / totalShares
+    : Infinity;
+  const discountPrice = nextRoundPricePerShare * (1 - note.discountRate / 100);
+  return Math.min(capPrice, discountPrice, nextRoundPricePerShare);
 }
 
-function calcSharesReceived(note: OQALNote, nextRoundPricePerShare: number): number {
-  const convPrice = calcConversionPrice(note, nextRoundPricePerShare);
+function calcSharesReceived(note: CapTableInstrument, nextRoundPricePerShare: number, totalShares: number): number {
+  const convPrice = calcConversionPrice(note, nextRoundPricePerShare, totalShares);
+  if (convPrice <= 0) return 0;
   return Math.round(note.investmentAmount / convPrice);
 }
 
@@ -76,23 +50,26 @@ function NoteCard({
   onDelete,
   onUpdate,
   nextRoundPrice,
+  totalShares,
 }: {
-  note: OQALNote;
+  note: CapTableInstrument;
   currency: 'SAR' | 'USD';
   onDelete: () => void;
-  onUpdate: (updated: OQALNote) => void;
+  onUpdate: (patch: Partial<CapTableInstrument>) => void;
   nextRoundPrice: number;
+  totalShares: number;
 }) {
   const [expanded, setExpanded] = useState(false);
   const daysLeft = daysUntilMaturity(note.issueDate, note.maturityMonths);
-  const convPrice = calcConversionPrice(note, nextRoundPrice);
-  const sharesReceived = calcSharesReceived(note, nextRoundPrice);
+  const convPrice = calcConversionPrice(note, nextRoundPrice, totalShares);
+  const sharesReceived = calcSharesReceived(note, nextRoundPrice, totalShares);
   const effectiveDiscount = nextRoundPrice > 0 ? ((nextRoundPrice - convPrice) / nextRoundPrice * 100) : 0;
 
-  const statusColors: Record<OQALNote['status'], string> = {
+  const statusColors: Record<string, string> = {
     active: 'bg-emerald-100 text-emerald-700 border-emerald-200',
     converted: 'bg-indigo-100 text-indigo-700 border-indigo-200',
     repaid: 'bg-slate-100 text-slate-600 border-slate-200',
+    cancelled: 'bg-red-100 text-red-600 border-red-200',
   };
 
   return (
@@ -111,8 +88,8 @@ function NoteCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-foreground text-sm truncate">{note.investorName || 'Unnamed Investor'}</span>
-            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${statusColors[note.status]}`}>
-              {note.status === 'active' ? 'Active' : note.status === 'converted' ? 'Converted' : 'Repaid'}
+            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${statusColors[note.status] ?? statusColors.active}`}>
+              {note.status.charAt(0).toUpperCase() + note.status.slice(1)}
             </span>
           </div>
           <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
@@ -120,15 +97,21 @@ function NoteCard({
             <span>·</span>
             <span>Cap: {fmt(note.valuationCap, note.currency)}</span>
             <span>·</span>
-            <span>{note.discountRate}% discount</span>
+            <span className={daysLeft < 0 ? 'text-red-500 font-semibold' : daysLeft < 90 ? 'text-amber-600 font-semibold' : ''}>
+              {daysLeft < 0 ? `Matured ${Math.abs(daysLeft)}d ago` : `${daysLeft}d to maturity`}
+            </span>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          {daysLeft > 0 && note.status === 'active' && (
-            <div className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${daysLeft < 60 ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}>
-              {daysLeft}d left
-            </div>
-          )}
+
+        {/* Conversion preview */}
+        {nextRoundPrice > 0 && note.status === 'active' && (
+          <div className="hidden sm:flex flex-col items-end shrink-0 text-right">
+            <div className="text-xs font-bold text-indigo-600">{sharesReceived.toLocaleString()} shares</div>
+            <div className="text-[10px] text-muted-foreground">{effectiveDiscount.toFixed(1)}% eff. discount</div>
+          </div>
+        )}
+
+        <div className="flex items-center gap-1 shrink-0">
           <button onClick={() => setExpanded(v => !v)} className="p-1.5 rounded-lg hover:bg-secondary transition-colors text-muted-foreground">
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
@@ -148,36 +131,34 @@ function NoteCard({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="px-4 pt-0 pb-4 border-t border-border">
-              {/* Conversion preview */}
-              {nextRoundPrice > 0 && note.status === 'active' && (
-                <div className="mt-3 p-3 rounded-lg bg-indigo-50 border border-indigo-100 mb-4">
-                  <div className="text-xs font-semibold text-indigo-700 mb-2">Conversion Preview (at next round price {fmt(nextRoundPrice, note.currency)}/share)</div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <div className="text-[10px] text-indigo-500 mb-0.5">Conversion Price</div>
-                      <div className="text-sm font-bold text-indigo-800">{fmt(convPrice, note.currency)}/share</div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] text-indigo-500 mb-0.5">Shares Received</div>
-                      <div className="text-sm font-bold text-indigo-800">{sharesReceived.toLocaleString()}</div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] text-indigo-500 mb-0.5">Effective Discount</div>
-                      <div className="text-sm font-bold text-indigo-800">{effectiveDiscount.toFixed(1)}%</div>
-                    </div>
+            <div className="px-4 pb-4 border-t border-border pt-3">
+              {/* Conversion summary */}
+              {nextRoundPrice > 0 && (
+                <div className="mb-4 grid grid-cols-3 gap-3">
+                  <div className="p-2.5 rounded-lg bg-indigo-50 border border-indigo-100 text-center">
+                    <div className="text-[10px] text-indigo-600 font-semibold mb-0.5">Conversion Price</div>
+                    <div className="text-sm font-bold text-indigo-700">{fmt(convPrice, note.currency)}/share</div>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-100 text-center">
+                    <div className="text-[10px] text-emerald-600 font-semibold mb-0.5">Shares Received</div>
+                    <div className="text-sm font-bold text-emerald-700">{sharesReceived.toLocaleString()}</div>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-100 text-center">
+                    <div className="text-[10px] text-amber-600 font-semibold mb-0.5">Effective Discount</div>
+                    <div className="text-sm font-bold text-amber-700">{effectiveDiscount.toFixed(1)}%</div>
                   </div>
                 </div>
               )}
 
               {/* Edit fields */}
-              <div className="grid grid-cols-2 gap-3 mt-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-muted-foreground mb-1 block">Investor Name</label>
                   <input
                     className="w-full text-sm border border-border rounded-lg px-3 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400"
                     value={note.investorName}
-                    onChange={e => onUpdate({ ...note, investorName: e.target.value })}
+                    onChange={e => onUpdate({ investorName: e.target.value })}
+                    placeholder="e.g. OQAL Angel Fund"
                   />
                 </div>
                 <div>
@@ -186,7 +167,7 @@ function NoteCard({
                     type="number"
                     className="w-full text-sm border border-border rounded-lg px-3 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400"
                     value={note.investmentAmount}
-                    onChange={e => onUpdate({ ...note, investmentAmount: Math.max(0, parseInt(e.target.value) || 0) })}
+                    onChange={e => onUpdate({ investmentAmount: Math.max(0, parseInt(e.target.value) || 0) })}
                   />
                 </div>
                 <div>
@@ -195,17 +176,16 @@ function NoteCard({
                     type="number"
                     className="w-full text-sm border border-border rounded-lg px-3 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400"
                     value={note.valuationCap}
-                    onChange={e => onUpdate({ ...note, valuationCap: Math.max(0, parseInt(e.target.value) || 0) })}
+                    onChange={e => onUpdate({ valuationCap: Math.max(0, parseInt(e.target.value) || 0) })}
                   />
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground mb-1 block">Discount Rate (%)</label>
                   <input
-                    type="number"
-                    min={0} max={50}
+                    type="number" min={0} max={50}
                     className="w-full text-sm border border-border rounded-lg px-3 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400"
                     value={note.discountRate}
-                    onChange={e => onUpdate({ ...note, discountRate: Math.min(50, Math.max(0, parseInt(e.target.value) || 0)) })}
+                    onChange={e => onUpdate({ discountRate: Math.min(50, Math.max(0, parseInt(e.target.value) || 0)) })}
                   />
                 </div>
                 <div>
@@ -214,17 +194,16 @@ function NoteCard({
                     type="date"
                     className="w-full text-sm border border-border rounded-lg px-3 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400"
                     value={note.issueDate}
-                    onChange={e => onUpdate({ ...note, issueDate: e.target.value })}
+                    onChange={e => onUpdate({ issueDate: e.target.value })}
                   />
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground mb-1 block">Maturity (months)</label>
                   <input
-                    type="number"
-                    min={6} max={60}
+                    type="number" min={6} max={60}
                     className="w-full text-sm border border-border rounded-lg px-3 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400"
                     value={note.maturityMonths}
-                    onChange={e => onUpdate({ ...note, maturityMonths: Math.min(60, Math.max(6, parseInt(e.target.value) || 18)) })}
+                    onChange={e => onUpdate({ maturityMonths: Math.min(60, Math.max(6, parseInt(e.target.value) || 18)) })}
                   />
                 </div>
                 <div>
@@ -233,7 +212,7 @@ function NoteCard({
                     type="number"
                     className="w-full text-sm border border-border rounded-lg px-3 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400"
                     value={note.qualifiedRoundThreshold}
-                    onChange={e => onUpdate({ ...note, qualifiedRoundThreshold: Math.max(0, parseInt(e.target.value) || 0) })}
+                    onChange={e => onUpdate({ qualifiedRoundThreshold: Math.max(0, parseInt(e.target.value) || 0) })}
                   />
                 </div>
                 <div>
@@ -241,11 +220,12 @@ function NoteCard({
                   <select
                     className="w-full text-sm border border-border rounded-lg px-3 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400"
                     value={note.status}
-                    onChange={e => onUpdate({ ...note, status: e.target.value as OQALNote['status'] })}
+                    onChange={e => onUpdate({ status: e.target.value as CapTableInstrument['status'] })}
                   >
                     <option value="active">Active</option>
                     <option value="converted">Converted</option>
                     <option value="repaid">Repaid</option>
+                    <option value="cancelled">Cancelled</option>
                   </select>
                 </div>
               </div>
@@ -254,9 +234,9 @@ function NoteCard({
                 <textarea
                   rows={2}
                   className="w-full text-sm border border-border rounded-lg px-3 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400 resize-none"
-                  value={note.notes}
+                  value={note.notes || ''}
                   placeholder="Additional terms, conditions, or investor notes..."
-                  onChange={e => onUpdate({ ...note, notes: e.target.value })}
+                  onChange={e => onUpdate({ notes: e.target.value })}
                 />
               </div>
             </div>
@@ -273,41 +253,63 @@ export default function OQALNotes() {
   const { lang } = useLanguage();
   const isRTL = lang === 'ar';
 
-  const { state, setState } = useToolState<OQALState>('oqal_notes', DEFAULT_STATE);
-  const { notes, companyValuation, currency } = state;
-
-  const [nextRoundPrice, setNextRoundPrice] = useState(0.5); // price per share in next round
+  const { state, isLoading, computed, setInstruments } = useCapTable();
+  const [nextRoundPrice, setNextRoundPrice] = useState(0.5);
   const [nextRoundSize, setNextRoundSize] = useState(2_000_000);
 
-  const totalRaised = useMemo(() => notes.filter(n => n.status === 'active').reduce((s, n) => s + n.investmentAmount, 0), [notes]);
-  const activeCount = notes.filter(n => n.status === 'active').length;
-  const convertedCount = notes.filter(n => n.status === 'converted').length;
+  if (isLoading || !state) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
-  const addNote = () => {
-    const newNote: OQALNote = {
+  const cs = state!;
+  const currency = cs.currency;
+  const totalSharesBasic = computed?.totalSharesBasic ?? 1;
+
+  // Only show OQAL notes from the instruments array
+  const oqalNotes = cs.instruments.filter(i => i.type === 'oqal_note');
+  const allInstruments = cs.instruments;
+
+  const totalRaised = useMemo(
+    () => oqalNotes.filter(n => n.status === 'active').reduce((s, n) => s + n.investmentAmount, 0),
+    [oqalNotes]
+  );
+  const activeCount = oqalNotes.filter(n => n.status === 'active').length;
+  const convertedCount = oqalNotes.filter(n => n.status === 'converted').length;
+
+  const COLORS = ['#4F6EF7', '#C4614A', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'];
+
+  function addNote() {
+    const idx = allInstruments.length;
+    const newNote: CapTableInstrument = {
       id: nanoid(),
       investorName: '',
+      type: 'oqal_note',
       investmentAmount: 500_000,
       currency,
-      valuationCap: companyValuation * 2,
+      valuationCap: cs.nextRoundPreMoneyValuation > 0 ? cs.nextRoundPreMoneyValuation * 2 : 10_000_000,
       discountRate: 20,
+      interestRate: 0,
       issueDate: new Date().toISOString().split('T')[0],
       maturityMonths: 18,
       conversionTrigger: 'qualified_round',
       qualifiedRoundThreshold: 2_000_000,
       status: 'active',
-      notes: '',
+      color: COLORS[idx % COLORS.length],
     };
-    setState(prev => ({ ...prev, notes: [...prev.notes, newNote] }));
-  };
+    setInstruments([...allInstruments, newNote]);
+  }
 
-  const deleteNote = (id: string) => {
-    setState(prev => ({ ...prev, notes: prev.notes.filter(n => n.id !== id) }));
-  };
+  function deleteNote(id: string) {
+    setInstruments(allInstruments.filter(i => i.id !== id));
+  }
 
-  const updateNote = (id: string, updated: OQALNote) => {
-    setState(prev => ({ ...prev, notes: prev.notes.map(n => n.id === id ? updated : n) }));
-  };
+  function updateNote(id: string, patch: Partial<CapTableInstrument>) {
+    setInstruments(allInstruments.map(i => i.id === id ? { ...i, ...patch } : i));
+  }
 
   return (
     <div className={`flex flex-col gap-6 ${isRTL ? 'rtl' : 'ltr'}`}>
@@ -323,37 +325,40 @@ export default function OQALNotes() {
             </h2>
           </div>
           <p className="text-sm text-muted-foreground max-w-xl">
-            Track Shariah-compliant OQAL Notes — the Saudi angel network's standardized financing instrument based on <strong>Qard Hassan</strong> (interest-free loan) + <strong>Promise to Sell Shares</strong>. Modeled on the KISS, adapted for Saudi &amp; Islamic law.
+            Track Shariah-compliant OQAL Notes — the Saudi angel network's standardized financing instrument based on <strong>Qard Hassan</strong> (interest-free loan) + <strong>Promise to Sell Shares</strong>. Notes are stored in the unified cap table and appear in dilution calculations.
           </p>
         </div>
-        <button
-          onClick={addNote}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95 shrink-0"
-          style={{ background: 'linear-gradient(135deg, oklch(0.55 0.18 150), oklch(0.45 0.2 160))' }}
-        >
-          <Plus className="w-4 h-4" />
-          Add OQAL Note
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-full shrink-0">
+            <Link2 className="w-3 h-3" />
+            <span>Synced with Cap Table</span>
+          </div>
+          <button
+            onClick={addNote}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95 shrink-0"
+            style={{ background: 'linear-gradient(135deg, oklch(0.55 0.18 150), oklch(0.45 0.2 160))' }}
+          >
+            <Plus className="w-4 h-4" />
+            Add OQAL Note
+          </button>
+        </div>
       </div>
 
       {/* How it works */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {[
           {
-            icon: <DollarSign className="w-4 h-4 text-emerald-600" />,
-            bg: 'bg-emerald-50',
+            icon: <DollarSign className="w-4 h-4 text-emerald-600" />, bg: 'bg-emerald-50',
             title: 'Qard Hassan',
             desc: 'Investor provides an interest-free loan (no riba). The principal is repayable if conversion does not occur.',
           },
           {
-            icon: <FileText className="w-4 h-4 text-indigo-600" />,
-            bg: 'bg-indigo-50',
+            icon: <FileText className="w-4 h-4 text-indigo-600" />, bg: 'bg-indigo-50',
             title: 'Promise to Sell Shares',
             desc: 'A binding promise to convert the loan into equity at a discounted price upon a qualifying event (next round, maturity, or exit).',
           },
           {
-            icon: <TrendingUp className="w-4 h-4 text-amber-600" />,
-            bg: 'bg-amber-50',
+            icon: <TrendingUp className="w-4 h-4 text-amber-600" />, bg: 'bg-amber-50',
             title: 'Conversion Mechanics',
             desc: 'Investor receives shares at the lower of: (a) valuation cap price, or (b) next-round price minus discount rate.',
           },
@@ -374,7 +379,7 @@ export default function OQALNotes() {
           { label: 'Total Raised via Notes', value: fmt(totalRaised, currency), icon: <DollarSign className="w-4 h-4" />, color: 'text-emerald-600', bg: 'bg-emerald-50' },
           { label: 'Active Notes', value: activeCount.toString(), icon: <FileText className="w-4 h-4" />, color: 'text-indigo-600', bg: 'bg-indigo-50' },
           { label: 'Converted', value: convertedCount.toString(), icon: <TrendingUp className="w-4 h-4" />, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Company Valuation', value: fmt(companyValuation, currency), icon: <Users className="w-4 h-4" />, color: 'text-slate-600', bg: 'bg-slate-50' },
+          { label: 'Total Shares (Fully Diluted)', value: (computed?.totalSharesFullyDiluted ?? 0).toLocaleString(), icon: <Users className="w-4 h-4" />, color: 'text-slate-600', bg: 'bg-slate-50' },
         ].map((kpi, i) => (
           <div key={i} className="p-3.5 rounded-xl border border-border bg-card">
             <div className={`w-7 h-7 rounded-lg ${kpi.bg} ${kpi.color} flex items-center justify-center mb-2`}>
@@ -386,33 +391,12 @@ export default function OQALNotes() {
         ))}
       </div>
 
-      {/* Settings row */}
+      {/* Conversion scenario settings */}
       <div className="flex flex-wrap gap-4 items-end p-4 rounded-xl border border-border bg-card">
-        <div>
-          <label className="text-xs text-muted-foreground mb-1 block">Currency</label>
-          <select
-            className="text-sm border border-border rounded-lg px-3 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400"
-            value={currency}
-            onChange={e => setState(prev => ({ ...prev, currency: e.target.value as 'SAR' | 'USD' }))}
-          >
-            <option value="SAR">SAR (Saudi Riyal)</option>
-            <option value="USD">USD (US Dollar)</option>
-          </select>
-        </div>
-        <div>
-          <label className="text-xs text-muted-foreground mb-1 block">Current Company Valuation ({currency})</label>
-          <input
-            type="number"
-            className="text-sm border border-border rounded-lg px-3 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400 w-40"
-            value={companyValuation}
-            onChange={e => setState(prev => ({ ...prev, companyValuation: Math.max(0, parseInt(e.target.value) || 0) }))}
-          />
-        </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">Next Round Price/Share ({currency})</label>
           <input
-            type="number"
-            step={0.01}
+            type="number" step={0.01}
             className="text-sm border border-border rounded-lg px-3 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400 w-36"
             value={nextRoundPrice}
             onChange={e => setNextRoundPrice(Math.max(0.001, parseFloat(e.target.value) || 0.5))}
@@ -427,10 +411,14 @@ export default function OQALNotes() {
             onChange={e => setNextRoundSize(Math.max(0, parseInt(e.target.value) || 0))}
           />
         </div>
+        <div className="text-xs text-muted-foreground">
+          <div>Total shares (basic): <span className="font-semibold text-foreground">{totalSharesBasic.toLocaleString()}</span></div>
+          <div>Implied post-money: <span className="font-semibold text-foreground">{fmt(nextRoundPrice * totalSharesBasic, currency)}</span></div>
+        </div>
       </div>
 
       {/* Notes list */}
-      {notes.length === 0 ? (
+      {oqalNotes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mb-4">
             <Shield className="w-8 h-8 text-emerald-400" />
@@ -441,7 +429,7 @@ export default function OQALNotes() {
           </p>
           <button
             onClick={addNote}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95"
             style={{ background: 'linear-gradient(135deg, oklch(0.55 0.18 150), oklch(0.45 0.2 160))' }}
           >
             <Plus className="w-4 h-4" />
@@ -451,21 +439,22 @@ export default function OQALNotes() {
       ) : (
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-foreground">{notes.length} Note{notes.length !== 1 ? 's' : ''}</h3>
+            <h3 className="text-sm font-semibold text-foreground">{oqalNotes.length} Note{oqalNotes.length !== 1 ? 's' : ''}</h3>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Info className="w-3.5 h-3.5" />
               <span>Click a note to expand and edit details</span>
             </div>
           </div>
           <AnimatePresence>
-            {notes.map(note => (
+            {oqalNotes.map(note => (
               <NoteCard
                 key={note.id}
                 note={note}
                 currency={currency}
                 onDelete={() => deleteNote(note.id)}
-                onUpdate={(updated) => updateNote(note.id, updated)}
+                onUpdate={(patch) => updateNote(note.id, patch)}
                 nextRoundPrice={nextRoundPrice}
+                totalShares={totalSharesBasic}
               />
             ))}
           </AnimatePresence>

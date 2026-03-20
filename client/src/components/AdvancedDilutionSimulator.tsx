@@ -1,28 +1,19 @@
 /**
- * AdvancedDilutionSimulator — Named founders + pre-investment equity + round-by-round dilution
- * Design: "Venture Capital Clarity" — Editorial Finance
+ * AdvancedDilutionSimulator — Round-by-round dilution using unified cap table
+ * Founders and ESOP pool are read from the ZestEquity cap table.
+ * Funding rounds are local to this tool.
  */
-
 import { useState, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, UserPlus, Info } from 'lucide-react';
-import { nanoid } from 'nanoid';
+import { Link2, RefreshCw } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartTooltip,
-  ResponsiveContainer, Legend, BarChart, Bar, Cell,
+  ResponsiveContainer, Legend,
 } from 'recharts';
 import { useReport } from '@/contexts/ReportContext';
 import { useToolState } from '@/hooks/useToolState';
+import { useCapTable } from '@/hooks/useCapTable';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-interface Founder {
-  id: string;
-  name: string;
-  role: string;
-  initialPct: number; // % before any investment
-  color: string;
-}
 
 interface Round {
   id: string;
@@ -33,14 +24,12 @@ interface Round {
   color: string;
 }
 
+interface RoundsState {
+  rounds: Round[];
+  initialValuation: number;
+}
+
 // ─── Defaults ─────────────────────────────────────────────────────────────────
-
-const FOUNDER_COLORS = ['#C4614A', '#2D4A6B', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'];
-
-const DEFAULT_FOUNDERS: Founder[] = [
-  { id: nanoid(), name: 'Founder 1', role: 'CEO', initialPct: 50, color: FOUNDER_COLORS[0] },
-  { id: nanoid(), name: 'Founder 2', role: 'CTO', initialPct: 40, color: FOUNDER_COLORS[1] },
-];
 
 const DEFAULT_ROUNDS: Round[] = [
   { id: 'pre-seed', name: 'Pre-Seed',  enabled: true,  dilutionPct: 10, investmentAmount: 500_000,    color: '#C4614A' },
@@ -52,7 +41,10 @@ const DEFAULT_ROUNDS: Round[] = [
   { id: 'series-e', name: 'Series E',  enabled: false, dilutionPct: 8,  investmentAmount: 300_000_000,color: '#1B4A2D' },
 ];
 
-const OPTION_POOL_DEFAULT = 10;
+const DEFAULT_ROUNDS_STATE: RoundsState = {
+  rounds: DEFAULT_ROUNDS,
+  initialValuation: 3_000_000,
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -62,75 +54,53 @@ function fmt(n: number): string {
   if (Math.abs(n) >= 1e3) return `$${(n / 1e3).toFixed(0)}K`;
   return `$${n.toFixed(0)}`;
 }
+
 function fmtPct(n: number) { return `${n.toFixed(1)}%`; }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-interface DilutionState {
-  founders: Founder[];
-  rounds: Round[];
-  optionPool: number;
-  initialValuation: number;
-}
-
-const DEFAULT_DILUTION_STATE: DilutionState = {
-  founders: DEFAULT_FOUNDERS,
-  rounds: DEFAULT_ROUNDS,
-  optionPool: OPTION_POOL_DEFAULT,
-  initialValuation: 3_000_000,
-};
-
 export default function AdvancedDilutionSimulator() {
-  const { state: dilutionState, setState: setDilutionState } = useToolState<DilutionState>('dilution', DEFAULT_DILUTION_STATE);
-  const founders = dilutionState.founders;
-  const rounds = dilutionState.rounds;
-  const optionPool = dilutionState.optionPool;
-  const initialValuation = dilutionState.initialValuation;
-  const setFounders = (updater: Founder[] | ((prev: Founder[]) => Founder[])) =>
-    setDilutionState(prev => ({ ...prev, founders: typeof updater === 'function' ? updater(prev.founders) : updater }));
-  const setRounds = (updater: Round[] | ((prev: Round[]) => Round[])) =>
-    setDilutionState(prev => ({ ...prev, rounds: typeof updater === 'function' ? updater(prev.rounds) : updater }));
-  const setOptionPool = (v: number) => setDilutionState(prev => ({ ...prev, optionPool: v }));
-  const setInitialValuation = (v: number) => setDilutionState(prev => ({ ...prev, initialValuation: v }));
+  const { state: capState, isLoading, computed } = useCapTable();
+  const { state: roundsState, setState: setRoundsState } = useToolState<RoundsState>('dilution_rounds', DEFAULT_ROUNDS_STATE);
   const { setDilution } = useReport();
 
-  // ── Founder management ──────────────────────────────────────────────────────
+  const rounds = roundsState.rounds;
+  const initialValuation = roundsState.initialValuation;
 
-  const totalFounderPct = founders.reduce((s, f) => s + f.initialPct, 0);
-  const remainingPct = Math.max(0, 100 - optionPool - totalFounderPct);
+  const setRounds = (updater: Round[] | ((prev: Round[]) => Round[])) =>
+    setRoundsState(prev => ({ ...prev, rounds: typeof updater === 'function' ? updater(prev.rounds) : updater }));
+  const setInitialValuation = (v: number) =>
+    setRoundsState(prev => ({ ...prev, initialValuation: v }));
 
-  const addFounder = () => {
-    if (founders.length >= 6) return;
-    setFounders(prev => [...prev, {
-      id: nanoid(),
-      name: `Founder ${prev.length + 1}`,
-      role: 'Co-Founder',
-      initialPct: 0,
-      color: FOUNDER_COLORS[prev.length % FOUNDER_COLORS.length],
-    }]);
-  };
-
-  const updateFounder = (id: string, field: keyof Founder, value: any) => {
-    setFounders(prev => prev.map(f => f.id === id ? { ...f, [field]: value } : f));
-  };
-
-  const removeFounder = (id: string) => {
-    if (founders.length <= 1) return;
-    setFounders(prev => prev.filter(f => f.id !== id));
-  };
-
-  const updateRound = (id: string, field: keyof Round, value: any) => {
+  const updateRound = (id: string, field: keyof Round, value: unknown) => {
     setRounds(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
   };
+
+  if (isLoading || !capState) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  const cs = capState!;
+
+  // Derive founders from cap table
+  const founders = cs.shareholders.filter(s => s.type === 'founder');
+  const totalSharesBasic = computed?.totalSharesBasic ?? 1;
+
+  // Convert founder shares to initial percentages
+  const founderInitialPcts = founders.map(f => (f.shares / totalSharesBasic) * 100);
+  const esopInitialPct = computed?.esopPct ?? cs.esop.totalPoolShares / totalSharesBasic * 100;
 
   // ── Simulation ──────────────────────────────────────────────────────────────
 
   const simulation = useMemo(() => {
     const enabledRounds = rounds.filter(r => r.enabled);
 
-    // Starting ownership per founder (fraction of total)
-    let founderPcts = founders.map(f => f.initialPct);
-    let optPct = optionPool;
+    let founderPcts = [...founderInitialPcts];
+    let optPct = esopInitialPct;
     let investorPct = 0;
     let currentPostMoney = initialValuation;
 
@@ -145,10 +115,14 @@ export default function AdvancedDilutionSimulator() {
 
     const path: StageRow[] = [];
 
-    // Founding stage
     path.push({
       stage: 'Founding',
-      founders: founders.map((f, i) => ({ id: f.id, name: f.name, pct: founderPcts[i], value: (founderPcts[i] / 100) * initialValuation, color: f.color })),
+      founders: founders.map((f, i) => ({
+        id: f.id, name: f.name,
+        pct: founderPcts[i],
+        value: (founderPcts[i] / 100) * initialValuation,
+        color: f.color,
+      })),
       optionPoolPct: optPct,
       investorPct: 0,
       postMoney: initialValuation,
@@ -166,8 +140,7 @@ export default function AdvancedDilutionSimulator() {
       path.push({
         stage: round.name,
         founders: founders.map((f, i) => ({
-          id: f.id,
-          name: f.name,
+          id: f.id, name: f.name,
           pct: Math.round(founderPcts[i] * 10) / 10,
           value: (founderPcts[i] / 100) * postMoney,
           color: f.color,
@@ -180,14 +153,14 @@ export default function AdvancedDilutionSimulator() {
     }
 
     return path;
-  }, [founders, rounds, optionPool, initialValuation]);
+  }, [founders, founderInitialPcts, esopInitialPct, rounds, initialValuation]);
 
   const finalStage = simulation[simulation.length - 1];
   const totalRaised = rounds.filter(r => r.enabled).reduce((s, r) => s + r.investmentAmount, 0);
 
   // Area chart data
   const areaData = simulation.map(s => {
-    const row: Record<string, any> = { stage: s.stage };
+    const row: Record<string, number | string> = { stage: s.stage };
     s.founders.forEach(f => { row[f.name] = parseFloat(f.pct.toFixed(1)); });
     row['Investors'] = parseFloat(s.investorPct.toFixed(1));
     row['Option Pool'] = parseFloat(s.optionPoolPct.toFixed(1));
@@ -212,94 +185,58 @@ export default function AdvancedDilutionSimulator() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div>
-        <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-          Dilution Simulator
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Add your founders with their current equity, set dilution per round, and see exactly how ownership evolves from Pre-Seed through Series E.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-bold text-foreground mb-1">Dilution Simulator</h2>
+          <p className="text-sm text-muted-foreground">
+            Founders and ESOP pool are read from the Cap Table. Set dilution per round to see how ownership evolves from Pre-Seed through Series E.
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-full shrink-0">
+          <Link2 className="w-3 h-3" />
+          <span>Synced with Cap Table</span>
+        </div>
       </div>
 
-      {/* ── Founders Section ── */}
+      {/* ── Founders from Cap Table ── */}
       <div className="border border-border rounded-xl overflow-hidden bg-card">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div>
-            <div className="text-sm font-semibold text-foreground">Founding Team Equity</div>
+            <div className="text-sm font-semibold text-foreground">Founding Team Equity (from Cap Table)</div>
             <div className="text-[10px] text-muted-foreground mt-0.5">
-              Total assigned: <span className={`font-bold ${totalFounderPct + optionPool > 100 ? 'text-red-500' : 'text-foreground'}`}>{totalFounderPct + optionPool}%</span>
-              {' '}· Unallocated: <span className="font-bold text-muted-foreground">{remainingPct.toFixed(1)}%</span>
+              Edit founders in the Cap Table tool · ESOP: <span className="font-bold text-foreground">{esopInitialPct.toFixed(1)}%</span>
             </div>
           </div>
-          <button
-            onClick={addFounder}
-            disabled={founders.length >= 6}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40"
-            style={{ background: '#C4614A' }}
-          >
-            <UserPlus className="w-3.5 h-3.5" />
-            Add Founder
-          </button>
         </div>
-
         <div className="divide-y divide-border">
-          {founders.map((founder, idx) => (
-            <div key={founder.id} className="p-3 flex items-center gap-3 flex-wrap">
-              <div className="w-3 h-3 rounded-full shrink-0" style={{ background: founder.color }} />
-              <div className="flex gap-2 flex-1 flex-wrap min-w-0">
-                <input
-                  value={founder.name}
-                  onChange={e => updateFounder(founder.id, 'name', e.target.value)}
-                  placeholder="Founder name"
-                  className="vc-input px-2.5 py-1.5 text-sm font-medium w-32"
-                />
-                <input
-                  value={founder.role}
-                  onChange={e => updateFounder(founder.id, 'role', e.target.value)}
-                  placeholder="Role (CEO, CTO...)"
-                  className="vc-input px-2.5 py-1.5 text-xs text-muted-foreground w-28"
-                />
-                <div className="flex items-center gap-1.5">
-                  <input
-                    type="number" min={0} max={100} step={0.5}
-                    value={founder.initialPct}
-                    onChange={e => updateFounder(founder.id, 'initialPct', parseFloat(e.target.value) || 0)}
-                    className="vc-input w-16 px-2 py-1.5 text-sm text-center font-bold"
-                  />
-                  <span className="text-xs text-muted-foreground">%</span>
-                </div>
-                {/* Mini bar */}
-                <div className="flex-1 min-w-[80px] flex items-center">
-                  <div className="w-full bg-secondary rounded-full h-1.5 overflow-hidden">
-                    <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(founder.initialPct, 100)}%`, background: founder.color }} />
+          {founders.map((founder, idx) => {
+            const pct = founderInitialPcts[idx];
+            return (
+              <div key={founder.id} className="p-3 flex items-center gap-3 flex-wrap">
+                <div className="w-3 h-3 rounded-full shrink-0" style={{ background: founder.color }} />
+                <span className="text-sm font-semibold text-foreground flex-1">{founder.name}</span>
+                <span className="text-xs text-muted-foreground">{founder.shares.toLocaleString()} shares</span>
+                <div className="flex items-center gap-2 w-32">
+                  <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${Math.min(pct, 100)}%`, background: founder.color }} />
                   </div>
+                  <span className="text-xs font-bold w-10 text-right" style={{ color: founder.color }}>{pct.toFixed(1)}%</span>
                 </div>
               </div>
-              {founders.length > 1 && (
-                <button onClick={() => removeFounder(founder.id)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              )}
+            );
+          })}
+          {founders.length === 0 && (
+            <div className="p-4 text-sm text-muted-foreground text-center">
+              No founders in cap table. Add founders in the Cap Table tool.
             </div>
-          ))}
-        </div>
-
-        {/* Option pool */}
-        <div className="px-4 py-3 border-t border-border bg-secondary/20 flex items-center gap-3 flex-wrap">
-          <div className="w-3 h-3 rounded-full bg-gray-300 shrink-0" />
-          <span className="text-sm font-medium text-foreground flex-1">Employee Option Pool (ESOP)</span>
-          <div className="flex items-center gap-1.5">
-            <input
-              type="number" min={0} max={30} step={1}
-              value={optionPool}
-              onChange={e => setOptionPool(Math.max(0, parseInt(e.target.value) || 0))}
-              className="vc-input w-16 px-2 py-1.5 text-sm text-center font-bold"
-            />
-            <span className="text-xs text-muted-foreground">%</span>
-          </div>
-          {totalFounderPct + optionPool > 100 && (
-            <span className="text-[10px] text-red-500 font-semibold">⚠ Total exceeds 100%</span>
           )}
+        </div>
+        {/* ESOP row */}
+        <div className="px-4 py-3 border-t border-border bg-secondary/20 flex items-center gap-3 flex-wrap">
+          <div className="w-3 h-3 rounded-full bg-purple-400 shrink-0" />
+          <span className="text-sm font-medium text-foreground flex-1">Employee Option Pool (ESOP)</span>
+          <span className="text-xs font-bold text-purple-600">{esopInitialPct.toFixed(1)}%</span>
+          <span className="text-[10px] text-muted-foreground">({cs.esop.totalPoolShares.toLocaleString()} shares)</span>
         </div>
       </div>
 
@@ -313,7 +250,7 @@ export default function AdvancedDilutionSimulator() {
           <input
             type="number" value={initialValuation}
             onChange={e => setInitialValuation(Math.max(0, parseInt(e.target.value) || 0))}
-            className="vc-input w-full pl-7 pr-3 py-2 text-sm"
+            className="w-full pl-7 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400"
           />
         </div>
       </div>
@@ -328,10 +265,9 @@ export default function AdvancedDilutionSimulator() {
           {rounds.map(round => (
             <div key={round.id} className={`p-3 transition-all ${!round.enabled ? 'opacity-50' : ''}`}>
               <div className="flex items-center gap-3 flex-wrap">
-                {/* Toggle */}
                 <button
                   onClick={() => updateRound(round.id, 'enabled', !round.enabled)}
-                  className={`w-9 h-5 rounded-full transition-all relative shrink-0`}
+                  className="w-9 h-5 rounded-full transition-all relative shrink-0"
                   style={{ background: round.enabled ? round.color : 'oklch(0.88 0.01 80)' }}
                 >
                   <div className="w-3.5 h-3.5 rounded-full bg-white absolute top-0.5 transition-all"
@@ -339,7 +275,6 @@ export default function AdvancedDilutionSimulator() {
                 </button>
                 <div className="w-3 h-3 rounded-full shrink-0" style={{ background: round.color }} />
                 <span className="text-sm font-semibold text-foreground w-20 shrink-0">{round.name}</span>
-
                 {round.enabled && (
                   <div className="flex gap-3 flex-1 flex-wrap items-center">
                     <div className="flex items-center gap-1.5">
@@ -348,7 +283,7 @@ export default function AdvancedDilutionSimulator() {
                         type="number" min={1} max={50} step={0.5}
                         value={round.dilutionPct}
                         onChange={e => updateRound(round.id, 'dilutionPct', parseFloat(e.target.value) || 0)}
-                        className="vc-input w-14 px-2 py-1 text-xs text-center"
+                        className="w-14 px-2 py-1 text-xs text-center border border-border rounded-lg bg-background focus:outline-none"
                       />
                       <span className="text-[10px] text-muted-foreground">%</span>
                     </div>
@@ -358,7 +293,7 @@ export default function AdvancedDilutionSimulator() {
                         type="number" min={0}
                         value={round.investmentAmount}
                         onChange={e => updateRound(round.id, 'investmentAmount', parseInt(e.target.value) || 0)}
-                        className="vc-input w-24 px-2 py-1 text-xs"
+                        className="w-24 px-2 py-1 text-xs border border-border rounded-lg bg-background focus:outline-none"
                       />
                     </div>
                     <div className="text-[10px] text-muted-foreground font-mono">
@@ -379,20 +314,19 @@ export default function AdvancedDilutionSimulator() {
           return (
             <div key={f.id} className="border border-border rounded-xl p-3 bg-card text-center">
               <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">{f.name}</div>
-              <div className="text-[10px] text-muted-foreground mb-1">{f.role}</div>
-              <div className="text-lg font-bold metric-value" style={{ color: f.color }}>{fmtPct(finalFounder?.pct ?? 0)}</div>
+              <div className="text-lg font-bold" style={{ color: f.color }}>{fmtPct(finalFounder?.pct ?? 0)}</div>
               <div className="text-[9px] text-muted-foreground">{fmt(finalFounder?.value ?? 0)}</div>
             </div>
           );
         })}
         <div className="border border-border rounded-xl p-3 bg-card text-center">
           <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">Total Raised</div>
-          <div className="text-lg font-bold metric-value" style={{ color: '#2D4A6B' }}>{fmt(totalRaised)}</div>
+          <div className="text-lg font-bold" style={{ color: '#2D4A6B' }}>{fmt(totalRaised)}</div>
           <div className="text-[9px] text-muted-foreground">across all rounds</div>
         </div>
         <div className="border border-border rounded-xl p-3 bg-card text-center">
           <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">Final Post-Money</div>
-          <div className="text-lg font-bold metric-value" style={{ color: '#10B981' }}>{fmt(finalStage.postMoney)}</div>
+          <div className="text-lg font-bold" style={{ color: '#10B981' }}>{fmt(finalStage.postMoney)}</div>
           <div className="text-[9px] text-muted-foreground">company valuation</div>
         </div>
       </div>
@@ -411,13 +345,13 @@ export default function AdvancedDilutionSimulator() {
               ))}
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.88 0.01 80)" />
-            <XAxis dataKey="stage" tick={{ fontSize: 10, fontFamily: 'DM Sans' }} />
-            <YAxis tick={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace' }} tickFormatter={v => `${v}%`} domain={[0, 100]} />
+            <XAxis dataKey="stage" tick={{ fontSize: 10 }} />
+            <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${v}%`} domain={[0, 100]} />
             <RechartTooltip
-              formatter={(v: any, name: string) => [`${v}%`, name]}
-              contentStyle={{ fontSize: 11, fontFamily: 'DM Sans', borderRadius: 6 }}
+              formatter={(v: number, name: string) => [`${v}%`, name]}
+              contentStyle={{ fontSize: 11, borderRadius: 6 }}
             />
-            <Legend wrapperStyle={{ fontSize: 11, fontFamily: 'DM Sans' }} />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
             {areaKeys.map((key, i) => (
               <Area key={key} type="monotone" dataKey={key} stackId="1"
                 stroke={areaColors[i]} fill={`url(#grad-${i})`} strokeWidth={2} />
