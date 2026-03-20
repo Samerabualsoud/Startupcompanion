@@ -12,6 +12,7 @@ import {
 import { useReport } from '@/contexts/ReportContext';
 import { useToolState } from '@/hooks/useToolState';
 import { useCapTable } from '@/hooks/useCapTable';
+import ToolGuide from '@/components/ToolGuide';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -184,6 +185,26 @@ export default function AdvancedDilutionSimulator() {
 
   return (
     <div className="space-y-5">
+      {/* Education panel */}
+      <ToolGuide
+        toolName="Dilution Simulator"
+        tagline="Model how each funding round dilutes founder and ESOP ownership, round by round."
+        steps={[
+          { step: 1, title: 'Review your starting cap table', description: 'Founders and ESOP pool are pulled automatically from Zest Equity. If the numbers look wrong, update them in the Cap Table tool first.' },
+          { step: 2, title: 'Set starting valuation', description: 'Enter your pre-money valuation before any investment. This is the baseline for calculating post-money values after each round.' },
+          { step: 3, title: 'Enable and configure rounds', description: 'Toggle rounds on/off and set the dilution % for each. A typical Seed round dilutes 15–20%, Series A 20–25%. The investment amount is auto-calculated.' },
+          { step: 4, title: 'Read the area chart', description: 'The chart shows how each founder\'s ownership % decreases after each round. Hover over any point to see exact percentages at that stage.' },
+          { step: 5, title: 'Check the ownership table', description: 'The table shows ownership at each stage for every stakeholder — founders, ESOP pool, and investors combined.' },
+        ]}
+        concepts={[
+          { term: 'Dilution', definition: 'When new shares are issued to investors, existing shareholders own a smaller % of the company — even though their share count doesn\'t change.' },
+          { term: 'Pre-money valuation', definition: 'Company value before new investment. Post-money = pre-money + investment amount.' },
+          { term: 'ESOP dilution', definition: 'Investors often require the ESOP pool to be set up before the round (pre-money), which dilutes founders more than investors.' },
+          { term: 'Anti-dilution', definition: 'A provision that protects investors from dilution in down rounds. Common types: broad-based weighted average and full ratchet.' },
+        ]}
+        tip="Founders are often surprised by how much a 20% Seed + 20% ESOP pool + 25% Series A leaves them with. Model this before signing any term sheet. A founder with 60% pre-Seed can end up with ~30% post-Series A."
+      />
+
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>

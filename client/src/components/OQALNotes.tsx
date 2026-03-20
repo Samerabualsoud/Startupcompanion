@@ -9,6 +9,7 @@ import { Plus, Trash2, FileText, Info, ChevronDown, ChevronUp, Shield, TrendingU
 import { nanoid } from 'nanoid';
 import { useCapTable } from '@/hooks/useCapTable';
 import { useLanguage } from '@/contexts/LanguageContext';
+import ToolGuide from '@/components/ToolGuide';
 import type { CapTableInstrument } from '@shared/equity';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -313,17 +314,29 @@ export default function OQALNotes() {
 
   return (
     <div className={`flex flex-col gap-6 ${isRTL ? 'rtl' : 'ltr'}`}>
+      {/* Education panel */}
+      <ToolGuide
+        toolName="OQAL Notes (Shariah)"
+        tagline="Track Shariah-compliant OQAL Notes — the Saudi angel network's standardized financing instrument."
+        steps={[
+          { step: 1, title: 'Understand the OQAL structure', description: 'An OQAL note has two parts: (1) Qard Hassan — an interest-free loan to the company, and (2) a Promise to Sell Shares at a pre-agreed price when a qualifying event occurs (e.g. next funding round).' },
+          { step: 2, title: 'Add a note', description: 'Click "Add OQAL Note", enter the investor name, investment amount, and valuation cap. The valuation cap sets the maximum company valuation at which the note converts to equity.' },
+          { step: 3, title: 'Set conversion terms', description: 'Enter the qualifying round threshold (minimum raise that triggers conversion) and the maturity date. No interest rate is set — OQAL notes are interest-free by design.' },
+          { step: 4, title: 'Preview conversion', description: 'Use the Conversion Preview section to enter the next round pre-money valuation and see exactly how many shares each note converts into and at what price per share.' },
+          { step: 5, title: 'Notes appear in cap table', description: 'All OQAL notes are stored in the unified cap table (Zest Equity) and automatically appear in the fully-diluted share count and dilution simulator.' },
+        ]}
+        concepts={[
+          { term: 'Qard Hassan', definition: 'An interest-free loan in Islamic finance. The lender provides capital without charging riba (interest).' },
+          { term: 'Valuation cap', definition: 'The maximum valuation at which the note converts. Protects early investors from excessive dilution.' },
+          { term: 'Qualifying round', definition: 'A funding round that meets the minimum threshold to trigger note conversion (e.g. raising SAR 2M+).' },
+          { term: 'Conversion price', definition: 'The price per share at which the note converts. Calculated as: min(cap price, next round price).' },
+        ]}
+        tip="OQAL notes are the Saudi angel network's (OQAL) standard instrument. They are Shariah-compliant because there is no interest — the investor's return comes from equity upside, not a fixed rate. Always confirm the conversion terms with a Shariah advisor before signing."
+      />
+
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-              <Shield className="w-4 h-4 text-emerald-600" />
-            </div>
-            <h2 className="text-lg font-bold text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>
-              OQAL Notes
-            </h2>
-          </div>
           <p className="text-sm text-muted-foreground max-w-xl">
             Track Shariah-compliant OQAL Notes — the Saudi angel network's standardized financing instrument based on <strong>Qard Hassan</strong> (interest-free loan) + <strong>Promise to Sell Shares</strong>. Notes are stored in the unified cap table and appear in dilution calculations.
           </p>

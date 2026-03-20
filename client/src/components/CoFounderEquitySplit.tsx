@@ -10,6 +10,7 @@ import { nanoid } from 'nanoid';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCapTable } from '@/hooks/useCapTable';
+import ToolGuide from '@/components/ToolGuide';
 import type { CapTableShareholder } from '@shared/equity';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -264,6 +265,25 @@ export default function CoFounderEquitySplit() {
 
   return (
     <div className={`space-y-5 ${isRTL ? 'rtl' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      {/* Education panel */}
+      <ToolGuide
+        toolName="Co-Founder Equity Split"
+        tagline="Use a 7-factor weighted scoring model to recommend a fair equity split among co-founders."
+        steps={[
+          { step: 1, title: 'Add your founders', description: 'Click "Add Founder" to add each co-founder. Names sync with the cap table — any changes here update Zest Equity automatically.' },
+          { step: 2, title: 'Score each factor', description: 'For each founder, rate them 0–10 on 7 factors: Idea Origin, Full-Time Commitment, Domain Expertise, Technical Contribution, Network/Sales, Prior Exits, and Financial Risk. Hover the info icon to understand each factor.' },
+          { step: 3, title: 'Review the recommended split', description: 'The calculator weights your scores (Commitment carries 25%, Technical 20%, etc.) and shows a recommended equity % for each founder in the pie chart.' },
+          { step: 4, title: 'Apply to cap table', description: 'Click "Apply Recommended Split to Cap Table" to update each founder\'s share count in Zest Equity proportionally. The total founder shares remain the same — only the distribution changes.' },
+          { step: 5, title: 'Discuss with your co-founders', description: 'Use this as a structured conversation tool, not a final answer. The best splits come from open discussion using these scores as a starting point.' },
+        ]}
+        concepts={[
+          { term: 'Weighted score', definition: 'Each factor has a preset weight (e.g. Commitment = 25%). Your 0–10 rating is multiplied by the weight to produce a contribution score.' },
+          { term: 'Proportional split', definition: 'Each founder\'s recommended % = their score / total team score. A score of 7 out of a team total of 20 = 35%.' },
+          { term: 'Dynamic equity', definition: 'Some teams use a dynamic model where equity is re-calculated quarterly based on ongoing contribution. This tool supports that by letting you re-score at any time.' },
+        ]}
+        tip="The biggest predictor of co-founder disputes is unequal commitment, not unequal ideas. Weight the Commitment factor honestly. A founder who joins full-time on day 1 and takes no salary is contributing far more than one who keeps their job."
+      />
+
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>

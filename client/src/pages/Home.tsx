@@ -449,7 +449,7 @@ function HomeInner() {
           </button>
           <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground border border-border px-2.5 py-1 rounded-full">
             <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-            13 tools · Free
+            35 tools · Free
           </div>
           <LanguageSwitcher />
           {chatComplete && chatAnswers && (

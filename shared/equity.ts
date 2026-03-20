@@ -56,8 +56,24 @@ export interface CapTableInstrument {
   color: string;
   notes?: string;
 }
+// ─── ESOP Grant (per-employee) ────────────────────────────────────────────────
+export interface EsopGrant {
+  id: string;
+  employeeName: string;
+  employeeTitle: string;
+  employeeEmail: string;
+  grantDate: string;             // ISO date string
+  shares: number;                // total shares granted
+  strikePrice: number;           // strike price per share at grant date
+  vestingMonths: number;         // total vesting period in months
+  cliffMonths: number;           // cliff period in months
+  vestingStartDate: string;      // ISO date string
+  planType: 'iso' | 'nso' | 'rsu' | 'sar';
+  status: 'active' | 'terminated' | 'exercised' | 'expired';
+  notes: string;
+}
 
-// ─── ESOP Pool ─────────────────────────────────────────────────────────────────
+// ─── ESOP Pool ────────────────────────────────────────────────────────────────────
 export interface EsopPool {
   totalPoolShares: number;       // total shares reserved for ESOP
   issuedShares: number;          // shares already granted
@@ -68,6 +84,7 @@ export interface EsopPool {
   cliffMonths: number;           // default cliff
   planType: 'iso' | 'nso' | 'rsu' | 'sar';
   jurisdiction: string;
+  grants: EsopGrant[];           // per-employee grant records
 }
 
 // ─── Funding Round ─────────────────────────────────────────────────────────────
@@ -167,7 +184,8 @@ export const DEFAULT_CAP_TABLE: CapTableState = {
     vestingMonths: 48,
     cliffMonths: 12,
     planType: 'iso',
-    jurisdiction: 'delaware',
+    jurisdiction: 'saudi_arabia',
+    grants: [],
   },
   rounds: [
     {
