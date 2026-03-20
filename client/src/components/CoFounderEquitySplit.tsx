@@ -9,6 +9,7 @@ import { Plus, Trash2, Users, Info, ChevronDown, ChevronUp } from 'lucide-react'
 import { nanoid } from 'nanoid';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToolState } from '@/hooks/useToolState';
 
 interface FounderFactors {
   ideaOrigin: number;       // 0-10
@@ -240,7 +241,7 @@ function FactorSlider({
 export default function CoFounderEquitySplit() {
   const { lang } = useLanguage();
   const isRTL = lang === 'ar';
-  const [founders, setFounders] = useState<Founder[]>(DEFAULT_FOUNDERS);
+  const { state: founders, setState: setFounders } = useToolState<Founder[]>('equity_split', DEFAULT_FOUNDERS);
   const [showVesting, setShowVesting] = useState(false);
 
   const splits = useMemo(() => calcSplits(founders), [founders]);

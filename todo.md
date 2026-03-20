@@ -586,3 +586,13 @@
 - [ ] Redesign My Company (StartupProfile.tsx): hero header, key metrics row, tabbed layout
 - [ ] 0 TypeScript errors
 - [ ] Save checkpoint
+
+## Round 26 — New Features & Bug Fixes
+- [x] Fix: All tools (FundraisingReadiness, PitchDeckScorecard, DilutionSimulator, RunwayOptimizer, CoFounderEquitySplit) now persist state to DB via tool_states table
+- [x] Add tool_states DB table (userId + toolId + stateJson, unique per user/tool)
+- [x] Create useToolState hook for DB-backed tool state persistence with debounced auto-save
+- [x] Add OQAL Notes tool (Shariah-compliant convertible notes, OQAL network structure)
+- [x] Add Zest Equity tool (cap table with SAFE/convertible note conversion modeling)
+- [x] Wire both new tools to sidebar nav (Legal & Compliance + Equity & Ownership groups)
+- [x] Add search to Term Sheet Glossary (already existed — confirmed working)
+- [x] 31 tests passing, 0 TypeScript errors

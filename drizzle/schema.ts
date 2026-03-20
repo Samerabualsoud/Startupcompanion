@@ -597,6 +597,17 @@ export const auditLog = mysqlTable('audit_log', {
 export type AuditLog = typeof auditLog.$inferSelect;
 export type InsertAuditLog = typeof auditLog.$inferInsert;
 
+// ── Tool States (per-user JSON state for each tool) ──────────────────────────
+export const toolStates = mysqlTable('tool_states', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('userId').notNull(),
+  toolKey: varchar('toolKey', { length: 64 }).notNull(), // e.g. 'readiness', 'pitch_scorecard', 'dilution', 'runway', 'equity_split'
+  state: json('state').notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+});
+export type ToolState = typeof toolStates.$inferSelect;
+export type InsertToolState = typeof toolStates.$inferInsert;
+
 // ── Platform Settings (singleton row, id=1) ────────────────────────────────
 export const platformSettings = mysqlTable('platform_settings', {
   id: int('id').autoincrement().primaryKey(),

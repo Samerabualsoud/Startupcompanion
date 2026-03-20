@@ -12,6 +12,7 @@ import {
   ResponsiveContainer, Legend, BarChart, Bar, Cell,
 } from 'recharts';
 import { useReport } from '@/contexts/ReportContext';
+import { useToolState } from '@/hooks/useToolState';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -65,11 +66,32 @@ function fmtPct(n: number) { return `${n.toFixed(1)}%`; }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+interface DilutionState {
+  founders: Founder[];
+  rounds: Round[];
+  optionPool: number;
+  initialValuation: number;
+}
+
+const DEFAULT_DILUTION_STATE: DilutionState = {
+  founders: DEFAULT_FOUNDERS,
+  rounds: DEFAULT_ROUNDS,
+  optionPool: OPTION_POOL_DEFAULT,
+  initialValuation: 3_000_000,
+};
+
 export default function AdvancedDilutionSimulator() {
-  const [founders, setFounders] = useState<Founder[]>(DEFAULT_FOUNDERS);
-  const [rounds, setRounds] = useState<Round[]>(DEFAULT_ROUNDS);
-  const [optionPool, setOptionPool] = useState(OPTION_POOL_DEFAULT);
-  const [initialValuation, setInitialValuation] = useState(3_000_000);
+  const { state: dilutionState, setState: setDilutionState } = useToolState<DilutionState>('dilution', DEFAULT_DILUTION_STATE);
+  const founders = dilutionState.founders;
+  const rounds = dilutionState.rounds;
+  const optionPool = dilutionState.optionPool;
+  const initialValuation = dilutionState.initialValuation;
+  const setFounders = (updater: Founder[] | ((prev: Founder[]) => Founder[])) =>
+    setDilutionState(prev => ({ ...prev, founders: typeof updater === 'function' ? updater(prev.founders) : updater }));
+  const setRounds = (updater: Round[] | ((prev: Round[]) => Round[])) =>
+    setDilutionState(prev => ({ ...prev, rounds: typeof updater === 'function' ? updater(prev.rounds) : updater }));
+  const setOptionPool = (v: number) => setDilutionState(prev => ({ ...prev, optionPool: v }));
+  const setInitialValuation = (v: number) => setDilutionState(prev => ({ ...prev, initialValuation: v }));
   const { setDilution } = useReport();
 
   // ── Founder management ──────────────────────────────────────────────────────

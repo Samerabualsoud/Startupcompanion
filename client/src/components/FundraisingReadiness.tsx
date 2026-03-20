@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, Circle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { useReport } from '@/contexts/ReportContext';
+import { useToolState } from '@/hooks/useToolState';
 
 interface CheckItem {
   id: string;
@@ -58,7 +59,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function FundraisingReadiness() {
-  const [items, setItems] = useState<CheckItem[]>(INITIAL_ITEMS);
+  const { state: items, setState: setItems } = useToolState<CheckItem[]>('readiness', INITIAL_ITEMS);
   const [expandedCat, setExpandedCat] = useState<string | null>('Product');
   const { setReadiness } = useReport();
 

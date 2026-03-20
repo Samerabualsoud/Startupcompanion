@@ -12,7 +12,7 @@ import {
   BookOpen, BarChart3, DollarSign, Menu, X, ChevronRight,
   Gauge, Layers, FileDown, Link2, Check, Building2, MessageCircle,
   Mail, FileText, Users2, ClipboardCheck, Calendar, Globe,
-  UserCircle, LogOut, LogIn, Home as HomeIcon, ShoppingCart, FolderOpen
+  UserCircle, LogOut, LogIn, Home as HomeIcon, ShoppingCart, FolderOpen, Shield
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -59,8 +59,10 @@ import SalesTracker from '@/components/SalesTracker';
 import DataRoom from '@/components/DataRoom';
 import TermSheetBuilder from '@/components/TermSheetBuilder';
 import CapTableManager from '@/components/CapTableManager';
+import OQALNotes from '@/components/OQALNotes';
+import ZestEquity from '@/components/ZestEquity';
 import IdeaValidator from '@/components/IdeaValidator';
-type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator';
+type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator' | 'oqal-notes' | 'zest-equity';
 
 interface NavItem {
   id: ToolId;
@@ -130,6 +132,9 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'ai-term-sheet', tier: 'enterprise',          label: 'Term Sheet Intelligence', shortLabel: 'Term Intel',   navKey: 'navAITermAnalyzer', icon: FileText,      group: 'AI Advisory', badge: 'AI' },
   { id: 'ai-cofounder-agreement', tier: 'pro', label: 'Co-founder Agreement Drafter',shortLabel: 'Co-founder',   navKey: 'navAICofounder', icon: Users2,        group: 'AI Advisory', badge: 'AI' },
   { id: 'ai-due-diligence', tier: 'enterprise',       label: 'Due Diligence Analyzer',       shortLabel: 'Due Diligence',   navKey: 'navAIDueDiligence', icon: ClipboardCheck,group: 'AI Advisory', badge: 'AI' },
+  // Financing Instruments
+  { id: 'oqal-notes', tier: 'pro',   label: 'OQAL Notes (Shariah)',         shortLabel: 'OQAL Notes',    navKey: 'navOQALNotes',   icon: Shield,      group: 'Legal & Compliance', newUntil: '2026-07-01', badge: 'New' },
+  { id: 'zest-equity', tier: 'pro',  label: 'Zest Equity & Cap Table',      shortLabel: 'Zest Equity',   navKey: 'navZestEquity',  icon: TrendingUp,  group: 'Equity & Ownership', newUntil: '2026-07-01', badge: 'New' },
 ];
 
 const GROUPS = ['My Company', 'Valuation', 'Equity & Ownership', 'Capital Raising', 'Legal & Compliance', 'Market Intelligence', 'Investor Network', 'AI Advisory', 'Admin'];
@@ -166,6 +171,8 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'data-room': '#2D4A6B',
   'term-sheet-builder': '#7C3AED',
   'cap-table': '#0EA5E9',
+  'oqal-notes': '#10B981',
+  'zest-equity': '#4F6EF7',
   'idea-validator': '#EC4899',
 };
 
@@ -178,7 +185,7 @@ function HomeInner() {
   const { t, isRTL } = useLanguage();
 
   // Persist active tool across refreshes using localStorage + URL hash
-  const VALID_TOOL_IDS: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator'];
+  const VALID_TOOL_IDS: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator', 'oqal-notes', 'zest-equity'];
   const getInitialTool = (): ToolId => {
     // 1. Check URL hash first (e.g. /app#equity-split)
     const hash = window.location.hash.replace('#', '') as ToolId;
@@ -388,6 +395,8 @@ function HomeInner() {
       case 'data-room':                  return <DataRoom />;
       case 'term-sheet-builder':           return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><TermSheetBuilder /></div>;
       case 'cap-table':                    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><CapTableManager /></div>;
+      case 'oqal-notes':                   return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><OQALNotes /></div>;
+      case 'zest-equity':                  return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ZestEquity /></div>;
       case 'idea-validator':               return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><IdeaValidator /></div>;
       default: return null;
     }

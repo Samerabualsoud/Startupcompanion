@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { useReport } from '@/contexts/ReportContext';
+import { useToolState } from '@/hooks/useToolState';
 
 interface Slide {
   id: string;
@@ -154,7 +155,7 @@ const INITIAL_SLIDES: Slide[] = [
 ];
 
 export default function PitchDeckScorecard() {
-  const [slides, setSlides] = useState<Slide[]>(INITIAL_SLIDES);
+  const { state: slides, setState: setSlides } = useToolState<Slide[]>('pitch_scorecard', INITIAL_SLIDES);
   const [expandedId, setExpandedId] = useState<string | null>('problem');
   const { setPitchScore } = useReport();
 

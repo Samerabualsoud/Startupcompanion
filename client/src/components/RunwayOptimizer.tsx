@@ -17,6 +17,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useStartup } from '@/contexts/StartupContext';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+import { useToolState } from '@/hooks/useToolState';
 
 // ── Tooltip helper ─────────────────────────────────────────────────────────
 
@@ -148,14 +149,34 @@ function RunwaySlider({ value, onChange, min = 0, max = 100, step = 5 }: {
 
 // ── Main Component ─────────────────────────────────────────────────────────
 
+interface RunwayState {
+  cashOnHand: number;
+  monthlyRevenue: number;
+  categories: BurnCategory[];
+  targetExtension: 3 | 6 | 12;
+}
+
+const DEFAULT_RUNWAY_STATE: RunwayState = {
+  cashOnHand: 2000000,
+  monthlyRevenue: 50000,
+  categories: DEFAULT_CATEGORIES,
+  targetExtension: 6,
+};
+
 export default function RunwayOptimizer() {
   const { snapshot } = useStartup();
   const { isRTL } = useLanguage();
 
-  const [cashOnHand, setCashOnHand] = useState(2000000);
-  const [monthlyRevenue, setMonthlyRevenue] = useState(50000);
-  const [categories, setCategories] = useState<BurnCategory[]>(DEFAULT_CATEGORIES);
-  const [targetExtension, setTargetExtension] = useState<3 | 6 | 12>(6);
+  const { state: runwayState, setState: setRunwayState } = useToolState<RunwayState>('runway', DEFAULT_RUNWAY_STATE);
+  const cashOnHand = runwayState.cashOnHand;
+  const monthlyRevenue = runwayState.monthlyRevenue;
+  const categories = runwayState.categories;
+  const targetExtension = runwayState.targetExtension;
+  const setCashOnHand = (v: number) => setRunwayState(prev => ({ ...prev, cashOnHand: v }));
+  const setMonthlyRevenue = (v: number) => setRunwayState(prev => ({ ...prev, monthlyRevenue: v }));
+  const setCategories = (updater: BurnCategory[] | ((prev: BurnCategory[]) => BurnCategory[])) =>
+    setRunwayState(prev => ({ ...prev, categories: typeof updater === 'function' ? updater(prev.categories) : updater }));
+  const setTargetExtension = (v: 3 | 6 | 12) => setRunwayState(prev => ({ ...prev, targetExtension: v }));
   const [showCategories, setShowCategories] = useState(true);
   const [newCatName, setNewCatName] = useState('');
   const [addingCat, setAddingCat] = useState(false);
