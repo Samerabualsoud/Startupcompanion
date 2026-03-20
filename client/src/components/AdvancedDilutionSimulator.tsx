@@ -77,25 +77,13 @@ export default function AdvancedDilutionSimulator() {
     setRounds(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
   };
 
-  if (isLoading || !capState) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  const cs = capState!;
-
-  // Derive founders from cap table
-  const founders = cs.shareholders.filter(s => s.type === 'founder');
+  // Derive founders from cap table — safe even when capState is null
+  const founders = capState?.shareholders.filter(s => s.type === 'founder') ?? [];
   const totalSharesBasic = computed?.totalSharesBasic ?? 1;
-
-  // Convert founder shares to initial percentages
   const founderInitialPcts = founders.map(f => (f.shares / totalSharesBasic) * 100);
-  const esopInitialPct = computed?.esopPct ?? cs.esop.totalPoolShares / totalSharesBasic * 100;
+  const esopInitialPct = computed?.esopPct ?? (capState?.esop.totalPoolShares ?? 0) / totalSharesBasic * 100;
 
-  // ── Simulation ──────────────────────────────────────────────────────────────
+  // ── Simulation — MUST be before any early return ────────────────────────────
 
   const simulation = useMemo(() => {
     const enabledRounds = rounds.filter(r => r.enabled);
@@ -183,6 +171,14 @@ export default function AdvancedDilutionSimulator() {
     setDilution(reportData);
   }, [simulation, setDilution]);
 
+  if (isLoading || !capState) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
       {/* Education panel */}
@@ -257,7 +253,7 @@ export default function AdvancedDilutionSimulator() {
           <div className="w-3 h-3 rounded-full bg-purple-400 shrink-0" />
           <span className="text-sm font-medium text-foreground flex-1">Employee Option Pool (ESOP)</span>
           <span className="text-xs font-bold text-purple-600">{esopInitialPct.toFixed(1)}%</span>
-          <span className="text-[10px] text-muted-foreground">({cs.esop.totalPoolShares.toLocaleString()} shares)</span>
+          <span className="text-[10px] text-muted-foreground">({capState.esop.totalPoolShares.toLocaleString()} shares)</span>
         </div>
       </div>
 

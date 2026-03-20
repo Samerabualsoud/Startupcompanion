@@ -177,16 +177,9 @@ export default function CoFounderEquitySplit() {
   // These are scoring inputs only — actual shares live in the cap table
   const [factorMap, setFactorMap] = useState<Record<string, FounderFactors>>({});
 
-  if (isLoading || !state) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  const capState = state!;
-  const founders = capState.shareholders.filter(s => s.type === 'founder');
+  // Derive cap table data (safe even when state is null)
+  const capState = state ?? null;
+  const founders = capState?.shareholders.filter(s => s.type === 'founder') ?? [];
   const totalFounderShares = founders.reduce((sum, f) => sum + f.shares, 0);
   const totalSharesBasic = computed?.totalSharesBasic ?? 0;
 
@@ -195,7 +188,7 @@ export default function CoFounderEquitySplit() {
     return factorMap[id] ?? { ...DEFAULT_FACTORS };
   }
 
-  // Compute recommended splits from factor scores
+  // Compute recommended splits from factor scores — MUST be before any early return
   const splits = useMemo(() => {
     const scores = founders.map(f => ({
       id: f.id,
@@ -209,6 +202,14 @@ export default function CoFounderEquitySplit() {
     }));
   }, [founders, factorMap]);
 
+  if (isLoading || !state) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   function updateFactor(id: string, factor: FactorKey, value: number) {
     setFactorMap(prev => ({
       ...prev,
@@ -216,10 +217,13 @@ export default function CoFounderEquitySplit() {
     }));
   }
 
+  // After early return guard above, state is guaranteed non-null
+  const cs = state!;
+
   // Apply recommended split to cap table shares
   function applyRecommendedSplit() {
     const totalShares = totalFounderShares > 0 ? totalFounderShares : 9_000_000;
-    const updated = capState.shareholders.map(sh => {
+    const updated = cs.shareholders.map(sh => {
       if (sh.type !== 'founder') return sh;
       const split = splits.find(s => s.id === sh.id);
       if (!split) return sh;
@@ -231,7 +235,6 @@ export default function CoFounderEquitySplit() {
   // Add a new founder to the cap table
   function addFounder() {
     if (founders.length >= 6) return;
-    const idx = capState.shareholders.length;
     const COLORS = ['#4F6EF7', '#C4614A', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'];
     const newHolder: CapTableShareholder = {
       id: nanoid(),
@@ -245,16 +248,16 @@ export default function CoFounderEquitySplit() {
       vestingStartDate: new Date().toISOString().split('T')[0],
       color: COLORS[founders.length % COLORS.length],
     };
-    setShareholders([...capState.shareholders, newHolder]);
+    setShareholders([...cs.shareholders, newHolder]);
   }
 
   function removeFounder(id: string) {
     if (founders.length <= 1) return;
-    setShareholders(capState.shareholders.filter(s => s.id !== id));
+    setShareholders(cs.shareholders.filter(s => s.id !== id));
   }
 
   function updateFounderName(id: string, name: string) {
-    setShareholders(capState.shareholders.map(s => s.id === id ? { ...s, name } : s));
+    setShareholders(cs.shareholders.map(s => s.id === id ? { ...s, name } : s));
   }
 
   const pieData = splits.map((s, i) => ({

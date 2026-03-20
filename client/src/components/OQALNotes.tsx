@@ -258,6 +258,15 @@ export default function OQALNotes() {
   const [nextRoundPrice, setNextRoundPrice] = useState(0.5);
   const [nextRoundSize, setNextRoundSize] = useState(2_000_000);
 
+  // Derive data safely before any early return — required by Rules of Hooks
+  const oqalNotes = state?.instruments.filter(i => i.type === 'oqal_note') ?? [];
+  const allInstruments = state?.instruments ?? [];
+
+  const totalRaised = useMemo(
+    () => oqalNotes.filter(n => n.status === 'active').reduce((s, n) => s + n.investmentAmount, 0),
+    [oqalNotes]
+  );
+
   if (isLoading || !state) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -266,18 +275,9 @@ export default function OQALNotes() {
     );
   }
 
-  const cs = state!;
+  const cs = state;
   const currency = cs.currency;
   const totalSharesBasic = computed?.totalSharesBasic ?? 1;
-
-  // Only show OQAL notes from the instruments array
-  const oqalNotes = cs.instruments.filter(i => i.type === 'oqal_note');
-  const allInstruments = cs.instruments;
-
-  const totalRaised = useMemo(
-    () => oqalNotes.filter(n => n.status === 'active').reduce((s, n) => s + n.investmentAmount, 0),
-    [oqalNotes]
-  );
   const activeCount = oqalNotes.filter(n => n.status === 'active').length;
   const convertedCount = oqalNotes.filter(n => n.status === 'converted').length;
 
