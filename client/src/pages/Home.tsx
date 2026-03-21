@@ -664,19 +664,7 @@ function HomeInner() {
 
         {/* ── Main Content ── */}
         <main className="flex flex-col flex-1 overflow-hidden">
-          {/* Tool header bar */}
-          {activeTool !== 'valuation' && activeTool !== 'dashboard' && activeItem && (
-            <div className={`shrink-0 px-5 py-3 border-b border-border bg-white flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm" style={{ background: 'linear-gradient(135deg, oklch(0.62 0.22 30), oklch(0.60 0.24 290))' }}>
-                {(() => { const Icon = activeItem.icon; return <Icon className="w-4 h-4 text-white" />; })()}
-              </div>
-              <div className={isRTL ? 'text-right' : ''}>
-                <div className="text-sm font-extrabold text-foreground" style={{ fontFamily: 'Nunito, sans-serif' }}>{activeItem.label}</div>
-              </div>
-              <div className="flex-1" />
-              <div className="rainbow-divider hidden lg:block" style={{ width: 40, height: 3 }} />
-            </div>
-          )}
+          {/* Tool header bar removed — each tool has its own ToolGuide header */}
 
           <div className="flex flex-1 overflow-hidden">
             {renderTool()}

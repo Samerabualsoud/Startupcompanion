@@ -64,7 +64,7 @@ export default function Login() {
           </blockquote>
           <div className="space-y-4">
             {[
-              { num: '13+', label: isRTL ? 'أداة للشركات الناشئة في مكان واحد' : 'Startup tools in one place' },
+              { num: '35+', label: isRTL ? 'أداة للشركات الناشئة في مكان واحد' : 'Startup tools in one place' },
               { num: '7', label: isRTL ? 'طرق تقييم' : 'Valuation methods' },
               { num: '100+', label: isRTL ? 'مستثمرون ومسرّعات أعمال' : 'Investors & accelerators' },
             ].map(item => (
