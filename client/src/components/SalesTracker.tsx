@@ -875,9 +875,96 @@ export default function SalesTracker() {
         </TabsContent>
 
         {/* ── REVENUE ── */}
-        <TabsContent value="revenue" className="mt-4">
+        <TabsContent value="revenue" className="mt-4 space-y-4">
+          {/* Auto-calculated KPI summary row — derived from closed deals, no manual inputs */}
+          {(() => {
+            const s = analyticsData?.summary;
+            const won = entries.filter(d => d.dealStage === cfg.wonStage);
+            const isProcurement = businessModel === 'procurement';
+
+            // Procurement: compute PVF and service fee revenue from entries
+            const pvf = isProcurement ? won.reduce((sum, d) => sum + (d.dealValue ?? d.amount), 0) : 0;
+            const serviceFeeRevenue = isProcurement && takeRatePct > 0 ? pvf * (takeRatePct / 100) : 0;
+
+            const kpiCards = isProcurement ? [
+              {
+                label: isRTL ? 'إجمالي حجم المشتريات' : 'Total PVF',
+                value: fmt(pvf, currency),
+                sub: isRTL ? 'حجم المشتريات المُيسَّرة' : 'Procurement Volume Facilitated',
+                icon: DollarSign, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/30', accent: 'border-l-4 border-l-emerald-500',
+              },
+              {
+                label: isRTL ? 'إيراد رسوم الخدمة' : 'Service Fee Revenue',
+                value: takeRatePct > 0 ? fmt(serviceFeeRevenue, currency) : '—',
+                sub: takeRatePct > 0 ? (isRTL ? `معدل الأخذ ${takeRatePct}% × PVF` : `Take Rate ${takeRatePct}% × PVF`) : (isRTL ? 'أدخل معدل الأخذ في اقتصاديات الوحدة' : 'Set Take Rate in Unit Economics'),
+                icon: TrendingUp, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30', accent: 'border-l-4 border-l-blue-500',
+              },
+              {
+                label: 'YTD',
+                value: s ? fmt(s.ytd, currency) : '—',
+                sub: isRTL ? `إيرادات ${new Date().getFullYear()}` : `Revenue in ${new Date().getFullYear()}`,
+                icon: Calendar, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-900/30', accent: 'border-l-4 border-l-violet-500',
+              },
+              {
+                label: 'LTD',
+                value: s ? fmt(s.ltd, currency) : '—',
+                sub: s?.firstRevenueDate
+                  ? (isRTL ? `منذ ${new Date(s.firstRevenueDate).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short' })}` : `Since ${new Date(s.firstRevenueDate).toLocaleDateString('en', { year: 'numeric', month: 'short' })}`)
+                  : (isRTL ? 'لا توجد إيرادات بعد' : 'No revenue yet'),
+                icon: CalendarRange, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-100 dark:bg-orange-900/30', accent: 'border-l-4 border-l-orange-500',
+              },
+            ] : [
+              {
+                label: 'MRR',
+                value: s ? fmt(s.mrr, currency) : '—',
+                sub: s?.lastMonthWithData ? (isRTL ? `آخر شهر: ${s.lastMonthWithData}` : `Latest month: ${s.lastMonthWithData}`) : (isRTL ? 'لا توجد إيرادات بعد' : 'No revenue yet'),
+                icon: DollarSign, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/30', accent: 'border-l-4 border-l-emerald-500',
+              },
+              {
+                label: 'ARR',
+                value: s ? fmt(s.arr, currency) : '—',
+                sub: isRTL ? 'MRR × 12 (تقدير)' : 'MRR × 12 (annualised)',
+                icon: TrendingUp, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30', accent: 'border-l-4 border-l-blue-500',
+              },
+              {
+                label: 'YTD',
+                value: s ? fmt(s.ytd, currency) : '—',
+                sub: isRTL ? `إيرادات ${new Date().getFullYear()}` : `Revenue in ${new Date().getFullYear()}`,
+                icon: Calendar, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-900/30', accent: 'border-l-4 border-l-violet-500',
+              },
+              {
+                label: 'LTD',
+                value: s ? fmt(s.ltd, currency) : '—',
+                sub: s?.firstRevenueDate
+                  ? (isRTL ? `منذ ${new Date(s.firstRevenueDate).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short' })}` : `Since ${new Date(s.firstRevenueDate).toLocaleDateString('en', { year: 'numeric', month: 'short' })}`)
+                  : (isRTL ? 'لا توجد إيرادات بعد' : 'No revenue yet'),
+                icon: CalendarRange, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-100 dark:bg-orange-900/30', accent: 'border-l-4 border-l-orange-500',
+              },
+            ];
+
+            return (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {kpiCards.map(card => (
+                  <div key={card.label} className={`rounded-xl bg-card border border-border shadow-sm p-3 flex flex-col gap-1.5 min-w-0 overflow-hidden ${card.accent}`}>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-foreground uppercase tracking-wide">{card.label}</p>
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${card.bg}`}>
+                        <card.icon className={`w-3.5 h-3.5 ${card.color}`} />
+                      </div>
+                    </div>
+                    <p className={`text-xl font-extrabold ${card.color}`}>{card.value}</p>
+                    <p className="text-[10px] text-muted-foreground leading-tight">{card.sub}</p>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+
+          {/* Monthly Revenue Chart */}
           <Card>
-            <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">{isRTL ? 'الإيرادات الشهرية' : 'Monthly Revenue'}</CardTitle></CardHeader>
+            <CardHeader className="pb-2 pt-4">
+              <CardTitle className="text-sm">{isRTL ? 'الإيرادات الشهرية' : 'Monthly Revenue'}</CardTitle>
+            </CardHeader>
             <CardContent className="pb-4">
               {monthlyData.length === 0 ? (
                 <div className="text-center py-8 text-sm text-muted-foreground">{isRTL ? 'لا توجد بيانات إيرادات بعد.' : 'No revenue data yet.'}</div>
