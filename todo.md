@@ -639,3 +639,8 @@
 - [ ] Rebuild Unit Economics with business-model cost structures (SaaS, Marketplace, E-commerce, Service, Hardware, Subscription)
 - [ ] Add per-item unit economics analysis (COGS per unit, contribution margin, break-even units)
 - [ ] Add ZestEquity/equity/ESOP/OQAL/cap table terms to glossary (termSheet.ts)
+- [ ] COGSCalculator: percentage-fee (feeType) support for payment gateway, BNPL, etc.
+- [ ] Fix RTL sidebar: anchor to right side when Arabic is active
+- [ ] Full Arabic translation coverage for all tool screens
+- [ ] Unit Economics tab in Sales Pipeline Tracker
+- [ ] Visible.vc dark theme applied to all screens

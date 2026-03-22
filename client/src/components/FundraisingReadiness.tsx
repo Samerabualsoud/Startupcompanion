@@ -6,6 +6,7 @@
 import ToolGuide from '@/components/ToolGuide';
 import { useState, useMemo, useEffect } from 'react';
 import { useStartup } from '@/contexts/StartupContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Circle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts';
@@ -60,8 +61,18 @@ const CATEGORY_COLORS: Record<string, string> = {
   Fundraising: '#6366F1',
 };
 
+const CATEGORY_LABELS_AR: Record<string, string> = {
+  Product: 'المنتج',
+  Traction: 'النمو',
+  Team: 'الفريق',
+  Market: 'السوق',
+  Legal: 'القانوني',
+  Fundraising: 'جمع التمويل',
+};
+
 export default function FundraisingReadiness() {
   const { snapshot } = useStartup();
+  const { lang, isRTL } = useLanguage();
   const { state: items, setState: setItems } = useToolState<CheckItem[]>('readiness', INITIAL_ITEMS);
   const [expandedCat, setExpandedCat] = useState<string | null>('Product');
   const { setReadiness } = useReport();
@@ -86,10 +97,11 @@ export default function FundraisingReadiness() {
     return { score, maxScore, pct, categoryScores };
   }, [items]);
 
-  const readinessLabel = pct >= 80 ? { label: 'Ready to Raise', color: '#10B981', icon: '🚀' }
-    : pct >= 60 ? { label: 'Almost Ready', color: '#F59E0B', icon: '⚡' }
-    : pct >= 40 ? { label: 'Getting There', color: '#F97316', icon: '🔧' }
-    : { label: 'Not Ready Yet', color: '#EF4444', icon: '🛑' };
+  const readinessLabel = pct >= 80
+    ? { label: lang === 'ar' ? 'جاهز للتمويل' : 'Ready to Raise', color: '#10B981', icon: '🚀' }
+    : pct >= 60 ? { label: lang === 'ar' ? 'تقريباً جاهز' : 'Almost Ready', color: '#F59E0B', icon: '⚡' }
+    : pct >= 40 ? { label: lang === 'ar' ? 'في الطريق' : 'Getting There', color: '#F97316', icon: '🔧' }
+    : { label: lang === 'ar' ? 'غير جاهز بعد' : 'Not Ready Yet', color: '#EF4444', icon: '🛑' };
 
   const radarData = categoryScores.map(c => ({ subject: c.category, score: c.pct, fullMark: 100 }));
 
@@ -109,28 +121,36 @@ export default function FundraisingReadiness() {
   return (
     <div className="space-y-5">
       <ToolGuide
-        toolName='Fundraising Readiness'
-        tagline='Assess your readiness to raise — 20 checks across team, product, traction, and financials.'
-        steps={[
+        toolName={lang === 'ar' ? 'مقياس الاستعداد للتمويل' : 'Fundraising Readiness'}
+        tagline={lang === 'ar' ? 'قيّم استعدادك للتمويل — ٢٠ نقطة تحقق عبر الفريق والمنتج والنمو والماليات.' : 'Assess your readiness to raise — 20 checks across team, product, traction, and financials.'}
+        steps={lang === 'ar' ? [
+          { step: 1, title: 'اعمل على قائمة التحقق', description: 'مرّ على ٢٠ نقطة تحقق عبر ٦ فئات.' },
+          { step: 2, title: 'ضع علامة على البنود المكتملة', description: 'ضع إشارة على ما أنجزته (عرض تقديمي، جدول ملكية، ماليات...).' },
+          { step: 3, title: 'راجع درجتك', description: 'تتحدث درجة الاستعداد في الوقت الفعلي.' },
+          { step: 4, title: 'سدّ الثغرات', description: 'استخدم البنود غير المكتملة كقائمة مهام للتحضير للتمويل.' },
+        ] : [
           { step: 1, title: 'Work through checklist', description: 'Go through all 20 readiness checks across 4 categories.' },
           { step: 2, title: 'Mark completed items', description: 'Check off items you have ready (pitch deck, cap table, financials, etc.).' },
           { step: 3, title: 'Review score', description: 'Your readiness score updates in real time as you check items.' },
           { step: 4, title: 'Fix gaps', description: 'Use the unchecked items as your fundraising preparation to-do list.' },
         ]}
-        connections={[
+        connections={lang === 'ar' ? [
+          { from: 'ملف الشركة الناشئة', to: 'اسم الشركة يظهر في الرأس للسياق' },
+          { from: 'جدول الملكية ZestEquity', to: 'فحص جدول الملكية يعكس بيانات ZestEquity' },
+        ] : [
           { from: 'Startup Profile', to: 'company name shown in the header for context' },
           { from: 'ZestEquity Cap Table', to: 'cap table readiness check reflects your ZestEquity data' },
         ]}
-        tip='Aim for 80%+ readiness before approaching investors. The cap table and financials categories are most scrutinized.'
+        tip={lang === 'ar' ? 'استهدف ٨٠٪+ قبل التواصل مع المستثمرين. فئتا جدول الملكية والماليات هما الأكثر فحصاً.' : 'Aim for 80%+ readiness before approaching investors. The cap table and financials categories are most scrutinized.'}
       />
 
       {/* Header */}
       <div>
         <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-          Fundraising Readiness Score
+          {lang === 'ar' ? 'درجة الاستعداد للتمويل' : 'Fundraising Readiness Score'}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Check off what you've completed. Get a readiness score and specific action items to improve it.
+          {lang === 'ar' ? 'ضع علامة على ما أنجزته. احصل على درجة استعداد وبنود إجراءات محددة لتحسينها.' : "Check off what you've completed. Get a readiness score and specific action items to improve it."}
         </p>
       </div>
 
@@ -142,7 +162,7 @@ export default function FundraisingReadiness() {
               {pct}%
             </div>
             <div className="text-lg font-semibold text-foreground mb-1">{readinessLabel.icon} {readinessLabel.label}</div>
-            <div className="text-xs text-muted-foreground mb-3">{score} / {maxScore} weighted points</div>
+            <div className="text-xs text-muted-foreground mb-3">{score} / {maxScore} {lang === 'ar' ? 'نقطة مرجحة' : 'weighted points'}</div>
             <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
@@ -187,9 +207,9 @@ export default function FundraisingReadiness() {
             >
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full" style={{ background: CATEGORY_COLORS[cat] }} />
-                <span className="text-sm font-semibold text-foreground">{cat}</span>
+                <span className="text-sm font-semibold text-foreground">{lang === 'ar' ? (CATEGORY_LABELS_AR[cat] || cat) : cat}</span>
                 <span className="text-xs text-muted-foreground">
-                  {catItems.filter(i => i.checked).length}/{catItems.length} completed
+                  {catItems.filter(i => i.checked).length}/{catItems.length} {lang === 'ar' ? 'مكتمل' : 'completed'}
                 </span>
               </div>
               <div className="flex items-center gap-3">
@@ -212,7 +232,7 @@ export default function FundraisingReadiness() {
                     <div className="flex-1">
                       <div className={`text-sm font-medium ${item.checked ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                         {item.label}
-                        {item.weight === 3 && <span className="ml-1.5 text-[9px] font-bold text-red-500 uppercase tracking-wider">Critical</span>}
+                        {item.weight === 3 && <span className="ml-1.5 text-[9px] font-bold text-red-500 uppercase tracking-wider">{lang === 'ar' ? 'حرج' : 'Critical'}</span>}
                       </div>
                       <div className="text-xs text-muted-foreground mt-0.5">{item.description}</div>
                       {!item.checked && (

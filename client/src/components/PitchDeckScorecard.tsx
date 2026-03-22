@@ -6,6 +6,7 @@
 import ToolGuide from '@/components/ToolGuide';
 import { useState, useMemo, useEffect } from 'react';
 import { useStartup } from '@/contexts/StartupContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts';
@@ -156,8 +157,22 @@ const INITIAL_SLIDES: Slide[] = [
   },
 ];
 
+const SLIDE_NAMES_AR: Record<string, string> = {
+  problem: 'المشكلة',
+  solution: 'الحل',
+  market: 'حجم السوق',
+  traction: 'النمو',
+  'business-model': 'نموذج العمل',
+  competition: 'المنافسة',
+  team: 'الفريق',
+  financials: 'الماليات',
+  'go-to-market': 'خطة الدخول للسوق',
+  ask: 'طلب التمويل',
+};
+
 export default function PitchDeckScorecard() {
   const { snapshot } = useStartup();
+  const { lang, isRTL } = useLanguage();
   const { state: slides, setState: setSlides } = useToolState<Slide[]>('pitch_scorecard', INITIAL_SLIDES);
   const [expandedId, setExpandedId] = useState<string | null>('problem');
   const { setPitchScore } = useReport();
@@ -174,10 +189,11 @@ export default function PitchDeckScorecard() {
     return { totalScore, maxScore, pct, radarData };
   }, [slides]);
 
-  const fundabilityLabel = pct >= 80 ? { label: 'Highly Fundable', color: '#10B981' }
-    : pct >= 65 ? { label: 'Fundable with Work', color: '#F59E0B' }
-    : pct >= 50 ? { label: 'Needs Improvement', color: '#F97316' }
-    : { label: 'Major Gaps', color: '#EF4444' };
+  const fundabilityLabel = pct >= 80
+    ? { label: lang === 'ar' ? 'قابل للتمويل بشدة' : 'Highly Fundable', color: '#10B981' }
+    : pct >= 65 ? { label: lang === 'ar' ? 'قابل للتمويل مع تحسينات' : 'Fundable with Work', color: '#F59E0B' }
+    : pct >= 50 ? { label: lang === 'ar' ? 'يحتاج تحسيناً' : 'Needs Improvement', color: '#F97316' }
+    : { label: lang === 'ar' ? 'ثغرات جوهرية' : 'Major Gaps', color: '#EF4444' };
 
   const weakSlides = slides.filter(s => s.score < 6).sort((a, b) => (a.score * a.weight) - (b.score * b.weight));
 
@@ -194,27 +210,34 @@ export default function PitchDeckScorecard() {
   return (
     <div className="space-y-5">
       <ToolGuide
-        toolName='Pitch Deck Scorecard'
-        tagline='Score your pitch deck across 10 investor criteria.'
-        steps={[
+        toolName={lang === 'ar' ? 'بطاقة تقييم عرض التقديم' : 'Pitch Deck Scorecard'}
+        tagline={lang === 'ar' ? 'قيّم عرضك التقديمي عبر 10 معايير استثمارية.' : 'Score your pitch deck across 10 investor criteria.'}
+        steps={lang === 'ar' ? [
+          { step: 1, title: 'قيّم كل شريحة', description: 'أعط درجة لكل قسم من العشرة من 0 إلى 10.' },
+          { step: 2, title: 'أضف ملاحظات', description: 'سجّل نقاط الضعف المحددة لمعالجتها في كل قسم.' },
+          { step: 3, title: 'راجع الدرجة الإجمالية', description: 'تظهر درجتك الكلية وتقييمك في الأعلى.' },
+          { step: 4, title: 'حسّن المناطق الضعيفة', description: 'ركّز على الأقسام ذات الدرجة أقل من 6 — هذه أكبر ثغراتك.' },
+        ] : [
           { step: 1, title: 'Rate each slide', description: 'Score each of the 10 pitch deck sections from 1-5.' },
           { step: 2, title: 'Add notes', description: 'Note specific weaknesses to address in each section.' },
           { step: 3, title: 'Review overall score', description: 'Your total score and grade appear at the top.' },
           { step: 4, title: 'Improve weak areas', description: 'Focus on sections scoring below 3 — these are your biggest gaps.' },
         ]}
-        connections={[
+        connections={lang === 'ar' ? [
+          { from: 'ملف الشركة الناشئة', to: 'اسم الشركة يظهر في رأس بطاقة التقييم' },
+        ] : [
           { from: 'Startup Profile', to: 'company name shown in the scorecard header' },
         ]}
-        tip='Problem, Solution, and Traction slides are the most important. Investors decide in the first 3 slides.'
+        tip={lang === 'ar' ? 'شرائح المشكلة والحل والنمو هي الأهم. يتخذ المستثمرون قرارهم في الشرائح الثلاث الأولى.' : 'Problem, Solution, and Traction slides are the most important. Investors decide in the first 3 slides.'}
       />
 
       {/* Header */}
       <div>
         <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-          Pitch Deck Scorecard
+          {lang === 'ar' ? 'بطاقة تقييم عرض التقديم' : 'Pitch Deck Scorecard'}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Rate each slide 0-10. Get a fundability score and specific tips to improve your deck.
+          {lang === 'ar' ? 'أعط درجة لكل شريحة من 0-10. احصل على درجة قابلية التمويل ونصائح محددة لتحسين عرضك.' : 'Rate each slide 0-10. Get a fundability score and specific tips to improve your deck.'}
         </p>
       </div>
 
@@ -226,7 +249,7 @@ export default function PitchDeckScorecard() {
               {pct}%
             </div>
             <div className="text-base font-semibold text-foreground mb-1">{fundabilityLabel.label}</div>
-            <div className="text-xs text-muted-foreground mb-3">Fundability Score</div>
+            <div className="text-xs text-muted-foreground mb-3">{lang === 'ar' ? 'درجة قابلية التمويل' : 'Fundability Score'}</div>
             <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
@@ -249,12 +272,12 @@ export default function PitchDeckScorecard() {
 
         {weakSlides.length > 0 && (
           <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
-            <div className="text-xs font-semibold text-amber-800 mb-1.5">🎯 Priority Improvements</div>
+            <div className="text-xs font-semibold text-amber-800 mb-1.5">🎯 {lang === 'ar' ? 'أولويات التحسين' : 'Priority Improvements'}</div>
             <div className="flex flex-wrap gap-2">
               {weakSlides.slice(0, 4).map(s => (
                 <button key={s.id} onClick={() => setExpandedId(s.id)}
                   className="flex items-center gap-1.5 text-[10px] text-amber-700 bg-white border border-amber-300 px-2 py-1 rounded-full hover:bg-amber-50 transition-colors">
-                  {s.emoji} {s.name}: {s.score}/10
+                  {s.emoji} {lang === 'ar' ? (SLIDE_NAMES_AR[s.id] || s.name) : s.name}: {s.score}/10
                 </button>
               ))}
             </div>
@@ -276,7 +299,7 @@ export default function PitchDeckScorecard() {
               >
                 <span className="text-xl shrink-0">{slide.emoji}</span>
                 <div className="flex-1 text-left">
-                  <div className="text-sm font-semibold text-foreground">{slide.name}</div>
+                  <div className="text-sm font-semibold text-foreground">{lang === 'ar' ? (SLIDE_NAMES_AR[slide.id] || slide.name) : slide.name}</div>
                   <div className="text-[10px] text-muted-foreground">{slide.description}</div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">

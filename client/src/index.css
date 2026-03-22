@@ -1,9 +1,8 @@
 /*
- * Design System: "Startup Energy" — Colorful, Playful, Founder-Native
- * Vibe: Notion × Linear × Duolingo — bold, fun, confident, not corporate
- * Colors: Warm white background, vibrant coral/orange primary, multi-color accents
- * Typography: Nunito (headings) + DM Sans (body) + JetBrains Mono (numbers)
- * Sidebar: Light with colorful group accents — not dark and stuffy
+ * Design System: "Visible.vc Dark" — Professional, Dark, Founder-Grade
+ * Vibe: Visible.vc × Linear × Notion — dark charcoal, vivid blue CTA, clean white text
+ * Colors: Dark charcoal background (#202020), blue primary (#0F52DE), card surface (#2a2a2a)
+ * Typography: Inter (headings + body) + JetBrains Mono (numbers)
  */
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -46,54 +45,55 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
+
 :root {
-  --radius: 0.75rem;
+  --radius: 0.5rem;
 
-  /* ── Light mode: warm white + vibrant coral/orange primary ── */
-  --background: oklch(0.98 0.006 60);          /* warm off-white */
-  --foreground: oklch(0.18 0.03 30);            /* warm near-black */
-  --card: oklch(1 0 0);                          /* pure white */
-  --card-foreground: oklch(0.18 0.03 30);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.03 30);
+  /* ── Dark theme: Visible.vc charcoal ── */
+  --background: oklch(0.165 0 0);              /* #202020 dark charcoal */
+  --foreground: oklch(0.97 0 0);               /* near-white */
+  --card: oklch(0.20 0 0);                     /* #2a2a2a slightly lighter */
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.22 0 0);
+  --popover-foreground: oklch(0.95 0 0);
 
-  /* Primary: vibrant coral/orange — energetic, startup-y */
-  --primary: oklch(0.62 0.22 30);               /* vivid coral-orange */
+  /* Primary: Visible.vc blue #0F52DE */
+  --primary: oklch(0.50 0.22 264);             /* #0F52DE vivid blue */
   --primary-foreground: oklch(0.99 0 0);
 
-  --secondary: oklch(0.95 0.02 30);             /* light peach tint */
-  --secondary-foreground: oklch(0.30 0.06 30);
+  --secondary: oklch(0.26 0 0);               /* #373737 card surface */
+  --secondary-foreground: oklch(0.85 0 0);
 
-  --muted: oklch(0.94 0.01 60);
-  --muted-foreground: oklch(0.52 0.025 40);
+  --muted: oklch(0.24 0 0);
+  --muted-foreground: oklch(0.60 0 0);         /* #71717A zinc-500 */
 
-  /* Accent: electric violet */
-  --accent: oklch(0.60 0.24 290);               /* vivid violet */
+  /* Accent: same blue */
+  --accent: oklch(0.50 0.22 264);
   --accent-foreground: oklch(0.99 0 0);
 
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
 
-  --border: oklch(0.90 0.015 60);
-  --input: oklch(0.92 0.01 60);
-  --ring: oklch(0.62 0.22 30);
+  --border: oklch(0.28 0 0);                   /* subtle dark border */
+  --input: oklch(0.22 0 0);
+  --ring: oklch(0.50 0.22 264);
 
-  /* Chart colors — full rainbow */
-  --chart-1: oklch(0.62 0.22 30);               /* coral */
-  --chart-2: oklch(0.60 0.24 290);              /* violet */
-  --chart-3: oklch(0.72 0.19 155);              /* green */
-  --chart-4: oklch(0.75 0.18 55);               /* amber */
-  --chart-5: oklch(0.65 0.18 200);              /* cyan */
+  /* Chart colors */
+  --chart-1: oklch(0.50 0.22 264);            /* blue */
+  --chart-2: oklch(0.72 0.19 155);            /* green */
+  --chart-3: oklch(0.75 0.18 55);             /* amber */
+  --chart-4: oklch(0.65 0.18 200);            /* cyan */
+  --chart-5: oklch(0.60 0.24 290);            /* violet */
 
-  /* Sidebar: clean white with warm border */
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.25 0.03 30);
-  --sidebar-primary: oklch(0.62 0.22 30);
+  /* Sidebar: dark surface */
+  --sidebar: oklch(0.18 0 0);                  /* #242424 */
+  --sidebar-foreground: oklch(0.90 0 0);
+  --sidebar-primary: oklch(0.50 0.22 264);
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.95 0.025 30);
-  --sidebar-accent-foreground: oklch(0.25 0.03 30);
-  --sidebar-border: oklch(0.91 0.015 60);
-  --sidebar-ring: oklch(0.62 0.22 30);
+  --sidebar-accent: oklch(0.24 0 0);
+  --sidebar-accent-foreground: oklch(0.90 0 0);
+  --sidebar-border: oklch(0.26 0 0);
+  --sidebar-ring: oklch(0.50 0.22 264);
 }
 
 @layer base {
@@ -102,14 +102,15 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'DM Sans', 'Inter', sans-serif;
+    font-family: 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4 {
-    font-family: 'Nunito', 'Space Grotesk', sans-serif;
-    font-weight: 800;
-    letter-spacing: -0.01em;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: oklch(0.97 0 0);
   }
   .font-mono, .tabular-nums {
     font-family: 'JetBrains Mono', monospace;
@@ -129,7 +130,7 @@
   html.font-arabic textarea,
   html.font-arabic select,
   html.font-arabic label {
-    font-family: 'Noto Kufi Arabic', 'DM Sans', sans-serif;
+    font-family: 'Noto Kufi Arabic', 'Inter', sans-serif;
     letter-spacing: 0;
   }
   button:not(:disabled),
@@ -170,28 +171,52 @@
     }
   }
 
-  /* ── Gradient pill badge ── */
-  .badge-gradient {
-    background: linear-gradient(135deg, oklch(0.62 0.22 30), oklch(0.60 0.24 290));
+  /* ── Blue CTA button (Visible.vc style) ── */
+  .btn-primary-visible {
+    background: oklch(0.50 0.22 264);
     color: white;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 0.15rem 0.6rem;
-    letter-spacing: 0.03em;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.5rem 1.25rem;
+    border: none;
+    transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
   }
-
-  /* ── Glowing primary button ── */
-  .btn-glow {
-    box-shadow: 0 0 0 0 oklch(0.62 0.22 30 / 0);
-    transition: box-shadow 0.2s ease, transform 0.1s ease;
-  }
-  .btn-glow:hover {
-    box-shadow: 0 4px 20px oklch(0.62 0.22 30 / 0.40);
+  .btn-primary-visible:hover {
+    background: oklch(0.44 0.22 264);
+    box-shadow: 0 4px 16px oklch(0.50 0.22 264 / 0.35);
     transform: translateY(-1px);
   }
-  .btn-glow:active {
+  .btn-primary-visible:active {
     transform: translateY(0);
+  }
+
+  /* ── Outline button (Visible.vc secondary) ── */
+  .btn-outline-visible {
+    background: transparent;
+    color: oklch(0.90 0 0);
+    border: 1.5px solid oklch(0.35 0 0);
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.5rem 1.25rem;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .btn-outline-visible:hover {
+    border-color: oklch(0.55 0 0);
+    background: oklch(0.22 0 0);
+  }
+
+  /* ── Card (Visible.vc dark surface) ── */
+  .visible-card {
+    background: oklch(0.20 0 0);
+    border: 1px solid oklch(0.28 0 0);
+    border-radius: 8px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .visible-card:hover {
+    border-color: oklch(0.38 0 0);
+    box-shadow: 0 4px 20px oklch(0 0 0 / 0.4);
   }
 
   /* ── Metric display ── */
@@ -199,18 +224,19 @@
     font-family: 'JetBrains Mono', monospace;
     font-weight: 700;
     letter-spacing: -0.03em;
+    color: oklch(0.97 0 0);
   }
 
-  /* ── Sidebar (light) ── */
+  /* ── Sidebar (dark) ── */
   .nav-sidebar {
-    background: oklch(1 0 0);
-    color: oklch(0.25 0.03 30);
-    border-right: 1.5px solid oklch(0.91 0.015 60);
+    background: oklch(0.18 0 0);
+    color: oklch(0.85 0 0);
+    border-right: 1px solid oklch(0.26 0 0);
   }
 
-  /* ── Gradient accent bar ── */
+  /* ── Blue accent bar ── */
   .accent-bar {
-    background: linear-gradient(90deg, oklch(0.62 0.22 30), oklch(0.60 0.24 290), oklch(0.72 0.19 155));
+    background: oklch(0.50 0.22 264);
   }
 
   /* ── Card hover lift ── */
@@ -219,36 +245,37 @@
   }
   .card-hover:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px oklch(0.62 0.22 30 / 0.12);
+    box-shadow: 0 8px 30px oklch(0 0 0 / 0.5);
   }
 
-  /* ── Input styling ── */
+  /* ── Input styling (dark) ── */
   .vc-input {
-    background: oklch(0.98 0.006 60);
-    border: 1.5px solid oklch(0.90 0.015 60);
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
+    background: oklch(0.22 0 0);
+    border: 1px solid oklch(0.30 0 0);
+    border-radius: 6px;
+    color: oklch(0.95 0 0);
+    font-family: 'Inter', sans-serif;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
   .vc-input:focus {
-    border-color: oklch(0.62 0.22 30);
+    border-color: oklch(0.50 0.22 264);
     outline: none;
-    box-shadow: 0 0 0 3px oklch(0.62 0.22 30 / 0.15);
+    box-shadow: 0 0 0 3px oklch(0.50 0.22 264 / 0.20);
   }
 
   /* ── Chat input ── */
   .chat-input {
-    background: oklch(1 0 0);
-    border: 1.5px solid oklch(0.90 0.015 60);
-    border-radius: 12px;
-    font-family: 'DM Sans', sans-serif;
-    color: oklch(0.18 0.03 30);
+    background: oklch(0.22 0 0);
+    border: 1px solid oklch(0.30 0 0);
+    border-radius: 8px;
+    color: oklch(0.95 0 0);
+    font-family: 'Inter', sans-serif;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
   .chat-input:focus {
-    border-color: oklch(0.62 0.22 30);
+    border-color: oklch(0.50 0.22 264);
     outline: none;
-    box-shadow: 0 0 0 3px oklch(0.62 0.22 30 / 0.12);
+    box-shadow: 0 0 0 3px oklch(0.50 0.22 264 / 0.18);
   }
 
   /* ── Chat send button ── */
@@ -258,123 +285,140 @@
     justify-content: center;
     width: 2.25rem;
     height: 2.25rem;
-    border-radius: 10px;
-    background: oklch(0.62 0.22 30);
+    border-radius: 6px;
+    background: oklch(0.50 0.22 264);
     color: white;
     transition: background 0.15s ease, transform 0.1s ease;
   }
   .chat-send-btn:hover {
-    background: oklch(0.56 0.22 30);
+    background: oklch(0.44 0.22 264);
     transform: scale(1.05);
   }
   .chat-send-btn:disabled {
-    background: oklch(0.85 0.02 60);
-    color: oklch(0.60 0.02 60);
+    background: oklch(0.28 0 0);
+    color: oklch(0.50 0 0);
     transform: none;
     cursor: not-allowed;
   }
 
   /* ── Valuation method card ── */
   .method-card {
-    background: oklch(1 0 0);
-    border: 1.5px solid oklch(0.91 0.015 60);
-    border-radius: 12px;
+    background: oklch(0.20 0 0);
+    border: 1px solid oklch(0.28 0 0);
+    border-radius: 8px;
     padding: 1rem;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
   .method-card:hover {
-    border-color: oklch(0.62 0.22 30);
-    box-shadow: 0 4px 16px oklch(0.62 0.22 30 / 0.10);
+    border-color: oklch(0.50 0.22 264);
+    box-shadow: 0 4px 16px oklch(0.50 0.22 264 / 0.15);
   }
 
   /* ── Section heading ── */
   .section-heading {
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    color: oklch(0.18 0.03 30);
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: oklch(0.97 0 0);
   }
 
-  /* ── Colorful group header in sidebar ── */
-  .group-header-my-company   { color: oklch(0.62 0.22 30); }   /* coral */
-  .group-header-valuation    { color: oklch(0.60 0.24 290); }  /* violet */
-  .group-header-equity       { color: oklch(0.55 0.20 250); }  /* indigo */
-  .group-header-capital      { color: oklch(0.56 0.22 150); }  /* emerald */
-  .group-header-legal        { color: oklch(0.55 0.18 330); }  /* pink */
-  .group-header-market       { color: oklch(0.58 0.20 200); }  /* cyan */
-  .group-header-investor     { color: oklch(0.62 0.20 55); }   /* amber */
-  .group-header-ai           { color: oklch(0.58 0.22 290); }  /* purple */
-  .group-header-admin        { color: oklch(0.52 0.02 60); }   /* gray */
+  /* ── Group headers in sidebar ── */
+  .group-header-my-company   { color: oklch(0.75 0.12 264); }
+  .group-header-valuation    { color: oklch(0.75 0.12 264); }
+  .group-header-equity       { color: oklch(0.75 0.12 264); }
+  .group-header-capital      { color: oklch(0.75 0.12 264); }
+  .group-header-legal        { color: oklch(0.75 0.12 264); }
+  .group-header-market       { color: oklch(0.75 0.12 264); }
+  .group-header-investor     { color: oklch(0.75 0.12 264); }
+  .group-header-ai           { color: oklch(0.75 0.12 264); }
+  .group-header-admin        { color: oklch(0.55 0 0); }
 
-  /* ── Colorful active nav item per group ── */
-  .nav-active-my-company   { background: oklch(0.96 0.04 30) !important;  color: oklch(0.50 0.22 30) !important; }
-  .nav-active-valuation    { background: oklch(0.94 0.05 290) !important; color: oklch(0.45 0.24 290) !important; }
-  .nav-active-equity       { background: oklch(0.94 0.04 250) !important; color: oklch(0.42 0.20 250) !important; }
-  .nav-active-capital      { background: oklch(0.93 0.05 150) !important; color: oklch(0.42 0.22 150) !important; }
-  .nav-active-legal        { background: oklch(0.94 0.04 330) !important; color: oklch(0.44 0.18 330) !important; }
-  .nav-active-market       { background: oklch(0.93 0.04 200) !important; color: oklch(0.44 0.20 200) !important; }
-  .nav-active-investor     { background: oklch(0.95 0.05 55) !important;  color: oklch(0.48 0.20 55) !important; }
-  .nav-active-ai           { background: oklch(0.94 0.05 290) !important; color: oklch(0.45 0.22 290) !important; }
-  .nav-active-admin        { background: oklch(0.94 0.01 60) !important;  color: oklch(0.35 0.02 60) !important; }
+  /* ── Active nav item ── */
+  .nav-active-my-company   { background: oklch(0.50 0.22 264 / 0.15) !important; color: oklch(0.75 0.18 264) !important; }
+  .nav-active-valuation    { background: oklch(0.50 0.22 264 / 0.15) !important; color: oklch(0.75 0.18 264) !important; }
+  .nav-active-equity       { background: oklch(0.50 0.22 264 / 0.15) !important; color: oklch(0.75 0.18 264) !important; }
+  .nav-active-capital      { background: oklch(0.50 0.22 264 / 0.15) !important; color: oklch(0.75 0.18 264) !important; }
+  .nav-active-legal        { background: oklch(0.50 0.22 264 / 0.15) !important; color: oklch(0.75 0.18 264) !important; }
+  .nav-active-market       { background: oklch(0.50 0.22 264 / 0.15) !important; color: oklch(0.75 0.18 264) !important; }
+  .nav-active-investor     { background: oklch(0.50 0.22 264 / 0.15) !important; color: oklch(0.75 0.18 264) !important; }
+  .nav-active-ai           { background: oklch(0.50 0.22 264 / 0.15) !important; color: oklch(0.75 0.18 264) !important; }
+  .nav-active-admin        { background: oklch(0.26 0 0) !important; color: oklch(0.80 0 0) !important; }
 
-  /* ── Gradient hero text ── */
+  /* ── Badge (Visible.vc style) ── */
+  .badge-gradient {
+    background: oklch(0.50 0.22 264);
+    color: white;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Glowing primary button ── */
+  .btn-glow {
+    box-shadow: 0 0 0 0 oklch(0.50 0.22 264 / 0);
+    transition: box-shadow 0.2s ease, transform 0.1s ease;
+  }
+  .btn-glow:hover {
+    box-shadow: 0 4px 20px oklch(0.50 0.22 264 / 0.40);
+    transform: translateY(-1px);
+  }
+  .btn-glow:active {
+    transform: translateY(0);
+  }
+
+  /* ── Blue gradient text ── */
   .gradient-text {
-    background: linear-gradient(135deg, oklch(0.62 0.22 30) 0%, oklch(0.60 0.24 290) 50%, oklch(0.72 0.19 155) 100%);
+    background: linear-gradient(135deg, oklch(0.65 0.18 264) 0%, oklch(0.75 0.15 200) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* ── Colorful stat cards ── */
-  .stat-card-coral  { background: linear-gradient(135deg, oklch(0.96 0.04 30), oklch(0.99 0.01 30)); border: 1.5px solid oklch(0.88 0.06 30); }
-  .stat-card-violet { background: linear-gradient(135deg, oklch(0.95 0.04 290), oklch(0.99 0.01 290)); border: 1.5px solid oklch(0.86 0.06 290); }
-  .stat-card-green  { background: linear-gradient(135deg, oklch(0.95 0.05 155), oklch(0.99 0.01 155)); border: 1.5px solid oklch(0.86 0.07 155); }
-  .stat-card-amber  { background: linear-gradient(135deg, oklch(0.96 0.05 55), oklch(0.99 0.01 55)); border: 1.5px solid oklch(0.88 0.07 55); }
+  /* ── Stat cards (dark) ── */
+  .stat-card-coral  { background: oklch(0.22 0 0); border: 1px solid oklch(0.50 0.22 264 / 0.3); }
+  .stat-card-violet { background: oklch(0.22 0 0); border: 1px solid oklch(0.50 0.22 264 / 0.3); }
+  .stat-card-green  { background: oklch(0.22 0 0); border: 1px solid oklch(0.72 0.19 155 / 0.3); }
+  .stat-card-amber  { background: oklch(0.22 0 0); border: 1px solid oklch(0.75 0.18 55 / 0.3); }
 
-  /* ── Playful section divider ── */
+  /* ── Section divider ── */
   .rainbow-divider {
-    height: 3px;
-    background: linear-gradient(90deg,
-      oklch(0.62 0.22 30),
-      oklch(0.75 0.18 55),
-      oklch(0.72 0.19 155),
-      oklch(0.65 0.18 200),
-      oklch(0.60 0.24 290),
-      oklch(0.62 0.22 330)
-    );
+    height: 1px;
+    background: oklch(0.30 0 0);
     border-radius: 999px;
   }
 
-  /* ── Floating card with colored top border ── */
+  /* ── Tool card ── */
   .tool-card {
-    background: white;
-    border-radius: 16px;
-    border: 1.5px solid oklch(0.91 0.015 60);
-    box-shadow: 0 2px 12px oklch(0.18 0.03 30 / 0.06);
+    background: oklch(0.20 0 0);
+    border-radius: 8px;
+    border: 1px solid oklch(0.28 0 0);
     overflow: hidden;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
   }
   .tool-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 28px oklch(0.18 0.03 30 / 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px oklch(0 0 0 / 0.5);
+    border-color: oklch(0.38 0 0);
   }
 }
 
 /* ── Scrollbar styling ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: oklch(0.82 0.02 60); border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: oklch(0.70 0.04 60); }
+::-webkit-scrollbar-track { background: oklch(0.18 0 0); }
+::-webkit-scrollbar-thumb { background: oklch(0.32 0 0); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: oklch(0.42 0 0); }
 
 /* ── Selection color ── */
 ::selection {
-  background: oklch(0.62 0.22 30 / 0.20);
-  color: oklch(0.18 0.03 30);
+  background: oklch(0.50 0.22 264 / 0.30);
+  color: oklch(0.97 0 0);
 }
 
 /* ── Focus ring ── */
 :focus-visible {
-  outline: 2px solid oklch(0.62 0.22 30);
+  outline: 2px solid oklch(0.50 0.22 264);
   outline-offset: 2px;
 }
 
@@ -384,71 +428,23 @@
   transition-duration: 0.12s;
   transition-timing-function: ease;
 }
-/* Exclude layout properties from global transition */
 *:not(input):not(textarea) {
   transition-property: color, background-color, border-color, box-shadow, opacity;
 }
 
 /* ── RTL (Arabic) global layout fixes ── */
-/* When dir=rtl is set on <html>, these rules ensure all components respect it */
-
-/* Text alignment: default to start (left in LTR, right in RTL) */
 [dir="rtl"] .text-left { text-align: right !important; }
 [dir="rtl"] .text-right { text-align: left !important; }
-
-/* Flex row direction: reverse flex-row in RTL */
-[dir="rtl"] .flex-row { flex-direction: row-reverse; }
-
-/* Padding/margin logical properties for sidebar and cards */
-[dir="rtl"] .pl-3 { padding-left: 0; padding-right: 0.75rem; }
-[dir="rtl"] .pr-3 { padding-right: 0; padding-left: 0.75rem; }
-[dir="rtl"] .pl-4 { padding-left: 0; padding-right: 1rem; }
-[dir="rtl"] .pr-4 { padding-right: 0; padding-left: 1rem; }
-[dir="rtl"] .pl-5 { padding-left: 0; padding-right: 1.25rem; }
-[dir="rtl"] .pr-5 { padding-right: 0; padding-left: 1.25rem; }
-[dir="rtl"] .pl-6 { padding-left: 0; padding-right: 1.5rem; }
-[dir="rtl"] .pr-6 { padding-right: 0; padding-left: 1.5rem; }
-
-/* Margin logical properties */
+/* flex-row direction is handled explicitly via isRTL ? 'flex-row-reverse' : 'flex-row' in JSX */
 [dir="rtl"] .ml-auto { margin-left: 0; margin-right: auto; }
 [dir="rtl"] .mr-auto { margin-right: 0; margin-left: auto; }
-[dir="rtl"] .ml-1 { margin-left: 0; margin-right: 0.25rem; }
-[dir="rtl"] .ml-2 { margin-left: 0; margin-right: 0.5rem; }
-[dir="rtl"] .ml-3 { margin-left: 0; margin-right: 0.75rem; }
-[dir="rtl"] .mr-1 { margin-right: 0; margin-left: 0.25rem; }
-[dir="rtl"] .mr-2 { margin-right: 0; margin-left: 0.5rem; }
-[dir="rtl"] .mr-3 { margin-right: 0; margin-left: 0.75rem; }
-
-/* Border logical properties */
-[dir="rtl"] .border-l { border-left: none; border-right: 1px solid var(--border); }
-[dir="rtl"] .border-r { border-right: none; border-left: 1px solid var(--border); }
-[dir="rtl"] .border-l-2 { border-left: none; border-right: 2px solid var(--border); }
-[dir="rtl"] .rounded-l { border-radius: 0 0.25rem 0.25rem 0; }
-[dir="rtl"] .rounded-r { border-radius: 0.25rem 0 0 0.25rem; }
-
-/* Icon chevrons: flip directional icons */
-[dir="rtl"] .lucide-chevron-right { transform: scaleX(-1); }
-[dir="rtl"] .lucide-chevron-left { transform: scaleX(-1); }
-[dir="rtl"] .lucide-arrow-right { transform: scaleX(-1); }
-[dir="rtl"] .lucide-arrow-left { transform: scaleX(-1); }
-
-/* Input text direction */
-[dir="rtl"] input, [dir="rtl"] textarea {
-  text-align: right;
-  direction: rtl;
-}
-
-/* Number inputs should stay LTR even in RTL mode */
-[dir="rtl"] input[type="number"] {
-  text-align: left;
-  direction: ltr;
-}
-
-/* Table cells */
-[dir="rtl"] th, [dir="rtl"] td { text-align: right; }
-
-/* Font for Arabic text */
-[dir="rtl"] body,
-[dir="rtl"] .font-sans {
-  font-family: 'Noto Sans Arabic', 'DM Sans', system-ui, sans-serif;
-}
+[dir="rtl"] .pl-4 { padding-left: 0; padding-right: 1rem; }
+[dir="rtl"] .pr-4 { padding-right: 0; padding-left: 1rem; }
+[dir="rtl"] .border-l { border-left: none; border-right-width: 1px; }
+[dir="rtl"] .border-r { border-right: none; border-left-width: 1px; }
+[dir="rtl"] .rounded-l-lg { border-radius: 0 0.5rem 0.5rem 0; }
+[dir="rtl"] .rounded-r-lg { border-radius: 0.5rem 0 0 0.5rem; }
+[dir="rtl"] .space-x-2 > * + * { margin-left: 0; margin-right: 0.5rem; }
+[dir="rtl"] .space-x-3 > * + * { margin-left: 0; margin-right: 0.75rem; }
+[dir="rtl"] .space-x-4 > * + * { margin-left: 0; margin-right: 1rem; }
+[dir="rtl"] .gap-x-2 { column-gap: 0.5rem; }

@@ -1,14 +1,16 @@
 /**
- * Sales Tracker — Full Pipeline CRM
- * Kanban pipeline, detailed deal form, analytics: MoM revenue, channel, product,
- * win rate, weighted pipeline, forecast, AI analysis.
+ * Sales Tracker — Business Model Adaptive Pipeline
+ * Stages, fields, KPIs, and unit economics adapt to:
+ *   Business Model: SaaS | E-commerce | Marketplace | Agency | Hardware
+ *   Motion: B2B | B2C
  */
 import { useState, useMemo, useCallback } from 'react';
 import {
   Plus, Trash2, Loader2, Edit2, X, Check, ChevronDown, ChevronUp,
-  BarChart3, TrendingUp, DollarSign, Target, Users, Mail, Phone,
-  Calendar, Sparkles, RefreshCw, Filter, Search, ArrowUpDown,
-  AlertCircle, CheckCircle2, Clock, XCircle, GitMerge
+  BarChart3, TrendingUp, DollarSign, Target, Users, Sparkles,
+  RefreshCw, Search, ArrowUpDown, CheckCircle2, Clock, XCircle,
+  GitMerge, Zap, Activity, ShoppingCart, Briefcase, Cpu, Store,
+  Package, UserCheck, Repeat
 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -25,19 +27,75 @@ import { toast } from 'sonner';
 import { Streamdown } from 'streamdown';
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Cell, Legend, PieChart, Pie
+  Tooltip, ResponsiveContainer, Cell, PieChart, Pie
 } from 'recharts';
 
 // ── Types ──────────────────────────────────────────────────────────────────
-type DealStage = 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost';
-type Channel = 'direct' | 'online' | 'referral' | 'partner' | 'inbound' | 'outbound' | 'other';
+type BusinessModel = 'saas' | 'ecommerce' | 'marketplace' | 'agency' | 'hardware';
+type Motion = 'b2b' | 'b2c';
+type DealStage = string;
+
+interface StageConfig {
+  label: string;
+  labelAr: string;
+  color: string;
+  bg: string;
+  icon: React.ElementType;
+  defaultProb: number;
+}
+
+interface ModelConfig {
+  label: string;
+  labelAr: string;
+  icon: React.ElementType;
+  stages: Record<string, StageConfig>;
+  wonStage: string;
+  lostStage: string;
+  dealLabel: string;
+  dealLabelAr: string;
+  amountLabel: string;
+  amountLabelAr: string;
+  extraFields: ExtraField[];
+  kpiLabels: KpiLabels;
+  unitEconLabels: UnitEconLabels;
+  benchmarks: Benchmark[];
+}
+
+interface ExtraField {
+  key: string;
+  label: string;
+  labelAr: string;
+  type: 'text' | 'number' | 'select';
+  options?: string[];
+  placeholder?: string;
+}
+
+interface KpiLabels {
+  revenue: string; revenueAr: string;
+  pipeline: string; pipelineAr: string;
+  weighted: string; weightedAr: string;
+  winRate: string; winRateAr: string;
+}
+
+interface UnitEconLabels {
+  arpc: string; arpcAr: string;
+  ltv: string; ltvAr: string;
+  cac: string; cacAr: string;
+  payback: string; paybackAr: string;
+  extraMetric?: string; extraMetricAr?: string;
+}
+
+interface Benchmark {
+  metric: string; metricAr: string;
+  b2b: string; b2c: string;
+}
 
 interface Deal {
   id: number;
   date: string | Date;
   amount: number;
   currency: string;
-  channel: Channel;
+  channel: string;
   product: string;
   customer: string;
   dealStage: DealStage;
@@ -51,28 +109,231 @@ interface Deal {
   nextAction?: string | null;
   notes?: string | null;
   createdAt?: string | Date;
+  // extra model-specific fields stored in notes as JSON prefix
 }
 
-const STAGE_CONFIG: Record<DealStage, { label: string; color: string; bg: string; icon: React.ElementType; defaultProb: number }> = {
-  lead:         { label: 'Lead',        color: 'text-slate-600',  bg: 'bg-slate-100',  icon: Users,        defaultProb: 10 },
-  qualified:    { label: 'Qualified',   color: 'text-blue-600',   bg: 'bg-blue-50',    icon: CheckCircle2, defaultProb: 25 },
-  proposal:     { label: 'Proposal',    color: 'text-yellow-600', bg: 'bg-yellow-50',  icon: Clock,        defaultProb: 50 },
-  negotiation:  { label: 'Negotiation', color: 'text-orange-600', bg: 'bg-orange-50',  icon: ArrowUpDown,  defaultProb: 75 },
-  closed_won:   { label: 'Won',         color: 'text-green-600',  bg: 'bg-green-50',   icon: CheckCircle2, defaultProb: 100 },
-  closed_lost:  { label: 'Lost',        color: 'text-red-600',    bg: 'bg-red-50',     icon: XCircle,      defaultProb: 0 },
+// ── Model Configurations ───────────────────────────────────────────────────
+const MODEL_CONFIGS: Record<BusinessModel, ModelConfig> = {
+  saas: {
+    label: 'SaaS',
+    labelAr: 'SaaS',
+    icon: Zap,
+    stages: {
+      lead:        { label: 'Lead',        labelAr: 'عميل محتمل',   color: 'text-slate-600',  bg: 'bg-slate-100',   icon: Users,         defaultProb: 10 },
+      trial:       { label: 'Trial',       labelAr: 'تجربة',        color: 'text-sky-600',    bg: 'bg-sky-50',      icon: Clock,         defaultProb: 20 },
+      demo:        { label: 'Demo',        labelAr: 'عرض توضيحي',   color: 'text-blue-600',   bg: 'bg-blue-50',     icon: Activity,      defaultProb: 35 },
+      proposal:    { label: 'Proposal',    labelAr: 'عرض سعر',      color: 'text-yellow-600', bg: 'bg-yellow-50',   icon: Clock,         defaultProb: 55 },
+      negotiation: { label: 'Negotiation', labelAr: 'تفاوض',        color: 'text-orange-600', bg: 'bg-orange-50',   icon: ArrowUpDown,   defaultProb: 75 },
+      closed_won:  { label: 'Closed Won',  labelAr: 'مُغلقة (ربح)', color: 'text-green-600',  bg: 'bg-green-50',    icon: CheckCircle2,  defaultProb: 100 },
+      closed_lost: { label: 'Closed Lost', labelAr: 'مُغلقة (خسارة)', color: 'text-red-600', bg: 'bg-red-50',      icon: XCircle,       defaultProb: 0 },
+    },
+    wonStage: 'closed_won', lostStage: 'closed_lost',
+    dealLabel: 'Account', dealLabelAr: 'حساب',
+    amountLabel: 'ARR / MRR', amountLabelAr: 'الإيراد السنوي/الشهري المتكرر',
+    extraFields: [
+      { key: 'seats', label: 'Seats / Licenses', labelAr: 'عدد المقاعد', type: 'number', placeholder: '10' },
+      { key: 'contractMonths', label: 'Contract Length (mo)', labelAr: 'مدة العقد (شهر)', type: 'number', placeholder: '12' },
+      { key: 'plan', label: 'Plan / Tier', labelAr: 'الخطة', type: 'select', options: ['Starter', 'Growth', 'Enterprise', 'Custom'] },
+    ],
+    kpiLabels: {
+      revenue: 'Total ARR', revenueAr: 'إجمالي الإيراد السنوي',
+      pipeline: 'Pipeline ARR', pipelineAr: 'خط أنابيب الإيراد السنوي',
+      weighted: 'Weighted ARR', weightedAr: 'الإيراد السنوي المرجّح',
+      winRate: 'Win Rate', winRateAr: 'معدل الفوز',
+    },
+    unitEconLabels: {
+      arpc: 'Avg ARR / Account', arpcAr: 'متوسط الإيراد السنوي لكل حساب',
+      ltv: 'Customer LTV', ltvAr: 'القيمة الدائمة للعميل',
+      cac: 'CAC', cacAr: 'تكلفة اكتساب العميل',
+      payback: 'CAC Payback', paybackAr: 'فترة استرداد تكلفة الاكتساب',
+      extraMetric: 'NRR (est.)', extraMetricAr: 'معدل الاحتفاظ الصافي (تقديري)',
+    },
+    benchmarks: [
+      { metric: 'LTV/CAC', metricAr: 'نسبة LTV/CAC', b2b: '3–5x', b2c: '2–4x' },
+      { metric: 'CAC Payback', metricAr: 'فترة الاسترداد', b2b: '12–18 mo', b2c: '6–12 mo' },
+      { metric: 'Gross Margin', metricAr: 'هامش الربح الإجمالي', b2b: '70–80%', b2c: '65–75%' },
+      { metric: 'Win Rate', metricAr: 'معدل الفوز', b2b: '20–30%', b2c: '2–5%' },
+      { metric: 'Avg Contract', metricAr: 'متوسط العقد', b2b: '12–24 mo', b2c: '1–3 mo' },
+    ],
+  },
+
+  ecommerce: {
+    label: 'E-commerce',
+    labelAr: 'تجارة إلكترونية',
+    icon: ShoppingCart,
+    stages: {
+      browsing:   { label: 'Browsing',   labelAr: 'تصفح',         color: 'text-slate-600',  bg: 'bg-slate-100',   icon: Search,        defaultProb: 5 },
+      cart:       { label: 'Cart',       labelAr: 'سلة التسوق',   color: 'text-sky-600',    bg: 'bg-sky-50',      icon: ShoppingCart,  defaultProb: 20 },
+      checkout:   { label: 'Checkout',   labelAr: 'الدفع',        color: 'text-blue-600',   bg: 'bg-blue-50',     icon: DollarSign,    defaultProb: 60 },
+      processing: { label: 'Processing', labelAr: 'قيد المعالجة', color: 'text-yellow-600', bg: 'bg-yellow-50',   icon: Clock,         defaultProb: 85 },
+      fulfilled:  { label: 'Fulfilled',  labelAr: 'تم الشحن',     color: 'text-green-600',  bg: 'bg-green-50',    icon: CheckCircle2,  defaultProb: 100 },
+      returned:   { label: 'Returned',   labelAr: 'مُرتجع',       color: 'text-red-600',    bg: 'bg-red-50',      icon: XCircle,       defaultProb: 0 },
+    },
+    wonStage: 'fulfilled', lostStage: 'returned',
+    dealLabel: 'Order', dealLabelAr: 'طلب',
+    amountLabel: 'Order Value (GMV)', amountLabelAr: 'قيمة الطلب (GMV)',
+    extraFields: [
+      { key: 'sku', label: 'SKU / Product', labelAr: 'رمز المنتج', type: 'text', placeholder: 'SKU-001' },
+      { key: 'units', label: 'Units Ordered', labelAr: 'الكمية', type: 'number', placeholder: '1' },
+      { key: 'discountPct', label: 'Discount (%)', labelAr: 'الخصم (%)', type: 'number', placeholder: '0' },
+      { key: 'shippingCost', label: 'Shipping Cost', labelAr: 'تكلفة الشحن', type: 'number', placeholder: '0' },
+    ],
+    kpiLabels: {
+      revenue: 'Total GMV', revenueAr: 'إجمالي قيمة البضائع',
+      pipeline: 'Pending Orders', pipelineAr: 'الطلبات المعلقة',
+      weighted: 'Checkout Value', weightedAr: 'قيمة الطلبات في الدفع',
+      winRate: 'Fulfillment Rate', winRateAr: 'معدل إتمام الطلبات',
+    },
+    unitEconLabels: {
+      arpc: 'Avg Order Value (AOV)', arpcAr: 'متوسط قيمة الطلب',
+      ltv: 'Customer LTV', ltvAr: 'القيمة الدائمة للعميل',
+      cac: 'CAC / CPA', cacAr: 'تكلفة اكتساب العميل',
+      payback: 'Payback Period', paybackAr: 'فترة الاسترداد',
+      extraMetric: 'Repeat Rate', extraMetricAr: 'معدل التكرار',
+    },
+    benchmarks: [
+      { metric: 'AOV', metricAr: 'متوسط قيمة الطلب', b2b: '$200–$2,000', b2c: '$50–$150' },
+      { metric: 'Gross Margin', metricAr: 'هامش الربح الإجمالي', b2b: '35–55%', b2c: '30–50%' },
+      { metric: 'Cart Abandon Rate', metricAr: 'معدل التخلي عن السلة', b2b: '60–70%', b2c: '70–80%' },
+      { metric: 'Repeat Purchase Rate', metricAr: 'معدل الشراء المتكرر', b2b: '50–70%', b2c: '20–40%' },
+      { metric: 'Return Rate', metricAr: 'معدل الإرجاع', b2b: '5–10%', b2c: '15–30%' },
+    ],
+  },
+
+  marketplace: {
+    label: 'Marketplace',
+    labelAr: 'منصة سوق',
+    icon: Store,
+    stages: {
+      inquiry:    { label: 'Inquiry',    labelAr: 'استفسار',      color: 'text-slate-600',  bg: 'bg-slate-100',   icon: Users,         defaultProb: 10 },
+      matched:    { label: 'Matched',    labelAr: 'تم التطابق',   color: 'text-sky-600',    bg: 'bg-sky-50',      icon: UserCheck,     defaultProb: 30 },
+      negotiating:{ label: 'Negotiating',labelAr: 'تفاوض',        color: 'text-blue-600',   bg: 'bg-blue-50',     icon: ArrowUpDown,   defaultProb: 50 },
+      in_progress:{ label: 'In Progress',labelAr: 'قيد التنفيذ',  color: 'text-yellow-600', bg: 'bg-yellow-50',   icon: Clock,         defaultProb: 75 },
+      completed:  { label: 'Completed',  labelAr: 'مكتمل',        color: 'text-green-600',  bg: 'bg-green-50',    icon: CheckCircle2,  defaultProb: 100 },
+      cancelled:  { label: 'Cancelled',  labelAr: 'ملغى',         color: 'text-red-600',    bg: 'bg-red-50',      icon: XCircle,       defaultProb: 0 },
+    },
+    wonStage: 'completed', lostStage: 'cancelled',
+    dealLabel: 'Transaction', dealLabelAr: 'معاملة',
+    amountLabel: 'GMV', amountLabelAr: 'إجمالي قيمة المعاملات',
+    extraFields: [
+      { key: 'takeRatePct', label: 'Take Rate (%)', labelAr: 'نسبة العمولة (%)', type: 'number', placeholder: '10' },
+      { key: 'buyerName', label: 'Buyer', labelAr: 'المشتري', type: 'text', placeholder: 'Buyer name' },
+      { key: 'sellerName', label: 'Seller / Provider', labelAr: 'البائع / مزود الخدمة', type: 'text', placeholder: 'Seller name' },
+      { key: 'category', label: 'Category', labelAr: 'الفئة', type: 'text', placeholder: 'e.g. Logistics' },
+    ],
+    kpiLabels: {
+      revenue: 'Net Revenue (Take)', revenueAr: 'الإيراد الصافي (العمولة)',
+      pipeline: 'Pending GMV', pipelineAr: 'GMV المعلق',
+      weighted: 'Weighted GMV', weightedAr: 'GMV المرجّح',
+      winRate: 'Completion Rate', winRateAr: 'معدل الإتمام',
+    },
+    unitEconLabels: {
+      arpc: 'Avg GMV / Transaction', arpcAr: 'متوسط GMV لكل معاملة',
+      ltv: 'Buyer LTV', ltvAr: 'القيمة الدائمة للمشتري',
+      cac: 'CAC (Buyer)', cacAr: 'تكلفة اكتساب المشتري',
+      payback: 'Payback Period', paybackAr: 'فترة الاسترداد',
+      extraMetric: 'Avg Take Rate', extraMetricAr: 'متوسط نسبة العمولة',
+    },
+    benchmarks: [
+      { metric: 'Take Rate', metricAr: 'نسبة العمولة', b2b: '5–15%', b2c: '10–25%' },
+      { metric: 'Gross Margin', metricAr: 'هامش الربح الإجمالي', b2b: '60–75%', b2c: '55–70%' },
+      { metric: 'Completion Rate', metricAr: 'معدل الإتمام', b2b: '70–85%', b2c: '80–90%' },
+      { metric: 'Repeat Rate', metricAr: 'معدل التكرار', b2b: '40–60%', b2c: '30–50%' },
+      { metric: 'LTV/CAC', metricAr: 'نسبة LTV/CAC', b2b: '3–6x', b2c: '2–4x' },
+    ],
+  },
+
+  agency: {
+    label: 'Agency / Services',
+    labelAr: 'وكالة / خدمات',
+    icon: Briefcase,
+    stages: {
+      brief:      { label: 'Brief',      labelAr: 'موجز المشروع',  color: 'text-slate-600',  bg: 'bg-slate-100',   icon: Users,         defaultProb: 15 },
+      proposal:   { label: 'Proposal',   labelAr: 'عرض سعر',      color: 'text-sky-600',    bg: 'bg-sky-50',      icon: Clock,         defaultProb: 30 },
+      scoping:    { label: 'Scoping',    labelAr: 'تحديد النطاق',  color: 'text-blue-600',   bg: 'bg-blue-50',     icon: Activity,      defaultProb: 50 },
+      contract:   { label: 'Contract',   labelAr: 'عقد',           color: 'text-yellow-600', bg: 'bg-yellow-50',   icon: ArrowUpDown,   defaultProb: 75 },
+      delivery:   { label: 'Delivery',   labelAr: 'تسليم',         color: 'text-green-600',  bg: 'bg-green-50',    icon: CheckCircle2,  defaultProb: 100 },
+      lost:       { label: 'Lost',       labelAr: 'خسارة',         color: 'text-red-600',    bg: 'bg-red-50',      icon: XCircle,       defaultProb: 0 },
+    },
+    wonStage: 'delivery', lostStage: 'lost',
+    dealLabel: 'Project / Retainer', dealLabelAr: 'مشروع / عقد شهري',
+    amountLabel: 'Project Value', amountLabelAr: 'قيمة المشروع',
+    extraFields: [
+      { key: 'projectType', label: 'Project Type', labelAr: 'نوع المشروع', type: 'select', options: ['Retainer', 'One-off', 'Hourly', 'Performance'] },
+      { key: 'estimatedHours', label: 'Estimated Hours', labelAr: 'الساعات المقدرة', type: 'number', placeholder: '40' },
+      { key: 'monthlyRetainer', label: 'Monthly Retainer', labelAr: 'الرسوم الشهرية', type: 'number', placeholder: '0' },
+      { key: 'deliveryWeeks', label: 'Delivery Timeline (wks)', labelAr: 'مدة التسليم (أسابيع)', type: 'number', placeholder: '4' },
+    ],
+    kpiLabels: {
+      revenue: 'Total Billed', revenueAr: 'إجمالي المبالغ المفوترة',
+      pipeline: 'Active Pipeline', pipelineAr: 'خط الأنابيب النشط',
+      weighted: 'Weighted Pipeline', weightedAr: 'خط الأنابيب المرجّح',
+      winRate: 'Pitch Win Rate', winRateAr: 'معدل الفوز بالعروض',
+    },
+    unitEconLabels: {
+      arpc: 'Avg Project Value', arpcAr: 'متوسط قيمة المشروع',
+      ltv: 'Client LTV', ltvAr: 'القيمة الدائمة للعميل',
+      cac: 'CAC', cacAr: 'تكلفة اكتساب العميل',
+      payback: 'Payback Period', paybackAr: 'فترة الاسترداد',
+      extraMetric: 'Revenue / FTE', extraMetricAr: 'الإيراد لكل موظف',
+    },
+    benchmarks: [
+      { metric: 'Gross Margin', metricAr: 'هامش الربح الإجمالي', b2b: '40–60%', b2c: '50–65%' },
+      { metric: 'Win Rate (pitches)', metricAr: 'معدل الفوز بالعروض', b2b: '25–40%', b2c: '30–50%' },
+      { metric: 'Avg Project Value', metricAr: 'متوسط قيمة المشروع', b2b: '$10k–$100k', b2c: '$1k–$10k' },
+      { metric: 'Client Retention', metricAr: 'معدل الاحتفاظ بالعملاء', b2b: '70–85%', b2c: '50–70%' },
+      { metric: 'Utilisation Rate', metricAr: 'معدل الاستخدام', b2b: '65–80%', b2c: '60–75%' },
+    ],
+  },
+
+  hardware: {
+    label: 'Hardware / IoT',
+    labelAr: 'أجهزة / إنترنت الأشياء',
+    icon: Cpu,
+    stages: {
+      lead:       { label: 'Lead',       labelAr: 'عميل محتمل',   color: 'text-slate-600',  bg: 'bg-slate-100',   icon: Users,         defaultProb: 10 },
+      demo:       { label: 'Demo / PoC', labelAr: 'عرض / إثبات', color: 'text-sky-600',    bg: 'bg-sky-50',      icon: Activity,      defaultProb: 25 },
+      pilot:      { label: 'Pilot',      labelAr: 'تجربة تجريبية',color: 'text-blue-600',   bg: 'bg-blue-50',     icon: Package,       defaultProb: 50 },
+      po_received:{ label: 'PO Received',labelAr: 'أمر شراء',     color: 'text-yellow-600', bg: 'bg-yellow-50',   icon: CheckCircle2,  defaultProb: 85 },
+      shipped:    { label: 'Shipped',    labelAr: 'تم الشحن',     color: 'text-green-600',  bg: 'bg-green-50',    icon: CheckCircle2,  defaultProb: 100 },
+      lost:       { label: 'Lost',       labelAr: 'خسارة',        color: 'text-red-600',    bg: 'bg-red-50',      icon: XCircle,       defaultProb: 0 },
+    },
+    wonStage: 'shipped', lostStage: 'lost',
+    dealLabel: 'Order / Account', dealLabelAr: 'طلب / حساب',
+    amountLabel: 'Order Value', amountLabelAr: 'قيمة الطلب',
+    extraFields: [
+      { key: 'units', label: 'Units', labelAr: 'الكمية', type: 'number', placeholder: '10' },
+      { key: 'unitPrice', label: 'Unit Price', labelAr: 'سعر الوحدة', type: 'number', placeholder: '0' },
+      { key: 'supportContract', label: 'Support Contract (mo)', labelAr: 'عقد الدعم (شهر)', type: 'number', placeholder: '12' },
+      { key: 'hardwareCOGS', label: 'COGS per Unit', labelAr: 'تكلفة الوحدة', type: 'number', placeholder: '0' },
+    ],
+    kpiLabels: {
+      revenue: 'Total Revenue', revenueAr: 'إجمالي الإيرادات',
+      pipeline: 'Pipeline Value', pipelineAr: 'قيمة خط الأنابيب',
+      weighted: 'Weighted Pipeline', weightedAr: 'خط الأنابيب المرجّح',
+      winRate: 'Win Rate', winRateAr: 'معدل الفوز',
+    },
+    unitEconLabels: {
+      arpc: 'Avg Order Value', arpcAr: 'متوسط قيمة الطلب',
+      ltv: 'Customer LTV', ltvAr: 'القيمة الدائمة للعميل',
+      cac: 'CAC', cacAr: 'تكلفة اكتساب العميل',
+      payback: 'Payback Period', paybackAr: 'فترة الاسترداد',
+      extraMetric: 'Gross Margin / Unit', extraMetricAr: 'هامش الربح لكل وحدة',
+    },
+    benchmarks: [
+      { metric: 'Gross Margin', metricAr: 'هامش الربح الإجمالي', b2b: '40–60%', b2c: '30–50%' },
+      { metric: 'Win Rate', metricAr: 'معدل الفوز', b2b: '20–35%', b2c: '2–8%' },
+      { metric: 'LTV/CAC', metricAr: 'نسبة LTV/CAC', b2b: '3–5x', b2c: '2–3x' },
+      { metric: 'Avg Deal Size', metricAr: 'متوسط حجم الصفقة', b2b: '$5k–$500k', b2c: '$50–$500' },
+      { metric: 'Sales Cycle', metricAr: 'دورة المبيعات', b2b: '3–12 mo', b2c: '1–7 days' },
+    ],
+  },
 };
 
-const CHANNELS: { value: Channel; label: string }[] = [
-  { value: 'direct', label: 'Direct' },
-  { value: 'inbound', label: 'Inbound' },
-  { value: 'outbound', label: 'Outbound' },
-  { value: 'referral', label: 'Referral' },
-  { value: 'partner', label: 'Partner' },
-  { value: 'online', label: 'Online' },
-  { value: 'other', label: 'Other' },
-];
-
-const CHANNEL_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'];
+// Must match server z.enum values
+const CHANNELS: Array<'direct' | 'online' | 'referral' | 'partner' | 'inbound' | 'outbound' | 'other'> = ['direct', 'online', 'referral', 'partner', 'inbound', 'outbound', 'other'];
+const CHANNEL_LABELS: Record<string, string> = { direct: 'Direct', online: 'Online', referral: 'Referral', partner: 'Partner', inbound: 'Inbound', outbound: 'Outbound', other: 'Other' };
+const CHANNEL_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316'];
 
 function fmt(n: number, currency = 'USD'): string {
   const sym = currency === 'USD' ? '$' : currency === 'SAR' ? 'SAR ' : currency === 'AED' ? 'AED ' : currency + ' ';
@@ -89,7 +350,6 @@ function isoDate(d: string | Date | null | undefined): string {
   return new Date(d).toISOString().split('T')[0];
 }
 
-// ── Empty form ─────────────────────────────────────────────────────────────
 const emptyForm = (): Omit<Deal, 'id' | 'createdAt'> => ({
   date: new Date().toISOString().split('T')[0],
   amount: 0,
@@ -114,35 +374,42 @@ export default function SalesTracker() {
   const { lang } = useLanguage();
   const isRTL = lang === 'ar';
 
+  const [businessModel, setBusinessModel] = useState<BusinessModel>('saas');
+  const [motion, setMotion] = useState<Motion>('b2b');
   const [activeTab, setActiveTab] = useState('pipeline');
   const [showForm, setShowForm] = useState(false);
   const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
   const [form, setForm] = useState<Omit<Deal, 'id' | 'createdAt'>>(emptyForm());
+  const [extraValues, setExtraValues] = useState<Record<string, string>>({});
   const [expandedDeal, setExpandedDeal] = useState<number | null>(null);
-  const [stageFilter, setStageFilter] = useState<DealStage | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [targetMonth, setTargetMonth] = useState(new Date().toISOString().slice(0, 7));
   const [targetAmount, setTargetAmount] = useState(0);
   const [targetCurrency, setTargetCurrency] = useState('USD');
 
+  // Unit Economics inputs
+  const [cacInput, setCacInput] = useState(0);
+  const [churnRatePct, setChurnRatePct] = useState(5);
+  const [grossMarginPct, setGrossMarginPct] = useState(70);
+
+  const cfg = MODEL_CONFIGS[businessModel];
+
   // ── tRPC ───────────────────────────────────────────────────────────────
   const { data: rawEntries = [], refetch } = trpc.sales.listEntries.useQuery({ limit: 500 });
   const entries: Deal[] = rawEntries as Deal[];
-  const { data: analytics } = trpc.sales.getAnalytics.useQuery(undefined as any);
-  const addMutation = trpc.sales.addEntry.useMutation({ onSuccess: () => { refetch(); setShowForm(false); setForm(emptyForm()); toast.success('Deal added'); } });
-  const updateMutation = trpc.sales.updateEntry.useMutation({ onSuccess: () => { refetch(); setEditingDeal(null); toast.success('Deal updated'); } });
-  const deleteMutation = trpc.sales.deleteEntry.useMutation({ onSuccess: () => { refetch(); toast.success('Deal deleted'); } });
-  const targetMutation = trpc.sales.setTarget.useMutation({ onSuccess: () => toast.success('Target saved') });
+  const addMutation = trpc.sales.addEntry.useMutation({ onSuccess: () => { refetch(); setShowForm(false); setForm(emptyForm()); setExtraValues({}); toast.success(isRTL ? 'تمت إضافة الصفقة' : 'Deal added'); } });
+  const updateMutation = trpc.sales.updateEntry.useMutation({ onSuccess: () => { refetch(); setEditingDeal(null); toast.success(isRTL ? 'تم تحديث الصفقة' : 'Deal updated'); } });
+  const deleteMutation = trpc.sales.deleteEntry.useMutation({ onSuccess: () => { refetch(); toast.success(isRTL ? 'تم حذف الصفقة' : 'Deal deleted'); } });
+  const targetMutation = trpc.sales.setTarget.useMutation({ onSuccess: () => toast.success(isRTL ? 'تم حفظ الهدف' : 'Target saved') });
   const analyzeMutation = trpc.ai.analyzeCOGS.useMutation({
     onSuccess: (d: any) => setAiAnalysis(d?.analysis ?? ''),
-    onError: () => toast.error('AI analysis failed'),
+    onError: () => toast.error(isRTL ? 'فشل التحليل' : 'AI analysis failed'),
   });
 
   // ── Computed ───────────────────────────────────────────────────────────
   const filtered = useMemo(() => {
     let list = entries;
-    if (stageFilter !== 'all') list = list.filter(d => d.dealStage === stageFilter);
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       list = list.filter(d =>
@@ -152,58 +419,86 @@ export default function SalesTracker() {
       );
     }
     return list;
-  }, [entries, stageFilter, searchQuery]);
+  }, [entries, searchQuery]);
 
   const kpis = useMemo(() => {
-    const won = entries.filter(d => d.dealStage === 'closed_won');
-    const lost = entries.filter(d => d.dealStage === 'closed_lost');
-    const active = entries.filter(d => !['closed_won', 'closed_lost'].includes(d.dealStage));
+    const won = entries.filter(d => d.dealStage === cfg.wonStage);
+    const lost = entries.filter(d => d.dealStage === cfg.lostStage);
+    const active = entries.filter(d => d.dealStage !== cfg.wonStage && d.dealStage !== cfg.lostStage);
     const totalRevenue = won.reduce((s, d) => s + d.amount, 0);
     const pipeline = active.reduce((s, d) => s + (d.dealValue ?? d.amount), 0);
     const weighted = active.reduce((s, d) => s + (d.dealValue ?? d.amount) * ((d.probability ?? 50) / 100), 0);
     const winRate = (won.length + lost.length) > 0 ? (won.length / (won.length + lost.length)) * 100 : 0;
     const avgDealSize = won.length > 0 ? totalRevenue / won.length : 0;
     return { totalRevenue, pipeline, weighted, winRate, avgDealSize, wonCount: won.length, lostCount: lost.length, activeCount: active.length };
-  }, [entries]);
+  }, [entries, cfg]);
 
   const stageGroups = useMemo(() => {
-    const groups: Record<DealStage, Deal[]> = {
-      lead: [], qualified: [], proposal: [], negotiation: [], closed_won: [], closed_lost: [],
-    };
-    for (const d of filtered) groups[d.dealStage].push(d);
+    const groups: Record<string, Deal[]> = {};
+    for (const stage of Object.keys(cfg.stages)) groups[stage] = [];
+    for (const d of filtered) {
+      if (groups[d.dealStage] !== undefined) groups[d.dealStage].push(d);
+    }
     return groups;
-  }, [filtered]);
+  }, [filtered, cfg]);
 
   const channelData = useMemo(() => {
     const map: Record<string, { revenue: number; deals: number }> = {};
-    for (const d of entries.filter(e => e.dealStage === 'closed_won')) {
-      const ch = CHANNELS.find(c => c.value === d.channel)?.label ?? d.channel;
+    for (const d of entries.filter(e => e.dealStage === cfg.wonStage)) {
+      const ch = d.channel || 'Other';
       if (!map[ch]) map[ch] = { revenue: 0, deals: 0 };
       map[ch].revenue += d.amount;
       map[ch].deals++;
     }
     return Object.entries(map).map(([name, v]) => ({ name, ...v })).sort((a, b) => b.revenue - a.revenue);
-  }, [entries]);
+  }, [entries, cfg]);
 
-  const productData = useMemo(() => {
-    const map: Record<string, { revenue: number; deals: number }> = {};
-    for (const d of entries.filter(e => e.dealStage === 'closed_won' && e.product)) {
-      if (!map[d.product]) map[d.product] = { revenue: 0, deals: 0 };
-      map[d.product].revenue += d.amount;
-      map[d.product].deals++;
+  const monthlyData = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const d of entries.filter(e => e.dealStage === cfg.wonStage)) {
+      const mo = new Date(d.date).toISOString().slice(0, 7);
+      map[mo] = (map[mo] ?? 0) + d.amount;
     }
-    return Object.entries(map).map(([name, v]) => ({ name, ...v })).sort((a, b) => b.revenue - a.revenue).slice(0, 8);
-  }, [entries]);
+    return Object.entries(map).sort(([a], [b]) => a.localeCompare(b)).map(([month, revenue]) => ({ month, revenue }));
+  }, [entries, cfg]);
 
-  // ── Handlers ───────────────────────────="────────────────────────────────
-  const openAdd = () => { setForm(emptyForm()); setEditingDeal(null); setShowForm(true); };
+  const unitEcon = useMemo(() => {
+    const won = entries.filter(d => d.dealStage === cfg.wonStage);
+    const arpc = won.length > 0 ? won.reduce((s, d) => s + d.amount, 0) / won.length : 0;
+    const churnDecimal = churnRatePct / 100;
+    const ltv = churnDecimal > 0 ? arpc / churnDecimal : 0;
+    const ltvCacRatio = cacInput > 0 ? ltv / cacInput : 0;
+    const grossMarginDecimal = grossMarginPct / 100;
+    const paybackMonths = cacInput > 0 && arpc * grossMarginDecimal > 0 ? cacInput / (arpc * grossMarginDecimal) : 0;
+    const totalDeals = entries.length;
+    const leadToQualified = totalDeals > 0 ? ((won.length + entries.filter(d => d.dealStage === cfg.lostStage).length + entries.filter(d => d.dealStage !== cfg.wonStage && d.dealStage !== cfg.lostStage && d.dealStage !== Object.keys(cfg.stages)[0]).length) / totalDeals) * 100 : 0;
+    const qualifiedToWon = (won.length + entries.filter(d => d.dealStage === cfg.lostStage).length) > 0 ? (won.length / (won.length + entries.filter(d => d.dealStage === cfg.lostStage).length)) * 100 : 0;
+    const closedWithDates = won.filter(d => d.createdAt && d.date);
+    const avgCycleDays = closedWithDates.length > 0 ? closedWithDates.reduce((s, d) => { const cr = new Date(d.createdAt!).getTime(); const cl = new Date(d.date).getTime(); return s + Math.max(0, (cl - cr) / 86400000); }, 0) / closedWithDates.length : 0;
+    const totalRev = won.reduce((s, d) => s + d.amount, 0);
+    const customerRevMap: Record<string, number> = {};
+    for (const d of won) customerRevMap[d.customer] = (customerRevMap[d.customer] ?? 0) + d.amount;
+    const topCustomerRev = Object.values(customerRevMap).length > 0 ? Math.max(...Object.values(customerRevMap)) : 0;
+    const topCustomerPct = totalRev > 0 ? (topCustomerRev / totalRev) * 100 : 0;
+    return { arpc, ltv, ltvCacRatio, paybackMonths, leadToQualified, qualifiedToWon, avgCycleDays, topCustomerPct };
+  }, [entries, cfg, cacInput, churnRatePct, grossMarginPct]);
+
+  // ── Handlers ───────────────────────────────────────────────────────────
+  const openAdd = () => {
+    const firstStage = Object.keys(cfg.stages)[0];
+    setForm({ ...emptyForm(), dealStage: firstStage, probability: cfg.stages[firstStage].defaultProb });
+    setExtraValues({});
+    setEditingDeal(null);
+    setShowForm(true);
+  };
+
   const openEdit = (deal: Deal) => {
     setEditingDeal(deal);
     setForm({
       date: isoDate(deal.date),
       amount: deal.amount,
       currency: deal.currency,
-      channel: deal.channel,
+      channel: (deal.channel as any) ?? 'direct',
       product: deal.product,
       customer: deal.customer,
       dealStage: deal.dealStage,
@@ -211,27 +506,47 @@ export default function SalesTracker() {
       contactEmail: deal.contactEmail ?? '',
       contactPhone: deal.contactPhone ?? '',
       dealValue: deal.dealValue ?? 0,
-      probability: deal.probability ?? STAGE_CONFIG[deal.dealStage].defaultProb,
+      probability: deal.probability ?? cfg.stages[deal.dealStage]?.defaultProb ?? 50,
       expectedCloseDate: isoDate(deal.expectedCloseDate),
       lostReason: deal.lostReason ?? '',
       nextAction: deal.nextAction ?? '',
       notes: deal.notes ?? '',
     });
+    setExtraValues({});
     setShowForm(true);
   };
 
   const setField = (key: keyof typeof form, value: unknown) =>
     setForm(prev => ({ ...prev, [key]: value }));
 
-  const handleStageChange = (stage: DealStage) => {
+  const handleStageChange = (stage: string) => {
     setField('dealStage', stage);
-    setField('probability', STAGE_CONFIG[stage].defaultProb);
+    setField('probability', cfg.stages[stage]?.defaultProb ?? 50);
   };
 
   const handleSubmit = () => {
     const dateStr2 = typeof form.date === 'string' ? form.date : new Date(form.date).toISOString().split('T')[0];
+    // Embed extra fields in notes as JSON prefix
+    const extraJson = Object.keys(extraValues).length > 0 ? `[EXTRA:${JSON.stringify(extraValues)}] ` : '';
+    type ValidChannel = 'direct' | 'online' | 'referral' | 'partner' | 'inbound' | 'outbound' | 'other';
+    const validChannels: ValidChannel[] = ['direct', 'online', 'referral', 'partner', 'inbound', 'outbound', 'other'];
+    const safeChannel: ValidChannel = validChannels.includes(form.channel as ValidChannel) ? (form.channel as ValidChannel) : 'direct';
+    // Map adaptive model stages to server-side enum
+    type ValidStage = 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost';
+    const serverStages: ValidStage[] = ['lead', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost'];
+    const stageToServer = (s: string): ValidStage => {
+      if (serverStages.includes(s as ValidStage)) return s as ValidStage;
+      if (s === cfg.wonStage) return 'closed_won';
+      if (s === cfg.lostStage) return 'closed_lost';
+      const idx = Object.keys(cfg.stages).indexOf(s);
+      const serverMap: ValidStage[] = ['lead', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost'];
+      return serverMap[Math.min(idx, serverMap.length - 3)] ?? 'lead';
+    };
+    const safeStage = stageToServer(form.dealStage);
     const payload = {
       ...form,
+      channel: safeChannel,
+      dealStage: safeStage,
       date: dateStr2,
       amount: Number(form.amount) || 0,
       dealValue: Number(form.dealValue) || undefined,
@@ -242,7 +557,7 @@ export default function SalesTracker() {
       contactPhone: form.contactPhone || undefined,
       lostReason: form.lostReason || undefined,
       nextAction: form.nextAction || undefined,
-      notes: form.notes || undefined,
+      notes: extraJson + (form.notes || ''),
     };
     if (editingDeal) {
       updateMutation.mutate({ id: editingDeal.id, ...payload });
@@ -252,13 +567,10 @@ export default function SalesTracker() {
   };
 
   const handleAI = useCallback(() => {
-    const won = entries.filter(d => d.dealStage === 'closed_won');
-    const active = entries.filter(d => !['closed_won', 'closed_lost'].includes(d.dealStage));
-    // Use analyzeCOGS as a general business analysis endpoint
     analyzeMutation.mutate({
-      businessModel: 'services',
+      businessModel: businessModel as any,
       totalCOGS: 0,
-      grossMarginPct: kpis.winRate,
+      grossMarginPct,
       totalOpEx: 0,
       ebitda: kpis.totalRevenue,
       directCosts: [],
@@ -267,154 +579,159 @@ export default function SalesTracker() {
       language: lang === 'ar' ? 'arabic' : 'english',
     });
     setActiveTab('ai');
-  }, [entries, kpis, channelData, productData, lang]);
+  }, [entries, kpis, channelData, businessModel, grossMarginPct, lang]);
 
   const currency = entries[0]?.currency ?? 'USD';
 
   // ── Deal Card ──────────────────────────────────────────────────────────
   const DealCard = ({ deal }: { deal: Deal }) => {
-    const cfg = STAGE_CONFIG[deal.dealStage];
+    const stageCfg = cfg.stages[deal.dealStage];
     const isExpanded = expandedDeal === deal.id;
+    if (!stageCfg) return null;
     return (
       <div className={`rounded-lg border border-border bg-card shadow-sm transition-all ${isExpanded ? 'ring-1 ring-primary/30' : ''}`}>
         <div
-          className="flex items-start justify-between p-3 cursor-pointer"
+          className="p-2.5 cursor-pointer"
           onClick={() => setExpandedDeal(isExpanded ? null : deal.id)}
         >
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate">{deal.customer || 'Unnamed'}</p>
-            {deal.product && <p className="text-xs text-muted-foreground truncate">{deal.product}</p>}
-            {deal.contactName && <p className="text-xs text-muted-foreground">{deal.contactName}</p>}
+          <div className="flex items-start justify-between gap-1.5">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-foreground truncate">{deal.customer || '—'}</p>
+              {deal.product && <p className="text-[10px] text-muted-foreground truncate">{deal.product}</p>}
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button onClick={e => { e.stopPropagation(); openEdit(deal); }} className="p-1 rounded hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"><Edit2 className="w-3 h-3" /></button>
+              <button onClick={e => { e.stopPropagation(); deleteMutation.mutate({ id: deal.id }); }} className="p-1 rounded hover:bg-red-50 text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-3 h-3" /></button>
+            </div>
           </div>
-          <div className="flex flex-col items-end gap-1 ml-2 shrink-0">
-            <span className="text-sm font-bold text-foreground">{fmt(deal.dealValue ?? deal.amount, deal.currency)}</span>
-            {deal.probability != null && deal.dealStage !== 'closed_won' && deal.dealStage !== 'closed_lost' && (
-              <span className="text-xs text-muted-foreground">{deal.probability}%</span>
-            )}
+          <div className="flex items-center justify-between mt-1.5">
+            <span className="text-xs font-bold text-foreground">{fmt(deal.dealValue ?? deal.amount, deal.currency)}</span>
+            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${stageCfg.bg} ${stageCfg.color}`}>{deal.probability ?? stageCfg.defaultProb}%</span>
           </div>
         </div>
         {isExpanded && (
-          <div className="px-3 pb-3 border-t border-border/50 pt-2 space-y-2">
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              {deal.contactEmail && <div className="flex items-center gap-1 text-muted-foreground"><Mail className="w-3 h-3" />{deal.contactEmail}</div>}
-              {deal.contactPhone && <div className="flex items-center gap-1 text-muted-foreground"><Phone className="w-3 h-3" />{deal.contactPhone}</div>}
-              {deal.expectedCloseDate && <div className="flex items-center gap-1 text-muted-foreground"><Calendar className="w-3 h-3" />Close: {dateStr(deal.expectedCloseDate)}</div>}
-              <div className="flex items-center gap-1 text-muted-foreground"><DollarSign className="w-3 h-3" />Closed: {fmt(deal.amount, deal.currency)}</div>
-            </div>
-            {deal.nextAction && (
-              <div className="text-xs bg-blue-50 text-blue-700 rounded p-2">
-                <span className="font-medium">Next: </span>{deal.nextAction}
-              </div>
-            )}
-            {deal.lostReason && (
-              <div className="text-xs bg-red-50 text-red-700 rounded p-2">
-                <span className="font-medium">Lost: </span>{deal.lostReason}
-              </div>
-            )}
-            {deal.notes && <p className="text-xs text-muted-foreground">{deal.notes}</p>}
-            <div className="flex gap-2 pt-1">
-              <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => openEdit(deal)}>
-                <Edit2 className="w-3 h-3 mr-1" /> Edit
-              </Button>
-              <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => deleteMutation.mutate({ id: deal.id })}>
-                <Trash2 className="w-3 h-3 mr-1" /> Delete
-              </Button>
-            </div>
+          <div className="px-2.5 pb-2.5 pt-0 border-t border-border/50 space-y-1.5 text-[10px] text-muted-foreground">
+            {deal.contactName && <div className="flex items-center gap-1"><Users className="w-3 h-3" />{deal.contactName}</div>}
+            {deal.contactEmail && <div className="flex items-center gap-1"><span>✉</span>{deal.contactEmail}</div>}
+            {deal.expectedCloseDate && <div className="flex items-center gap-1"><Clock className="w-3 h-3" />Close: {dateStr(deal.expectedCloseDate)}</div>}
+            {deal.nextAction && <div className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-primary" />{deal.nextAction}</div>}
           </div>
         )}
       </div>
     );
   };
 
+  // ── Render ─────────────────────────────────────────────────────────────
   return (
-    <div className={`space-y-6 ${isRTL ? 'rtl' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Header */}
+    <div className={`space-y-5 ${isRTL ? 'rtl' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+
+      {/* ── Model Selector ── */}
+      <div className="flex flex-wrap items-center gap-3 p-4 rounded-xl border border-border bg-card">
+        <div className="flex-1 min-w-[200px]">
+          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+            {isRTL ? 'نموذج العمل' : 'Business Model'}
+          </Label>
+          <div className="flex flex-wrap gap-2">
+            {(Object.keys(MODEL_CONFIGS) as BusinessModel[]).map(m => {
+              const mc = MODEL_CONFIGS[m];
+              const Icon = mc.icon;
+              return (
+                <button
+                  key={m}
+                  onClick={() => { setBusinessModel(m); setActiveTab('pipeline'); }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                    businessModel === m
+                      ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                      : 'bg-background text-muted-foreground border-border hover:border-primary/50 hover:text-foreground'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {isRTL ? mc.labelAr : mc.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="shrink-0">
+          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+            {isRTL ? 'نوع السوق' : 'Market Motion'}
+          </Label>
+          <div className="flex gap-2">
+            {(['b2b', 'b2c'] as Motion[]).map(m => (
+              <button
+                key={m}
+                onClick={() => setMotion(m)}
+                className={`px-4 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                  motion === m
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-background text-muted-foreground border-border hover:border-primary/50'
+                }`}
+              >
+                {m.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Header ── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <Target className="w-5 h-5 text-primary" />
-            Sales Pipeline Tracker
+            {(() => { const Icon = cfg.icon; return <Icon className="w-5 h-5 text-primary" />; })()}
+            {isRTL ? cfg.labelAr : cfg.label} {motion.toUpperCase()} {isRTL ? 'متتبع المبيعات' : 'Sales Tracker'}
           </h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Full CRM pipeline · Channel & product analytics · AI forecasting</p>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {isRTL
+              ? `${Object.keys(cfg.stages).length} مراحل · ${cfg.extraFields.length} حقول مخصصة · اقتصاديات الوحدة`
+              : `${Object.keys(cfg.stages).length} stages · ${cfg.extraFields.length} custom fields · unit economics`}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleAI} disabled={analyzeMutation.isPending}>
             {analyzeMutation.isPending ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1.5" />}
-            AI Analysis
+            {isRTL ? 'تحليل ذكاء اصطناعي' : 'AI Analysis'}
           </Button>
-          <Button size="sm" onClick={openAdd}><Plus className="w-4 h-4 mr-1.5" /> Add Deal</Button>
+          <Button size="sm" onClick={openAdd}>
+            <Plus className="w-4 h-4 mr-1.5" />
+            {isRTL ? `إضافة ${cfg.dealLabelAr}` : `Add ${cfg.dealLabel}`}
+          </Button>
         </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* ── KPI Cards ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          {
-            label: isRTL ? 'إجمالي الإيرادات' : 'Total Revenue',
-            value: fmt(kpis.totalRevenue, currency),
-            sub: isRTL ? `${kpis.wonCount} صفقة مُغلقة` : `${kpis.wonCount} deals closed`,
-            icon: DollarSign,
-            iconBg: 'bg-emerald-100',
-            iconColor: 'text-emerald-600',
-            valueColor: 'text-emerald-600',
-            accent: 'border-l-4 border-l-emerald-500',
-          },
-          {
-            label: isRTL ? 'قيمة خط الأنابيب' : 'Pipeline Value',
-            value: fmt(kpis.pipeline, currency),
-            sub: isRTL ? `${kpis.activeCount} صفقة نشطة` : `${kpis.activeCount} active deals`,
-            icon: GitMerge,
-            iconBg: 'bg-blue-100',
-            iconColor: 'text-blue-600',
-            valueColor: 'text-blue-600',
-            accent: 'border-l-4 border-l-blue-500',
-          },
-          {
-            label: isRTL ? 'خط الأنابيب المرجّح' : 'Weighted Pipeline',
-            value: fmt(kpis.weighted, currency),
-            sub: isRTL ? 'مُعدَّل حسب الاحتمالية' : 'probability-adjusted',
-            icon: BarChart3,
-            iconBg: 'bg-violet-100',
-            iconColor: 'text-violet-600',
-            valueColor: 'text-violet-600',
-            accent: 'border-l-4 border-l-violet-500',
-          },
-          {
-            label: isRTL ? 'معدل الفوز' : 'Win Rate',
-            value: `${kpis.winRate.toFixed(1)}%`,
-            sub: isRTL ? `متوسط الصفقة: ${fmt(kpis.avgDealSize, currency)}` : `Avg deal: ${fmt(kpis.avgDealSize, currency)}`,
-            icon: TrendingUp,
-            iconBg: kpis.winRate >= 30 ? 'bg-emerald-100' : 'bg-orange-100',
-            iconColor: kpis.winRate >= 30 ? 'text-emerald-600' : 'text-orange-500',
-            valueColor: kpis.winRate >= 30 ? 'text-emerald-600' : 'text-orange-500',
-            accent: kpis.winRate >= 30 ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-orange-400',
-          },
+          { label: isRTL ? cfg.kpiLabels.revenueAr : cfg.kpiLabels.revenue, value: fmt(kpis.totalRevenue, currency), sub: isRTL ? `${kpis.wonCount} ${cfg.dealLabelAr} مُغلق` : `${kpis.wonCount} ${cfg.dealLabel}s closed`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-100', accent: 'border-l-4 border-l-emerald-500' },
+          { label: isRTL ? cfg.kpiLabels.pipelineAr : cfg.kpiLabels.pipeline, value: fmt(kpis.pipeline, currency), sub: isRTL ? `${kpis.activeCount} نشط` : `${kpis.activeCount} active`, icon: GitMerge, color: 'text-blue-600', bg: 'bg-blue-100', accent: 'border-l-4 border-l-blue-500' },
+          { label: isRTL ? cfg.kpiLabels.weightedAr : cfg.kpiLabels.weighted, value: fmt(kpis.weighted, currency), sub: isRTL ? 'مُعدَّل حسب الاحتمالية' : 'probability-adjusted', icon: BarChart3, color: 'text-violet-600', bg: 'bg-violet-100', accent: 'border-l-4 border-l-violet-500' },
+          { label: isRTL ? cfg.kpiLabels.winRateAr : cfg.kpiLabels.winRate, value: `${kpis.winRate.toFixed(1)}%`, sub: isRTL ? `متوسط الصفقة: ${fmt(kpis.avgDealSize, currency)}` : `Avg deal: ${fmt(kpis.avgDealSize, currency)}`, icon: TrendingUp, color: kpis.winRate >= 25 ? 'text-emerald-600' : 'text-orange-500', bg: kpis.winRate >= 25 ? 'bg-emerald-100' : 'bg-orange-100', accent: kpis.winRate >= 25 ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-orange-400' },
         ].map(card => (
           <div key={card.label} className={`rounded-xl bg-card border border-border shadow-sm p-4 flex flex-col gap-3 ${card.accent}`}>
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{card.label}</p>
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${card.iconBg}`}>
-                <card.icon className={`w-4 h-4 ${card.iconColor}`} />
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${card.bg}`}>
+                <card.icon className={`w-4 h-4 ${card.color}`} />
               </div>
             </div>
             <div>
-              <p className={`text-2xl font-bold tracking-tight ${card.valueColor}`}>{card.value}</p>
+              <p className={`text-2xl font-bold tracking-tight ${card.color}`}>{card.value}</p>
               <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Tabs */}
+      {/* ── Tabs ── */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full justify-start overflow-x-auto">
-          <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
-          <TabsTrigger value="list">Deal List</TabsTrigger>
-          <TabsTrigger value="revenue">Revenue</TabsTrigger>
-          <TabsTrigger value="channels">Channels</TabsTrigger>
-          <TabsTrigger value="products">Products</TabsTrigger>
-          <TabsTrigger value="targets">Targets</TabsTrigger>
-          <TabsTrigger value="ai">AI Analysis</TabsTrigger>
+          <TabsTrigger value="pipeline">{isRTL ? 'خط الأنابيب' : 'Pipeline'}</TabsTrigger>
+          <TabsTrigger value="list">{isRTL ? `قائمة ${cfg.dealLabelAr}` : `${cfg.dealLabel} List`}</TabsTrigger>
+          <TabsTrigger value="revenue">{isRTL ? 'الإيرادات' : 'Revenue'}</TabsTrigger>
+          <TabsTrigger value="channels">{isRTL ? 'القنوات' : 'Channels'}</TabsTrigger>
+          <TabsTrigger value="unit-econ">{isRTL ? 'اقتصاديات الوحدة' : 'Unit Economics'}</TabsTrigger>
+          <TabsTrigger value="targets">{isRTL ? 'الأهداف' : 'Targets'}</TabsTrigger>
+          <TabsTrigger value="ai">{isRTL ? 'تحليل ذكاء اصطناعي' : 'AI Analysis'}</TabsTrigger>
         </TabsList>
 
         {/* ── PIPELINE (Kanban) ── */}
@@ -422,45 +739,40 @@ export default function SalesTracker() {
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder={isRTL ? 'بحث في الصفقات…' : 'Search deals…'} className="pl-9 h-9" />
+              <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder={isRTL ? `بحث في ${cfg.dealLabelAr}…` : `Search ${cfg.dealLabel}s…`} className="pl-9 h-9" />
             </div>
             <div className="text-xs text-muted-foreground shrink-0">
-              {isRTL ? `${filtered.length} صفقة` : `${filtered.length} deals`}
+              {isRTL ? `${filtered.length} ${cfg.dealLabelAr}` : `${filtered.length} ${cfg.dealLabel}s`}
             </div>
           </div>
-          {/* Kanban Board */}
           <div className="overflow-x-auto pb-2">
             <div className="flex gap-3 min-w-max">
-              {(Object.keys(STAGE_CONFIG) as DealStage[]).map(stage => {
-                const cfg = STAGE_CONFIG[stage];
-                const deals = stageGroups[stage];
+              {(Object.keys(cfg.stages) as string[]).map(stage => {
+                const stageCfg = cfg.stages[stage];
+                const deals = stageGroups[stage] ?? [];
                 const total = deals.reduce((s, d) => s + (d.dealValue ?? d.amount), 0);
-                const isWon = stage === 'closed_won';
-                const isLost = stage === 'closed_lost';
+                const isWon = stage === cfg.wonStage;
+                const isLost = stage === cfg.lostStage;
                 return (
                   <div key={stage} className="flex flex-col w-[200px] shrink-0">
-                    {/* Column Header */}
-                    <div className={`rounded-t-xl px-3 py-2.5 ${cfg.bg} border border-b-0 border-border`}>
+                    <div className={`rounded-t-xl px-3 py-2.5 ${stageCfg.bg} border border-b-0 border-border`}>
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-1.5">
-                          <cfg.icon className={`w-3.5 h-3.5 ${cfg.color}`} />
-                          <span className={`text-xs font-bold ${cfg.color}`}>{cfg.label}</span>
+                          <stageCfg.icon className={`w-3.5 h-3.5 ${stageCfg.color}`} />
+                          <span className={`text-xs font-bold ${stageCfg.color}`}>{isRTL ? stageCfg.labelAr : stageCfg.label}</span>
                         </div>
-                        <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${cfg.bg} ${cfg.color} border border-current/20`}>{deals.length}</span>
+                        <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${stageCfg.bg} ${stageCfg.color} border border-current/20`}>{deals.length}</span>
                       </div>
                       <p className="text-xs font-medium text-muted-foreground">{fmt(total, currency)}</p>
                     </div>
-                    {/* Cards */}
-                    <div className={`flex-1 space-y-2 p-2 rounded-b-xl border border-t-0 border-border min-h-[200px] ${
-                      isWon ? 'bg-emerald-50/40' : isLost ? 'bg-red-50/40' : 'bg-muted/10'
-                    }`}>
+                    <div className={`flex-1 space-y-2 p-2 rounded-b-xl border border-t-0 border-border min-h-[200px] ${isWon ? 'bg-emerald-50/40' : isLost ? 'bg-red-50/40' : 'bg-muted/10'}`}>
                       {deals.map(deal => <DealCard key={deal.id} deal={deal} />)}
                       {deals.length === 0 && (
                         <div className="flex flex-col items-center justify-center py-8 gap-1">
                           <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center">
-                            <cfg.icon className="w-4 h-4 text-muted-foreground/50" />
+                            <stageCfg.icon className="w-4 h-4 text-muted-foreground/50" />
                           </div>
-                          <p className="text-[11px] text-muted-foreground/60">{isRTL ? 'لا توجد صفقات' : 'No deals'}</p>
+                          <p className="text-[11px] text-muted-foreground/60">{isRTL ? `لا توجد ${cfg.dealLabelAr}` : `No ${cfg.dealLabel}s`}</p>
                         </div>
                       )}
                     </div>
@@ -476,88 +788,58 @@ export default function SalesTracker() {
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search deals…" className="pl-9 h-9" />
+              <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder={isRTL ? `بحث…` : `Search…`} className="pl-9 h-9" />
             </div>
-            <Select value={stageFilter} onValueChange={v => setStageFilter(v as DealStage | 'all')}>
-              <SelectTrigger className="w-36 h-9"><SelectValue placeholder="All stages" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Stages</SelectItem>
-                {(Object.keys(STAGE_CONFIG) as DealStage[]).map(s => (
-                  <SelectItem key={s} value={s}>{STAGE_CONFIG[s].label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/40">
-                  {['Customer', 'Product', 'Contact', 'Stage', 'Deal Value', 'Prob.', 'Close Date', 'Channel', 'Actions'].map(h => (
-                    <th key={h} className="text-left py-2.5 px-3 text-xs font-medium text-muted-foreground whitespace-nowrap">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.length === 0 && (
-                  <tr><td colSpan={9} className="text-center py-8 text-muted-foreground text-sm">No deals found. Add your first deal.</td></tr>
-                )}
-                {filtered.map(deal => {
-                  const cfg = STAGE_CONFIG[deal.dealStage];
-                  return (
-                    <tr key={deal.id} className="border-b border-border/50 hover:bg-muted/20">
-                      <td className="py-2.5 px-3 font-medium">{deal.customer || '—'}</td>
-                      <td className="py-2.5 px-3 text-muted-foreground">{deal.product || '—'}</td>
-                      <td className="py-2.5 px-3">
-                        <div>{deal.contactName || '—'}</div>
-                        {deal.contactEmail && <div className="text-xs text-muted-foreground">{deal.contactEmail}</div>}
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${cfg.bg} ${cfg.color}`}>
-                          {cfg.label}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 font-medium">{fmt(deal.dealValue ?? deal.amount, deal.currency)}</td>
-                      <td className="py-2.5 px-3 text-muted-foreground">{deal.probability ?? '—'}%</td>
-                      <td className="py-2.5 px-3 text-muted-foreground whitespace-nowrap">{dateStr(deal.expectedCloseDate) || '—'}</td>
-                      <td className="py-2.5 px-3 text-muted-foreground capitalize">{deal.channel}</td>
-                      <td className="py-2.5 px-3">
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(deal)}>
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteMutation.mutate({ id: deal.id })}>
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="space-y-2">
+            {filtered.length === 0 && (
+              <div className="text-center py-10 text-sm text-muted-foreground">
+                {isRTL ? `لا توجد ${cfg.dealLabelAr} بعد. أضف أول ${cfg.dealLabelAr}.` : `No ${cfg.dealLabel}s yet. Add your first ${cfg.dealLabel}.`}
+              </div>
+            )}
+            {filtered.map(deal => {
+              const stageCfg = cfg.stages[deal.dealStage];
+              if (!stageCfg) return null;
+              return (
+                <div key={deal.id} className="flex items-center justify-between p-3 rounded-xl border border-border bg-card hover:bg-muted/20 transition-colors gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className={`w-2 h-8 rounded-full shrink-0 ${stageCfg.bg.replace('bg-', 'bg-').replace('-50', '-400').replace('-100', '-400')}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">{deal.customer}</p>
+                      <p className="text-xs text-muted-foreground truncate">{deal.product} · {dateStr(deal.date)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <Badge variant="outline" className={`text-[10px] ${stageCfg.color} ${stageCfg.bg} border-0`}>{isRTL ? stageCfg.labelAr : stageCfg.label}</Badge>
+                    <span className="text-sm font-bold text-foreground">{fmt(deal.amount, deal.currency)}</span>
+                    <div className="flex gap-1">
+                      <button onClick={() => openEdit(deal)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground"><Edit2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => deleteMutation.mutate({ id: deal.id })} className="p-1.5 rounded-lg hover:bg-red-50 text-muted-foreground hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </TabsContent>
 
         {/* ── REVENUE ── */}
         <TabsContent value="revenue" className="mt-4">
           <Card>
-            <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">Monthly Revenue (Won Deals)</CardTitle></CardHeader>
+            <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">{isRTL ? 'الإيرادات الشهرية' : 'Monthly Revenue'}</CardTitle></CardHeader>
             <CardContent className="pb-4">
-              {analytics?.monthly?.length ? (
+              {monthlyData.length === 0 ? (
+                <div className="text-center py-8 text-sm text-muted-foreground">{isRTL ? 'لا توجد بيانات إيرادات بعد.' : 'No revenue data yet.'}</div>
+              ) : (
                 <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={analytics.monthly.map(m => ({ ...m, revenue: m.revenue ?? 0, wonDeals: m.wonDeals ?? 0 }))} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+                  <BarChart data={monthlyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                    <YAxis yAxisId={0} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
-                    <YAxis yAxisId={1} orientation="right" tick={{ fontSize: 11 }} />
-                    <Tooltip formatter={(v: any, name: string) => name === 'Revenue' ? fmt(v, currency) : v} />
-                    <Legend />
-                    <Bar yAxisId={0} dataKey="revenue" fill="#10B981" name="Revenue" radius={[4, 4, 0, 0]} />
-                    <Bar yAxisId={1} dataKey="wonDeals" fill="#3B82F6" name="Won Deals" radius={[4, 4, 0, 0]} />
+                    <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />
+                    <Tooltip formatter={(v: number) => fmt(v, currency)} />
+                    <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-8">No revenue data yet.</p>
               )}
             </CardContent>
           </Card>
@@ -566,66 +848,25 @@ export default function SalesTracker() {
         {/* ── CHANNELS ── */}
         <TabsContent value="channels" className="mt-4">
           <Card>
-            <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">Revenue by Channel</CardTitle></CardHeader>
+            <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">{isRTL ? 'الإيرادات حسب القناة' : 'Revenue by Channel'}</CardTitle></CardHeader>
             <CardContent className="pb-4">
               {channelData.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">No channel data yet.</p>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-6">
-                  <ResponsiveContainer width="100%" height={220}>
-                    <PieChart>
-                      <Pie data={channelData} dataKey="revenue" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                        {channelData.map((_, i) => <Cell key={i} fill={CHANNEL_COLORS[i % CHANNEL_COLORS.length]} />)}
-                      </Pie>
-                      <Tooltip formatter={(v: any) => fmt(v, currency)} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="space-y-2">
-                    {channelData.map((c, i) => (
-                      <div key={c.name} className="flex items-center justify-between text-sm p-2 rounded-lg bg-muted/30">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full" style={{ background: CHANNEL_COLORS[i % CHANNEL_COLORS.length] }} />
-                          <span>{c.name}</span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-muted-foreground">{c.deals} deals</span>
-                          <span className="font-medium">{fmt(c.revenue, currency)}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* ── PRODUCTS ── */}
-        <TabsContent value="products" className="mt-4">
-          <Card>
-            <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">Revenue by Product / Service</CardTitle></CardHeader>
-            <CardContent className="pb-4">
-              {productData.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">No product data yet. Add deals with product names.</p>
+                <div className="text-center py-8 text-sm text-muted-foreground">{isRTL ? 'لا توجد بيانات قنوات بعد.' : 'No channel data yet.'}</div>
               ) : (
                 <>
                   <ResponsiveContainer width="100%" height={220}>
-                    <BarChart data={productData} layout="vertical" margin={{ top: 5, right: 20, left: 80, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-                      <XAxis type="number" tickFormatter={v => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
-                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={80} />
-                      <Tooltip formatter={(v: any) => fmt(v, currency)} />
-                      <Bar dataKey="revenue" fill="#8B5CF6" name="Revenue" radius={[0, 4, 4, 0]} />
-                    </BarChart>
+                    <PieChart>
+                      <Pie data={channelData} dataKey="revenue" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
+                        {channelData.map((_, i) => <Cell key={i} fill={CHANNEL_COLORS[i % CHANNEL_COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip formatter={(v: number) => fmt(v, currency)} />
+                    </PieChart>
                   </ResponsiveContainer>
-                  <div className="mt-4 space-y-2">
-                    {productData.map((p, i) => (
-                      <div key={p.name} className="flex items-center justify-between text-sm p-2 rounded-lg bg-muted/30">
-                        <span>{p.name}</span>
-                        <div className="flex items-center gap-4">
-                          <span className="text-muted-foreground">{p.deals} deals</span>
-                          <span className="font-medium">{fmt(p.revenue, currency)}</span>
-                        </div>
+                  <div className="mt-3 space-y-2">
+                    {channelData.map((c, i) => (
+                      <div key={c.name} className="flex items-center justify-between text-sm p-2 rounded-lg bg-muted/30">
+                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full" style={{ background: CHANNEL_COLORS[i % CHANNEL_COLORS.length] }} /><span>{c.name}</span></div>
+                        <div className="flex items-center gap-4"><span className="text-muted-foreground">{c.deals} {isRTL ? cfg.dealLabelAr : cfg.dealLabel}s</span><span className="font-medium">{fmt(c.revenue, currency)}</span></div>
                       </div>
                     ))}
                   </div>
@@ -635,33 +876,170 @@ export default function SalesTracker() {
           </Card>
         </TabsContent>
 
+        {/* ── UNIT ECONOMICS ── */}
+        <TabsContent value="unit-econ" className="mt-4 space-y-5">
+          <Card>
+            <CardHeader className="pb-2 pt-4">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Zap className="w-4 h-4 text-primary" />
+                {isRTL ? 'مدخلات اقتصاديات الوحدة' : 'Unit Economics Inputs'}
+                <Badge variant="outline" className="text-[10px] ml-2">{motion.toUpperCase()} · {isRTL ? cfg.labelAr : cfg.label}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-xs">{isRTL ? cfg.unitEconLabels.cacAr : cfg.unitEconLabels.cac} ({currency})</Label>
+                  <Input type="number" min={0} value={cacInput || ''} onChange={e => setCacInput(parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
+                  <p className="text-[10px] text-muted-foreground mt-1">{isRTL ? 'إجمالي الإنفاق على التسويق والمبيعات ÷ عدد العملاء الجدد' : 'Total sales & marketing spend ÷ new customers'}</p>
+                </div>
+                <div>
+                  <Label className="text-xs">{isRTL ? 'معدل التراجع الشهري (%)' : 'Monthly Churn Rate (%)'}</Label>
+                  <Input type="number" min={0} max={100} step={0.1} value={churnRatePct || ''} onChange={e => setChurnRatePct(parseFloat(e.target.value) || 0)} placeholder="5" className="mt-1" />
+                  <p className="text-[10px] text-muted-foreground mt-1">{isRTL ? 'نسبة العملاء الذين يتوقفون شهرياً' : '% of customers who stop each month'}</p>
+                </div>
+                <div>
+                  <Label className="text-xs">{isRTL ? 'هامش الربح الإجمالي (%)' : 'Gross Margin (%)'}</Label>
+                  <Input type="number" min={0} max={100} step={1} value={grossMarginPct || ''} onChange={e => setGrossMarginPct(parseFloat(e.target.value) || 0)} placeholder="70" className="mt-1" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { label: isRTL ? cfg.unitEconLabels.arpcAr : cfg.unitEconLabels.arpc, value: fmt(unitEcon.arpc, currency), sub: isRTL ? `من ${kpis.wonCount} ${cfg.dealLabelAr} مُغلق` : `from ${kpis.wonCount} closed ${cfg.dealLabel}s`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-100', accent: 'border-l-4 border-l-emerald-500' },
+              { label: isRTL ? cfg.unitEconLabels.ltvAr : cfg.unitEconLabels.ltv, value: unitEcon.ltv > 0 ? fmt(unitEcon.ltv, currency) : '—', sub: isRTL ? `عند ${churnRatePct}% معدل تراجع` : `at ${churnRatePct}% churn`, icon: Repeat, color: 'text-blue-600', bg: 'bg-blue-100', accent: 'border-l-4 border-l-blue-500' },
+              { label: isRTL ? 'نسبة LTV/CAC' : 'LTV / CAC Ratio', value: cacInput > 0 ? `${unitEcon.ltvCacRatio.toFixed(1)}x` : '—', sub: unitEcon.ltvCacRatio >= 3 ? (isRTL ? '✓ ممتاز (≥ 3x)' : '✓ Excellent (≥ 3x)') : unitEcon.ltvCacRatio >= 1 ? (isRTL ? '⚠ مقبول (1–3x)' : '⚠ Acceptable (1–3x)') : (isRTL ? '✗ تحت الهدف' : '✗ Below target'), icon: Activity, color: unitEcon.ltvCacRatio >= 3 ? 'text-emerald-600' : unitEcon.ltvCacRatio >= 1 ? 'text-yellow-600' : 'text-red-500', bg: unitEcon.ltvCacRatio >= 3 ? 'bg-emerald-100' : unitEcon.ltvCacRatio >= 1 ? 'bg-yellow-100' : 'bg-red-100', accent: unitEcon.ltvCacRatio >= 3 ? 'border-l-4 border-l-emerald-500' : unitEcon.ltvCacRatio >= 1 ? 'border-l-4 border-l-yellow-400' : 'border-l-4 border-l-red-400' },
+              { label: isRTL ? cfg.unitEconLabels.paybackAr : cfg.unitEconLabels.payback, value: cacInput > 0 && unitEcon.paybackMonths > 0 ? `${unitEcon.paybackMonths.toFixed(1)} ${isRTL ? 'شهر' : 'mo'}` : '—', sub: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? (isRTL ? '✓ جيد (≤ 12 شهر)' : '✓ Good (≤ 12 mo)') : unitEcon.paybackMonths > 12 ? (isRTL ? '⚠ طويل (> 12 شهر)' : '⚠ Long (> 12 mo)') : (isRTL ? 'أدخل CAC للحساب' : 'Enter CAC to compute'), icon: Clock, color: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'text-emerald-600' : 'text-orange-500', bg: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'bg-emerald-100' : 'bg-orange-100', accent: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-orange-400' },
+            ].map(card => (
+              <div key={card.label} className={`rounded-xl bg-card border border-border shadow-sm p-4 flex flex-col gap-3 ${card.accent}`}>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{card.label}</p>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${card.bg}`}><card.icon className={`w-4 h-4 ${card.color}`} /></div>
+                </div>
+                <div>
+                  <p className={`text-2xl font-bold tracking-tight ${card.color}`}>{card.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Funnel + Velocity */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">{isRTL ? 'قمع التحويل' : 'Conversion Funnel'}</CardTitle></CardHeader>
+              <CardContent className="pb-4 space-y-3">
+                {[
+                  { label: isRTL ? `إجمالي ${cfg.dealLabelAr}` : `Total ${cfg.dealLabel}s`, value: entries.length, pct: 100, color: 'bg-blue-500' },
+                  { label: isRTL ? 'مؤهلة وما فوق' : 'Qualified & Above', value: entries.filter(d => d.dealStage !== Object.keys(cfg.stages)[0]).length, pct: unitEcon.leadToQualified, color: 'bg-violet-500' },
+                  { label: isRTL ? `${cfg.dealLabelAr} مُكتملة` : `${cfg.dealLabel}s Won`, value: kpis.wonCount, pct: unitEcon.qualifiedToWon, color: 'bg-emerald-500' },
+                ].map(row => (
+                  <div key={row.label}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-muted-foreground">{row.label}</span>
+                      <span className="font-semibold text-foreground">{row.value} ({row.pct.toFixed(1)}%)</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full ${row.color}`} style={{ width: `${Math.min(100, row.pct)}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">{isRTL ? 'مؤشرات سرعة المبيعات' : 'Sales Velocity'}</CardTitle></CardHeader>
+              <CardContent className="pb-4">
+                <div className="space-y-3">
+                  {[
+                    { label: isRTL ? 'متوسط دورة الإغلاق' : 'Avg Deal Cycle', value: unitEcon.avgCycleDays > 0 ? `${unitEcon.avgCycleDays.toFixed(0)} ${isRTL ? 'يوم' : 'days'}` : '—', tip: isRTL ? 'من إنشاء الصفقة حتى الإغلاق' : 'From creation to close' },
+                    { label: isRTL ? cfg.kpiLabels.winRateAr : cfg.kpiLabels.winRate, value: `${kpis.winRate.toFixed(1)}%`, tip: isRTL ? `${kpis.wonCount} فوز من ${kpis.wonCount + kpis.lostCount} مُغلق` : `${kpis.wonCount} won of ${kpis.wonCount + kpis.lostCount} closed` },
+                    { label: isRTL ? 'تركّز الإيرادات' : 'Revenue Concentration', value: unitEcon.topCustomerPct > 0 ? `${unitEcon.topCustomerPct.toFixed(1)}%` : '—', tip: unitEcon.topCustomerPct > 30 ? (isRTL ? '⚠ تركّز مرتفع — تنويع موصى به' : '⚠ High concentration — diversify') : (isRTL ? '✓ توزيع صحي' : '✓ Healthy distribution') },
+                    { label: isRTL ? `متوسط حجم ${cfg.dealLabelAr}` : `Avg ${cfg.dealLabel} Size`, value: fmt(kpis.avgDealSize, currency), tip: isRTL ? 'من الصفقات المُغلقة' : 'From closed deals' },
+                  ].map(row => (
+                    <div key={row.label} className="flex items-start justify-between py-2 border-b border-border last:border-0">
+                      <div>
+                        <p className="text-xs font-medium text-foreground">{row.label}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{row.tip}</p>
+                      </div>
+                      <span className="text-sm font-bold text-foreground shrink-0 ml-3">{row.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Benchmarks */}
+          <Card>
+            <CardHeader className="pb-2 pt-4">
+              <CardTitle className="text-sm">{isRTL ? `معايير الصناعة — ${cfg.labelAr}` : `Industry Benchmarks — ${cfg.label}`}</CardTitle>
+            </CardHeader>
+            <CardContent className="pb-4">
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-2 text-muted-foreground font-medium">{isRTL ? 'المقياس' : 'Metric'}</th>
+                      <th className="text-center py-2 text-muted-foreground font-medium">{isRTL ? 'قيمتك' : 'Your Value'}</th>
+                      <th className="text-center py-2 text-muted-foreground font-medium">B2B</th>
+                      <th className="text-center py-2 text-muted-foreground font-medium">B2C</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cfg.benchmarks.map(row => {
+                      let yourValue = '—';
+                      if (row.metric === 'LTV/CAC' || row.metricAr === 'نسبة LTV/CAC') yourValue = cacInput > 0 ? `${unitEcon.ltvCacRatio.toFixed(1)}x` : '—';
+                      else if (row.metric.includes('Win Rate') || row.metricAr.includes('الفوز')) yourValue = `${kpis.winRate.toFixed(1)}%`;
+                      else if (row.metric.includes('Gross Margin') || row.metricAr.includes('هامش الربح الإجمالي')) yourValue = `${grossMarginPct}%`;
+                      else if (row.metric.includes('Payback') || row.metricAr.includes('الاسترداد')) yourValue = cacInput > 0 && unitEcon.paybackMonths > 0 ? `${unitEcon.paybackMonths.toFixed(1)} mo` : '—';
+                      else if (row.metric.includes('AOV') || row.metric.includes('Avg Order') || row.metricAr.includes('متوسط قيمة')) yourValue = fmt(unitEcon.arpc, currency);
+                      return (
+                        <tr key={row.metric} className="border-b border-border/50 last:border-0">
+                          <td className="py-2 font-medium text-foreground">{isRTL ? row.metricAr : row.metric}</td>
+                          <td className="py-2 text-center font-bold text-primary">{yourValue}</td>
+                          <td className={`py-2 text-center ${motion === 'b2b' ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>{row.b2b}</td>
+                          <td className={`py-2 text-center ${motion === 'b2c' ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>{row.b2c}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-3">
+                {isRTL ? `المصدر: SaaStr، OpenView، Bessemer Venture Partners 2024 — المعيار النشط: ${motion.toUpperCase()} (굵게)` : `Source: SaaStr, OpenView, Bessemer VP 2024 — Active benchmark: ${motion.toUpperCase()} (bold)`}
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* ── TARGETS ── */}
         <TabsContent value="targets" className="mt-4">
           <Card>
-            <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">Monthly Sales Target</CardTitle></CardHeader>
+            <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">{isRTL ? 'هدف المبيعات الشهري' : 'Monthly Sales Target'}</CardTitle></CardHeader>
             <CardContent className="pb-4 space-y-4">
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <Label className="text-xs">Month</Label>
+                  <Label className="text-xs">{isRTL ? 'الشهر' : 'Month'}</Label>
                   <Input type="month" value={targetMonth} onChange={e => setTargetMonth(e.target.value)} className="mt-1" />
                 </div>
                 <div>
-                  <Label className="text-xs">Target Amount</Label>
+                  <Label className="text-xs">{isRTL ? 'المبلغ المستهدف' : 'Target Amount'}</Label>
                   <Input type="number" min={0} value={targetAmount || ''} onChange={e => setTargetAmount(parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
                 </div>
                 <div>
-                  <Label className="text-xs">Currency</Label>
+                  <Label className="text-xs">{isRTL ? 'العملة' : 'Currency'}</Label>
                   <Select value={targetCurrency} onValueChange={setTargetCurrency}>
                     <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {['USD', 'SAR', 'AED', 'EUR', 'GBP'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                    </SelectContent>
+                    <SelectContent>{['USD', 'SAR', 'AED', 'EUR', 'GBP'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
               </div>
               <Button onClick={() => targetMutation.mutate({ month: targetMonth, targetAmount, currency: targetCurrency })} disabled={targetMutation.isPending}>
                 {targetMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
-                Save Target
+                {isRTL ? 'حفظ الهدف' : 'Save Target'}
               </Button>
             </CardContent>
           </Card>
@@ -672,10 +1050,10 @@ export default function SalesTracker() {
           <Card>
             <CardHeader className="pb-2 pt-4">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> AI Sales Analysis</CardTitle>
+                <CardTitle className="text-sm flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> {isRTL ? 'تحليل المبيعات بالذكاء الاصطناعي' : 'AI Sales Analysis'}</CardTitle>
                 <Button variant="outline" size="sm" onClick={handleAI} disabled={analyzeMutation.isPending}>
                   {analyzeMutation.isPending ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-1.5" />}
-                  {analyzeMutation.isPending ? 'Analyzing…' : 'Refresh'}
+                  {analyzeMutation.isPending ? (isRTL ? 'جارٍ التحليل…' : 'Analyzing…') : (isRTL ? 'تحديث' : 'Refresh')}
                 </Button>
               </div>
             </CardHeader>
@@ -683,14 +1061,14 @@ export default function SalesTracker() {
               {!aiAnalysis && !analyzeMutation.isPending && (
                 <div className="text-center py-10">
                   <Sparkles className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground mb-4">Get AI-powered analysis of your pipeline health, win rate, and revenue forecast.</p>
-                  <Button onClick={handleAI}><Sparkles className="w-4 h-4 mr-2" /> Generate Analysis</Button>
+                  <p className="text-sm text-muted-foreground mb-4">{isRTL ? 'احصل على تحليل ذكاء اصطناعي لصحة خط الأنابيب ومعدل الفوز وتوقعات الإيرادات.' : 'Get AI-powered analysis of your pipeline health, win rate, and revenue forecast.'}</p>
+                  <Button onClick={handleAI}><Sparkles className="w-4 h-4 mr-2" /> {isRTL ? 'إنشاء التحليل' : 'Generate Analysis'}</Button>
                 </div>
               )}
               {analyzeMutation.isPending && (
                 <div className="flex items-center gap-3 py-8 justify-center">
                   <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                  <span className="text-sm text-muted-foreground">Analyzing your pipeline…</span>
+                  <span className="text-sm text-muted-foreground">{isRTL ? 'جارٍ تحليل خط الأنابيب…' : 'Analyzing your pipeline…'}</span>
                 </div>
               )}
               {aiAnalysis && !analyzeMutation.isPending && (
@@ -705,26 +1083,30 @@ export default function SalesTracker() {
       <Dialog open={showForm} onOpenChange={open => { if (!open) { setShowForm(false); setEditingDeal(null); } }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingDeal ? 'Edit Deal' : 'Add New Deal'}</DialogTitle>
+            <DialogTitle>
+              {editingDeal
+                ? (isRTL ? `تعديل ${cfg.dealLabelAr}` : `Edit ${cfg.dealLabel}`)
+                : (isRTL ? `إضافة ${cfg.dealLabelAr} جديد` : `Add New ${cfg.dealLabel}`)}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            {/* Basic Info */}
+            {/* Basic */}
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
-                <Label className="text-xs">Company / Customer *</Label>
-                <Input value={form.customer} onChange={e => setField('customer', e.target.value)} placeholder="e.g. Acme Corp" className="mt-1" />
+                <Label className="text-xs">{isRTL ? 'الشركة / العميل *' : 'Company / Customer *'}</Label>
+                <Input value={form.customer} onChange={e => setField('customer', e.target.value)} placeholder={isRTL ? 'مثال: شركة أكمي' : 'e.g. Acme Corp'} className="mt-1" />
               </div>
               <div>
-                <Label className="text-xs">Product / Service</Label>
-                <Input value={form.product} onChange={e => setField('product', e.target.value)} placeholder="e.g. Enterprise Plan" className="mt-1" />
+                <Label className="text-xs">{isRTL ? 'المنتج / الخدمة' : 'Product / Service'}</Label>
+                <Input value={form.product} onChange={e => setField('product', e.target.value)} placeholder={isRTL ? 'مثال: الخطة الاحترافية' : 'e.g. Pro Plan'} className="mt-1" />
               </div>
               <div>
-                <Label className="text-xs">Deal Stage</Label>
-                <Select value={form.dealStage} onValueChange={v => handleStageChange(v as DealStage)}>
+                <Label className="text-xs">{isRTL ? 'المرحلة' : 'Stage'}</Label>
+                <Select value={form.dealStage} onValueChange={handleStageChange}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {(Object.keys(STAGE_CONFIG) as DealStage[]).map(s => (
-                      <SelectItem key={s} value={s}>{STAGE_CONFIG[s].label}</SelectItem>
+                    {(Object.keys(cfg.stages) as string[]).map(s => (
+                      <SelectItem key={s} value={s}>{isRTL ? cfg.stages[s].labelAr : cfg.stages[s].label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -733,28 +1115,57 @@ export default function SalesTracker() {
 
             <Separator />
 
+            {/* Model-specific extra fields */}
+            {cfg.extraFields.length > 0 && (
+              <>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  {isRTL ? `حقول ${cfg.labelAr}` : `${cfg.label} Fields`}
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {cfg.extraFields.map(field => (
+                    <div key={field.key}>
+                      <Label className="text-xs">{isRTL ? field.labelAr : field.label}</Label>
+                      {field.type === 'select' ? (
+                        <Select value={extraValues[field.key] ?? ''} onValueChange={v => setExtraValues(prev => ({ ...prev, [field.key]: v }))}>
+                          <SelectTrigger className="mt-1"><SelectValue placeholder={isRTL ? 'اختر…' : 'Select…'} /></SelectTrigger>
+                          <SelectContent>{(field.options ?? []).map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+                        </Select>
+                      ) : (
+                        <Input
+                          type={field.type}
+                          value={extraValues[field.key] ?? ''}
+                          onChange={e => setExtraValues(prev => ({ ...prev, [field.key]: e.target.value }))}
+                          placeholder={field.placeholder}
+                          className="mt-1"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <Separator />
+              </>
+            )}
+
             {/* Contact */}
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Contact Details</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{isRTL ? 'بيانات التواصل' : 'Contact Details'}</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">Contact Name</Label>
+                <Label className="text-xs">{isRTL ? 'اسم جهة الاتصال' : 'Contact Name'}</Label>
                 <Input value={form.contactName ?? ''} onChange={e => setField('contactName', e.target.value)} placeholder="John Smith" className="mt-1" />
               </div>
               <div>
-                <Label className="text-xs">Contact Email</Label>
+                <Label className="text-xs">{isRTL ? 'البريد الإلكتروني' : 'Email'}</Label>
                 <Input type="email" value={form.contactEmail ?? ''} onChange={e => setField('contactEmail', e.target.value)} placeholder="john@acme.com" className="mt-1" />
               </div>
               <div>
-                <Label className="text-xs">Contact Phone</Label>
-                <Input value={form.contactPhone ?? ''} onChange={e => setField('contactPhone', e.target.value)} placeholder="+1 555 0100" className="mt-1" />
+                <Label className="text-xs">{isRTL ? 'الهاتف' : 'Phone'}</Label>
+                <Input value={form.contactPhone ?? ''} onChange={e => setField('contactPhone', e.target.value)} placeholder="+966 50 000 0000" className="mt-1" />
               </div>
               <div>
-                <Label className="text-xs">Channel</Label>
+                <Label className="text-xs">{isRTL ? 'قناة الاكتساب' : 'Channel'}</Label>
                 <Select value={form.channel} onValueChange={v => setField('channel', v)}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {CHANNELS.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
-                  </SelectContent>
+                  <SelectContent>{CHANNELS.map(c => <SelectItem key={c} value={c}>{CHANNEL_LABELS[c]}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>
@@ -762,64 +1173,62 @@ export default function SalesTracker() {
             <Separator />
 
             {/* Financials */}
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Deal Financials</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{isRTL ? 'الماليات' : 'Financials'}</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">Deal Value (Expected)</Label>
+                <Label className="text-xs">{isRTL ? cfg.amountLabelAr : cfg.amountLabel} ({isRTL ? 'متوقع' : 'Expected'})</Label>
                 <Input type="number" min={0} value={form.dealValue ?? ''} onChange={e => setField('dealValue', parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
               </div>
               <div>
-                <Label className="text-xs">Closed Amount (Actual)</Label>
+                <Label className="text-xs">{isRTL ? 'المبلغ الفعلي (مُغلق)' : 'Closed Amount (Actual)'}</Label>
                 <Input type="number" min={0} value={form.amount || ''} onChange={e => setField('amount', parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
               </div>
               <div>
-                <Label className="text-xs">Currency</Label>
+                <Label className="text-xs">{isRTL ? 'العملة' : 'Currency'}</Label>
                 <Select value={form.currency} onValueChange={v => setField('currency', v)}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {['USD', 'SAR', 'AED', 'EUR', 'GBP', 'EGP'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                  </SelectContent>
+                  <SelectContent>{['USD', 'SAR', 'AED', 'EUR', 'GBP', 'EGP'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div>
-                <Label className="text-xs">Win Probability (%)</Label>
+                <Label className="text-xs">{isRTL ? 'احتمالية الفوز (%)' : 'Win Probability (%)'}</Label>
                 <Input type="number" min={0} max={100} value={form.probability ?? ''} onChange={e => setField('probability', parseInt(e.target.value) || 0)} placeholder="50" className="mt-1" />
               </div>
               <div>
-                <Label className="text-xs">Date</Label>
+                <Label className="text-xs">{isRTL ? 'التاريخ' : 'Date'}</Label>
                 <Input type="date" value={typeof form.date === 'string' ? form.date : isoDate(form.date)} onChange={e => setField('date', e.target.value)} className="mt-1" />
               </div>
               <div>
-                <Label className="text-xs">Expected Close Date</Label>
+                <Label className="text-xs">{isRTL ? 'تاريخ الإغلاق المتوقع' : 'Expected Close Date'}</Label>
                 <Input type="date" value={form.expectedCloseDate ? String(form.expectedCloseDate) : ''} onChange={e => setField('expectedCloseDate', e.target.value)} className="mt-1" />
               </div>
             </div>
 
             <Separator />
 
-            {/* Actions & Notes */}
+            {/* Notes */}
             <div className="space-y-3">
               <div>
-                <Label className="text-xs">Next Action</Label>
-                <Input value={form.nextAction ?? ''} onChange={e => setField('nextAction', e.target.value)} placeholder="e.g. Follow up call on Friday" className="mt-1" />
+                <Label className="text-xs">{isRTL ? 'الإجراء التالي' : 'Next Action'}</Label>
+                <Input value={form.nextAction ?? ''} onChange={e => setField('nextAction', e.target.value)} placeholder={isRTL ? 'مثال: متابعة الأربعاء' : 'e.g. Follow up Wednesday'} className="mt-1" />
               </div>
-              {form.dealStage === 'closed_lost' && (
+              {form.dealStage === cfg.lostStage && (
                 <div>
-                  <Label className="text-xs">Lost Reason</Label>
-                  <Input value={form.lostReason ?? ''} onChange={e => setField('lostReason', e.target.value)} placeholder="e.g. Price too high, chose competitor" className="mt-1" />
+                  <Label className="text-xs">{isRTL ? 'سبب الخسارة' : 'Lost Reason'}</Label>
+                  <Input value={form.lostReason ?? ''} onChange={e => setField('lostReason', e.target.value)} placeholder={isRTL ? 'مثال: السعر مرتفع' : 'e.g. Price too high'} className="mt-1" />
                 </div>
               )}
               <div>
-                <Label className="text-xs">Notes</Label>
-                <textarea value={form.notes ?? ''} onChange={e => setField('notes', e.target.value)} placeholder="Additional context, meeting notes…" className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px] resize-y focus:outline-none focus:ring-2 focus:ring-ring" />
+                <Label className="text-xs">{isRTL ? 'ملاحظات' : 'Notes'}</Label>
+                <textarea value={form.notes ?? ''} onChange={e => setField('notes', e.target.value)} placeholder={isRTL ? 'سياق إضافي…' : 'Additional context…'} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px] resize-y focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setShowForm(false); setEditingDeal(null); }}>Cancel</Button>
+            <Button variant="outline" onClick={() => { setShowForm(false); setEditingDeal(null); }}>{isRTL ? 'إلغاء' : 'Cancel'}</Button>
             <Button onClick={handleSubmit} disabled={addMutation.isPending || updateMutation.isPending}>
               {(addMutation.isPending || updateMutation.isPending) ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              {editingDeal ? 'Update Deal' : 'Add Deal'}
+              {editingDeal ? (isRTL ? 'تحديث' : 'Update') : (isRTL ? 'إضافة' : 'Add')}
             </Button>
           </DialogFooter>
         </DialogContent>

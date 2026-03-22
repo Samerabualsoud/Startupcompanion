@@ -6,6 +6,7 @@
 import ToolGuide from '@/components/ToolGuide';
 import { useState, useMemo, useEffect } from 'react';
 import { useStartup } from '@/contexts/StartupContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, MapPin, Clock, DollarSign, Percent, Star, ChevronDown, ChevronUp, Filter, BookmarkPlus, BookmarkCheck } from 'lucide-react';
 import { ACCELERATORS, COUNTRIES, recommendAccelerators, type Accelerator, type Stage } from '@/lib/accelerators';
@@ -13,19 +14,32 @@ import { SECTOR_OPTIONS } from '@/lib/valuation';
 import { useTrackedApplications } from '@/contexts/TrackedApplicationsContext';
 import { nanoid } from 'nanoid';
 
-const STAGE_OPTIONS = [
+const STAGE_OPTIONS_EN = [
   { value: 'pre-seed', label: 'Pre-Seed' },
   { value: 'seed', label: 'Seed' },
   { value: 'series-a', label: 'Series A' },
   { value: 'series-b', label: 'Series B' },
   { value: 'growth', label: 'Growth' },
 ];
+const STAGE_OPTIONS_AR = [
+  { value: 'pre-seed', label: 'ما قبل البذرة' },
+  { value: 'seed', label: 'البذرة' },
+  { value: 'series-a', label: 'السلسلة أ' },
+  { value: 'series-b', label: 'السلسلة ب' },
+  { value: 'growth', label: 'النمو' },
+];
 
-const TYPE_LABELS: Record<string, string> = {
+const TYPE_LABELS_EN: Record<string, string> = {
   accelerator: 'Accelerator',
   incubator: 'Incubator',
   'vc-studio': 'VC Studio',
   corporate: 'Corporate',
+};
+const TYPE_LABELS_AR: Record<string, string> = {
+  accelerator: 'مسرّعة أعمال',
+  incubator: 'حاضنة أعمال',
+  'vc-studio': 'استوديو رأس المال',
+  corporate: 'شركات',
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -35,16 +49,24 @@ const TYPE_COLORS: Record<string, string> = {
   corporate: '#1B3A5C',
 };
 
-const TIER_LABELS: Record<number, string> = {
+const TIER_LABELS_EN: Record<number, string> = {
   1: 'Top Global',
   2: 'Strong Regional',
   3: 'Local/Niche',
+};
+const TIER_LABELS_AR: Record<number, string> = {
+  1: 'الأفضل عالمياً',
+  2: 'قوي إقليمياً',
+  3: 'محلي / متخصص',
 };
 
 function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
   const [expanded, setExpanded] = useState(false);
   const { trackApplication, isTracked, untrack } = useTrackedApplications();
+  const { lang, isRTL } = useLanguage();
   const tracked = isTracked(acc.name);
+  const TYPE_LABELS = lang === 'ar' ? TYPE_LABELS_AR : TYPE_LABELS_EN;
+  const TIER_LABELS = lang === 'ar' ? TIER_LABELS_AR : TIER_LABELS_EN;
 
   const handleTrack = () => {
     if (tracked) {
@@ -105,9 +127,9 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
         {/* Key stats */}
         <div className="grid grid-cols-3 gap-2 mb-3">
           {[
-            { icon: DollarSign, label: 'Funding', value: acc.funding },
-            { icon: Percent, label: 'Equity', value: acc.equity },
-            { icon: Clock, label: 'Duration', value: acc.duration },
+            { icon: DollarSign, label: lang === 'ar' ? 'التمويل' : 'Funding', value: acc.funding },
+            { icon: Percent, label: lang === 'ar' ? 'الحصة' : 'Equity', value: acc.equity },
+            { icon: Clock, label: lang === 'ar' ? 'المدة' : 'Duration', value: acc.duration },
           ].map(stat => (
             <div key={stat.label} className="text-center p-2 rounded-lg bg-secondary/50">
               <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">{stat.label}</div>
@@ -129,7 +151,7 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
         {/* Deadline + actions */}
         <div className="flex items-center justify-between gap-2">
           <div className="text-[10px] text-muted-foreground">
-            <span className="font-semibold text-foreground">Deadline:</span> {acc.deadline}
+            <span className="font-semibold text-foreground">{lang === 'ar' ? 'الموعد النهائي:' : 'Deadline:'}</span> {acc.deadline}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -139,16 +161,16 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
                 ? { background: '#D1FAE5', color: '#059669', border: '1px solid #6EE7B7' }
                 : { background: 'oklch(0.35 0.2 270)', color: '#FAF6EF', border: '1px solid oklch(0.42 0.18 270)' }
               }
-              title={tracked ? 'Remove from tracker' : 'Track this application'}
+              title={tracked ? (lang === 'ar' ? 'إزالة من المتابعة' : 'Remove from tracker') : (lang === 'ar' ? 'تتبع هذا الطلب' : 'Track this application')}
             >
               {tracked ? <BookmarkCheck className="w-3 h-3" /> : <BookmarkPlus className="w-3 h-3" />}
-              {tracked ? 'Tracked' : 'Track'}
+              {tracked ? (lang === 'ar' ? 'متابَع' : 'Tracked') : (lang === 'ar' ? 'تتبع' : 'Track')}
             </button>
             <button
               onClick={() => setExpanded(v => !v)}
               className="text-[10px] text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors"
             >
-              {expanded ? 'Less' : 'Details'}
+              {expanded ? (lang === 'ar' ? 'أقل' : 'Less') : (lang === 'ar' ? 'التفاصيل' : 'Details')}
               {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
           </div>
@@ -165,7 +187,7 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
           >
             <div className="p-4 bg-secondary/30">
               <div className="mb-3">
-                <div className="text-xs font-semibold text-foreground mb-2">All Highlights</div>
+                <div className="text-xs font-semibold text-foreground mb-2">{lang === 'ar' ? 'جميع المميزات' : 'All Highlights'}</div>
                 <ul className="space-y-1">
                   {acc.highlights.map(h => (
                     <li key={h} className="flex items-start gap-2 text-xs text-muted-foreground">
@@ -176,7 +198,7 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
                 </ul>
               </div>
               <div className="mb-3">
-                <div className="text-xs font-semibold text-foreground mb-1">Stages Accepted</div>
+                <div className="text-xs font-semibold text-foreground mb-1">{lang === 'ar' ? 'المراحل المقبولة' : 'Stages Accepted'}</div>
                 <div className="flex gap-1.5 flex-wrap">
                   {acc.stages.map(s => (
                     <span key={s} className="text-[10px] px-2 py-0.5 rounded-full border border-border text-muted-foreground capitalize">{s}</span>
@@ -190,7 +212,7 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
                 className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
                 style={{ background: 'oklch(0.35 0.2 270)' }}
               >
-                Apply Now
+                {lang === 'ar' ? 'تقدّم الآن' : 'Apply Now'}
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
@@ -203,6 +225,8 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
 
 export default function AcceleratorRecommender() {
   const { snapshot } = useStartup();
+  const { lang, isRTL } = useLanguage();
+  const STAGE_OPTIONS = lang === 'ar' ? STAGE_OPTIONS_AR : STAGE_OPTIONS_EN;
   const [stage, setStage] = useState<Stage>('seed');
   const [country, setCountry] = useState('United States');
   const [sector, setSector] = useState('saas');
@@ -239,27 +263,34 @@ export default function AcceleratorRecommender() {
   return (
     <div className="space-y-5">
       <ToolGuide
-        toolName='Accelerator Finder'
-        tagline='Find the right accelerators — stage and sector auto-matched from your Startup Profile.'
-        steps={[
+        toolName={lang === 'ar' ? 'محرك البحث عن المسرّعات' : 'Accelerator Finder'}
+        tagline={lang === 'ar' ? 'ابحث عن المسرّعات المناسبة — المرحلة والقطاع يُملآن تلقائياً من ملف شركتك.' : 'Find the right accelerators — stage and sector auto-matched from your Startup Profile.'}
+        steps={lang === 'ar' ? [
+          { step: 1, title: 'راجع الفلاتر', description: 'المرحلة والدولة والقطاع تُملأ مسبقاً من ملف شركتك الناشئة.' },
+          { step: 2, title: 'عدّل الفلاتر', description: 'دقّق حسب الجغرافيا أو مبلغ التمويل أو نوع البرنامج.' },
+          { step: 3, title: 'تصفح النتائج', description: 'راجع المسرّعات المطابقة مع تفاصيل البرنامج ومواعيد التقديم.' },
+          { step: 4, title: 'تقدّم', description: 'انتقل إلى موقع المسرّعة لبدء طلبك.' },
+        ] : [
           { step: 1, title: 'Review filters', description: 'Stage, country, and sector are pre-filled from your Startup Profile.' },
           { step: 2, title: 'Adjust filters', description: 'Refine by geography, funding amount, or program type.' },
           { step: 3, title: 'Browse matches', description: 'Review matched accelerators with program details and application deadlines.' },
           { step: 4, title: 'Apply', description: "Click through to the accelerator's website to start your application." },
         ]}
-        connections={[
+        connections={lang === 'ar' ? [
+          { from: 'ملف الشركة الناشئة', to: 'يضبط فلاتر المرحلة والدولة والقطاع تلقائياً' },
+        ] : [
           { from: 'Startup Profile', to: 'auto-sets stage, country, and sector filters for relevant matches' },
         ]}
-        tip='Apply to 5-10 accelerators simultaneously. Top programs like YC and Techstars have <2% acceptance rates.'
+        tip={lang === 'ar' ? 'تقدّم لـ 5-10 مسرّعات في وقت واحد. أفضل البرامج كـ YC وTechstars لديها معدل قبول أقل من 2%.' : 'Apply to 5-10 accelerators simultaneously. Top programs like YC and Techstars have <2% acceptance rates.'}
       />
 
       {/* Header */}
       <div>
         <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-          Accelerator & Incubator Finder
+          {lang === 'ar' ? 'محرك البحث عن المسرّعات والحاضنات' : 'Accelerator & Incubator Finder'}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Find the best programs for your stage, location, and sector. Updated with {ACCELERATORS.length}+ programs globally.
+          {lang === 'ar' ? `ابحث عن أفضل البرامج لمرحلتك وموقعك وقطاعك. محدّث بأكثر من ${ACCELERATORS.length}+ برنامج عالمياً.` : `Find the best programs for your stage, location, and sector. Updated with ${ACCELERATORS.length}+ programs globally.`}
         </p>
       </div>
 
@@ -271,14 +302,14 @@ export default function AcceleratorRecommender() {
         >
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-accent" />
-            Filter Programs
+            {lang === 'ar' ? 'تصفية البرامج' : 'Filter Programs'}
           </div>
           {showFilters ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
         </button>
 
         <div className={`grid grid-cols-1 sm:grid-cols-3 gap-3 ${showFilters ? '' : ''}`}>
           <div>
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Your Stage</label>
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">{lang === 'ar' ? 'مرحلتك' : 'Your Stage'}</label>
             <select
               value={stage}
               onChange={e => setStage(e.target.value as Stage)}
@@ -290,7 +321,7 @@ export default function AcceleratorRecommender() {
             </select>
           </div>
           <div>
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Your Country</label>
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">{lang === 'ar' ? 'دولتك' : 'Your Country'}</label>
             <select
               value={country}
               onChange={e => setCountry(e.target.value)}
@@ -302,7 +333,7 @@ export default function AcceleratorRecommender() {
             </select>
           </div>
           <div>
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Your Sector</label>
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">{lang === 'ar' ? 'قطاعك' : 'Your Sector'}</label>
             <select
               value={sector}
               onChange={e => setSector(e.target.value)}
@@ -319,9 +350,11 @@ export default function AcceleratorRecommender() {
       {/* Results count */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">{recommendations.length}</span> programs recommended for{' '}
-          <span className="text-accent font-medium">{stage}</span> stage in{' '}
-          <span className="text-accent font-medium">{country}</span>
+          {lang === 'ar' ? (
+            <><span className="font-semibold text-foreground">{recommendations.length}</span> برنامج موصى به لمرحلة{' '}<span className="text-accent font-medium">{stage}</span> في{' '}<span className="text-accent font-medium">{country}</span></>
+          ) : (
+            <><span className="font-semibold text-foreground">{recommendations.length}</span> programs recommended for{' '}<span className="text-accent font-medium">{stage}</span> stage in{' '}<span className="text-accent font-medium">{country}</span></>
+          )}
         </div>
       </div>
 
@@ -329,7 +362,7 @@ export default function AcceleratorRecommender() {
       {recommendations.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <div className="text-4xl mb-3">🔍</div>
-          <div className="text-sm">No programs found for this combination. Try adjusting your filters.</div>
+          <div className="text-sm">{lang === 'ar' ? 'لا توجد برامج لهذه المجموعة. حاول تعديل الفلاتر.' : 'No programs found for this combination. Try adjusting your filters.'}</div>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -340,7 +373,7 @@ export default function AcceleratorRecommender() {
       )}
 
       <p className="text-[10px] text-muted-foreground text-center">
-        Program details are for reference only. Always verify current terms and deadlines on the official program websites.
+        {lang === 'ar' ? 'تفاصيل البرامج للإشارة فقط. تحقق دائماً من الشروط والمواعيد الحالية على المواقع الرسمية للبرامج.' : 'Program details are for reference only. Always verify current terms and deadlines on the official program websites.'}
       </p>
     </div>
   );

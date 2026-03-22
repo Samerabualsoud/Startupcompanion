@@ -6,6 +6,7 @@
 
 import { useStartup } from '@/contexts/StartupContext';
 import ToolGuide from '@/components/ToolGuide';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Edit2, Check, X, Users, Download, Rocket, BookmarkCheck, Loader2, RefreshCw } from 'lucide-react';
@@ -30,7 +31,7 @@ interface ContactFormData {
   linkedin: string;
 }
 
-const STATUS_CONFIG: Record<Status, { label: string; color: string; bg: string }> = {
+const STATUS_CONFIG_EN: Record<Status, { label: string; color: string; bg: string }> = {
   'target':            { label: 'Target',           color: '#6B7280', bg: '#F3F4F6' },
   'contacted':         { label: 'Contacted',         color: '#2D4A6B', bg: '#EFF6FF' },
   'intro-requested':   { label: 'Intro Requested',   color: '#7C3AED', bg: '#F5F3FF' },
@@ -40,6 +41,16 @@ const STATUS_CONFIG: Record<Status, { label: string; color: string; bg: string }
   'passed':            { label: 'Passed',            color: '#9CA3AF', bg: '#F9FAFB' },
   'invested':          { label: 'Invested ✓',        color: '#10B981', bg: '#D1FAE5' },
 };
+const STATUS_CONFIG_AR: Record<Status, { label: string; color: string; bg: string }> = {
+  'target':            { label: 'مستهدف',           color: '#6B7280', bg: '#F3F4F6' },
+  'contacted':         { label: 'تم التواصل',         color: '#2D4A6B', bg: '#EFF6FF' },
+  'intro-requested':   { label: 'طلب تعريف',   color: '#7C3AED', bg: '#F5F3FF' },
+  'meeting-scheduled': { label: 'اجتماع مجدول', color: '#D97706', bg: '#FFFBEB' },
+  'due-diligence':     { label: 'عناية واجبة',     color: '#C4614A', bg: '#FFF5F3' },
+  'term-sheet':        { label: 'صحيفة الشروط',        color: '#059669', bg: '#ECFDF5' },
+  'passed':            { label: 'رفض',            color: '#9CA3AF', bg: '#F9FAFB' },
+  'invested':          { label: 'استثمر ✓',        color: '#10B981', bg: '#D1FAE5' },
+};
 
 const PIPELINE_STAGES: Status[] = ['target', 'contacted', 'intro-requested', 'meeting-scheduled', 'due-diligence', 'term-sheet', 'invested'];
 
@@ -48,8 +59,9 @@ const EMPTY_FORM: ContactFormData = {
   lastContact: new Date().toISOString().split('T')[0], notes: '', email: '', linkedin: '',
 };
 
-function StatusBadge({ status }: { status: Status }) {
-  const cfg = STATUS_CONFIG[status];
+type StatusConfigMap = Record<Status, { label: string; color: string; bg: string }>;
+function StatusBadge({ status, config }: { status: Status; config: StatusConfigMap }) {
+  const cfg = config[status];
   return (
     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap"
       style={{ color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.color}30` }}>
@@ -60,6 +72,8 @@ function StatusBadge({ status }: { status: Status }) {
 
 export default function InvestorCRM() {
   const { snapshot } = useStartup();
+  const { lang, isRTL } = useLanguage();
+  const STATUS_CONFIG = lang === 'ar' ? STATUS_CONFIG_AR : STATUS_CONFIG_EN;
   const { isAuthenticated } = useAuth();
   const utils = trpc.useUtils();
   const { tracked, untrack } = useTrackedApplications();
@@ -193,27 +207,34 @@ export default function InvestorCRM() {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
       <ToolGuide
-        toolName='Investor Pipeline'
-        tagline='Track your investor relationships — company context available throughout.'
-        steps={[
+        toolName={lang === 'ar' ? 'خط أنابيب المستثمرين' : 'Investor Pipeline'}
+        tagline={lang === 'ar' ? 'تتبع علاقاتك مع المستثمرين — سياق الشركة متاح طوال الوقت.' : 'Track your investor relationships — company context available throughout.'}
+        steps={lang === 'ar' ? [
+          { step: 1, title: 'أضف مستثمرين', description: 'أضف المستثمرين المستهدفين مع صندوقهم ومرحلة التركيز وبيانات التواصل.' },
+          { step: 2, title: 'تتبع الحالة', description: 'حدّث حالة كل مستثمر: مستهدف → تواصل → اجتماع → صحيفة شروط → إغلاق.' },
+          { step: 3, title: 'سجّل التفاعلات', description: 'أضف ملاحظات بعد كل اجتماع أو بريد إلكتروني.' },
+          { step: 4, title: 'راقب خط الأنابيب', description: 'استخدم عرض خط الأنابيب لرؤية مكان كل مستثمر في عمليتك.' },
+        ] : [
           { step: 1, title: 'Add investors', description: 'Add investors you are targeting with their fund, stage focus, and contact details.' },
           { step: 2, title: 'Track status', description: "Update each investor's status: Identified → Contacted → Meeting → Term Sheet → Closed." },
           { step: 3, title: 'Log interactions', description: 'Add notes after each meeting or email exchange.' },
           { step: 4, title: 'Monitor pipeline', description: 'Use the pipeline view to see where each investor is in your process.' },
         ]}
-        connections={[
+        connections={lang === 'ar' ? [
+          { from: 'ملف الشركة الناشئة', to: 'اسم الشركة ومرحلتها يُستخدم كسياق لمطابقة المستثمرين' },
+        ] : [
           { from: 'Startup Profile', to: 'company name and stage used as context for investor matching' },
         ]}
-        tip='Run a parallel process with 20-30 investors. Most will say no — volume is key to closing a round.'
+        tip={lang === 'ar' ? 'شغّل عملية متوازية مع 20-30 مستثمراً. معظمهم سيرفضون — الحجم هو مفتاح إغلاق الجولة.' : 'Run a parallel process with 20-30 investors. Most will say no — volume is key to closing a round.'}
       />
 
         <Users className="w-12 h-12 text-muted-foreground opacity-40" />
         <div>
-          <div className="text-lg font-bold text-foreground mb-1">Sign in to use Investor CRM</div>
-          <div className="text-sm text-muted-foreground mb-4">Your contacts are saved securely per account across all sessions.</div>
+          <div className="text-lg font-bold text-foreground mb-1">{lang === 'ar' ? 'سجّل الدخول لاستخدام إدارة المستثمرين' : 'Sign in to use Investor CRM'}</div>
+          <div className="text-sm text-muted-foreground mb-4">{lang === 'ar' ? 'جهات الاتصال محفوظة بأمان لكل حساب عبر جميع الجلسات.' : 'Your contacts are saved securely per account across all sessions.'}</div>
           <a href={getLoginUrl()} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
             style={{ background: '#C4614A' }}>
-            Sign In to Continue
+            {lang === 'ar' ? 'تسجيل الدخول للمتابعة' : 'Sign In to Continue'}
           </a>
         </div>
       </div>
@@ -224,7 +245,7 @@ export default function InvestorCRM() {
     return (
       <div className="flex items-center justify-center py-20 gap-3 text-muted-foreground">
         <Loader2 className="w-5 h-5 animate-spin" />
-        <span className="text-sm">Loading your contacts...</span>
+        <span className="text-sm">{lang === 'ar' ? 'جاري تحميل جهات الاتصال...' : 'Loading your contacts...'}</span>
       </div>
     );
   }
@@ -232,7 +253,7 @@ export default function InvestorCRM() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
-        <div className="text-sm text-destructive">Failed to load contacts. Please try again.</div>
+        <div className="text-sm text-destructive">{lang === 'ar' ? 'فشل تحميل جهات الاتصال. حاول مرة أخرى.' : 'Failed to load contacts. Please try again.'}</div>
         <button onClick={() => utils.crm.getContacts.invalidate()}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm border border-border text-muted-foreground hover:bg-secondary/40">
           <RefreshCw className="w-3.5 h-3.5" /> Retry
@@ -247,9 +268,9 @@ export default function InvestorCRM() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-            Investor CRM
+            {lang === 'ar' ? 'إدارة علاقات المستثمرين' : 'Investor CRM'}
           </h2>
-          <p className="text-sm text-muted-foreground">Track your investor outreach pipeline. Contacts are saved to your account.</p>
+          <p className="text-sm text-muted-foreground">{lang === 'ar' ? 'تتبع خط أنابيب التواصل مع المستثمرين. جهات الاتصال محفوظة في حسابك.' : 'Track your investor outreach pipeline. Contacts are saved to your account.'}</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button onClick={exportCSV}
@@ -257,20 +278,20 @@ export default function InvestorCRM() {
             style={{ background: 'oklch(0.35 0.2 270)', color: '#FAF6EF', border: '1px solid oklch(0.42 0.18 270)' }}
             title="Export to CSV">
             <Download className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Export CSV</span>
+            <span className="hidden sm:inline">{lang === 'ar' ? 'تصدير CSV' : 'Export CSV'}</span>
           </button>
           <button onClick={() => setShowAdd(v => !v)}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
             style={{ background: '#C4614A' }}>
             <Plus className="w-4 h-4" />
-            Add Investor
+            {lang === 'ar' ? 'إضافة مستثمر' : 'Add Investor'}
           </button>
         </div>
       </div>
 
       {/* Pipeline funnel */}
       <div className="border border-border rounded-xl p-4 bg-card">
-        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Pipeline Overview</div>
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{lang === 'ar' ? 'نظرة عامة على خط الأنابيب' : 'Pipeline Overview'}</div>
         <div className="flex gap-1 overflow-x-auto pb-1">
           {PIPELINE_STAGES.map((stage, i) => {
             const cfg = STATUS_CONFIG[stage];
@@ -293,7 +314,7 @@ export default function InvestorCRM() {
         {showAdd && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             className="border border-border rounded-xl p-4 bg-card space-y-3">
-            <div className="text-sm font-semibold text-foreground">Add New Investor</div>
+            <div className="text-sm font-semibold text-foreground">{lang === 'ar' ? 'إضافة مستثمر جديد' : 'Add New Investor'}</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
                 { key: 'name', label: 'Name', placeholder: 'Sarah Chen' },
@@ -347,11 +368,11 @@ export default function InvestorCRM() {
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-60"
                 style={{ background: '#C4614A' }}>
                 {addMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-                {addMutation.isPending ? 'Saving...' : 'Add'}
+                {addMutation.isPending ? (lang === 'ar' ? 'جاري الحفظ...' : 'Saving...') : (lang === 'ar' ? 'إضافة' : 'Add')}
               </button>
               <button onClick={() => { setShowAdd(false); setNewData(EMPTY_FORM); }}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm border border-border text-muted-foreground hover:bg-secondary/40">
-                <X className="w-3.5 h-3.5" /> Cancel
+                <X className="w-3.5 h-3.5" /> {lang === 'ar' ? 'إلغاء' : 'Cancel'}
               </button>
             </div>
           </motion.div>
@@ -362,7 +383,7 @@ export default function InvestorCRM() {
       <div className="flex gap-2 flex-wrap">
         <button onClick={() => setFilterStatus('all')}
           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${filterStatus === 'all' ? 'bg-foreground text-background' : 'border border-border text-muted-foreground'}`}>
-          All ({contacts.length})
+          {lang === 'ar' ? `الكل (${contacts.length})` : `All (${contacts.length})`}
         </button>
         {PIPELINE_STAGES.map(s => (
           <button key={s} onClick={() => setFilterStatus(s)}
@@ -379,8 +400,8 @@ export default function InvestorCRM() {
           <Users className="w-8 h-8 mx-auto mb-3 opacity-40" />
           <div className="text-sm">
             {contacts.length === 0
-              ? 'No investors yet. Add your first target investor above.'
-              : 'No investors match this filter.'}
+              ? (lang === 'ar' ? 'لا يوجد مستثمرون بعد. أضف أول مستثمر مستهدف أعلاه.' : 'No investors yet. Add your first target investor above.')
+              : (lang === 'ar' ? 'لا يوجد مستثمرون يطابقون هذا الفلتر.' : 'No investors match this filter.')}
           </div>
         </div>
       ) : (
@@ -436,7 +457,7 @@ export default function InvestorCRM() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-bold text-foreground">{inv.name}</span>
                         <span className="text-xs text-muted-foreground">@ {inv.firm}</span>
-                        <StatusBadge status={inv.status as Status} />
+                        <StatusBadge status={inv.status as Status} config={STATUS_CONFIG} />
                       </div>
                       <div className="text-[10px] text-muted-foreground mt-0.5">
                         {inv.stageFocus} · {inv.sectorFocus} · Last contact: {inv.lastContact}

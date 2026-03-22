@@ -40,6 +40,8 @@ interface DirectCost {
   id: string;
   name: string;
   amount: number;
+  /** 'fixed' = absolute currency amount; 'pct' = percentage of monthly revenue (e.g. 2.9 for 2.9%) */
+  feeType: 'fixed' | 'pct';
   type: CostType;
   perUnit: boolean;
   fixedPortion?: number;
@@ -101,11 +103,11 @@ const MARGIN_BENCHMARKS: Record<BusinessModel, { gross: number; ebitda: number; 
 const BM_TEMPLATES: Record<BusinessModel, { direct: Omit<DirectCost, 'id'>[]; indirect: Omit<IndirectCost, 'id'>[] }> = {
   saas: {
     direct: [
-      { name: 'Cloud Hosting (AWS/GCP/Azure)', amount: 0, type: 'variable', perUnit: false, category: 'hosting' },
-      { name: 'Payment Processing (~2.9% of revenue)', amount: 0, type: 'variable', perUnit: true, category: 'payment_processing' },
-      { name: 'Customer Support (per user/mo)', amount: 0, type: 'variable', perUnit: true, category: 'support' },
-      { name: 'Third-party SaaS / APIs', amount: 0, type: 'fixed', perUnit: false, category: 'licensing' },
-      { name: 'Data Storage & CDN', amount: 0, type: 'variable', perUnit: false, category: 'cloud' },
+      { name: 'Cloud Hosting (AWS/GCP/Azure)', amount: 0, feeType: 'fixed', type: 'variable', perUnit: false, category: 'hosting' },
+      { name: 'Payment Processing (2.9% of revenue)', amount: 2.9, feeType: 'pct', type: 'variable', perUnit: false, category: 'payment_processing' },
+      { name: 'Customer Support (per user/mo)', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'support' },
+      { name: 'Third-party SaaS / APIs', amount: 0, feeType: 'fixed', type: 'fixed', perUnit: false, category: 'licensing' },
+      { name: 'Data Storage & CDN', amount: 0, feeType: 'fixed', type: 'variable', perUnit: false, category: 'cloud' },
     ],
     indirect: [
       { name: 'Sales & Marketing', amount: 0, category: 'marketing' },
@@ -115,12 +117,13 @@ const BM_TEMPLATES: Record<BusinessModel, { direct: Omit<DirectCost, 'id'>[]; in
   },
   ecommerce: {
     direct: [
-      { name: 'Product Cost / COGS per item', amount: 0, type: 'variable', perUnit: true, category: 'materials' },
-      { name: 'Packaging & Labeling', amount: 0, type: 'variable', perUnit: true, category: 'packaging' },
-      { name: 'Shipping & Last-Mile Delivery', amount: 0, type: 'variable', perUnit: true, category: 'shipping' },
-      { name: 'Payment Processing (2.9% + fee)', amount: 0, type: 'variable', perUnit: true, category: 'payment_processing' },
-      { name: 'Returns & Refunds Reserve', amount: 0, type: 'variable', perUnit: true, category: 'other' },
-      { name: 'Warehouse / Fulfillment (fixed)', amount: 0, type: 'fixed', perUnit: false, category: 'other' },
+      { name: 'Product Cost / COGS per item', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'materials' },
+      { name: 'Packaging & Labeling', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'packaging' },
+      { name: 'Shipping & Last-Mile Delivery', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'shipping' },
+      { name: 'Payment Processing (2.9% of revenue)', amount: 2.9, feeType: 'pct', type: 'variable', perUnit: false, category: 'payment_processing' },
+      { name: 'BNPL Fee (e.g. Tabby/Tamara ~3-5%)', amount: 3.5, feeType: 'pct', type: 'variable', perUnit: false, category: 'payment_processing' },
+      { name: 'Returns & Refunds Reserve', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'other' },
+      { name: 'Warehouse / Fulfillment (fixed)', amount: 0, feeType: 'fixed', type: 'fixed', perUnit: false, category: 'other' },
     ],
     indirect: [
       { name: 'Digital Marketing / Ads', amount: 0, category: 'marketing' },
@@ -130,10 +133,10 @@ const BM_TEMPLATES: Record<BusinessModel, { direct: Omit<DirectCost, 'id'>[]; in
   },
   marketplace: {
     direct: [
-      { name: 'Payment Processing (2.9%)', amount: 0, type: 'variable', perUnit: true, category: 'payment_processing' },
-      { name: 'Trust & Safety / Fraud Prevention', amount: 0, type: 'variable', perUnit: true, category: 'support' },
-      { name: 'Customer Support per Transaction', amount: 0, type: 'variable', perUnit: true, category: 'support' },
-      { name: 'Cloud Infrastructure (fixed)', amount: 0, type: 'fixed', perUnit: false, category: 'hosting' },
+      { name: 'Payment Processing (2.9% of GMV)', amount: 2.9, feeType: 'pct', type: 'variable', perUnit: false, category: 'payment_processing' },
+      { name: 'Trust & Safety / Fraud Prevention', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'support' },
+      { name: 'Customer Support per Transaction', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'support' },
+      { name: 'Cloud Infrastructure (fixed)', amount: 0, feeType: 'fixed', type: 'fixed', perUnit: false, category: 'hosting' },
     ],
     indirect: [
       { name: 'Supply Acquisition (sellers/providers)', amount: 0, category: 'marketing' },
@@ -144,12 +147,12 @@ const BM_TEMPLATES: Record<BusinessModel, { direct: Omit<DirectCost, 'id'>[]; in
   },
   hardware: {
     direct: [
-      { name: 'Bill of Materials (BOM)', amount: 0, type: 'variable', perUnit: true, category: 'materials' },
-      { name: 'Contract Manufacturing', amount: 0, type: 'variable', perUnit: true, category: 'labor' },
-      { name: 'Quality Control & Testing', amount: 0, type: 'variable', perUnit: true, category: 'other' },
-      { name: 'Packaging & Retail Box', amount: 0, type: 'variable', perUnit: true, category: 'packaging' },
-      { name: 'Shipping & Logistics', amount: 0, type: 'variable', perUnit: true, category: 'shipping' },
-      { name: 'Tooling & Molds (amortized)', amount: 0, type: 'fixed', perUnit: false, category: 'other' },
+      { name: 'Bill of Materials (BOM)', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'materials' },
+      { name: 'Contract Manufacturing', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'labor' },
+      { name: 'Quality Control & Testing', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'other' },
+      { name: 'Packaging & Retail Box', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'packaging' },
+      { name: 'Shipping & Logistics', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'shipping' },
+      { name: 'Tooling & Molds (amortized)', amount: 0, feeType: 'fixed', type: 'fixed', perUnit: false, category: 'other' },
     ],
     indirect: [
       { name: 'Sales & Distribution', amount: 0, category: 'sales' },
@@ -159,10 +162,10 @@ const BM_TEMPLATES: Record<BusinessModel, { direct: Omit<DirectCost, 'id'>[]; in
   },
   services: {
     direct: [
-      { name: 'Direct Labor / Consultant Hours', amount: 0, type: 'variable', perUnit: true, category: 'labor' },
-      { name: 'Subcontractors / Freelancers', amount: 0, type: 'variable', perUnit: false, category: 'labor' },
-      { name: 'Travel & Expenses (project)', amount: 0, type: 'variable', perUnit: false, category: 'other' },
-      { name: 'Software / Tools per Project', amount: 0, type: 'variable', perUnit: false, category: 'licensing' },
+      { name: 'Direct Labor / Consultant Hours', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'labor' },
+      { name: 'Subcontractors / Freelancers', amount: 0, feeType: 'fixed', type: 'variable', perUnit: false, category: 'labor' },
+      { name: 'Travel & Expenses (project)', amount: 0, feeType: 'fixed', type: 'variable', perUnit: false, category: 'other' },
+      { name: 'Software / Tools per Project', amount: 0, feeType: 'fixed', type: 'variable', perUnit: false, category: 'licensing' },
     ],
     indirect: [
       { name: 'Business Development / Sales', amount: 0, category: 'sales' },
@@ -173,11 +176,11 @@ const BM_TEMPLATES: Record<BusinessModel, { direct: Omit<DirectCost, 'id'>[]; in
   },
   manufacturing: {
     direct: [
-      { name: 'Raw Materials', amount: 0, type: 'variable', perUnit: true, category: 'materials' },
-      { name: 'Direct Labor (production)', amount: 0, type: 'variable', perUnit: true, category: 'labor' },
-      { name: 'Energy / Utilities (variable)', amount: 0, type: 'variable', perUnit: false, category: 'other' },
-      { name: 'Machine Maintenance (amortized)', amount: 0, type: 'fixed', perUnit: false, category: 'other' },
-      { name: 'Quality Control', amount: 0, type: 'variable', perUnit: true, category: 'other' },
+      { name: 'Raw Materials', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'materials' },
+      { name: 'Direct Labor (production)', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'labor' },
+      { name: 'Energy / Utilities (variable)', amount: 0, feeType: 'fixed', type: 'variable', perUnit: false, category: 'other' },
+      { name: 'Machine Maintenance (amortized)', amount: 0, feeType: 'fixed', type: 'fixed', perUnit: false, category: 'other' },
+      { name: 'Quality Control', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'other' },
     ],
     indirect: [
       { name: 'Factory Overhead / Rent', amount: 0, category: 'facilities' },
@@ -187,7 +190,7 @@ const BM_TEMPLATES: Record<BusinessModel, { direct: Omit<DirectCost, 'id'>[]; in
   },
   other: {
     direct: [
-      { name: 'Primary Direct Cost', amount: 0, type: 'variable', perUnit: true, category: 'other' },
+      { name: 'Primary Direct Cost', amount: 0, feeType: 'fixed', type: 'variable', perUnit: true, category: 'other' },
     ],
     indirect: [
       { name: 'Sales & Marketing', amount: 0, category: 'marketing' },
@@ -241,16 +244,30 @@ export default function COGSCalculator() {
     let totalDirectSemiFixed = 0;
     let totalDirectSemiVariable = 0;
 
+    const monthlyRevForPct = revenuePerUnit * unitsPerMonth;
     for (const c of directCosts) {
+      // Resolve effective amount: percentage-based fees use % of monthly revenue
+      const effectiveAmount = c.feeType === 'pct'
+        ? (c.amount / 100) * monthlyRevForPct
+        : c.amount;
       if (c.type === 'fixed') {
-        totalDirectFixed += c.amount;
+        totalDirectFixed += effectiveAmount;
       } else if (c.type === 'variable') {
-        totalDirectVariable += c.perUnit ? c.amount * unitsPerMonth : c.amount;
+        if (c.feeType === 'pct') {
+          // Pct-of-revenue costs are already monthly totals
+          totalDirectVariable += effectiveAmount;
+        } else {
+          totalDirectVariable += c.perUnit ? effectiveAmount * unitsPerMonth : effectiveAmount;
+        }
       } else if (c.type === 'semi-variable') {
-        const fixedBase = c.fixedPortion ?? c.amount * 0.4;
-        const varPer = c.variablePortion ?? (c.amount * 0.6) / Math.max(1, unitsPerMonth);
-        totalDirectSemiFixed += fixedBase;
-        totalDirectSemiVariable += varPer * unitsPerMonth;
+        if (c.feeType === 'pct') {
+          totalDirectSemiVariable += effectiveAmount;
+        } else {
+          const fixedBase = c.fixedPortion ?? effectiveAmount * 0.4;
+          const varPer = c.variablePortion ?? (effectiveAmount * 0.6) / Math.max(1, unitsPerMonth);
+          totalDirectSemiFixed += fixedBase;
+          totalDirectSemiVariable += varPer * unitsPerMonth;
+        }
       }
     }
 
@@ -340,7 +357,7 @@ export default function COGSCalculator() {
 
   // ── Handlers ───────────────────────────────────────────────────────────
   const addDirectCost = () => setDirectCosts(prev => [...prev, {
-    id: nanoid(), name: '', amount: 0, type: 'variable', perUnit: true, category: 'other',
+    id: nanoid(), name: '', amount: 0, feeType: 'fixed' as 'fixed' | 'pct', type: 'variable' as CostType, perUnit: true, category: 'other' as DirectCategory,
   }]);
 
   const updateDirectCost = (id: string, field: keyof DirectCost, value: unknown) =>
@@ -623,7 +640,29 @@ export default function COGSCalculator() {
                       </SelectContent>
                     </Select>
                   </div>
-                  {cost.type === 'semi-variable' ? (
+                  {/* Fee Type toggle: fixed amount vs % of revenue */}
+                  <div className="col-span-6 sm:col-span-2">
+                    <Label className="text-xs">Fee Type</Label>
+                    <Select value={cost.feeType ?? 'fixed'} onValueChange={v => updateDirectCost(cost.id, 'feeType', v as 'fixed' | 'pct')}>
+                      <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fixed">Fixed ({currency})</SelectItem>
+                        <SelectItem value="pct">% of Revenue</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {cost.feeType === 'pct' ? (
+                    <div className="col-span-5 sm:col-span-2">
+                      <Label className="text-xs">Rate (%)</Label>
+                      <div className="relative mt-1">
+                        <Input type="number" min={0} max={100} step={0.1} value={cost.amount || ''} onChange={e => updateDirectCost(cost.id, 'amount', parseFloat(e.target.value) || 0)} placeholder="e.g. 2.9" className="h-8 text-sm pr-7" />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        = {metrics.monthlyRevenue > 0 ? fmt((cost.amount / 100) * metrics.monthlyRevenue, currency) : '—'}/mo
+                      </p>
+                    </div>
+                  ) : cost.type === 'semi-variable' ? (
                     <>
                       <div className="col-span-5 sm:col-span-1">
                         <Label className="text-xs">Fixed ({currency})</Label>

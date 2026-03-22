@@ -510,12 +510,12 @@ export const translations = {
   ar: {
     // ── Nav / Global ──
     appName: "Polaris Arabia",
-    appTagline: "التقييم · حقوق الملكية · جمع التمويل · الموارد",
+    appTagline: "التقييم · الأسهم · التمويل · الموارد",
     signIn: "تسجيل الدخول",
     signOut: "تسجيل الخروج",
     getStarted: "ابدأ الآن",
     openApp: "فتح التطبيق",
-    goToDashboard: "الذهاب إلى لوحة التحكم",
+    goToDashboard: "لوحة التحكم",
     account: "الحساب",
     myStartupProfile: "ملف شركتي الناشئة",
     tools: "أدوات",
@@ -524,12 +524,12 @@ export const translations = {
 
     // ── Landing Page ──
     heroBadge: "١٤ أداة · بدون رسوم · بدون بطاقة ائتمانية",
-    heroTitle1: "المجموعة الكاملة من الأدوات",
-    heroTitle2: "للمؤسسين في المراحل المبكرة",
-    heroSubtitle: "قيّم شركتك الناشئة، اقسم حقوق الملكية بعدالة، ابحث عن المستثمرين، وتابع جمع التمويل — كل ذلك في مكان واحد. مصمم للمؤسسين، لا للمستشارين الماليين.",
+    heroTitle1: "مجموعة الأدوات الشاملة",
+    heroTitle2: "للمؤسسين في المراحل الأولى",
+    heroSubtitle: "قيّم شركتك، وزّع الأسهم بعدالة، ابحث عن المستثمرين، وتابع جولات التمويل — كل ذلك في مكان واحد. صُمّم للمؤسسين، لا للمستشارين الماليين.",
     startForFree: "ابدأ الآن",
     createFreeAccount: "أنشئ حسابك",
-    freeForever: "بدون رسوم · بدون بطاقة ائتمانية · بدون مستشار مالي",
+    freeForever: "مجاني تماماً · بدون بطاقة ائتمانية · بدون مستشار مالي",
 
     // Stats
     statTools: "أدوات للشركات الناشئة",
@@ -539,17 +539,17 @@ export const translations = {
 
     // Tools section
     everyToolTitle: "كل أداة يحتاجها المؤسس",
-    everyToolSubtitle: "من فكرتك الأولى حتى جولة السلسلة أ — بنينا الأدوات التي تحل محل المستشارين المكلفين وجداول البيانات المتناثرة.",
+    everyToolSubtitle: "من الفكرة الأولى حتى جولة السلسلة أ — أدوات تُغني عن المستشارين المكلفين وجداول البيانات المبعثرة.",
 
     // How it works
-    howItWorksTitle: "مصمم للمؤسسين، لا لخبراء المال",
-    howItWorksSubtitle: "بدون مصطلحات معقدة. بدون جداول بيانات. فقط أسئلة بسيطة ونتائج فورية احترافية.",
+    howItWorksTitle: "للمؤسسين، لا لخبراء المال",
+    howItWorksSubtitle: "بلا مصطلحات معقدة. بلا جداول بيانات. أسئلة بسيطة ونتائج احترافية فورية.",
     step1Title: "أجب على أسئلة بسيطة",
-    step1Desc: "واجهتنا التفاعلية تقودك عبر أسئلة بلغة بسيطة. لا تحتاج خلفية مالية.",
+    step1Desc: "واجهتنا التفاعلية تقودك بأسئلة سهلة. لا تحتاج أي خلفية مالية.",
     step2Title: "احصل على نتائج فورية",
-    step2Desc: "الحسابات تعمل في الوقت الفعلي باستخدام ٧ طرق تقييم معيارية وتحليل بالذكاء الاصطناعي.",
+    step2Desc: "الحسابات تعمل لحظياً بـ ٧ طرق تقييم معيارية وتحليل بالذكاء الاصطناعي.",
     step3Title: "صدّر وشارك",
-    step3Desc: "نزّل تقريراً كاملاً بصيغة PDF، شارك رابطاً مع المؤسسين المشاركين، أو صدّر خط أنابيب المستثمرين كملف CSV.",
+    step3Desc: "نزّل تقريراً كاملاً بصيغة PDF، أو شارك رابطاً مع شركائك، أو صدّر قاعدة المستثمرين بصيغة CSV.",
 
     // Database section
     globalCoverage: "تغطية عالمية",
@@ -565,11 +565,11 @@ export const translations = {
     lawyersDesc: "مكاتب صديقة للشركات الناشئة",
 
     // Testimonials
-    trustedBy: "موثوق به من مؤسسين حول العالم",
+    trustedBy: "يثق به مؤسسون حول العالم",
 
     // CTA
-    ctaTitle: "هل أنت مستعد للبناء بوضوح؟",
-    ctaSubtitle: "انضم إلى آلاف المؤسسين الذين يستخدمون Polaris Arabia لاتخاذ قرارات أفضل وأسرع.",
+    ctaTitle: "ابدأ البناء بثقة اليوم",
+    ctaSubtitle: "انضم إلى آلاف المؤسسين الذين يستخدمون Polaris Arabia لاتخاذ قرارات أذكى وأسرع.",
 
     // Footer
     footerDisclaimer: "جميع الحسابات تقديرية فقط ولا تشكل مشورة مالية.",
@@ -676,12 +676,12 @@ export const translations = {
     // ── Sidebar Nav ──
     navValuation: "التقييم",
     navEquitySplit: "تقسيم الأسهم",
-    navDilution: "محاكاة التخفيف",
+    navDilution: "محاكي التخفيف",
     navReadiness: "الاستعداد للتمويل",
     navPitchDeck: "تقييم العرض التقديمي",
     navInvestorCRM: "إدارة المستثمرين",
     navAccelerators: "مسرّعات الأعمال",
-    navRunway: "محسّن المدرج",
+    navRunway: "مخطط المدرج",
     navTermSheet: "مسرد شروط الاستثمار",
     navIdeaCheck: "تقييم الفكرة",
     navDatabase: "قاعدة بيانات النظام البيئي",
@@ -690,7 +690,7 @@ export const translations = {
     navMatching: "مطابقة المستثمرين",
 
     navGroupValuation: "التقييم",
-    navGroupEquity: "الأسهم وجدول الرسملة",
+    navGroupEquity: "الأسهم وجدول الملكية",
     navGroupFundraising: "جمع التمويل",
     navGroupResources: "الموارد",
     navGroupDatabase: "النظام البيئي",
@@ -747,8 +747,8 @@ export const translations = {
     navIdeaValidator: 'مدقق الأفكار بالذكاء الاصطناعي',
 
     // AI Fundraising Advisor
-    aiFundraisingTitle: "مستشار جمع التمويل بالذكاء الاصطناعي",
-    aiFundraisingSubtitle: "اسأل أي شيء عن جمع التمويل والمستثمرين وشروط الاستثمار أو استراتيجية الشركة الناشئة.",
+    aiFundraisingTitle: "مستشار التمويل بالذكاء الاصطناعي",
+    aiFundraisingSubtitle: "اسأل عن جمع التمويل والمستثمرين وشروط الاستثمار أو استراتيجية شركتك الناشئة.",
     aiFundraisingPlaceholder: "اسألني أي شيء عن جمع التمويل…",
     aiFundraisingContext: "أخبرني عن شركتك الناشئة (اختياري)",
     aiFundraisingContextPlaceholder: "مثال: شركة SaaS، مرحلة ما قبل البذرة، تقنية مالية، إيرادات ٥٠ ألف دولار شهرياً",
@@ -802,7 +802,7 @@ export const translations = {
     aiDDGenerating: "جارى الإنشاء…",
 
     // SAFE / Convertible Note Builder
-    safeTitle: "باني SAFE / سند قابل للتحويل",
+    safeTitle: "منشئ SAFE / السند القابل للتحويل",
     safeSubtitle: "أنشئ اتفاقية SAFE أو سند قابل للتحويل بناءً على شروط صفقتك.",
     safeType: "نوع الأداة",
     safeTypeSafe: "SAFE (اتفاقية بسيطة لحقوق ملكية مستقبلية)",
@@ -820,7 +820,7 @@ export const translations = {
     safeDownload: "تنزيل",
 
     // NDA Generator
-    ndaTitle: "مولد اتفاقية عدم الإفصاح",
+    ndaTitle: "منشئ اتفاقية السرية (NDA)",
     ndaSubtitle: "أنشئ اتفاقية عدم إفصاح لمحادثات شركتك الناشئة.",
     ndaType: "نوع الاتفاقية",
     ndaTypeMutual: "اتفاقية متبادلة",
@@ -836,8 +836,8 @@ export const translations = {
     ndaDownload: "تنزيل",
 
     // ESOP Planner
-    esopTitle: "مخطط خيارات الأسهم للموظفين",
-    esopSubtitle: "صمّم مجمع خيارات أسهم الموظفين، جداول الاستحقاق، وأثر التخفيف.",
+    esopTitle: "مخطط خيارات الموظفين (ESOP)",
+    esopSubtitle: "صمّم مجمع خيارات الأسهم وجداول الاستحقاق وأثر التخفيف.",
     esopTotalShares: "إجمالي الأسهم القائمة",
     esopPoolSize: "حجم مجمع الخيارات (%)",
     esopNewHires: "التوظيفات المخططة",
@@ -866,8 +866,8 @@ export const translations = {
     startupDirVisit: "زيارة الموقع",
 
     // Valuation Timeline
-    valuationTimelineTitle: "تاريخ التقييم 409A",
-    valuationTimelineSubtitle: "تتبع معالم تقييم شركتك الناشئة عبر الزمن.",
+    valuationTimelineTitle: "سجل التقييمات (409A)",
+    valuationTimelineSubtitle: "تتبع محطات تقييم شركتك عبر الزمن.",
     valuationTimelineAddEntry: "إضافة إدخال",
     valuationTimelineCompanyName: "اسم الشركة",
     valuationTimelineDate: "تاريخ التقييم",
@@ -891,7 +891,7 @@ export const translations = {
 
     // Feasibility / Idea Evaluator
     feasibilityTitle: 'مقيّم الأفكار بالذكاء الاصطناعي',
-    feasibilitySubtitle: 'صف فكرة شركتك الناشئة بلغة بسيطة. سيقيّمها الذكاء الاصطناعي عبر ٨ أبعاد — تماماً كما يفعل المستثمر — ويعطيك تغذية راجعة صادقة وقابلة للتطبيق.',
+    feasibilitySubtitle: 'صف فكرتك بلغة بسيطة. سيحللها الذكاء الاصطناعي عبر ٨ أبعاد — تماماً كما يفعل المستثمر — ويقدم لك تغذية راجعة صريحة وعملية.',
     feasibilityDescribeLabel: 'صف فكرتك',
     feasibilityDescribePlaceholder: 'مثال: منصة SaaS للشركات تستخدم الذكاء الاصطناعي لأتمتة سير عمل المشتريات في شركات التصنيع متوسطة الحجم...',
     feasibilityMinChars: 'الحد الأدنى ٢٠ حرفاً. كلما زادت التفاصيل، كان التقييم أدق.',
@@ -901,7 +901,7 @@ export const translations = {
     feasibilityTargetCustomerPlaceholder: 'مثال: شركات تصنيع متوسطة الحجم (٥٠-٥٠٠ موظف)',
     feasibilityProblemSolved: 'ما المشكلة المحددة التي تحلها؟',
     feasibilityProblemSolvedPlaceholder: 'مثال: المشتريات اليدوية تستغرق ٢٠+ ساعة أسبوعياً وتؤدي إلى أخطاء مكلفة',
-    feasibilityRevenueModel: 'كيف ستجني المال؟',
+    feasibilityRevenueModel: 'كيف ستحقق الإيرادات؟',
     feasibilityRevenueModelPlaceholder: 'مثال: اشتراك SaaS بـ ٥٠٠-٢٠٠٠ دولار شهرياً لكل شركة',
     feasibilityCompetitors: 'من هم منافسوك؟',
     feasibilityCompetitorsPlaceholder: 'مثال: Coupa وJaggaer، لكنهما مكلفان ومعقدان للشركات الصغيرة',
@@ -928,7 +928,7 @@ export const translations = {
     feasibilityReportSubtitle: 'تقييم مدعوم بالذكاء الاصطناعي عبر ٨ أبعاد',
     feasibilityNewIdea: 'فكرة جديدة',
     feasibilityOverallScore: 'الدرجة الإجمالية',
-    feasibilityVerdict: 'الحكم',
+    feasibilityVerdict: 'التقييم العام',
     feasibilityStrengths: 'نقاط القوة',
     feasibilityGaps: 'الثغرات',
     feasibilityRecommendation: 'التوصية',
@@ -939,15 +939,15 @@ export const translations = {
 
     // Valuation panel
     valuationAssistantTitle: 'مساعد التقييم',
-    valuationAssistantStatus: 'متصل · 7 طرق تقييم',
-    valuationReportWillAppear: 'سيظهر تقريرك هنا',
-    valuationReportWillAppearDesc: 'أجب على الأسئلة وسنولد فوراً تقريراً احترافياً باستخدام 7 طرق معيارية في الصناعة.',
+    valuationAssistantStatus: 'نشط · ٧ طرق تقييم',
+    valuationReportWillAppear: 'تقريرك سيظهر هنا',
+    valuationReportWillAppearDesc: 'أجب على الأسئلة وسنُنشئ فوراً تقريراً احترافياً باستخدام ٧ طرق تقييم معيارية.',
 
     // ── Founder Dashboard ──
     navDashboard: 'لوحة التحكم',
     navGroupDashboard: 'نظرة عامة',
-    navCOGS: 'حاسبة التكاليف',
-    navSales: 'متتبع المبيعات',
+    navCOGS: 'اقتصاديات الوحدة',
+    navSales: 'ذكاء الإيرادات',
     navDataRoom: 'غرفة البيانات',
     navZestEquity: 'جدول الملكية والحصص',
     navOQALNotes: 'صكوك OQAL (شريعة)',
@@ -955,7 +955,7 @@ export const translations = {
     dashboardSubtitle: 'شركتك الناشئة في لمحة',
     dashboardValuation: 'آخر تقييم',
     dashboardRunway: 'المدة الزمنية',
-    dashboardBurnRate: 'معدل الإنفاق الشهري',
+    dashboardBurnRate: 'معدل الحرق الشهري',
     dashboardRaised: 'إجمالي التمويل',
     dashboardGrossMargin: 'هامش الربح الإجمالي',
     dashboardARR: 'الإيرادات السنوية المتكررة',
@@ -971,15 +971,15 @@ export const translations = {
     dashboardNoActivity: 'لا يوجد نشاط حديث',
     dashboardValuationCard: 'تقييم الشركة',
     dashboardEquityCard: 'توزيع الأسهم',
-    dashboardFundraisingCard: 'التحقق من الجاهزية',
+    dashboardFundraisingCard: 'الاستعداد للتمويل',
     dashboardCOGSCard: 'حساب التكاليف',
     dashboardInvestorsCard: 'تتبع المستثمرين',
     dashboardLegalCard: 'إنشاء الوثائق',
-    dashboardProgress: 'تقدم مساحة العمل',
+    dashboardProgress: 'تقدمك في المنصة',
     dashboardProgressDesc: 'الأدوات التي استخدمتها حتى الآن',
 
     // ── COGS Calculator ──
-    cogsTitle: 'حاسبة تكلفة البضاعة المباعة',
+    cogsTitle: 'حاسبة التكاليف والاقتصاديات',
     cogsSubtitle: 'احسب تكلفة البضاعة المباعة وهامش الربح الإجمالي',
     cogsBusinessModel: 'نموذج العمل',
     cogsCurrency: 'العملة',

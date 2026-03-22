@@ -4,6 +4,7 @@
  * Funding rounds are local to this tool.
  */
 import { useState, useMemo, useEffect } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Link2, RefreshCw } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartTooltip,
@@ -61,6 +62,7 @@ function fmtPct(n: number) { return `${n.toFixed(1)}%`; }
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function AdvancedDilutionSimulator() {
+  const { lang, isRTL } = useLanguage();
   const { state: capState, isLoading, computed } = useCapTable();
   const { state: roundsState, setState: setRoundsState } = useToolState<RoundsState>('dilution_rounds', DEFAULT_ROUNDS_STATE);
   const { setDilution } = useReport();
@@ -183,35 +185,46 @@ export default function AdvancedDilutionSimulator() {
     <div className="space-y-5">
       {/* Education panel */}
       <ToolGuide
-        toolName="Dilution Simulator"
-        tagline="Model how each funding round dilutes founder and ESOP ownership, round by round."
-        steps={[
+        toolName={lang === 'ar' ? 'محاكي التخفيف' : 'Dilution Simulator'}
+        tagline={lang === 'ar' ? 'نمّذج كيف تخفّف كل جولة تمويل حصص المؤسسين ومجموعة خيارات الموظفين.' : 'Model how each funding round dilutes founder and ESOP ownership, round by round.'}
+        steps={lang === 'ar' ? [
+          { step: 1, title: 'راجع جدول الملكية الأولي', description: 'يُجلب المؤسسون ومجموعة ESOP تلقائياً من ZestEquity. إذا كانت الأرقام خاطئة، حدّثها في أداة جدول الملكية أولاً.' },
+          { step: 2, title: 'حدّد التقييم الابتدائي', description: 'أدخل تقييمك قبل الاستثمار. هذا هو الأساس لحساب القيمة بعد الاستثمار في كل جولة.' },
+          { step: 3, title: 'فعّل الجولات واضبطها', description: 'شغّل الجولات أو أوقفها وحدّد نسبة التخفيف لكل منها. جولة البذرة تخفّف عادةً 15–20٪، والسلسلة أ 20–25٪.' },
+          { step: 4, title: 'اقرأ الرسم البياني', description: 'يوضح الرسم كيف تنخفض حصة كل مؤسس بعد كل جولة. مرّر فوق أي نقطة لرؤية النسب الدقيقة.' },
+          { step: 5, title: 'راجع جدول الملكية', description: 'يعرض الجدول الملكية في كل مرحلة لكل طرف — المؤسسون ومجموعة ESOP والمستثمرون.' },
+        ] : [
           { step: 1, title: 'Review your starting cap table', description: 'Founders and ESOP pool are pulled automatically from Zest Equity. If the numbers look wrong, update them in the Cap Table tool first.' },
           { step: 2, title: 'Set starting valuation', description: 'Enter your pre-money valuation before any investment. This is the baseline for calculating post-money values after each round.' },
           { step: 3, title: 'Enable and configure rounds', description: 'Toggle rounds on/off and set the dilution % for each. A typical Seed round dilutes 15–20%, Series A 20–25%. The investment amount is auto-calculated.' },
           { step: 4, title: 'Read the area chart', description: 'The chart shows how each founder\'s ownership % decreases after each round. Hover over any point to see exact percentages at that stage.' },
           { step: 5, title: 'Check the ownership table', description: 'The table shows ownership at each stage for every stakeholder — founders, ESOP pool, and investors combined.' },
         ]}
-        concepts={[
+        concepts={lang === 'ar' ? [
+          { term: 'التخفيف', definition: 'عند إصدار أسهم جديدة للمستثمرين، يمتلك المساهمون الحاليون نسبة أصغر — حتى وإن ظل عدد أسهمهم ثابتاً.' },
+          { term: 'التقييم قبل الاستثمار', definition: 'قيمة الشركة قبل الاستثمار الجديد. التقييم بعد الاستثمار = التقييم قبل + مبلغ الاستثمار.' },
+          { term: 'تخفيف ESOP', definition: 'كثيراً ما يشترط المستثمرون إنشاء مجموعة ESOP قبل الجولة، مما يخفّف المؤسسين أكثر من المستثمرين.' },
+          { term: 'الحماية من التخفيف', definition: 'بند يحمي المستثمرين من التخفيف في جولات التقييم المنخفض. الأنواع الشائعة: المتوسط المرجح والرافعة الكاملة.' },
+        ] : [
           { term: 'Dilution', definition: 'When new shares are issued to investors, existing shareholders own a smaller % of the company — even though their share count doesn\'t change.' },
           { term: 'Pre-money valuation', definition: 'Company value before new investment. Post-money = pre-money + investment amount.' },
           { term: 'ESOP dilution', definition: 'Investors often require the ESOP pool to be set up before the round (pre-money), which dilutes founders more than investors.' },
           { term: 'Anti-dilution', definition: 'A provision that protects investors from dilution in down rounds. Common types: broad-based weighted average and full ratchet.' },
         ]}
-        tip="Founders are often surprised by how much a 20% Seed + 20% ESOP pool + 25% Series A leaves them with. Model this before signing any term sheet. A founder with 60% pre-Seed can end up with ~30% post-Series A."
+        tip={lang === 'ar' ? 'كثيراً ما يتفاجأ المؤسسون بما يتبقى لهم بعد 20٪ بذرة + 20٪ ESOP + 25٪ سلسلة أ. نمّذج هذا قبل توقيع أي صحيفة شروط. مؤسس بحصة 60٪ قبل البذرة قد ينتهي بـ 30٪ بعد السلسلة أ.' : 'Founders are often surprised by how much a 20% Seed + 20% ESOP pool + 25% Series A leaves them with. Model this before signing any term sheet. A founder with 60% pre-Seed can end up with ~30% post-Series A.'}
       />
 
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-foreground mb-1">Dilution Simulator</h2>
+          <h2 className="text-xl font-bold text-foreground mb-1">{lang === 'ar' ? 'محاكي التخفيف' : 'Dilution Simulator'}</h2>
           <p className="text-sm text-muted-foreground">
-            Founders and ESOP pool are read from the Cap Table. Set dilution per round to see how ownership evolves from Pre-Seed through Series E.
+            {lang === 'ar' ? 'يُقرأ المؤسسون ومجموعة ESOP من جدول الملكية. حدّد نسبة التخفيف لكل جولة لترى كيف تتطور الملكية من ما قبل البذرة حتى السلسلة هـ.' : 'Founders and ESOP pool are read from the Cap Table. Set dilution per round to see how ownership evolves from Pre-Seed through Series E.'}
           </p>
         </div>
         <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-full shrink-0">
           <Link2 className="w-3 h-3" />
-          <span>Synced with Cap Table</span>
+          <span>{lang === 'ar' ? 'متزامن مع جدول الملكية' : 'Synced with Cap Table'}</span>
         </div>
       </div>
 
@@ -219,9 +232,9 @@ export default function AdvancedDilutionSimulator() {
       <div className="border border-border rounded-xl overflow-hidden bg-card">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div>
-            <div className="text-sm font-semibold text-foreground">Founding Team Equity (from Cap Table)</div>
+            <div className="text-sm font-semibold text-foreground">{lang === 'ar' ? 'حصص فريق التأسيس (من جدول الملكية)' : 'Founding Team Equity (from Cap Table)'}</div>
             <div className="text-[10px] text-muted-foreground mt-0.5">
-              Edit founders in the Cap Table tool · ESOP: <span className="font-bold text-foreground">{esopInitialPct.toFixed(1)}%</span>
+              {lang === 'ar' ? 'عدّل المؤسسين في أداة جدول الملكية' : 'Edit founders in the Cap Table tool'} · ESOP: <span className="font-bold text-foreground">{esopInitialPct.toFixed(1)}%</span>
             </div>
           </div>
         </div>
@@ -232,7 +245,7 @@ export default function AdvancedDilutionSimulator() {
               <div key={founder.id} className="p-3 flex items-center gap-3 flex-wrap">
                 <div className="w-3 h-3 rounded-full shrink-0" style={{ background: founder.color }} />
                 <span className="text-sm font-semibold text-foreground flex-1">{founder.name}</span>
-                <span className="text-xs text-muted-foreground">{founder.shares.toLocaleString()} shares</span>
+                <span className="text-xs text-muted-foreground">{founder.shares.toLocaleString()} {lang === 'ar' ? 'سهم' : 'shares'}</span>
                 <div className="flex items-center gap-2 w-32">
                   <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
                     <div className="h-full rounded-full" style={{ width: `${Math.min(pct, 100)}%`, background: founder.color }} />
@@ -244,14 +257,14 @@ export default function AdvancedDilutionSimulator() {
           })}
           {founders.length === 0 && (
             <div className="p-4 text-sm text-muted-foreground text-center">
-              No founders in cap table. Add founders in the Cap Table tool.
+              {lang === 'ar' ? 'لا يوجد مؤسسون في جدول الملكية. أضف المؤسسين في أداة جدول الملكية.' : 'No founders in cap table. Add founders in the Cap Table tool.'}
             </div>
           )}
         </div>
         {/* ESOP row */}
         <div className="px-4 py-3 border-t border-border bg-secondary/20 flex items-center gap-3 flex-wrap">
           <div className="w-3 h-3 rounded-full bg-purple-400 shrink-0" />
-          <span className="text-sm font-medium text-foreground flex-1">Employee Option Pool (ESOP)</span>
+          <span className="text-sm font-medium text-foreground flex-1">{lang === 'ar' ? 'مجموعة خيارات الموظفين (ESOP)' : 'Employee Option Pool (ESOP)'}</span>
           <span className="text-xs font-bold text-purple-600">{esopInitialPct.toFixed(1)}%</span>
           <span className="text-[10px] text-muted-foreground">({capState.esop.totalPoolShares.toLocaleString()} shares)</span>
         </div>
@@ -260,7 +273,7 @@ export default function AdvancedDilutionSimulator() {
       {/* ── Company Valuation ── */}
       <div className="border border-border rounded-xl p-4 bg-card">
         <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">
-          Starting Pre-Money Valuation (before any investment)
+          {lang === 'ar' ? 'التقييم الابتدائي قبل الاستثمار (قبل أي تمويل)' : 'Starting Pre-Money Valuation (before any investment)'}
         </label>
         <div className="relative max-w-xs">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
@@ -275,8 +288,8 @@ export default function AdvancedDilutionSimulator() {
       {/* ── Rounds ── */}
       <div className="border border-border rounded-xl overflow-hidden bg-card">
         <div className="px-4 py-3 border-b border-border">
-          <div className="text-sm font-semibold text-foreground">Funding Rounds</div>
-          <div className="text-[10px] text-muted-foreground mt-0.5">Toggle rounds on/off and set the dilution % and amount raised per round.</div>
+          <div className="text-sm font-semibold text-foreground">{lang === 'ar' ? 'جولات التمويل' : 'Funding Rounds'}</div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">{lang === 'ar' ? 'شغّل الجولات أو أوقفها وحدّد نسبة التخفيف ومبلغ الجمع لكل جولة.' : 'Toggle rounds on/off and set the dilution % and amount raised per round.'}</div>
         </div>
         <div className="divide-y divide-border">
           {rounds.map(round => (

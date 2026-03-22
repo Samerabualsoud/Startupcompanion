@@ -289,7 +289,7 @@ function HomeInner() {
                   exit={{ opacity: 0, x: 30 }}
                   transition={{ duration: 0.35, ease: 'easeOut' }}
                   className="hidden lg:flex flex-col flex-1 overflow-hidden"
-                  style={{ background: 'oklch(0.993 0.003 80)' }}
+                  style={{ background: 'oklch(0.165 0 0)' }}
                 >
                   <ValuationReport inputs={inputs} summary={summary} onReset={handleReset} />
                 </motion.div>
@@ -303,7 +303,7 @@ function HomeInner() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="lg:hidden fixed inset-0 z-50 flex flex-col"
-                  style={{ background: 'oklch(0.993 0.003 80)', top: 57 }}
+                  style={{ background: 'oklch(0.165 0 0)', top: 57 }}
                 >
                   <ValuationReport inputs={inputs} summary={summary} onReset={handleReset} />
                 </motion.div>
@@ -406,7 +406,7 @@ function HomeInner() {
     <div className="min-h-screen flex flex-col bg-background">
 
       {/* ── Top Bar ── */}
-      <header className="shrink-0 border-b border-border bg-white px-4 py-3 flex items-center justify-between z-40 relative" style={{ boxShadow: '0 1px 0 oklch(0.91 0.015 60)' }}>
+      <header className={`shrink-0 border-b border-border bg-card px-4 py-3 flex items-center justify-between z-40 relative ${isRTL ? 'flex-row-reverse' : ''}`} style={{ boxShadow: '0 1px 0 oklch(0.26 0 0)' }}>
         <div className="flex items-center gap-3">
           {/* Mobile menu button */}
           <button
@@ -425,11 +425,11 @@ function HomeInner() {
             }}
             className="flex items-center gap-2.5 hover:opacity-80 transition-opacity cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, oklch(0.62 0.22 30), oklch(0.60 0.24 290))' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.50 0.22 264)' }}>
               <TrendingUp className="w-4 h-4 text-white" />
             </div>
             <div>
-              <div className="text-sm font-extrabold text-foreground" style={{ fontFamily: 'Nunito, sans-serif', letterSpacing: '-0.01em' }}>
+              <div className="text-sm font-bold text-foreground" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '-0.02em' }}>
                 Polaris Arabia
               </div>
               <div className="text-[10px] text-muted-foreground hidden sm:block">
@@ -517,7 +517,7 @@ function HomeInner() {
               });
             }}
             className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-xl transition-all hover:opacity-90 active:scale-95 text-white"
-            style={{ background: 'linear-gradient(135deg, oklch(0.62 0.22 30), oklch(0.60 0.24 290))' }}
+            style={{ background: 'oklch(0.50 0.22 264)' }}
             title="Download Full Report (PDF)"
           >
             <FileDown className="w-3.5 h-3.5" />
@@ -552,9 +552,9 @@ function HomeInner() {
             ${!sidebarOpen ? (isRTL ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0') : 'translate-x-0'}
           `}
           style={{
-            background: 'white',
-            borderRight: isRTL ? 'none' : '1.5px solid oklch(0.91 0.015 60)',
-            borderLeft: isRTL ? '1.5px solid oklch(0.91 0.015 60)' : 'none',
+            background: 'oklch(0.18 0 0)',
+            borderRight: isRTL ? 'none' : '1px solid oklch(0.26 0 0)',
+            borderLeft: isRTL ? '1px solid oklch(0.26 0 0)' : 'none',
             top: 57,
             height: 'calc(100vh - 57px)',
             // RTL: anchor to right side; LTR: anchor to left side
@@ -585,16 +585,16 @@ function HomeInner() {
               };
               // Per-group color config
               const groupColors: Record<string, { header: string; activeBg: string; activeText: string; activeIcon: string }> = {
-                'Overview':           { header: 'oklch(0.52 0.02 60)',   activeBg: 'oklch(0.94 0.01 60)',   activeText: 'oklch(0.30 0.02 60)',   activeIcon: 'oklch(0.40 0.02 60)' },
-                'My Company':         { header: 'oklch(0.55 0.22 30)',   activeBg: 'oklch(0.95 0.05 30)',   activeText: 'oklch(0.45 0.22 30)',   activeIcon: 'oklch(0.55 0.22 30)' },
-                'Valuation':          { header: 'oklch(0.52 0.24 290)',  activeBg: 'oklch(0.94 0.05 290)',  activeText: 'oklch(0.42 0.24 290)',  activeIcon: 'oklch(0.52 0.24 290)' },
-                'Equity & Ownership': { header: 'oklch(0.50 0.20 250)',  activeBg: 'oklch(0.93 0.04 250)',  activeText: 'oklch(0.40 0.20 250)',  activeIcon: 'oklch(0.50 0.20 250)' },
-                'Capital Raising':    { header: 'oklch(0.50 0.20 150)',  activeBg: 'oklch(0.93 0.05 150)',  activeText: 'oklch(0.40 0.20 150)',  activeIcon: 'oklch(0.50 0.20 150)' },
-                'Legal & Compliance': { header: 'oklch(0.50 0.18 330)',  activeBg: 'oklch(0.94 0.04 330)',  activeText: 'oklch(0.40 0.18 330)',  activeIcon: 'oklch(0.50 0.18 330)' },
-                'Market Intelligence':{ header: 'oklch(0.50 0.18 200)',  activeBg: 'oklch(0.93 0.04 200)',  activeText: 'oklch(0.40 0.18 200)',  activeIcon: 'oklch(0.50 0.18 200)' },
-                'Investor Network':   { header: 'oklch(0.55 0.18 55)',   activeBg: 'oklch(0.95 0.05 55)',   activeText: 'oklch(0.45 0.18 55)',   activeIcon: 'oklch(0.55 0.18 55)' },
-                'AI Advisory':        { header: 'oklch(0.52 0.22 290)',  activeBg: 'oklch(0.94 0.05 290)',  activeText: 'oklch(0.42 0.22 290)',  activeIcon: 'oklch(0.52 0.22 290)' },
-                'Admin':              { header: 'oklch(0.45 0.02 60)',   activeBg: 'oklch(0.93 0.01 60)',   activeText: 'oklch(0.30 0.02 60)',   activeIcon: 'oklch(0.45 0.02 60)' },
+                'Overview':           { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
+                'My Company':         { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
+                'Valuation':          { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
+                'Equity & Ownership': { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
+                'Capital Raising':    { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
+                'Legal & Compliance': { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
+                'Market Intelligence':{ header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
+                'Investor Network':   { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
+                'AI Advisory':        { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
+                'Admin':              { header: 'oklch(0.45 0 0)',    activeBg: 'oklch(0.26 0 0)',             activeText: 'oklch(0.80 0 0)',       activeIcon: 'oklch(0.65 0 0)' },
               };
               const gc = groupColors[group] ?? groupColors['Overview'];
               return (
@@ -619,9 +619,9 @@ function HomeInner() {
                           color: gc.activeText,
                           fontWeight: 600,
                         } : {
-                          color: 'oklch(0.50 0.02 60)',
+                          color: 'oklch(0.65 0 0)',
                         }}
-                        onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'oklch(0.96 0.01 60)'; }}
+                        onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'oklch(0.24 0 0)'; }}
                         onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = ''; }}
                       >
                         <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: isActive ? gc.activeIcon : undefined }} />
@@ -629,10 +629,10 @@ function HomeInner() {
                         {effectiveBadge && !isActive && (
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
                             effectiveBadge === 'AI'
-                              ? 'bg-violet-100 text-violet-600'
+                              ? 'bg-violet-900/40 text-violet-400'
                               : effectiveBadge === 'New'
-                              ? 'bg-emerald-100 text-emerald-600'
-                              : 'bg-orange-50 text-orange-500'
+                              ? 'bg-emerald-900/40 text-emerald-400'
+                              : 'bg-blue-900/40 text-blue-400'
                           }`}>
                             {effectiveBadge}
                           </span>
