@@ -32,7 +32,7 @@ import {
 } from 'recharts';
 
 // ── Types ──────────────────────────────────────────────────────────────────
-type BusinessModel = 'saas' | 'ecommerce' | 'marketplace' | 'agency' | 'hardware';
+type BusinessModel = 'saas' | 'ecommerce' | 'marketplace' | 'agency' | 'hardware' | 'procurement';
 type Motion = 'b2b' | 'b2c';
 type DealStage = string;
 
@@ -327,6 +327,50 @@ const MODEL_CONFIGS: Record<BusinessModel, ModelConfig> = {
       { metric: 'LTV/CAC', metricAr: 'نسبة LTV/CAC', b2b: '3–5x', b2c: '2–3x' },
       { metric: 'Avg Deal Size', metricAr: 'متوسط حجم الصفقة', b2b: '$5k–$500k', b2c: '$50–$500' },
       { metric: 'Sales Cycle', metricAr: 'دورة المبيعات', b2b: '3–12 mo', b2c: '1–7 days' },
+    ],
+  },
+
+  procurement: {
+    label: 'Procurement / Group Buying',
+    labelAr: 'مشتريات كخدمة / شراء جماعي',
+    icon: Package,
+    stages: {
+      lead:          { label: 'Lead Buyer',      labelAr: 'مشترٍ محتمل',    color: 'text-slate-600',  bg: 'bg-slate-100',   icon: Users,         defaultProb: 10 },
+      qualification: { label: 'Qualification',   labelAr: 'تأهيل',          color: 'text-sky-600',    bg: 'bg-sky-50',      icon: UserCheck,     defaultProb: 20 },
+      rfq:           { label: 'RFQ Sent',        labelAr: 'طلب عرض سعر',    color: 'text-blue-600 dark:text-blue-400',   bg: 'bg-blue-50 dark:bg-blue-950/30',     icon: Activity,      defaultProb: 40 },
+      negotiation:   { label: 'Negotiation',     labelAr: 'تفاوض',          color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-950/30',   icon: ArrowUpDown,   defaultProb: 65 },
+      po_received:   { label: 'PO Received',     labelAr: 'أمر شراء',       color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/30',   icon: CheckCircle2,  defaultProb: 85 },
+      fulfilled:     { label: 'Fulfilled',       labelAr: 'مُنجز',          color: 'text-green-600 dark:text-green-400',  bg: 'bg-green-50 dark:bg-green-950/30',    icon: CheckCircle2,  defaultProb: 100 },
+      lost:          { label: 'Lost',            labelAr: 'خسارة',          color: 'text-red-600 dark:text-red-400',    bg: 'bg-red-50 dark:bg-red-950/30',      icon: XCircle,       defaultProb: 0 },
+    },
+    wonStage: 'fulfilled', lostStage: 'lost',
+    dealLabel: 'Buyer / Order', dealLabelAr: 'مشترٍ / طلب',
+    amountLabel: 'Procurement Volume', amountLabelAr: 'حجم المشتريات',
+    extraFields: [
+      { key: 'category', label: 'Product Category', labelAr: 'فئة المنتج', type: 'text', placeholder: 'e.g. Office Supplies' },
+      { key: 'supplierCount', label: 'Suppliers Quoted', labelAr: 'عدد الموردين', type: 'number', placeholder: '3' },
+      { key: 'savingsPct', label: 'Savings vs. Market (%)', labelAr: 'التوفير مقارنة بالسوق (%)', type: 'number', placeholder: '15' },
+      { key: 'serviceFeePct', label: 'Service Fee (%)', labelAr: 'رسوم الخدمة (%)', type: 'number', placeholder: '2.5' },
+    ],
+    kpiLabels: {
+      revenue: 'Total PVF', revenueAr: 'إجمالي حجم المشتريات',
+      pipeline: 'Pipeline PVF', pipelineAr: 'خط أنابيب المشتريات',
+      weighted: 'Weighted PVF', weightedAr: 'حجم المشتريات المرجّح',
+      winRate: 'Conversion Rate', winRateAr: 'معدل التحويل',
+    },
+    unitEconLabels: {
+      arpc: 'Avg Order Value (AOV)', arpcAr: 'متوسط قيمة الطلب',
+      ltv: 'Buyer LTV', ltvAr: 'القيمة الدائمة للمشترٍ',
+      cac: 'Buyer CAC', cacAr: 'تكلفة اكتساب المشترٍ',
+      payback: 'CAC Payback', paybackAr: 'فترة استرداد التكلفة',
+      extraMetric: 'Take Rate', extraMetricAr: 'معدل الأخذ',
+    },
+    benchmarks: [
+      { metric: 'Take Rate', metricAr: 'معدل الأخذ', b2b: '1.5–5% of PVF', b2c: '3–8% of PVF' },
+      { metric: 'Gross Margin', metricAr: 'هامش الربح الإجمالي', b2b: '25–50%', b2c: '20–40%' },
+      { metric: 'Buyer Retention', metricAr: 'الاحتفاظ بالمشترين', b2b: '70–90%/yr', b2c: '40–65%/yr' },
+      { metric: 'Avg Order Value', metricAr: 'متوسط قيمة الطلب', b2b: '$10k–$500k', b2c: '$200–$5k' },
+      { metric: 'Savings vs Market', metricAr: 'التوفير مقارنة بالسوق', b2b: '10–30%', b2c: '5–20%' },
     ],
   },
 };

@@ -1,0 +1,1 @@
+ALTER TABLE `cogs_calculations` MODIFY COLUMN `businessModel` enum('saas','ecommerce','marketplace','hardware','services','manufacturing','procurement','other') NOT NULL DEFAULT 'saas';

@@ -1,0 +1,1 @@
+ALTER TABLE `sales_entries` MODIFY COLUMN `dealStage` varchar(64) NOT NULL DEFAULT 'closed_won';

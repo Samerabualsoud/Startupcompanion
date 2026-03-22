@@ -416,7 +416,7 @@ export const cogsCalculations = mysqlTable("cogs_calculations", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   name: varchar("name", { length: 256 }).notNull(),
-  businessModel: mysqlEnum("businessModel", ["saas", "ecommerce", "marketplace", "hardware", "services", "manufacturing", "other"]).default("saas").notNull(),
+  businessModel: mysqlEnum("businessModel", ["saas", "ecommerce", "marketplace", "hardware", "services", "manufacturing", "procurement", "other"]).default("saas").notNull(),
   currency: varchar("currency", { length: 8 }).notNull().default("USD"),
   // Revenue
   revenuePerUnit: float("revenuePerUnit").notNull().default(0),
@@ -506,7 +506,7 @@ export const salesEntries = mysqlTable('sales_entries', {
   channel: mysqlEnum('channel', ['direct', 'online', 'referral', 'partner', 'inbound', 'outbound', 'other']).default('direct').notNull(),
   product: varchar('product', { length: 256 }).notNull().default(''),
   customer: varchar('customer', { length: 256 }).notNull().default(''),
-  dealStage: mysqlEnum('dealStage', ['lead', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost']).default('closed_won').notNull(),
+  dealStage: varchar('dealStage', { length: 64 }).default('closed_won').notNull(), // varchar to support all business model stages (procurement, etc.)
   // Pipeline detail fields
   contactName: varchar('contactName', { length: 256 }),
   contactEmail: varchar('contactEmail', { length: 320 }),

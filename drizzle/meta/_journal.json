@@ -162,6 +162,20 @@
       "when": 1774038987112,
       "tag": "0022_complete_master_chief",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1774156191238,
+      "tag": "0023_light_sir_ram",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1774156545793,
+      "tag": "0024_curly_dust",
+      "breakpoints": true
     }
   ]
 }

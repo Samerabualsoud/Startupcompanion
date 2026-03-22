@@ -47,6 +47,7 @@ const BUSINESS_MODEL_OPTIONS = [
   { value: 'services', label: 'Services' },
   { value: 'hardware', label: 'Hardware' },
   { value: 'manufacturing', label: 'Manufacturing' },
+  { value: 'procurement', label: 'Procurement-as-a-Service / Group Buying' },
   { value: 'other', label: 'Other' },
 ];
 

@@ -22,7 +22,7 @@ export const salesRouter = router({
       channel: z.enum(['direct', 'online', 'referral', 'partner', 'inbound', 'outbound', 'other']).default('direct'),
       product: z.string().max(256).default(''),
       customer: z.string().max(256).default(''),
-      dealStage: z.enum(['lead', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost']).default('closed_won'),
+      dealStage: z.string().max(64).default('closed_won'), // flexible string to support all business model stages
       // Pipeline fields
       contactName: z.string().max(256).optional(),
       contactEmail: z.string().max(320).optional(),
@@ -77,7 +77,7 @@ export const salesRouter = router({
       channel: z.enum(['direct', 'online', 'referral', 'partner', 'inbound', 'outbound', 'other']).optional(),
       product: z.string().max(256).optional(),
       customer: z.string().max(256).optional(),
-      dealStage: z.enum(['lead', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost']).optional(),
+      dealStage: z.string().max(64).optional(),
       contactName: z.string().max(256).nullable().optional(),
       contactEmail: z.string().max(320).nullable().optional(),
       contactPhone: z.string().max(64).nullable().optional(),
