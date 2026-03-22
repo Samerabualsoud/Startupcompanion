@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, name, isPublicProfilePublished, publicProfileSlug FROM startup_profiles WHERE name = 'Jmaa' LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user TdNWm56gC61uQyK.bac7586e525f --database M2SxUioygz4pYLdarmBijQ --execute SELECT id, name, isPublicProfilePublished, publicProfileSlug FROM startup_profiles WHERE name = 'Jmaa' LIMIT 1;",
+  "rows": [
+    {
+      "id": "2",
+      "name": "Jmaa",
+      "isPublicProfilePublished": "0",
+      "publicProfileSlug": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tisPublicProfilePublished\tpublicProfileSlug\n2\tJmaa\t0\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 1513
+}

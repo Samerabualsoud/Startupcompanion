@@ -5,12 +5,15 @@ import { Loader2, Search, TrendingUp, DollarSign, ArrowLeft } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import StartupDetailModal from "./StartupDetailModal";
 
 export default function PublicStartupDirectory() {
   const [page, setPage] = useState(1);
   const [sector, setSector] = useState<string>("");
   const [stage, setStage] = useState<string>("");
   const [country, setCountry] = useState<string>("");
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   const { data: directory, isLoading } = trpc.publicProfile.listPublicProfiles.useQuery({
     page,
@@ -166,7 +169,13 @@ export default function PublicStartupDirectory() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
               {directory.profiles.map((startup) => (
-                <Link key={startup.id} href={`/startup/${startup.slug}`}>
+                <div
+                  key={startup.id}
+                  onClick={() => {
+                    setSelectedSlug(startup.slug);
+                    setIsDetailOpen(true);
+                  }}
+                >
                   <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
                     {/* Logo & Header */}
                     <div className="flex items-start gap-4 mb-4">
@@ -238,7 +247,7 @@ export default function PublicStartupDirectory() {
                       </div>
                     )}
                   </Card>
-                </Link>
+                </div>
               ))}
             </div>
 
@@ -265,6 +274,18 @@ export default function PublicStartupDirectory() {
               </div>
             )}
           </>
+        )}
+
+        {/* Detail Modal */}
+        {selectedSlug && (
+          <StartupDetailModal
+            slug={selectedSlug}
+            isOpen={isDetailOpen}
+            onClose={() => {
+              setIsDetailOpen(false);
+              setSelectedSlug(null);
+            }}
+          />
         )}
       </div>
     </div>

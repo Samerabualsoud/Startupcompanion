@@ -240,6 +240,26 @@ export default function ProfileSettings() {
           </p>
         </Card>
 
+        {/* Contacts Section */}
+        <Card className="p-6">
+          <h2 className="text-xl font-bold mb-4">Contact Information</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Founder Email</label>
+              <input
+                type="email"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+                placeholder="founder@company.com"
+                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Investors will use this email to contact you
+              </p>
+            </div>
+          </div>
+        </Card>
+
         {/* Profile Status */}
         <Card className="p-6 bg-secondary/50">
           <h2 className="text-xl font-bold mb-4">Publication Status</h2>
