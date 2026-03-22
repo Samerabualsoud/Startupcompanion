@@ -892,7 +892,7 @@ tr.section td { background: #1e293b; color: white; font-weight: 700; padding: 6p
             <ChevronDown className="w-3 h-3 text-muted-foreground" />
           </button>
           {modelSelectorOpen && (
-            <div className="absolute top-full left-0 mt-1 z-50 bg-popover border border-border rounded-lg shadow-xl p-2 w-72">
+            <div className="absolute top-full left-0 mt-1 z-50 bg-popover border border-border rounded-lg shadow-xl p-2 w-72 max-h-80 overflow-y-auto">
               <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-2">Select Business Model</div>
               {MODEL_GROUPS.map(group => {
                 const items = BUSINESS_MODELS.filter(m => m.group === group);
