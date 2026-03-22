@@ -49,22 +49,22 @@ export default function LandingPage() {
   }, []);
 
   const TOOLS = [
-    { icon: TrendingUp,  label: isRTL ? 'محرك التقييم' : 'Startup Valuation Engine',        desc: isRTL ? '٧ طرق: DCF، بطاقة الأداء، بيركوس، طريقة رأس المال المخاطر والمزيد' : '7 methods: DCF, Scorecard, Berkus, VC Method & more', accent: BLUE },
-    { icon: Brain,       label: isRTL ? 'محرك التحقق من الفكرة' : 'Concept Validation Engine', desc: isRTL ? 'الذكاء الاصطناعي يقيّم فكرتك عبر ٨ أبعاد' : 'AI scores your idea across 8 dimensions with risks & next steps', accent: VIOLET },
-    { icon: PieChart,    label: isRTL ? 'جدول الرأسمال' : 'Capitalization Table',             desc: isRTL ? 'توزيع الملكية المرئي مع تتبع التخفيف' : 'Visual ownership breakdown with dilution tracking across all rounds', accent: GREEN },
-    { icon: Users,       label: isRTL ? 'توزيع حقوق المؤسسين' : 'Founder Equity Allocation',  desc: isRTL ? 'تقييم بـ٧ عوامل لتقسيم الأسهم بعدالة' : '7-factor scoring to split equity fairly among founders', accent: AMBER },
-    { icon: Gauge,       label: isRTL ? 'تقييم الاستعداد للمستثمرين' : 'Investor Readiness',  desc: isRTL ? 'قائمة تحقق من ٢٠ نقطة لمعرفة ما إذا كنت مستعداً للتمويل' : '20-point checklist to know if you\'re ready to raise', accent: BLUE },
-    { icon: Target,      label: isRTL ? 'إدارة خط أنابيب المستثمرين' : 'Investor Pipeline CRM', desc: isRTL ? 'تتبع خط الأنابيب بالمراحل والملاحظات وتصدير CSV' : 'Track your pipeline with stages, notes, and CSV export', accent: VIOLET },
-    { icon: Database,    label: isRTL ? 'غرفة البيانات الافتراضية' : 'Virtual Data Room',      desc: isRTL ? 'خزنة مستندات آمنة مع روابط مشاركة للمستثمرين' : 'Secure document vault with shareable investor links and access tracking', accent: GREEN },
-    { icon: LineChart,   label: isRTL ? 'ذكاء الإيرادات' : 'Revenue Intelligence',            desc: isRTL ? 'CRM كامل مع خط أنابيب Kanban وتحليلات القنوات' : 'Full CRM with Kanban pipeline, channel analytics, and AI forecasting', accent: BLUE },
-    { icon: Calculator,  label: isRTL ? 'اقتصاديات الوحدة' : 'Unit Economics',                desc: isRTL ? 'تكلفة المنتج، هامش الربح، نقطة التعادل' : 'Product-level costing, margin waterfall, break-even, overhead allocation', accent: AMBER },
-    { icon: Rocket,      label: isRTL ? 'دليل المسرّعات والحاضنات' : 'Accelerator Finder',    desc: isRTL ? 'أكثر من ١٠٠ برنامج في الولايات المتحدة وأوروبا والشرق الأوسط' : '100+ programs across US, EU, MENA, Africa, and SEA', accent: VIOLET },
-    { icon: Building2,   label: isRTL ? 'قاعدة بيانات المستثمرين' : 'Investor Intelligence',  desc: isRTL ? 'أكثر من ٣٠ مستثمراً منتقى مع أحجام الشيكات' : '30+ curated investors with check sizes and portfolio data', accent: GREEN },
-    { icon: BookOpen,    label: isRTL ? 'مسرد شروط الاستثمار' : 'Investment Terms Glossary',  desc: isRTL ? '٧٥ مصطلحاً في ٨ فئات مع مؤشرات العلامات الحمراء' : '75 terms across 8 categories with red flag indicators', accent: BLUE },
+    { icon: TrendingUp,  label: isRTL ? 'محرك التقييم' : 'Startup Valuation Engine',        desc: isRTL ? '٧ طرق: DCF، بطاقة الأداء، بيركوس، طريقة رأس المال المخاطر والمزيد' : '7 methods: DCF, Scorecard, Berkus, VC Method & more', accent: BLUE, toolId: 'valuation' },
+    { icon: Brain,       label: isRTL ? 'محرك التحقق من الفكرة' : 'Concept Validation Engine', desc: isRTL ? 'الذكاء الاصطناعي يقيّم فكرتك عبر ٨ أبعاد' : 'AI scores your idea across 8 dimensions with risks & next steps', accent: VIOLET, toolId: 'idea-validator' },
+    { icon: PieChart,    label: isRTL ? 'جدول الرأسمال' : 'Capitalization Table',             desc: isRTL ? 'توزيع الملكية المرئي مع تتبع التخفيف' : 'Visual ownership breakdown with dilution tracking across all rounds', accent: GREEN, toolId: 'cap-table' },
+    { icon: Users,       label: isRTL ? 'توزيع حقوق المؤسسين' : 'Founder Equity Allocation',  desc: isRTL ? 'تقييم بـ٧ عوامل لتقسيم الأسهم بعدالة' : '7-factor scoring to split equity fairly among founders', accent: AMBER, toolId: 'equity-split' },
+    { icon: Gauge,       label: isRTL ? 'تقييم الاستعداد للمستثمرين' : 'Investor Readiness',  desc: isRTL ? 'قائمة تحقق من ٢٠ نقطة لمعرفة ما إذا كنت مستعداً للتمويل' : '20-point checklist to know if you\'re ready to raise', accent: BLUE, toolId: 'readiness' },
+    { icon: Target,      label: isRTL ? 'إدارة خط أنابيب المستثمرين' : 'Investor Pipeline CRM', desc: isRTL ? 'تتبع خط الأنابيب بالمراحل والملاحظات وتصدير CSV' : 'Track your pipeline with stages, notes, and CSV export', accent: VIOLET, toolId: 'investor-crm' },
+    { icon: Database,    label: isRTL ? 'غرفة البيانات الافتراضية' : 'Virtual Data Room',      desc: isRTL ? 'خزنة مستندات آمنة مع روابط مشاركة للمستثمرين' : 'Secure document vault with shareable investor links and access tracking', accent: GREEN, toolId: 'data-room' },
+    { icon: LineChart,   label: isRTL ? 'ذكاء الإيرادات' : 'Revenue Intelligence',            desc: isRTL ? 'CRM كامل مع خط أنابيب Kanban وتحليلات القنوات' : 'Full CRM with Kanban pipeline, channel analytics, and AI forecasting', accent: BLUE, toolId: 'sales' },
+    { icon: Calculator,  label: isRTL ? 'اقتصاديات الوحدة' : 'Unit Economics',                desc: isRTL ? 'تكلفة المنتج، هامش الربح، نقطة التعادل' : 'Product-level costing, margin waterfall, break-even, overhead allocation', accent: AMBER, toolId: 'cogs' },
+    { icon: Rocket,      label: isRTL ? 'دليل المسرّعات والحاضنات' : 'Accelerator Finder',    desc: isRTL ? 'أكثر من ١٠٠ برنامج في الولايات المتحدة وأوروبا والشرق الأوسط' : '100+ programs across US, EU, MENA, Africa, and SEA', accent: VIOLET, toolId: 'accelerators' },
+    { icon: Building2,   label: isRTL ? 'قاعدة بيانات المستثمرين' : 'Investor Intelligence',  desc: isRTL ? 'أكثر من ٣٠ مستثمراً منتقى مع أحجام الشيكات' : '30+ curated investors with check sizes and portfolio data', accent: GREEN, toolId: 'resources' },
+    { icon: BookOpen,    label: isRTL ? 'مسرد شروط الاستثمار' : 'Investment Terms Glossary',  desc: isRTL ? '٧٥ مصطلحاً في ٨ فئات مع مؤشرات العلامات الحمراء' : '75 terms across 8 categories with red flag indicators', accent: BLUE, toolId: 'term-sheet' },
   ];
 
   const STATS = [
-    { value: '33+',  label: isRTL ? 'أداة متخصصة' : 'Startup Tools',    accent: BLUE },
+    { value: '35+',  label: isRTL ? 'أداة متخصصة' : 'Startup Tools',    accent: BLUE },
     { value: '7',    label: isRTL ? 'طريقة تقييم' : 'Valuation Methods', accent: VIOLET },
     { value: '100+', label: isRTL ? 'مسرّع أعمال' : 'Accelerators',      accent: GREEN },
     { value: isRTL ? 'مجاني' : 'Free', label: isRTL ? 'للأبد' : 'Forever', accent: AMBER },
@@ -192,7 +192,7 @@ export default function LandingPage() {
             style={{ background: `${BLUE}18`, borderColor: `${BLUE}40`, color: 'oklch(0.75 0.18 264)' }}
           >
             <Sparkles className="w-3 h-3" />
-            {isRTL ? '٣٣ أداة · بدون رسوم · بدون بطاقة ائتمانية' : '33 tools · No fees · No credit card required'}
+            {isRTL ? '٣٥+ أداة · بدون رسوم · بدون بطاقة ائتمانية' : '35+ tools · No fees · No credit card required'}
           </div>
 
           {/* Headline */}
@@ -287,8 +287,9 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {TOOLS.map((tool, i) => {
               const Icon = tool.icon;
+              const toolHref = isAuthenticated ? `/app#${tool.toolId}` : `${REGISTER_PATH}?next=/app%23${tool.toolId}`;
               return (
-                <Link href={ctaPath} key={i}>
+                <Link href={toolHref} key={i}>
                   <div
                     className="group p-5 rounded-lg border cursor-pointer transition-all"
                     style={{ background: BG, borderColor: BORDER }}
@@ -325,7 +326,7 @@ export default function LandingPage() {
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-md font-semibold text-sm transition-all hover:opacity-90 active:scale-95 text-white"
                 style={{ background: BLUE }}
               >
-                {isRTL ? 'عرض جميع الأدوات الـ٣٣' : 'View all 33 tools'}
+                {isRTL ? 'عرض جميع الأدوات الـ٣٥+' : 'View all 35+ tools'}
                 <ArrowRight className="w-4 h-4" />
               </button>
             </Link>

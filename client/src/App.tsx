@@ -17,6 +17,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import DataRoomShare from './pages/DataRoomShare';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import FAQ from './pages/FAQ';
 function AppRoutes() {
   return (
     <Switch>
@@ -31,6 +32,7 @@ function AppRoutes() {
       <Route path={"/data-room/:token"} component={DataRoomShare} />
       <Route path={"/terms"} component={TermsOfService} />
       <Route path={"/privacy"} component={PrivacyPolicy} />
+      <Route path={"/faq"} component={FAQ} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

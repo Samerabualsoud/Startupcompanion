@@ -214,7 +214,11 @@ function HomeInner() {
     // 1. Check URL hash first (e.g. /app#equity-split)
     const hash = window.location.hash.replace('#', '') as ToolId;
     if (VALID_TOOL_IDS.includes(hash)) return hash;
-    // 2. Fall back to localStorage
+    // 2. Check URL query param (e.g. /app?tool=valuation)
+    const params = new URLSearchParams(window.location.search);
+    const queryTool = params.get('tool') as ToolId;
+    if (queryTool && VALID_TOOL_IDS.includes(queryTool)) return queryTool;
+    // 3. Fall back to localStorage
     const saved = localStorage.getItem('polaris_active_tool') as ToolId;
     if (saved && VALID_TOOL_IDS.includes(saved)) return saved;
     return 'dashboard';
@@ -471,7 +475,7 @@ function HomeInner() {
           </button>
           <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground border border-border px-2.5 py-1 rounded-full">
             <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-            35 tools · Free
+            35+ tools · Free
           </div>
           {chatComplete && chatAnswers && (
             <button

@@ -112,12 +112,12 @@ export default function SiteFooter() {
             {t.product}
           </h4>
           {[
-            { label: t.valuation, href: '/app?tool=valuation' },
-            { label: t.capTable, href: '/app?tool=zest-equity' },
-            { label: t.esop, href: '/app?tool=zest-equity' },
-            { label: t.dilution, href: '/app?tool=dilution' },
-            { label: t.runway, href: '/app?tool=runway' },
-            { label: t.pitchDeck, href: '/app?tool=pitch-deck' },
+            { label: t.valuation, href: '/app#valuation' },
+            { label: t.capTable, href: '/app#cap-table' },
+            { label: t.esop, href: '/app#esop' },
+            { label: t.dilution, href: '/app#dilution' },
+            { label: t.runway, href: '/app#runway' },
+            { label: t.pitchDeck, href: '/app#pitch-deck' },
           ].map(({ label, href }) => (
             <Link key={label} href={href}>
               <span
@@ -138,9 +138,8 @@ export default function SiteFooter() {
             {t.resources}
           </h4>
           {[
-            { label: t.glossary, href: '/app?tool=term-sheet', internal: true },
-            { label: t.blog, href: 'https://polarisarabia.com/blog', internal: false },
-            { label: t.faq, href: '/app?tool=term-sheet', internal: true },
+            { label: t.glossary, href: '/app#term-sheet', internal: true },
+            { label: t.faq, href: '/faq', internal: true },
             { label: t.contactUs, href: 'mailto:hello@polarisarabia.com', internal: false },
             { label: t.aboutUs, href: 'https://polarisarabia.com/about', internal: false },
           ].map(({ label, href, internal }) => (

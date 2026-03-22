@@ -337,17 +337,18 @@ export default function Onboarding() {
   const [isPublic, setIsPublic] = useState(true);
   const [submitted, setSubmitted] = useState(false);
 
+   const nextPath = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('next') : null;
+  const redirectAfterOnboarding = () => navigate(nextPath ? decodeURIComponent(nextPath) : APP_PATH);
   const onSuccess = async () => {
     await utils.auth.me.invalidate();
     setSubmitted(true);
-    setTimeout(() => navigate(APP_PATH), 2000);
+    setTimeout(() => redirectAfterOnboarding(), 2000);
   };
-
   const submitVcKyc = trpc.kyc.submitVcKyc.useMutation({ onSuccess });
   const submitAngelKyc = trpc.kyc.submitAngelKyc.useMutation({ onSuccess });
   const submitLawyerKyc = trpc.kyc.submitLawyerKyc.useMutation({ onSuccess });
   const submitStartupKyc = trpc.kyc.submitStartupKyc.useMutation({ onSuccess });
-  const skipKyc = trpc.kyc.skipKyc.useMutation({ onSuccess: async () => { await utils.auth.me.invalidate(); navigate(APP_PATH); } });
+  const skipKyc = trpc.kyc.skipKyc.useMutation({ onSuccess: async () => { await utils.auth.me.invalidate(); redirectAfterOnboarding(); } });
 
   const isPending = submitVcKyc.isPending || submitAngelKyc.isPending || submitLawyerKyc.isPending || submitStartupKyc.isPending;
   const mutationError = submitVcKyc.error || submitAngelKyc.error || submitLawyerKyc.error || submitStartupKyc.error;

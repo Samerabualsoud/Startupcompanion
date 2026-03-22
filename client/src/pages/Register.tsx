@@ -31,6 +31,8 @@ export default function Register() {
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
   const { t, isRTL } = useLanguage();
+  // Preserve ?next= param so after onboarding we land on the right tool
+  const nextParam = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('next') : null;
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -41,8 +43,8 @@ export default function Register() {
   const registerMutation = trpc.auth.register.useMutation({
     onSuccess: async () => {
       await utils.auth.me.invalidate();
-      // Redirect to KYC onboarding after registration
-      navigate(KYC_PATH);
+      // Redirect to KYC onboarding after registration, preserving ?next= param
+      navigate(nextParam ? `${KYC_PATH}?next=${encodeURIComponent(nextParam)}` : KYC_PATH);
     },
     onError: (err) => {
       setError(err.message || (isRTL ? 'حدث خطأ ما. يرجى المحاولة مرة أخرى.' : 'Something went wrong. Please try again.'));
@@ -241,7 +243,7 @@ export default function Register() {
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             {t('haveAccount')}{' '}
-            <Link href={LOGIN_PATH} className="font-semibold hover:underline" style={{ color: 'var(--primary)' }}>
+            <Link href={nextParam ? `${LOGIN_PATH}?next=${encodeURIComponent(nextParam)}` : LOGIN_PATH} className="font-semibold hover:underline" style={{ color: 'var(--primary)' }}>
               {t('signInLink')}
             </Link>
           </div>
