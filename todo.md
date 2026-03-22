@@ -711,3 +711,18 @@
 - [x] COGS/Unit Economics data integration (pre-fill from COGS tool)
 - [x] Save/load projections to database
 - [x] Write vitest tests for new engine (34 tests)
+
+## Business Model Expansion (6 → 15 Models)
+- [x] Add Subscription (non-SaaS) model: physical/content recurring billing, churn, LTV
+- [x] Add Freemium model: free-to-paid conversion funnel, MAU, ARPU tiers
+- [x] Add Usage-Based / Pay-as-you-go model: volume × unit price, API calls / transactions
+- [x] Add Advertising / Media model: MAU × CPM, fill rate, ad revenue per user
+- [x] Add D2C / Retail model: units × ASP, repeat purchase rate, LTV, inventory COGS
+- [x] Add Fintech / Lending model: AUM, interest spread, transaction volume, NIM
+- [x] Add EdTech / Content model: enrolled students × course price, completion rate
+- [x] Add On-Demand / Gig model: bookings × take rate, supply/demand sides
+- [x] Add Real Estate / PropTech model: units under management × fee, rental yield
+- [x] Update FinancialProjection UI with input forms for all 9 new models
+- [x] Update MODEL_META for all 9 new models
+- [x] Update DEFAULT_REVENUE_DRIVERS for all 9 new models
+- [x] Update tests for new models

@@ -8,7 +8,11 @@ import {
   type FinancialModelInputs,
 } from '../shared/projectionEngine';
 
-const businessModelEnum = z.enum(['saas', 'ecommerce', 'marketplace', 'agency', 'hardware', 'procurement']);
+const businessModelEnum = z.enum([
+  'saas', 'ecommerce', 'marketplace', 'agency', 'hardware', 'procurement',
+  'subscription', 'freemium', 'usage_based', 'advertising', 'd2c',
+  'fintech', 'edtech', 'on_demand', 'proptech'
+]);
 const scenarioEnum = z.enum(['bear', 'base', 'bull']);
 const yearHorizonEnum = z.union([z.literal(3), z.literal(5), z.literal(10)]);
 

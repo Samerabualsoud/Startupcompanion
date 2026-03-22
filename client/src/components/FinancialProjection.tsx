@@ -18,7 +18,8 @@ import {
   Zap, ShoppingCart, Store, Briefcase, Cpu, Package,
   ChevronDown, ChevronRight, CheckCircle2,
   FileSpreadsheet, FileText, Calendar,
-  Plus, Minus, Info, ArrowUpRight, ArrowDownRight
+  Plus, Minus, Info, ArrowUpRight, ArrowDownRight,
+  Activity, Radio, Tag, Landmark, GraduationCap, Truck, Building2
 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
@@ -53,12 +54,21 @@ import * as XLSX from 'xlsx';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const BUSINESS_MODELS: { id: BusinessModel; label: string; icon: React.ElementType; color: string; description: string }[] = [
-  { id: 'saas',        label: 'SaaS',                     icon: Zap,          color: '#6366F1', description: 'Subscription software revenue' },
-  { id: 'ecommerce',   label: 'E-commerce',               icon: ShoppingCart, color: '#F59E0B', description: 'Product sales & repeat orders' },
-  { id: 'marketplace', label: 'Marketplace',              icon: Store,        color: '#10B981', description: 'GMV × take rate model' },
-  { id: 'agency',      label: 'Agency / Services',        icon: Briefcase,    color: '#8B5CF6', description: 'Retainers + project revenue' },
-  { id: 'hardware',    label: 'Hardware / IoT',           icon: Cpu,          color: '#EC4899', description: 'Unit sales + recurring subscriptions' },
-  { id: 'procurement', label: 'Procurement-as-a-Service', icon: Package,      color: '#0EA5E9', description: 'PVF × take rate model' },
+  { id: 'saas',         label: 'SaaS',                        icon: Zap,          color: '#6366F1', description: 'Subscription software revenue' },
+  { id: 'ecommerce',    label: 'E-commerce',                  icon: ShoppingCart, color: '#F59E0B', description: 'Product sales & repeat orders' },
+  { id: 'marketplace',  label: 'Marketplace',                 icon: Store,        color: '#10B981', description: 'GMV × take rate model' },
+  { id: 'agency',       label: 'Agency / Services',           icon: Briefcase,    color: '#8B5CF6', description: 'Retainers + project revenue' },
+  { id: 'hardware',     label: 'Hardware / IoT',              icon: Cpu,          color: '#EC4899', description: 'Unit sales + recurring subscriptions' },
+  { id: 'procurement',  label: 'Procurement-as-a-Service',    icon: Package,      color: '#0EA5E9', description: 'PVF × take rate model' },
+  { id: 'subscription', label: 'Subscription (Physical)',      icon: RefreshCw,    color: '#14B8A6', description: 'Recurring billing for boxes or media' },
+  { id: 'freemium',     label: 'Freemium',                    icon: Users,        color: '#A855F7', description: 'Free-to-paid conversion funnel' },
+  { id: 'usage_based',  label: 'Usage-Based / Pay-as-you-go', icon: Activity,     color: '#F97316', description: 'Volume × unit price (API, compute)' },
+  { id: 'advertising',  label: 'Advertising / Media',         icon: Radio,        color: '#EF4444', description: 'MAU × CPM ad monetization' },
+  { id: 'd2c',          label: 'D2C / Retail',                icon: Tag,          color: '#84CC16', description: 'Direct-to-consumer brand' },
+  { id: 'fintech',      label: 'Fintech / Lending',           icon: Landmark,     color: '#06B6D4', description: 'AUM, NIM, transaction fees' },
+  { id: 'edtech',       label: 'EdTech / Content',            icon: GraduationCap, color: '#F59E0B', description: 'Course enrollments + subscriptions' },
+  { id: 'on_demand',    label: 'On-Demand / Gig',             icon: Truck,        color: '#10B981', description: 'Bookings × take rate' },
+  { id: 'proptech',     label: 'Real Estate / PropTech',      icon: Building2,    color: '#6B7280', description: 'Units under management × fee' },
 ];
 
 const SCENARIOS: { id: Scenario; label: string; color: string; description: string }[] = [
@@ -583,6 +593,124 @@ export default function FinancialProjection() {
           <NumInput label="Avg Order Value" value={rd.avgOrderValue} onChange={v => update('avgOrderValue', v)} prefix={currency} />
           <NumInput label="Operational Cost %" value={rd.operationalCostPct} onChange={v => update('operationalCostPct', v)} suffix="%" />
           <NumInput label="CAC per Buyer" value={rd.cacPerBuyer} onChange={v => update('cacPerBuyer', v)} prefix={currency} />
+        </div>
+      );
+      case 'subscription': return (
+        <div className="grid grid-cols-2 gap-3">
+          <NumInput label="Starting Subscribers" value={rd.startingSubscribers} onChange={v => update('startingSubscribers', v)} />
+          <NumInput label="New Subscribers (M1)" value={rd.newSubscribersM1} onChange={v => update('newSubscribersM1', v)} />
+          <NumInput label="Subscriber Growth MoM %" value={rd.subscriberGrowthMoM} onChange={v => update('subscriberGrowthMoM', v)} suffix="%" />
+          <NumInput label="Avg Monthly Fee" value={rd.avgMonthlyFee} onChange={v => update('avgMonthlyFee', v)} prefix={currency} />
+          <NumInput label="Monthly Churn Rate %" value={rd.monthlyChurnRate} onChange={v => update('monthlyChurnRate', v)} suffix="%" tooltip="% of subscribers lost each month" />
+          <NumInput label="COGS per Subscriber / Month" value={rd.cogsPerSubscriber} onChange={v => update('cogsPerSubscriber', v)} prefix={currency} tooltip="Fulfillment, content, shipping cost per subscriber" />
+          <NumInput label="Annual Price Increase %" value={rd.annualPriceIncreasePct} onChange={v => update('annualPriceIncreasePct', v)} suffix="%" />
+          <NumInput label="CAC per Subscriber" value={rd.cacPerSubscriber} onChange={v => update('cacPerSubscriber', v)} prefix={currency} />
+        </div>
+      );
+      case 'freemium': return (
+        <div className="grid grid-cols-2 gap-3">
+          <NumInput label="Starting MAU (Free)" value={rd.startingMAU} onChange={v => update('startingMAU', v)} tooltip="Monthly Active Users on free tier" />
+          <NumInput label="MAU Growth MoM %" value={rd.mauGrowthMoM} onChange={v => update('mauGrowthMoM', v)} suffix="%" />
+          <NumInput label="Free-to-Paid Conversion %" value={rd.freeToPayConversionRate} onChange={v => update('freeToPayConversionRate', v)} suffix="%" tooltip="% of MAU who are on paid plan" />
+          <NumInput label="Avg ARPU (Paid)" value={rd.avgARPU} onChange={v => update('avgARPU', v)} prefix={currency} tooltip="Average Revenue Per Paid User per month" />
+          <NumInput label="Monthly Churn (Paid) %" value={rd.monthlyChurnRate} onChange={v => update('monthlyChurnRate', v)} suffix="%" />
+          <NumInput label="COGS as % of Revenue" value={rd.cogsAsPctOfRevenue} onChange={v => update('cogsAsPctOfRevenue', v)} suffix="%" tooltip="Hosting, infra, support" />
+          <NumInput label="Expansion Revenue %" value={rd.expansionRevenuePct} onChange={v => update('expansionRevenuePct', v)} suffix="%" />
+          <NumInput label="CAC per Paid User" value={rd.cacPerPaidUser} onChange={v => update('cacPerPaidUser', v)} prefix={currency} />
+        </div>
+      );
+      case 'usage_based': return (
+        <div className="grid grid-cols-2 gap-3">
+          <NumInput label="Starting Active Accounts" value={rd.startingActiveAccounts} onChange={v => update('startingActiveAccounts', v)} />
+          <NumInput label="Account Growth MoM %" value={rd.accountGrowthMoM} onChange={v => update('accountGrowthMoM', v)} suffix="%" />
+          <NumInput label="Avg Units / Account / Month" value={rd.avgUnitsPerAccount} onChange={v => update('avgUnitsPerAccount', v)} tooltip="API calls, GB, transactions per account" />
+          <NumInput label="Unit Growth MoM %" value={rd.unitGrowthMoM} onChange={v => update('unitGrowthMoM', v)} suffix="%" tooltip="Growth in usage per account" />
+          <NumInput label="Price per Unit" value={rd.pricePerUnit} onChange={v => update('pricePerUnit', v)} prefix={currency} step={0.0001} />
+          <NumInput label="COGS as % of Revenue" value={rd.cogsPctOfRevenue} onChange={v => update('cogsPctOfRevenue', v)} suffix="%" tooltip="Infra, bandwidth, processing" />
+          <NumInput label="CAC per Account" value={rd.cacPerAccount} onChange={v => update('cacPerAccount', v)} prefix={currency} />
+        </div>
+      );
+      case 'advertising': return (
+        <div className="grid grid-cols-2 gap-3">
+          <NumInput label="Starting MAU" value={rd.startingMAU} onChange={v => update('startingMAU', v)} />
+          <NumInput label="MAU Growth MoM %" value={rd.mauGrowthMoM} onChange={v => update('mauGrowthMoM', v)} suffix="%" />
+          <NumInput label="Sessions / User / Month" value={rd.avgSessionsPerUserPerMonth} onChange={v => update('avgSessionsPerUserPerMonth', v)} />
+          <NumInput label="Page Views / Session" value={rd.pageViewsPerSession} onChange={v => update('pageViewsPerSession', v)} />
+          <NumInput label="Ad Fill Rate %" value={rd.adFillRate} onChange={v => update('adFillRate', v)} suffix="%" tooltip="% of ad slots filled with paid ads" />
+          <NumInput label="CPM Rate" value={rd.cpmRate} onChange={v => update('cpmRate', v)} prefix={currency} tooltip="Revenue per 1,000 impressions" step={0.1} />
+          <NumInput label="Content Cost / Month" value={rd.contentCostMonthly} onChange={v => update('contentCostMonthly', v)} prefix={currency} />
+          <NumInput label="Infra Cost as % Revenue" value={rd.infrastructureCostPctRevenue} onChange={v => update('infrastructureCostPctRevenue', v)} suffix="%" />
+          <NumInput label="CAC per User" value={rd.cacPerUser} onChange={v => update('cacPerUser', v)} prefix={currency} />
+        </div>
+      );
+      case 'd2c': return (
+        <div className="grid grid-cols-2 gap-3">
+          <NumInput label="Existing Customer Base" value={rd.existingCustomerBase} onChange={v => update('existingCustomerBase', v)} tooltip="Customers already acquired at start" />
+          <NumInput label="New Customers / Month (M1)" value={rd.startingMonthlyNewCustomers} onChange={v => update('startingMonthlyNewCustomers', v)} />
+          <NumInput label="New Customer Growth MoM %" value={rd.newCustomerGrowthMoM} onChange={v => update('newCustomerGrowthMoM', v)} suffix="%" />
+          <NumInput label="Avg First Order Value" value={rd.avgFirstOrderValue} onChange={v => update('avgFirstOrderValue', v)} prefix={currency} />
+          <NumInput label="Repeat Purchase Rate %" value={rd.repeatPurchaseRate} onChange={v => update('repeatPurchaseRate', v)} suffix="%" tooltip="% of existing customers who repurchase each month" />
+          <NumInput label="Avg Repeat Order Value" value={rd.avgRepeatOrderValue} onChange={v => update('avgRepeatOrderValue', v)} prefix={currency} />
+          <NumInput label="COGS as % of Revenue" value={rd.cogsAsPctOfRevenue} onChange={v => update('cogsAsPctOfRevenue', v)} suffix="%" tooltip="Product + fulfillment + returns" />
+          <NumInput label="Return Rate %" value={rd.returnRate} onChange={v => update('returnRate', v)} suffix="%" />
+          <NumInput label="CAC per Customer" value={rd.cacPerCustomer} onChange={v => update('cacPerCustomer', v)} prefix={currency} />
+        </div>
+      );
+      case 'fintech': return (
+        <div className="grid grid-cols-2 gap-3">
+          <NumInput label="Starting AUM / Loan Book" value={rd.startingAUM} onChange={v => update('startingAUM', v)} prefix={currency} tooltip="Assets Under Management or Loan Portfolio" />
+          <NumInput label="AUM Growth MoM %" value={rd.aumGrowthMoM} onChange={v => update('aumGrowthMoM', v)} suffix="%" />
+          <NumInput label="Net Interest Margin (NIM) %" value={rd.netInterestMarginPct} onChange={v => update('netInterestMarginPct', v)} suffix="%" tooltip="Annual NIM: interest income minus funding cost" />
+          <NumInput label="Transaction Volume (M1)" value={rd.transactionVolumeM1} onChange={v => update('transactionVolumeM1', v)} prefix={currency} />
+          <NumInput label="Transaction Growth MoM %" value={rd.transactionGrowthMoM} onChange={v => update('transactionGrowthMoM', v)} suffix="%" />
+          <NumInput label="Transaction Fee %" value={rd.transactionFeePct} onChange={v => update('transactionFeePct', v)} suffix="%" />
+          <NumInput label="Loan Default Rate % (Annual)" value={rd.loanDefaultRatePct} onChange={v => update('loanDefaultRatePct', v)} suffix="%" />
+          <NumInput label="Operational Cost as % Revenue" value={rd.operationalCostPctRevenue} onChange={v => update('operationalCostPctRevenue', v)} suffix="%" />
+          <NumInput label="Starting Customers" value={rd.startingCustomers} onChange={v => update('startingCustomers', v)} />
+          <NumInput label="Customer Growth MoM %" value={rd.customerGrowthMoM} onChange={v => update('customerGrowthMoM', v)} suffix="%" />
+          <NumInput label="CAC per Customer" value={rd.cacPerCustomer} onChange={v => update('cacPerCustomer', v)} prefix={currency} />
+        </div>
+      );
+      case 'edtech': return (
+        <div className="grid grid-cols-2 gap-3">
+          <NumInput label="Starting Monthly Enrollments" value={rd.startingMonthlyEnrollments} onChange={v => update('startingMonthlyEnrollments', v)} />
+          <NumInput label="Enrollment Growth MoM %" value={rd.enrollmentGrowthMoM} onChange={v => update('enrollmentGrowthMoM', v)} suffix="%" />
+          <NumInput label="Avg Course Price" value={rd.avgCoursePrice} onChange={v => update('avgCoursePrice', v)} prefix={currency} />
+          <NumInput label="Subscription Revenue %" value={rd.subscriptionRevenuePct} onChange={v => update('subscriptionRevenuePct', v)} suffix="%" tooltip="% of revenue from monthly subscriptions vs one-time" />
+          <NumInput label="Avg Subscription Fee / Month" value={rd.avgSubscriptionFee} onChange={v => update('avgSubscriptionFee', v)} prefix={currency} />
+          <NumInput label="Starting Subscribers" value={rd.startingSubscribers} onChange={v => update('startingSubscribers', v)} />
+          <NumInput label="Subscriber Growth MoM %" value={rd.subscriberGrowthMoM} onChange={v => update('subscriberGrowthMoM', v)} suffix="%" />
+          <NumInput label="Subscriber Churn Monthly %" value={rd.subscriberChurnMonthly} onChange={v => update('subscriberChurnMonthly', v)} suffix="%" />
+          <NumInput label="Content Cost as % Revenue" value={rd.contentCostPctRevenue} onChange={v => update('contentCostPctRevenue', v)} suffix="%" />
+          <NumInput label="Platform Cost as % Revenue" value={rd.platformCostPctRevenue} onChange={v => update('platformCostPctRevenue', v)} suffix="%" />
+          <NumInput label="CAC per Student" value={rd.cacPerStudent} onChange={v => update('cacPerStudent', v)} prefix={currency} />
+        </div>
+      );
+      case 'on_demand': return (
+        <div className="grid grid-cols-2 gap-3">
+          <NumInput label="Starting Monthly Bookings" value={rd.startingMonthlyBookings} onChange={v => update('startingMonthlyBookings', v)} />
+          <NumInput label="Booking Growth MoM %" value={rd.bookingGrowthMoM} onChange={v => update('bookingGrowthMoM', v)} suffix="%" />
+          <NumInput label="Avg Booking Value (Gross)" value={rd.avgBookingValue} onChange={v => update('avgBookingValue', v)} prefix={currency} />
+          <NumInput label="Take Rate %" value={rd.takeRate} onChange={v => update('takeRate', v)} suffix="%" tooltip="Platform fee as % of booking value" />
+          <NumInput label="Payment Processing Cost %" value={rd.paymentProcessingCost} onChange={v => update('paymentProcessingCost', v)} suffix="%" />
+          <NumInput label="Insurance & Safety Cost %" value={rd.insuranceSafetyPct} onChange={v => update('insuranceSafetyPct', v)} suffix="%" tooltip="Insurance, trust & safety as % of revenue" />
+          <NumInput label="Starting Supply Count" value={rd.startingSupplyCount} onChange={v => update('startingSupplyCount', v)} tooltip="Drivers, workers, couriers at start" />
+          <NumInput label="Supply Growth MoM %" value={rd.supplyGrowthMoM} onChange={v => update('supplyGrowthMoM', v)} suffix="%" />
+          <NumInput label="CAC per Supply-Side Worker" value={rd.cacPerSupplySide} onChange={v => update('cacPerSupplySide', v)} prefix={currency} />
+        </div>
+      );
+      case 'proptech': return (
+        <div className="grid grid-cols-2 gap-3">
+          <NumInput label="Starting Units Under Management" value={rd.startingUnitsUnderManagement} onChange={v => update('startingUnitsUnderManagement', v)} />
+          <NumInput label="Unit Growth MoM %" value={rd.unitGrowthMoM} onChange={v => update('unitGrowthMoM', v)} suffix="%" />
+          <NumInput label="Avg Monthly Fee / Unit" value={rd.avgMonthlyFeePerUnit} onChange={v => update('avgMonthlyFeePerUnit', v)} prefix={currency} tooltip="Property management fee per unit per month" />
+          <NumInput label="Avg Rental Yield % (Annual)" value={rd.avgRentalYield} onChange={v => update('avgRentalYield', v)} suffix="%" />
+          <NumInput label="Revenue Share %" value={rd.revenueSharePct} onChange={v => update('revenueSharePct', v)} suffix="%" tooltip="% of rental income taken as platform fee" />
+          <NumInput label="Transaction Fee per Lease" value={rd.transactionFeePerLease} onChange={v => update('transactionFeePerLease', v)} prefix={currency} />
+          <NumInput label="New Leases / Month" value={rd.newLeasesPerMonth} onChange={v => update('newLeasesPerMonth', v)} />
+          <NumInput label="Lease Growth MoM %" value={rd.leaseGrowthMoM} onChange={v => update('leaseGrowthMoM', v)} suffix="%" />
+          <NumInput label="Operational Cost as % Revenue" value={rd.operationalCostPctRevenue} onChange={v => update('operationalCostPctRevenue', v)} suffix="%" />
+          <NumInput label="CAC per Unit" value={rd.cacPerUnit} onChange={v => update('cacPerUnit', v)} prefix={currency} />
         </div>
       );
     }
