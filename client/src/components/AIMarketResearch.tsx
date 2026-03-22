@@ -136,8 +136,8 @@ export default function AIMarketResearch() {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--primary)' }}>
-            <Search className="w-4.5 h-4.5 text-white" />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary">
+            <Search className="w-4.5 h-4.5 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
@@ -206,8 +206,7 @@ export default function AIMarketResearch() {
           <Button
             type="submit"
             disabled={mutation.isPending}
-            className="w-full h-11 text-sm font-semibold"
-            style={{ background: 'var(--primary)', color: '#FAF6EF' }}
+            className="w-full h-11 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
           >
             {mutation.isPending ? (
               <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Researching market… (30-60s)</>
@@ -233,18 +232,18 @@ export default function AIMarketResearch() {
             </div>
 
             {/* Executive Summary */}
-            <div className="p-4 rounded-xl border border-border" style={{ background: 'var(--primary)' }}>
-              <p className="text-sm text-white/90 leading-relaxed">{result.executiveSummary}</p>
+            <div className="p-4 rounded-xl border border-primary/30 bg-primary/10">
+              <p className="text-sm text-foreground leading-relaxed">{result.executiveSummary}</p>
             </div>
 
             {/* Market Size */}
             <Section id="marketSize" title="Market Size" icon={BarChart3}>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
-                  { label: 'TAM', value: result.marketSize.tam, color: '#C4614A' },
-                  { label: 'SAM', value: result.marketSize.sam, color: '#2D4A6B' },
-                  { label: 'SOM', value: result.marketSize.som, color: '#10B981' },
-                  { label: 'Growth Rate', value: result.marketSize.growthRate, color: '#F59E0B' },
+                  { label: 'TAM', value: result.marketSize.tam, color: 'var(--primary)' },
+                  { label: 'SAM', value: result.marketSize.sam, color: 'var(--primary)' },
+                  { label: 'SOM', value: result.marketSize.som, color: 'var(--primary)' },
+                  { label: 'Growth Rate', value: result.marketSize.growthRate, color: 'var(--primary)' },
                 ].map(m => (
                   <div key={m.label} className="p-3 rounded-lg border border-border text-center">
                     <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{m.label}</div>
@@ -336,7 +335,7 @@ export default function AIMarketResearch() {
               <ul className="space-y-2">
                 {result.goToMarketSuggestions.map((s, i) => (
                   <li key={i} className="flex gap-2.5 text-xs text-foreground">
-                    <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'var(--primary)' }}>{i + 1}</span>
+                    <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-primary text-primary-foreground">{i + 1}</span>
                     {s}
                   </li>
                 ))}

@@ -100,8 +100,8 @@ export default function AITermSheetAnalyzer() {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--primary)' }}>
-            <FileText className="w-4.5 h-4.5 text-white" />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary">
+            <FileText className="w-4.5 h-4.5 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>AI Term Sheet Analyzer</h1>
@@ -157,8 +157,7 @@ export default function AITermSheetAnalyzer() {
               mutation.mutate({ termSheetText, companyStage, founderExperience, language: lang === 'ar' ? 'arabic' : 'english' });
             }}
             disabled={mutation.isPending}
-            className="w-full h-11 text-sm font-semibold"
-            style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+            className="w-full h-11 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
           >
             {mutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analyzing term sheet…</> : <><FileText className="w-4 h-4 mr-2" /> Analyze Term Sheet</>}
           </Button>
@@ -211,7 +210,7 @@ export default function AITermSheetAnalyzer() {
               <ol className="space-y-2">
                 {result.negotiationPriorities.map((p, i) => (
                   <li key={i} className="flex gap-3 text-xs text-foreground">
-                    <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: i === 0 ? '#C4614A' : i === 1 ? '#F59E0B' : '#6366F1' }}>{i + 1}</span>
+                    <span className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-primary-foreground ${i === 0 ? 'bg-primary' : i === 1 ? 'bg-amber-500' : 'bg-indigo-500'}`}>{i + 1}</span>
                     {p}
                   </li>
                 ))}

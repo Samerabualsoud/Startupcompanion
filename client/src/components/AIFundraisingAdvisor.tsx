@@ -7,7 +7,7 @@ import ToolGuide from '@/components/ToolGuide';
 import { useState, useRef, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Send, Loader2, Trash2, User, Bot, CheckCircle2, AlertCircle } from 'lucide-react';
+import { MessageCircle, Send, Loader2, Trash2, User, Bot, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Streamdown } from 'streamdown';
@@ -25,7 +25,6 @@ export default function AIFundraisingAdvisor() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Build rich context from the startup profile snapshot
   const hasProfile = !!(snapshot.companyName || snapshot.sector || snapshot.stage);
 
   const buildStartupContext = () => ({
@@ -114,23 +113,26 @@ export default function AIFundraisingAdvisor() {
       />
 
       {/* Header */}
-      <div className="shrink-0 px-5 py-3.5 border-b border-border flex items-center justify-between" style={{ background: 'var(--primary)' }}>
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--primary)' }}>
-            <Bot className="w-4 h-4 text-white" />
+      <div className="shrink-0 px-5 py-3.5 border-b border-border bg-card flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary">
+            <Bot className="w-4.5 h-4.5 text-primary-foreground" />
           </div>
           <div>
-            <div className="text-sm font-semibold text-white">{t('aiFundraisingTitle')}</div>
+            <div className="text-sm font-semibold text-foreground">{t('aiFundraisingTitle')}</div>
             <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-[10px]" style={{ color: 'var(--muted-foreground)' }}>
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-[10px] text-muted-foreground">
                 {hasProfile ? `Personalized for ${snapshot.companyName || 'your startup'}` : 'Expert advisor · Always available'}
               </span>
             </div>
           </div>
         </div>
         {messages.length > 0 && (
-          <button onClick={clearChat} className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors">
+          <button
+            onClick={clearChat}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-secondary"
+          >
             <Trash2 className="w-3.5 h-3.5" /> Clear
           </button>
         )}
@@ -168,11 +170,11 @@ export default function AIFundraisingAdvisor() {
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-background">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full py-8 text-center">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'var(--background)' }}>
-              <MessageCircle className="w-7 h-7" style={{ color: 'var(--primary)' }} />
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 bg-primary/10 border border-primary/20">
+              <Sparkles className="w-7 h-7 text-primary" />
             </div>
             <h3 className="text-base font-bold text-foreground mb-2">
               {hasProfile ? `Ask Me Anything, ${snapshot.companyName || 'Founder'}` : 'Ask Me Anything About Fundraising'}
@@ -203,11 +205,21 @@ export default function AIFundraisingAdvisor() {
             animate={{ opacity: 1, y: 0 }}
             className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
           >
-            <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${msg.role === 'user' ? 'bg-secondary' : ''}`}
-              style={msg.role === 'assistant' ? { background: 'var(--primary)' } : {}}>
-              {msg.role === 'user' ? <User className="w-3.5 h-3.5 text-foreground" /> : <Bot className="w-3.5 h-3.5 text-white" />}
+            <div
+              className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
+                msg.role === 'user' ? 'bg-secondary' : 'bg-primary'
+              }`}
+            >
+              {msg.role === 'user'
+                ? <User className="w-3.5 h-3.5 text-foreground" />
+                : <Bot className="w-3.5 h-3.5 text-primary-foreground" />
+              }
             </div>
-            <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.role === 'user' ? 'rounded-tr-sm bg-foreground text-background' : 'rounded-tl-sm bg-card border border-border'}`}>
+            <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+              msg.role === 'user'
+                ? 'rounded-tr-sm bg-primary text-primary-foreground'
+                : 'rounded-tl-sm bg-card border border-border'
+            }`}>
               {msg.role === 'assistant' ? (
                 <div className="text-sm text-foreground prose prose-sm max-w-none">
                   <Streamdown>{msg.content}</Streamdown>
@@ -221,8 +233,8 @@ export default function AIFundraisingAdvisor() {
 
         {isLoading && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
-            <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'var(--primary)' }}>
-              <Bot className="w-3.5 h-3.5 text-white" />
+            <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-primary">
+              <Bot className="w-3.5 h-3.5 text-primary-foreground" />
             </div>
             <div className="bg-card border border-border rounded-2xl rounded-tl-sm px-4 py-3">
               <div className="flex gap-1.5 items-center">
@@ -246,7 +258,12 @@ export default function AIFundraisingAdvisor() {
             className="flex-1 text-sm"
             disabled={isLoading}
           />
-          <Button type="submit" disabled={!input.trim() || isLoading} size="icon" className="shrink-0" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
+          <Button
+            type="submit"
+            disabled={!input.trim() || isLoading}
+            size="icon"
+            className="shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"
+          >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </Button>
         </form>

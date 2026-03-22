@@ -189,7 +189,7 @@ export const translations = {
     navGroupEquity: "Equity & Ownership",
     navGroupFundraising: "Capital Raising",
     navGroupResources: "Market Intelligence",
-    navGroupDatabase: "Ecosystem",
+    navGroupDatabase: "Ecosystem Network",
     navGroupMyStartup: "My Company",
 
     // ── Resource Database ──
@@ -693,7 +693,7 @@ export const translations = {
     navGroupEquity: "الأسهم وجدول الملكية",
     navGroupFundraising: "جمع التمويل",
     navGroupResources: "الموارد",
-    navGroupDatabase: "النظام البيئي",
+    navGroupDatabase: "شبكة النظام البيئي",
     navGroupMyStartup: "شركتي الناشئة",
 
     // ── Resource Database ──

@@ -676,3 +676,15 @@
 - [ ] Fix muted-foreground contrast on light backgrounds
 - [ ] Fix card/secondary text contrast across tool screens
 - [ ] Fix any hardcoded low-contrast colors remaining in components
+
+## Round N+3 — AI Advisory UI Fixes & Sales Tracker Analytics
+
+- [ ] Rename "Investor Network" tab to "Ecosystem Network" in sidebar nav
+- [ ] Fix UI issues in AIFundraisingAdvisor component
+- [ ] Fix UI issues in AIInvestorEmail component
+- [ ] Fix UI issues in AIDueDiligence component
+- [ ] Fix UI issues in AITermSheetAnalyzer component
+- [ ] Fix UI issues in AICofounderAgreement component
+- [ ] Implement MRR/ARR auto-calculation in Sales Tracker from revenue entries
+- [ ] Implement YTD/LTD metrics for early-stage startups with no recurring revenue
+- [ ] Build enhanced KPI dashboard in Sales Tracker frontend

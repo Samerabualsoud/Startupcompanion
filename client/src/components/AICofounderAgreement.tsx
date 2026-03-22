@@ -128,8 +128,8 @@ export default function AICofounderAgreement() {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--primary)' }}>
-            <Users className="w-4.5 h-4.5 text-white" />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary">
+            <Users className="w-4.5 h-4.5 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>AI Co-founder Agreement</h1>
@@ -260,7 +260,7 @@ export default function AICofounderAgreement() {
             </div>
           </div>
 
-          <Button type="submit" disabled={mutation.isPending || !equityValid} className="w-full h-11 text-sm font-semibold" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
+          <Button type="submit" disabled={mutation.isPending || !equityValid} className="w-full h-11 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90">
             {mutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Drafting agreement…</> : <><Users className="w-4 h-4 mr-2" /> Draft Co-founder Agreement</>}
           </Button>
         </form>

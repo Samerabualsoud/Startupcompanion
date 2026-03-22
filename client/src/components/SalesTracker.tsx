@@ -7,10 +7,10 @@
 import { useState, useMemo, useCallback } from 'react';
 import {
   Plus, Trash2, Loader2, Edit2, X, Check, ChevronDown, ChevronUp,
-  BarChart3, TrendingUp, DollarSign, Target, Users, Sparkles,
+  BarChart3, TrendingUp, TrendingDown, DollarSign, Target, Users, Sparkles,
   RefreshCw, Search, ArrowUpDown, CheckCircle2, Clock, XCircle,
   GitMerge, Zap, Activity, ShoppingCart, Briefcase, Cpu, Store,
-  Package, UserCheck, Repeat
+  Package, UserCheck, Repeat, Calendar, CalendarRange, Rocket
 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -397,6 +397,7 @@ export default function SalesTracker() {
 
   // ── tRPC ───────────────────────────────────────────────────────────────
   const { data: rawEntries = [], refetch } = trpc.sales.listEntries.useQuery({ limit: 500 });
+  const { data: analyticsData } = trpc.sales.getAnalytics.useQuery();
   const entries: Deal[] = rawEntries as Deal[];
   const addMutation = trpc.sales.addEntry.useMutation({ onSuccess: () => { refetch(); setShowForm(false); setForm(emptyForm()); setExtraValues({}); toast.success(isRTL ? 'تمت إضافة الصفقة' : 'Deal added'); } });
   const updateMutation = trpc.sales.updateEntry.useMutation({ onSuccess: () => { refetch(); setEditingDeal(null); toast.success(isRTL ? 'تم تحديث الصفقة' : 'Deal updated'); } });
@@ -730,6 +731,7 @@ export default function SalesTracker() {
           <TabsTrigger value="revenue">{isRTL ? 'الإيرادات' : 'Revenue'}</TabsTrigger>
           <TabsTrigger value="channels">{isRTL ? 'القنوات' : 'Channels'}</TabsTrigger>
           <TabsTrigger value="unit-econ">{isRTL ? 'اقتصاديات الوحدة' : 'Unit Economics'}</TabsTrigger>
+          <TabsTrigger value="analytics">{isRTL ? 'التحليلات' : 'Analytics'}</TabsTrigger>
           <TabsTrigger value="targets">{isRTL ? 'الأهداف' : 'Targets'}</TabsTrigger>
           <TabsTrigger value="ai">{isRTL ? 'تحليل ذكاء اصطناعي' : 'AI Analysis'}</TabsTrigger>
         </TabsList>
@@ -1013,6 +1015,195 @@ export default function SalesTracker() {
               </p>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* ── ANALYTICS ── */}
+        <TabsContent value="analytics" className="mt-4 space-y-5">
+          {/* Top KPI Row: MRR / ARR / YTD / LTD */}
+          {(() => {
+            const s = analyticsData?.summary;
+            const hasRevenue = s && s.ltd > 0;
+            const isNewStartup = !hasRevenue;
+
+            // Helper: format growth badge
+            const GrowthBadge = ({ pct, label }: { pct: number | null | undefined; label: string }) => {
+              if (pct === null || pct === undefined) return <span className="text-xs text-muted-foreground">{isRTL ? 'لا توجد بيانات كافية' : 'Not enough data'}</span>;
+              const isPos = pct >= 0;
+              return (
+                <span className={`inline-flex items-center gap-0.5 text-xs font-semibold ${
+                  isPos ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'
+                }`}>
+                  {isPos ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  {Math.abs(pct).toFixed(1)}% {label}
+                </span>
+              );
+            };
+
+            return (
+              <>
+                {/* Early-stage banner */}
+                {isNewStartup && (
+                  <div className="flex items-center gap-3 p-4 rounded-xl border border-primary/30 bg-primary/5">
+                    <Rocket className="w-5 h-5 text-primary shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{isRTL ? 'مرحبًا بك في مرحلة الإطلاق!' : 'Welcome to Launch Stage!'}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{isRTL ? 'أضف أول صفقة مُغلقة لبدء حساب MRR وARR وYTD وLTD تلقائيًا.' : 'Add your first Closed Won deal and MRR, ARR, YTD, and LTD will calculate automatically.'}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* MRR / ARR / YTD / LTD cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  {[
+                    {
+                      label: 'MRR',
+                      labelAr: 'الإيراد الشهري المتكرر',
+                      value: s ? fmt(s.mrr, currency) : '—',
+                      sub: s?.lastMonthWithData ? (isRTL ? `آخر شهر: ${s.lastMonthWithData}` : `Latest month: ${s.lastMonthWithData}`) : (isRTL ? 'لا توجد إيرادات بعد' : 'No revenue yet'),
+                      icon: DollarSign,
+                      color: 'text-emerald-600 dark:text-emerald-400',
+                      bg: 'bg-emerald-100 dark:bg-emerald-900/30',
+                      accent: 'border-l-4 border-l-emerald-500',
+                      growth: s ? <GrowthBadge pct={s.momGrowthPct} label={isRTL ? 'شهريًا' : 'MoM'} /> : null,
+                    },
+                    {
+                      label: 'ARR',
+                      labelAr: 'الإيراد السنوي المتكرر',
+                      value: s ? fmt(s.arr, currency) : '—',
+                      sub: isRTL ? 'MRR × 12 (تقدير)' : 'MRR × 12 (annualised)',
+                      icon: TrendingUp,
+                      color: 'text-blue-600 dark:text-blue-400',
+                      bg: 'bg-blue-100 dark:bg-blue-900/30',
+                      accent: 'border-l-4 border-l-blue-500',
+                      growth: s ? <GrowthBadge pct={s.qoqGrowthPct} label={isRTL ? 'ربع سنوي' : 'QoQ'} /> : null,
+                    },
+                    {
+                      label: 'YTD',
+                      labelAr: 'الإيراد منذ بداية العام',
+                      value: s ? fmt(s.ytd, currency) : '—',
+                      sub: isRTL ? `إيرادات ${new Date().getFullYear()}` : `Revenue in ${new Date().getFullYear()}`,
+                      icon: Calendar,
+                      color: 'text-violet-600 dark:text-violet-400',
+                      bg: 'bg-violet-100 dark:bg-violet-900/30',
+                      accent: 'border-l-4 border-l-violet-500',
+                      growth: null,
+                    },
+                    {
+                      label: 'LTD',
+                      labelAr: 'الإيراد منذ الإطلاق',
+                      value: s ? fmt(s.ltd, currency) : '—',
+                      sub: s?.firstRevenueDate
+                        ? (isRTL ? `منذ ${new Date(s.firstRevenueDate).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short' })}` : `Since ${new Date(s.firstRevenueDate).toLocaleDateString('en', { year: 'numeric', month: 'short' })}`)
+                        : (isRTL ? 'لا توجد إيرادات بعد' : 'No revenue yet'),
+                      icon: CalendarRange,
+                      color: 'text-orange-600 dark:text-orange-400',
+                      bg: 'bg-orange-100 dark:bg-orange-900/30',
+                      accent: 'border-l-4 border-l-orange-500',
+                      growth: null,
+                    },
+                  ].map(card => (
+                    <div key={card.label} className={`rounded-xl bg-card border border-border shadow-sm p-3 flex flex-col gap-2 min-w-0 overflow-hidden ${card.accent}`}>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-bold text-foreground uppercase tracking-wide">{card.label}</p>
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${card.bg}`}>
+                          <card.icon className={`w-4 h-4 ${card.color}`} />
+                        </div>
+                      </div>
+                      <div>
+                        <p className={`text-xl font-bold tracking-tight truncate ${card.color}`}>{card.value}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{card.sub}</p>
+                      </div>
+                      {card.growth && <div className="mt-0.5">{card.growth}</div>}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Growth trend chart */}
+                {(analyticsData?.monthly?.length ?? 0) > 1 && (
+                  <Card>
+                    <CardHeader className="pb-2 pt-4">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-primary" />
+                        {isRTL ? 'اتجاه الإيرادات الشهرية' : 'Monthly Revenue Trend'}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pb-4">
+                      <ResponsiveContainer width="100%" height={240}>
+                        <LineChart data={analyticsData!.monthly}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                          <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />
+                          <Tooltip formatter={(v: number) => fmt(v, currency)} />
+                          <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Quarterly breakdown */}
+                {(analyticsData?.quarterly?.length ?? 0) > 0 && (
+                  <Card>
+                    <CardHeader className="pb-2 pt-4">
+                      <CardTitle className="text-sm">{isRTL ? 'الإيرادات الفصلية' : 'Quarterly Revenue'}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pb-4">
+                      <ResponsiveContainer width="100%" height={200}>
+                        <BarChart data={analyticsData!.quarterly}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis dataKey="quarter" tick={{ fontSize: 10 }} />
+                          <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />
+                          <Tooltip formatter={(v: number) => fmt(v, currency)} />
+                          <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* MoM growth table */}
+                {(analyticsData?.monthly?.length ?? 0) > 1 && (
+                  <Card>
+                    <CardHeader className="pb-2 pt-4">
+                      <CardTitle className="text-sm">{isRTL ? 'النمو الشهري (MoM)' : 'Month-over-Month Growth'}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pb-4">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr className="border-b border-border">
+                              <th className="text-left py-2 text-muted-foreground font-medium">{isRTL ? 'الشهر' : 'Month'}</th>
+                              <th className="text-right py-2 text-muted-foreground font-medium">{isRTL ? 'الإيراد' : 'Revenue'}</th>
+                              <th className="text-right py-2 text-muted-foreground font-medium">{isRTL ? 'النمو' : 'Growth'}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {[...(analyticsData?.monthly ?? [])].reverse().map(row => (
+                              <tr key={row.month} className="border-b border-border/50 last:border-0">
+                                <td className="py-2 text-foreground font-medium">{row.month}</td>
+                                <td className="py-2 text-right font-semibold text-foreground">{fmt(row.revenue, currency)}</td>
+                                <td className="py-2 text-right">
+                                  {row.momGrowth !== null ? (
+                                    <span className={`font-semibold ${
+                                      row.momGrowth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'
+                                    }`}>
+                                      {row.momGrowth >= 0 ? '+' : ''}{row.momGrowth.toFixed(1)}%
+                                    </span>
+                                  ) : (
+                                    <span className="text-muted-foreground">—</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            );
+          })()}
         </TabsContent>
 
         {/* ── TARGETS ── */}

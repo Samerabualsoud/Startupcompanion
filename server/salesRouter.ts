@@ -256,14 +256,62 @@ export const salesRouter = router({
     const wonEntries = entries.filter(e => e.dealStage === 'closed_won');
     const totalRevenue = wonEntries.reduce((s, e) => s + e.amount, 0);
     const avgDealSize = wonEntries.length > 0 ? totalRevenue / wonEntries.length : 0;
-    const winRate = entries.length > 0
-      ? (wonEntries.length / entries.filter(e => ['closed_won', 'closed_lost'].includes(e.dealStage)).length) * 100
-      : 0;
+    const closedCount = entries.filter(e => ['closed_won', 'closed_lost'].includes(e.dealStage)).length;
+    const winRate = closedCount > 0 ? (wonEntries.length / closedCount) * 100 : 0;
 
-    // Current month revenue
-    const currentMonth = new Date().toISOString().slice(0, 7);
+    // ── Date helpers ──
+    const now = new Date();
+    const currentMonth = now.toISOString().slice(0, 7); // YYYY-MM
+    const currentYear = now.getFullYear();
     const currentMonthRevenue = monthlyMap[currentMonth]?.revenue ?? 0;
     const currentTarget = targets.find(t => t.month === currentMonth);
+
+    // ── MRR: revenue in the most recent month that has data ──
+    const sortedMonthKeys = Object.keys(monthlyMap).sort();
+    const lastMonthWithData = sortedMonthKeys[sortedMonthKeys.length - 1] ?? currentMonth;
+    const mrr = monthlyMap[lastMonthWithData]?.revenue ?? 0;
+
+    // ── ARR: MRR × 12 (annualised from most recent month) ──
+    const arr = mrr * 12;
+
+    // ── MoM growth: compare last two months with data ──
+    const prevMonthKey = sortedMonthKeys[sortedMonthKeys.length - 2];
+    const prevMrr = prevMonthKey ? (monthlyMap[prevMonthKey]?.revenue ?? 0) : 0;
+    const momGrowthPct = prevMrr > 0 ? ((mrr - prevMrr) / prevMrr) * 100 : null;
+
+    // ── YTD: revenue from Jan 1 of current year to today ──
+    const ytd = wonEntries
+      .filter(e => new Date(e.date).getFullYear() === currentYear)
+      .reduce((s, e) => s + e.amount, 0);
+
+    // ── LTD (Launch to Date): all-time total revenue ──
+    const ltd = totalRevenue;
+
+    // ── First revenue date (launch date proxy) ──
+    const firstRevenueDate = wonEntries.length > 0
+      ? wonEntries.reduce((earliest, e) => {
+          const d = new Date(e.date);
+          return d < earliest ? d : earliest;
+        }, new Date(wonEntries[0].date))
+      : null;
+
+    // ── Quarterly revenue breakdown ──
+    const quarterlyMap: Record<string, number> = {};
+    for (const e of wonEntries) {
+      const d = new Date(e.date);
+      const q = `${d.getFullYear()}-Q${Math.ceil((d.getMonth() + 1) / 3)}`;
+      quarterlyMap[q] = (quarterlyMap[q] ?? 0) + e.amount;
+    }
+    const quarterly = Object.entries(quarterlyMap)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([quarter, revenue]) => ({ quarter, revenue }));
+
+    // ── Revenue growth rate (3-month CAGR proxy) ──
+    const last3Months = sortedMonthKeys.slice(-3);
+    const last3Revenue = last3Months.reduce((s, m) => s + (monthlyMap[m]?.revenue ?? 0), 0);
+    const prev3Months = sortedMonthKeys.slice(-6, -3);
+    const prev3Revenue = prev3Months.reduce((s, m) => s + (monthlyMap[m]?.revenue ?? 0), 0);
+    const qoqGrowthPct = prev3Revenue > 0 ? ((last3Revenue - prev3Revenue) / prev3Revenue) * 100 : null;
 
     return {
       entries,
@@ -272,6 +320,7 @@ export const salesRouter = router({
       products,
       stageFunnel,
       targets,
+      quarterly,
       summary: {
         totalRevenue,
         totalDeals: entries.length,
@@ -280,6 +329,15 @@ export const salesRouter = router({
         winRate: isFinite(winRate) ? winRate : 0,
         currentMonthRevenue,
         currentMonthTarget: currentTarget?.targetAmount ?? null,
+        // ── New analytics ──
+        mrr,
+        arr,
+        ytd,
+        ltd,
+        momGrowthPct: momGrowthPct !== null && isFinite(momGrowthPct) ? momGrowthPct : null,
+        qoqGrowthPct: qoqGrowthPct !== null && isFinite(qoqGrowthPct) ? qoqGrowthPct : null,
+        firstRevenueDate: firstRevenueDate?.toISOString() ?? null,
+        lastMonthWithData,
       },
     };
   }),
