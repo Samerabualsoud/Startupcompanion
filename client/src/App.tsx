@@ -18,6 +18,10 @@ import DataRoomShare from './pages/DataRoomShare';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import FAQ from './pages/FAQ';
+import PublicStartupDirectory from './pages/PublicStartupDirectory';
+import PublicStartupProfile from './pages/PublicStartupProfile';
+import ProfileSettings from './pages/ProfileSettings';
+
 function AppRoutes() {
   return (
     <Switch>
@@ -33,6 +37,9 @@ function AppRoutes() {
       <Route path={"/terms"} component={TermsOfService} />
       <Route path={"/privacy"} component={PrivacyPolicy} />
       <Route path={"/faq"} component={FAQ} />
+      <Route path={"/startups"} component={PublicStartupDirectory} />
+      <Route path={"/startup/:slug"} component={PublicStartupProfile} />
+      <Route path={"/profile-settings"} component={ProfileSettings} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

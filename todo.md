@@ -726,3 +726,28 @@
 - [x] Update MODEL_META for all 9 new models
 - [x] Update DEFAULT_REVENUE_DRIVERS for all 9 new models
 - [x] Update tests for new models
+
+
+## Round 25 — Public Startup Profiles (Q2 2026)
+- [x] Add public profile fields to startupProfiles schema (publicProfileSlug, publicProfileLogoUrl, publicProfileBio, etc.)
+- [x] Push database migration for public profile fields
+- [x] Create publicProfileRouter.ts with all endpoints:
+  - [x] getMyProfile: Get current user's profile settings
+  - [x] uploadLogo: Upload startup logo to S3 with validation
+  - [x] updatePublicProfile: Update and publish profile
+  - [x] getPublicProfile: Get public profile by slug (public endpoint)
+  - [x] listPublicProfiles: List all published profiles with filtering
+  - [x] getDirectoryStats: Get directory statistics
+- [x] Register publicProfileRouter in appRouter
+- [x] Build PublicStartupProfile.tsx component (investor-facing profile view)
+- [x] Build PublicStartupDirectory.tsx component (searchable directory with filters)
+- [x] Build ProfileSettings.tsx component (founder profile management UI)
+- [x] Add routes to App.tsx (/startups, /startup/:slug, /profile-settings)
+- [x] Implement logo upload with S3 storage and validation (JPEG, PNG, WebP, SVG, max 5MB)
+- [x] Implement URL-safe slug generation with uniqueness check
+- [x] Implement profile publishing/unpublishing workflow
+- [x] Implement view count tracking
+- [x] Implement filtering by sector, stage, country
+- [x] Write comprehensive unit tests (17 tests, all passing)
+- [x] 0 TypeScript errors, 92 tests passing
+- [ ] Next: Add investor discovery features and CRM integration

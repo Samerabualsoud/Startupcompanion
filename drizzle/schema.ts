@@ -197,7 +197,19 @@ export const startupProfiles = mysqlTable("startup_profiles", {
   registrationNumber: varchar("registrationNumber", { length: 128 }),
   // Fundraising
   nextFundingDate: timestamp("nextFundingDate"),
+  // Public Profile Fields
   isPublic: boolean("isPublic").default(false).notNull(),
+  isPublicProfilePublished: boolean("isPublicProfilePublished").default(false).notNull(),
+  publicProfileSlug: varchar("publicProfileSlug", { length: 256 }).unique(),
+  publicProfileLogoKey: varchar("publicProfileLogoKey", { length: 512 }),
+  publicProfileLogoUrl: varchar("publicProfileLogoUrl", { length: 1024 }),
+  publicProfileBio: text("publicProfileBio"),
+  publicProfileHighlights: json("publicProfileHighlights"),
+  publicProfileContactEmail: varchar("publicProfileContactEmail", { length: 320 }),
+  publicProfileInvestorNote: text("publicProfileInvestorNote"),
+  publicProfileAiScore: int("publicProfileAiScore"),
+  publicProfileVerified: boolean("publicProfileVerified").default(false).notNull(),
+  publicProfileViewCount: int("publicProfileViewCount").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
