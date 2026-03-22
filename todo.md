@@ -609,3 +609,9 @@
 - [ ] Update dashboard to show live cap table summary (total shares, ESOP %, top shareholders)
 - [ ] 0 TypeScript errors
 - [ ] Save checkpoint
+
+## Round 27 — Nav Labels, ESOP Saving, Vesting Planner Wiring
+- [ ] Fix nav items showing raw IDs (navZestEquity, navOQALNotes) instead of proper display labels
+- [ ] Fix ESOP saving so grants reflect in CoFounderEquitySplit share calculations
+- [ ] Connect vesting planner to founders shares and ESOP grants automatically
+- [ ] Push all code to GitHub

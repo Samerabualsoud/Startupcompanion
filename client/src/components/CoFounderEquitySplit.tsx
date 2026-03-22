@@ -182,6 +182,11 @@ export default function CoFounderEquitySplit() {
   const founders = capState?.shareholders.filter(s => s.type === 'founder') ?? [];
   const totalFounderShares = founders.reduce((sum, f) => sum + f.shares, 0);
   const totalSharesBasic = computed?.totalSharesBasic ?? 0;
+  // Use fully-diluted shares for % display (includes ESOP pool)
+  const totalSharesFullyDiluted = computed?.totalSharesFullyDiluted ?? totalSharesBasic;
+  const esopPoolShares = capState?.esop.totalPoolShares ?? 0;
+  const esopIssuedShares = capState?.esop.issuedShares ?? 0;
+  const esopPct = totalSharesFullyDiluted > 0 ? (esopPoolShares / totalSharesFullyDiluted * 100).toFixed(1) : '0';
 
   // Get or initialize factor scores for a founder
   function getFactors(id: string): FounderFactors {
@@ -346,8 +351,8 @@ export default function CoFounderEquitySplit() {
               {splits.map((s, i) => {
                 const founder = founders.find(f => f.id === s.id);
                 const colors = FOUNDER_COLORS[i % FOUNDER_COLORS.length];
-                const currentSharePct = totalSharesBasic > 0 && founder
-                  ? ((founder.shares / totalSharesBasic) * 100).toFixed(1)
+                const currentSharePct = totalSharesFullyDiluted > 0 && founder
+                  ? ((founder.shares / totalSharesFullyDiluted) * 100).toFixed(1)
                   : '0';
                 return (
                   <div key={s.id}>
@@ -378,6 +383,18 @@ export default function CoFounderEquitySplit() {
               })}
             </div>
           </div>
+
+          {/* ESOP Pool row in split summary */}
+          {esopPoolShares > 0 && (
+            <div className="mt-3 flex items-center justify-between px-3 py-2 rounded-lg bg-purple-50 border border-purple-200">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-purple-500 shrink-0" />
+                <span className="text-xs font-semibold text-purple-800">ESOP Pool</span>
+                <span className="text-[10px] text-purple-600">{esopIssuedShares.toLocaleString()} / {esopPoolShares.toLocaleString()} shares issued</span>
+              </div>
+              <span className="text-sm font-bold text-purple-700">{esopPct}% (fully diluted)</span>
+            </div>
+          )}
 
           {/* Best practice note */}
           <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200/80">

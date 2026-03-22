@@ -15,6 +15,8 @@ import {
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCapTable } from '@/hooks/useCapTable';
+import { Link2, RefreshCw } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -133,7 +135,64 @@ const fmtPct = (n: number) => `${n.toFixed(1)}%`;
 
 export default function VestingScheduleBuilder() {
   const { lang } = useLanguage();
+  const { state: capState, isLoading: capLoading } = useCapTable();
+
+  // Build stakeholders from cap table on first load
+  const [synced, setSynced] = useState(false);
   const [stakeholders, setStakeholders] = useState<Stakeholder[]>(DEFAULT_STAKEHOLDERS);
+
+  // Sync from cap table once it loads
+  useMemo(() => {
+    if (!capLoading && capState && !synced) {
+      const result: Stakeholder[] = [];
+      capState.shareholders
+        .filter(s => s.type === 'founder')
+        .forEach((f, i) => {
+          result.push({
+            id: f.id,
+            name: f.name,
+            role: 'CEO / Co-founder',
+            totalShares: f.shares,
+            vestingMonths: f.vestingMonths ?? 48,
+            cliffMonths: f.cliffMonths ?? 12,
+            vestingType: 'standard',
+            color: STAKEHOLDER_COLORS[i % STAKEHOLDER_COLORS.length],
+            startMonth: 0,
+          });
+        });
+      const grants = capState.esop.grants ?? [];
+      const activeGrants = grants.filter(g => g.status === 'active');
+      if (activeGrants.length > 0) {
+        activeGrants.forEach((g, i) => {
+          result.push({
+            id: g.id,
+            name: g.employeeName || `Employee ${i + 1}`,
+            role: g.employeeTitle || 'Early Employee',
+            totalShares: g.shares,
+            vestingMonths: g.vestingMonths,
+            cliffMonths: g.cliffMonths,
+            vestingType: 'standard',
+            color: STAKEHOLDER_COLORS[(result.length) % STAKEHOLDER_COLORS.length],
+            startMonth: 0,
+          });
+        });
+      } else if (capState.esop.totalPoolShares > 0) {
+        result.push({
+          id: 'esop-pool',
+          name: 'ESOP Pool',
+          role: 'ESOP Pool',
+          totalShares: capState.esop.totalPoolShares,
+          vestingMonths: capState.esop.vestingMonths,
+          cliffMonths: capState.esop.cliffMonths,
+          vestingType: 'standard',
+          color: STAKEHOLDER_COLORS[result.length % STAKEHOLDER_COLORS.length],
+          startMonth: 0,
+        });
+      }
+      if (result.length > 0) setStakeholders(result);
+      setSynced(true);
+    }
+  }, [capLoading, capState, synced]);
   const [milestones, setMilestones] = useState<MilestoneEvent[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -244,7 +303,20 @@ export default function VestingScheduleBuilder() {
             Model equity vesting for founders, employees, and advisors — with cliff, back-loading, and milestone options.
           </p>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
+          {/* Cap table sync badge */}
+          <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-full">
+            <Link2 className="w-3 h-3" />
+            <span>Synced with Cap Table</span>
+          </div>
+          {/* Re-sync button */}
+          <button
+            onClick={() => { setSynced(false); }}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:bg-secondary/40 transition-all"
+            title="Re-sync founders and ESOP grants from Cap Table"
+          >
+            <RefreshCw className="w-3 h-3" /> Re-sync
+          </button>
           <button
             onClick={handleAiRecommend}
             disabled={aiLoading}
