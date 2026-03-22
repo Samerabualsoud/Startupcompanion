@@ -24,9 +24,9 @@ export default function PublicStartupDetail() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <h1 className="text-2xl font-bold mb-4">Startup not found</h1>
-        <Link href="/directory">
-          <Button>Back to Directory</Button>
-        </Link>
+          <Link href="/startups">
+            <Button>Back to Directory</Button>
+          </Link>
       </div>
     );
   }
@@ -36,7 +36,7 @@ export default function PublicStartupDetail() {
       {/* Header */}
       <div className="bg-card border-b border-border sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/directory">
+          <Link href="/startups">
             <Button variant="ghost" size="sm" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
               Back
@@ -116,6 +116,44 @@ export default function PublicStartupDetail() {
                 <h3 className="font-semibold">Founded</h3>
               </div>
               <p className="text-lg">{profile.foundedYear}</p>
+            </Card>
+          )}
+        </div>
+
+        {/* Problem & Solution */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {profile.problem && (
+            <Card className="p-6">
+              <h3 className="text-xl font-bold mb-3">Problem</h3>
+              <p className="text-muted-foreground leading-relaxed">{profile.problem}</p>
+            </Card>
+          )}
+          {profile.solution && (
+            <Card className="p-6">
+              <h3 className="text-xl font-bold mb-3">Solution</h3>
+              <p className="text-muted-foreground leading-relaxed">{profile.solution}</p>
+            </Card>
+          )}
+        </div>
+
+        {/* Business Details */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          {profile.businessModel && (
+            <Card className="p-6">
+              <h3 className="font-semibold mb-2 text-muted-foreground">Business Model</h3>
+              <p className="text-lg font-bold capitalize">{profile.businessModel}</p>
+            </Card>
+          )}
+          {profile.productStatus && (
+            <Card className="p-6">
+              <h3 className="font-semibold mb-2 text-muted-foreground">Product Status</h3>
+              <p className="text-lg font-bold capitalize">{profile.productStatus}</p>
+            </Card>
+          )}
+          {profile.targetCustomer && (
+            <Card className="p-6">
+              <h3 className="font-semibold mb-2 text-muted-foreground">Target Customer</h3>
+              <p className="text-sm leading-relaxed">{profile.targetCustomer}</p>
             </Card>
           )}
         </div>
