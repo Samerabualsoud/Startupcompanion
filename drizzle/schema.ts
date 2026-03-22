@@ -623,3 +623,22 @@ export const platformSettings = mysqlTable('platform_settings', {
 });
 export type PlatformSettings = typeof platformSettings.$inferSelect;
 export type InsertPlatformSettings = typeof platformSettings.$inferInsert;
+
+// ── Financial Projections ──────────────────────────────────────────────────
+export const financialProjections = mysqlTable('financial_projections', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('userId').notNull(),
+  name: varchar('name', { length: 256 }).notNull().default('My Projection'),
+  businessModel: varchar('businessModel', { length: 64 }).notNull().default('saas'),
+  approach: mysqlEnum('approach', ['top-down', 'bottom-up']).notNull().default('bottom-up'),
+  // Shared inputs (JSON blobs per approach)
+  topDownInputs: json('topDownInputs'),   // { tam, samPct, somPct, captureRateY1, captureRateY2, captureRateY3, avgDealSize }
+  bottomUpInputs: json('bottomUpInputs'), // model-specific unit economics inputs
+  // Computed outputs (stored for history)
+  projectionOutput: json('projectionOutput'), // { years: [{year, revenue, customers, ...}] }
+  currency: varchar('currency', { length: 8 }).notNull().default('USD'),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+});
+export type FinancialProjection = typeof financialProjections.$inferSelect;
+export type InsertFinancialProjection = typeof financialProjections.$inferInsert;

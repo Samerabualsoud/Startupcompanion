@@ -688,3 +688,12 @@
 - [ ] Implement MRR/ARR auto-calculation in Sales Tracker from revenue entries
 - [ ] Implement YTD/LTD metrics for early-stage startups with no recurring revenue
 - [ ] Build enhanced KPI dashboard in Sales Tracker frontend
+
+## Financial Projection Tool
+- [ ] Design projection logic for all 6 business models (SaaS, E-commerce, Marketplace, Agency, Hardware, Procurement)
+- [ ] Top-down approach: TAM → SAM → SOM → market share capture rate → revenue
+- [ ] Bottom-up approach: unit economics driven (price × volume × growth rate per model)
+- [ ] Backend: schema, db helpers, tRPC procedures for saving/loading projections
+- [ ] Frontend: model selector, approach toggle, input forms, 3-year output with charts
+- [ ] Wire into sidebar navigation
+- [ ] Write vitest tests

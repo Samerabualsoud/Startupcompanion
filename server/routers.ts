@@ -21,6 +21,7 @@ import { termSheetRouter } from './termSheetRouter';
 import { ideaValidatorRouter } from './ideaValidatorRouter';
 import { toolStateRouter } from './routers/toolState';
 import { equityRouter } from './routers/equityRouter';
+import { projectionRouter } from './projectionRouter';
 
 export const appRouter = router({
   system: systemRouter,
@@ -45,6 +46,7 @@ export const appRouter = router({
   ideaValidator: ideaValidatorRouter,
   toolState: toolStateRouter,
   equity: equityRouter,
+  projection: projectionRouter,
 });
 
 export type AppRouter = typeof appRouter;
