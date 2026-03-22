@@ -659,3 +659,8 @@
 - [ ] Wire AcceleratorRecommender, FundraisingReadiness, PitchDeckScorecard, InvestorCRM, DataRoom → startup profile
 - [ ] 0 TypeScript errors, 31 tests passing
 - [ ] Save checkpoint
+
+## Round N — System Theme & Badge Cleanup
+- [x] Add 'system' theme option to ThemeContext (follows OS prefers-color-scheme)
+- [x] Update theme toggle to cycle Light → Dark → System with appropriate icon
+- [x] Remove all sidebar nav badges (New, AI, 7 methods, 20 checks, etc.)

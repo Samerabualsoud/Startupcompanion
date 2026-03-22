@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, Sparkles, Rocket, Users, GitBranch, Target,
   BookOpen, BarChart3, DollarSign, Menu, X, ChevronRight,
-  Gauge, Layers, FileDown, Link2, Check, Sun, Moon, Building2, MessageCircle,
+  Gauge, Layers, FileDown, Link2, Check, Sun, Moon, Monitor, Building2, MessageCircle,
   Mail, FileText, Users2, ClipboardCheck, Calendar, Globe,
   UserCircle, LogOut, LogIn, Home as HomeIcon, ShoppingCart, FolderOpen, Shield
 } from 'lucide-react';
@@ -183,7 +183,7 @@ function HomeInner() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [, navigate] = useLocation();
   const { t, isRTL } = useLanguage();
-   const { theme, toggleTheme } = useTheme();
+   const { mode, theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
   // Theme-aware color tokens for inline styles (using CSS variables)
   const C = {
@@ -479,13 +479,13 @@ function HomeInner() {
               <span className="hidden sm:inline">{linkCopied ? 'Copied!' : 'Share'}</span>
             </button>
           )}
-          {/* Theme toggle */}
+          {/* Theme toggle — cycles: light → dark → system */}
           <button
             onClick={toggleTheme}
             className="p-1.5 rounded-lg transition-all hover:bg-secondary/60 text-muted-foreground"
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={mode === 'light' ? 'Switch to dark mode' : mode === 'dark' ? 'Switch to system theme' : 'Switch to light mode'}
           >
-            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {mode === 'light' ? <Moon className="w-4 h-4" /> : mode === 'dark' ? <Monitor className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
           </button>
           {/* User menu */}
           <div className="relative">
@@ -630,9 +630,7 @@ function HomeInner() {
                   {groupItems.map(item => {
                     const Icon = item.icon;
                     const isActive = activeTool === item.id;
-                    const isAI = item.badge === 'AI';
-                    const showNew = isNewFeature(item.newUntil);
-                    const effectiveBadge = isAI ? 'AI' : showNew ? 'New' : item.badge;
+                    // Badges removed — no badge rendering
                     return (
                       <button
                         key={item.id}
@@ -650,17 +648,7 @@ function HomeInner() {
                       >
                         <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: isActive ? gc.activeIcon : undefined }} />
                         <span className="text-xs flex-1 truncate text-left">{item.shortLabel}</span>
-                        {effectiveBadge && !isActive && (
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
-                            effectiveBadge === 'AI'
-                              ? 'bg-violet-900/40 text-violet-400'
-                              : effectiveBadge === 'New'
-                              ? 'bg-emerald-900/40 text-emerald-400'
-                              : 'bg-blue-900/40 text-blue-400'
-                          }`}>
-                            {effectiveBadge}
-                          </span>
-                        )}
+
                         {isActive && <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: gc.activeIcon }} />}
                       </button>
                     );
