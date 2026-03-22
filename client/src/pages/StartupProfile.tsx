@@ -395,8 +395,38 @@ export default function StartupProfile() {
           <Field label="Website">
             <Input value={form.websiteUrl} onChange={e => set('websiteUrl', e.target.value)} placeholder="https://..." />
           </Field>
-          <Field label="Logo URL" hint="Paste a direct image URL or upload to Imgur/Cloudinary">
-            <Input value={form.logoUrl} onChange={e => set('logoUrl', e.target.value)} placeholder="https://..." />
+          <Field label="Logo" hint="Upload your startup logo (JPEG, PNG, WebP, SVG - max 5MB)">
+            <div className="flex items-center gap-3">
+              {form.logoUrl && (
+                <img src={form.logoUrl} alt="Logo preview" className="w-16 h-16 rounded-lg object-contain bg-secondary border border-border" />
+              )}
+              <label htmlFor="logo-upload" className="cursor-pointer">
+                <Button asChild variant="outline" size="sm">
+                  <span>Upload Logo</span>
+                </Button>
+              </label>
+              <input
+                id="logo-upload"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 5 * 1024 * 1024) {
+                    toast.error('Logo must be smaller than 5MB');
+                    return;
+                  }
+                  const reader = new FileReader();
+                  reader.onload = (event) => {
+                    const base64 = event.target?.result as string;
+                    set('logoUrl', base64);
+                    toast.success('Logo uploaded');
+                  };
+                  reader.readAsDataURL(file);
+                }}
+                className="hidden"
+              />
+            </div>
           </Field>
           <Field label="Sector">
             <Select value={form.sector} onValueChange={v => set('sector', v)}>

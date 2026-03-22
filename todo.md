@@ -751,3 +751,10 @@
 - [x] Write comprehensive unit tests (17 tests, all passing)
 - [x] 0 TypeScript errors, 92 tests passing
 - [ ] Next: Add investor discovery features and CRM integration
+
+
+## Round 26 — Bug Fixes (Public Profiles)
+- [x] Fix StartupProfile.tsx: Replace "LOGO URL" text input with file upload button
+- [x] Fix StartupProfile.tsx: Add file upload handler for logo (same as ProfileSettings)
+- [x] Fix LandingPage.tsx: Add "Startup Directory" link to navigation menu
+- [ ] Fix LandingPage.tsx: Add "Startup Directory" to tools grid or features section
