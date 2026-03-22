@@ -19,6 +19,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { APP_PATH, REGISTER_PATH, LOGIN_PATH } from '@/const';
+import SiteFooter from '@/components/SiteFooter';
 
 export default function LandingPage() {
   const { isAuthenticated } = useAuth();
@@ -446,25 +447,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="border-t py-10 px-5" style={{ borderColor: 'oklch(0.91 0.015 60)', background: 'white' }}>
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, oklch(0.62 0.22 30), oklch(0.60 0.24 290))' }}>
-              <TrendingUp className="w-3.5 h-3.5 text-white" />
-            </div>
-            <span className="font-extrabold text-sm" style={{ fontFamily: "'Nunito', sans-serif" }}>Polaris Arabia</span>
-          </div>
-          <p className="text-xs text-center" style={{ color: 'oklch(0.60 0.02 60)' }}>
-            {isRTL ? 'جميع الحسابات تقديرية فقط ولا تشكل مشورة مالية.' : 'All calculations are estimates only and do not constitute financial advice.'}
-          </p>
-          <div className="flex items-center gap-4 text-xs" style={{ color: 'oklch(0.55 0.02 60)' }}>
-            <a href="#" className="hover:opacity-70 transition-opacity">{isRTL ? 'الخصوصية' : 'Privacy'}</a>
-            <a href="#" className="hover:opacity-70 transition-opacity">{isRTL ? 'الشروط' : 'Terms'}</a>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

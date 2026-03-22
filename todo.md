@@ -629,3 +629,13 @@
 - [ ] Wire DataRoom → startup profile (company name)
 - [ ] Update ToolGuide help content in all tools to reflect connections
 - [ ] Push all changes to GitHub
+
+## Round 29 — Footer, Legal Pages, Unit Economics, Glossary
+- [ ] Build professional site footer component (SiteFooter.tsx)
+- [ ] Build Terms & Conditions page (/terms) — Saudi PDPL compliant
+- [ ] Build Privacy Policy page (/privacy) — Saudi PDPL compliant
+- [ ] Wire footer into LandingPage, Login, Register, T&C, Privacy pages
+- [ ] Register /terms and /privacy routes in App.tsx
+- [ ] Rebuild Unit Economics with business-model cost structures (SaaS, Marketplace, E-commerce, Service, Hardware, Subscription)
+- [ ] Add per-item unit economics analysis (COGS per unit, contribution margin, break-even units)
+- [ ] Add ZestEquity/equity/ESOP/OQAL/cap table terms to glossary (termSheet.ts)

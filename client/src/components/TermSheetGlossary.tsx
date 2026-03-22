@@ -21,6 +21,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   legal: '#8B5CF6',
   duediligence: '#EC4899',
   metrics: '#059669',
+  equity: '#7C3AED',
 };
 
 const CATEGORY_LABELS_EN: Record<string, string> = {
@@ -34,6 +35,7 @@ const CATEGORY_LABELS_EN: Record<string, string> = {
   legal: 'Legal',
   duediligence: 'Due Diligence',
   metrics: 'Metrics & KPIs',
+  equity: 'Equity & ESOP',
 };
 
 const CATEGORY_LABELS_AR: Record<string, string> = {
@@ -47,6 +49,7 @@ const CATEGORY_LABELS_AR: Record<string, string> = {
   legal: 'القانوني',
   duediligence: 'العناية الواجبة',
   metrics: 'المقاييس والمؤشرات',
+  equity: 'الأسهم والخيارات',
 };
 
 function TermCard({ term, index, lang }: { term: TermDefinition; index: number; lang: 'en' | 'ar' }) {

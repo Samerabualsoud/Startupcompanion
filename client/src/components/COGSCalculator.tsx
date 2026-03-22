@@ -2,12 +2,13 @@
  * COGS & Cost Management Suite
  * Full cost structure: direct (fixed/variable/semi-variable), indirect/OpEx,
  * overhead allocation, margin waterfall, break-even, monthly trend, AI analysis.
+ * v2: Business-model templates + dedicated Unit Economics tab (LTV/CAC, payback, per-item waterfall)
  */
 import { useState, useMemo, useCallback } from 'react';
 import {
   Plus, Trash2, Loader2, Save, Sparkles, Calculator,
   History, RefreshCw, BarChart3, TrendingDown, TrendingUp,
-  AlertCircle, Package, DollarSign, Percent, Target
+  AlertCircle, Package, DollarSign, Percent, Target, Layers
 } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { trpc } from '@/lib/trpc';
@@ -96,6 +97,105 @@ const MARGIN_BENCHMARKS: Record<BusinessModel, { gross: number; ebitda: number; 
   other:         { gross: 50, ebitda: 15, label: 'General' },
 };
 
+// ── Business Model Cost Templates ─────────────────────────────────────────
+const BM_TEMPLATES: Record<BusinessModel, { direct: Omit<DirectCost, 'id'>[]; indirect: Omit<IndirectCost, 'id'>[] }> = {
+  saas: {
+    direct: [
+      { name: 'Cloud Hosting (AWS/GCP/Azure)', amount: 0, type: 'variable', perUnit: false, category: 'hosting' },
+      { name: 'Payment Processing (~2.9% of revenue)', amount: 0, type: 'variable', perUnit: true, category: 'payment_processing' },
+      { name: 'Customer Support (per user/mo)', amount: 0, type: 'variable', perUnit: true, category: 'support' },
+      { name: 'Third-party SaaS / APIs', amount: 0, type: 'fixed', perUnit: false, category: 'licensing' },
+      { name: 'Data Storage & CDN', amount: 0, type: 'variable', perUnit: false, category: 'cloud' },
+    ],
+    indirect: [
+      { name: 'Sales & Marketing', amount: 0, category: 'marketing' },
+      { name: 'R&D / Engineering', amount: 0, category: 'rd' },
+      { name: 'G&A / Admin', amount: 0, category: 'admin' },
+    ],
+  },
+  ecommerce: {
+    direct: [
+      { name: 'Product Cost / COGS per item', amount: 0, type: 'variable', perUnit: true, category: 'materials' },
+      { name: 'Packaging & Labeling', amount: 0, type: 'variable', perUnit: true, category: 'packaging' },
+      { name: 'Shipping & Last-Mile Delivery', amount: 0, type: 'variable', perUnit: true, category: 'shipping' },
+      { name: 'Payment Processing (2.9% + fee)', amount: 0, type: 'variable', perUnit: true, category: 'payment_processing' },
+      { name: 'Returns & Refunds Reserve', amount: 0, type: 'variable', perUnit: true, category: 'other' },
+      { name: 'Warehouse / Fulfillment (fixed)', amount: 0, type: 'fixed', perUnit: false, category: 'other' },
+    ],
+    indirect: [
+      { name: 'Digital Marketing / Ads', amount: 0, category: 'marketing' },
+      { name: 'Platform Fees (Amazon/Shopify)', amount: 0, category: 'sales' },
+      { name: 'G&A / Admin', amount: 0, category: 'admin' },
+    ],
+  },
+  marketplace: {
+    direct: [
+      { name: 'Payment Processing (2.9%)', amount: 0, type: 'variable', perUnit: true, category: 'payment_processing' },
+      { name: 'Trust & Safety / Fraud Prevention', amount: 0, type: 'variable', perUnit: true, category: 'support' },
+      { name: 'Customer Support per Transaction', amount: 0, type: 'variable', perUnit: true, category: 'support' },
+      { name: 'Cloud Infrastructure (fixed)', amount: 0, type: 'fixed', perUnit: false, category: 'hosting' },
+    ],
+    indirect: [
+      { name: 'Supply Acquisition (sellers/providers)', amount: 0, category: 'marketing' },
+      { name: 'Demand Acquisition (buyers)', amount: 0, category: 'marketing' },
+      { name: 'R&D / Platform Engineering', amount: 0, category: 'rd' },
+      { name: 'G&A / Admin', amount: 0, category: 'admin' },
+    ],
+  },
+  hardware: {
+    direct: [
+      { name: 'Bill of Materials (BOM)', amount: 0, type: 'variable', perUnit: true, category: 'materials' },
+      { name: 'Contract Manufacturing', amount: 0, type: 'variable', perUnit: true, category: 'labor' },
+      { name: 'Quality Control & Testing', amount: 0, type: 'variable', perUnit: true, category: 'other' },
+      { name: 'Packaging & Retail Box', amount: 0, type: 'variable', perUnit: true, category: 'packaging' },
+      { name: 'Shipping & Logistics', amount: 0, type: 'variable', perUnit: true, category: 'shipping' },
+      { name: 'Tooling & Molds (amortized)', amount: 0, type: 'fixed', perUnit: false, category: 'other' },
+    ],
+    indirect: [
+      { name: 'Sales & Distribution', amount: 0, category: 'sales' },
+      { name: 'R&D / Product Engineering', amount: 0, category: 'rd' },
+      { name: 'Warranty & Returns Reserve', amount: 0, category: 'admin' },
+    ],
+  },
+  services: {
+    direct: [
+      { name: 'Direct Labor / Consultant Hours', amount: 0, type: 'variable', perUnit: true, category: 'labor' },
+      { name: 'Subcontractors / Freelancers', amount: 0, type: 'variable', perUnit: false, category: 'labor' },
+      { name: 'Travel & Expenses (project)', amount: 0, type: 'variable', perUnit: false, category: 'other' },
+      { name: 'Software / Tools per Project', amount: 0, type: 'variable', perUnit: false, category: 'licensing' },
+    ],
+    indirect: [
+      { name: 'Business Development / Sales', amount: 0, category: 'sales' },
+      { name: 'Marketing & Proposals', amount: 0, category: 'marketing' },
+      { name: 'Overhead / Facilities', amount: 0, category: 'facilities' },
+      { name: 'G&A / Admin', amount: 0, category: 'admin' },
+    ],
+  },
+  manufacturing: {
+    direct: [
+      { name: 'Raw Materials', amount: 0, type: 'variable', perUnit: true, category: 'materials' },
+      { name: 'Direct Labor (production)', amount: 0, type: 'variable', perUnit: true, category: 'labor' },
+      { name: 'Energy / Utilities (variable)', amount: 0, type: 'variable', perUnit: false, category: 'other' },
+      { name: 'Machine Maintenance (amortized)', amount: 0, type: 'fixed', perUnit: false, category: 'other' },
+      { name: 'Quality Control', amount: 0, type: 'variable', perUnit: true, category: 'other' },
+    ],
+    indirect: [
+      { name: 'Factory Overhead / Rent', amount: 0, category: 'facilities' },
+      { name: 'Sales & Distribution', amount: 0, category: 'sales' },
+      { name: 'G&A / Admin', amount: 0, category: 'admin' },
+    ],
+  },
+  other: {
+    direct: [
+      { name: 'Primary Direct Cost', amount: 0, type: 'variable', perUnit: true, category: 'other' },
+    ],
+    indirect: [
+      { name: 'Sales & Marketing', amount: 0, category: 'marketing' },
+      { name: 'G&A / Admin', amount: 0, category: 'admin' },
+    ],
+  },
+};
+
 // ── Main Component ─────────────────────────────────────────────────────────
 export default function COGSCalculator() {
   const { lang } = useLanguage();
@@ -116,6 +216,11 @@ export default function COGSCalculator() {
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [loadedId, setLoadedId] = useState<number | null>(null);
   const [growthRate, setGrowthRate] = useState(10);
+
+  // Unit Economics extra state
+  const [cac, setCac] = useState(0);
+  const [ltv, setLtv] = useState(0);
+  const [avgLifetimeMonths, setAvgLifetimeMonths] = useState(24);
 
   // ── tRPC ───────────────────────────────────────────────────────────────
   const { data: history, refetch: refetchHistory } = trpc.cogs.list.useQuery(undefined, { enabled: showHistory });
@@ -254,6 +359,13 @@ export default function COGSCalculator() {
   const removeIndirectCost = (id: string) =>
     setIndirectCosts(prev => prev.filter(c => c.id !== id));
 
+  const applyTemplate = useCallback(() => {
+    const tpl = BM_TEMPLATES[businessModel];
+    setDirectCosts(tpl.direct.map(c => ({ ...c, id: nanoid() })));
+    setIndirectCosts(tpl.indirect.map(c => ({ ...c, id: nanoid() })));
+    toast.success(`${MARGIN_BENCHMARKS[businessModel].label} template loaded — fill in the amounts`);
+  }, [businessModel]);
+
   const handleSave = useCallback(async () => {
     if (!calcName.trim()) { toast.error('Please enter a name for this calculation'); return; }
     const payload = {
@@ -314,6 +426,14 @@ export default function COGSCalculator() {
     </span>
   );
 
+  // ── Unit Economics derived values ──────────────────────────────────────
+  const ltvCacRatio = cac > 0 ? ltv / cac : null;
+  const cacPaybackMonths = (revenuePerUnit > 0 && metrics.grossMarginPct > 0 && cac > 0)
+    ? Math.ceil(cac / (revenuePerUnit * metrics.grossMarginPct / 100))
+    : null;
+  const opexPerUnit = unitsPerMonth > 0 ? metrics.totalOpEx / unitsPerMonth : 0;
+  const netContribPerUnit = metrics.contributionMarginPerUnit - opexPerUnit;
+
   return (
     <div className={`space-y-6 ${isRTL ? 'rtl' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
@@ -323,7 +443,7 @@ export default function COGSCalculator() {
             <Calculator className="w-5 h-5 text-primary" />
             Cost Management Suite
           </h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Full cost structure · Margin waterfall · Break-even · AI analysis</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Full cost structure · Margin waterfall · Unit Economics · Break-even · AI analysis</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={() => { setShowHistory(v => !v); if (!showHistory) refetchHistory(); }}>
@@ -436,6 +556,7 @@ export default function COGSCalculator() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="costs">Cost Inputs</TabsTrigger>
+          <TabsTrigger value="unit-econ">Unit Economics</TabsTrigger>
           <TabsTrigger value="waterfall">Margin Waterfall</TabsTrigger>
           <TabsTrigger value="breakeven">Break-even</TabsTrigger>
           <TabsTrigger value="trend">6-Month Trend</TabsTrigger>
@@ -448,35 +569,39 @@ export default function COGSCalculator() {
           {/* Direct Costs */}
           <Card>
             <CardHeader className="pb-2 pt-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <Package className="w-4 h-4 text-primary" />
                   Direct Costs (COGS)
                   <Badge variant="secondary">{fmt(metrics.totalCOGS, currency)}</Badge>
                 </CardTitle>
-                <Button variant="outline" size="sm" onClick={addDirectCost}><Plus className="w-4 h-4 mr-1" /> Add Cost</Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={applyTemplate}
+                    title={`Load ${MARGIN_BENCHMARKS[businessModel].label} cost template`}
+                    className="text-primary border-primary/40 hover:bg-primary/5"
+                  >
+                    <Layers className="w-3.5 h-3.5 mr-1" />
+                    Load {MARGIN_BENCHMARKS[businessModel].label} Template
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={addDirectCost}><Plus className="w-4 h-4 mr-1" /> Add Cost</Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="pb-4 space-y-3">
               {directCosts.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">No direct costs yet. Click "Add Cost" to begin.</p>
+                <div className="text-center py-6 space-y-2">
+                  <p className="text-sm text-muted-foreground">No direct costs yet.</p>
+                  <p className="text-xs text-muted-foreground">Click <strong>Load {MARGIN_BENCHMARKS[businessModel].label} Template</strong> to pre-fill common cost lines for your business model, or add costs manually.</p>
+                </div>
               )}
               {directCosts.map(cost => (
                 <div key={cost.id} className="grid grid-cols-12 gap-2 items-end p-3 rounded-lg border border-border bg-muted/20">
-                  <div className="col-span-12 sm:col-span-3">
+                  <div className="col-span-12 sm:col-span-4">
                     <Label className="text-xs">Cost Name</Label>
-                    <Input value={cost.name} onChange={e => updateDirectCost(cost.id, 'name', e.target.value)} placeholder="e.g. AWS Hosting" className="mt-1 h-8 text-sm" />
-                  </div>
-                  <div className="col-span-6 sm:col-span-2">
-                    <Label className="text-xs">Type</Label>
-                    <Select value={cost.type} onValueChange={v => updateDirectCost(cost.id, 'type', v)}>
-                      <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="fixed">Fixed</SelectItem>
-                        <SelectItem value="variable">Variable</SelectItem>
-                        <SelectItem value="semi-variable">Semi-Variable</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input value={cost.name} onChange={e => updateDirectCost(cost.id, 'name', e.target.value)} placeholder="e.g. AWS hosting" className="mt-1 h-8 text-sm" />
                   </div>
                   <div className="col-span-6 sm:col-span-2">
                     <Label className="text-xs">Category</Label>
@@ -487,14 +612,25 @@ export default function COGSCalculator() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="col-span-6 sm:col-span-2">
+                    <Label className="text-xs">Type</Label>
+                    <Select value={cost.type} onValueChange={v => updateDirectCost(cost.id, 'type', v as CostType)}>
+                      <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fixed">Fixed</SelectItem>
+                        <SelectItem value="variable">Variable</SelectItem>
+                        <SelectItem value="semi-variable">Semi-Variable</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   {cost.type === 'semi-variable' ? (
                     <>
-                      <div className="col-span-5 sm:col-span-2">
-                        <Label className="text-xs">Fixed Base ({currency})</Label>
+                      <div className="col-span-5 sm:col-span-1">
+                        <Label className="text-xs">Fixed ({currency})</Label>
                         <Input type="number" min={0} value={cost.fixedPortion ?? ''} onChange={e => updateDirectCost(cost.id, 'fixedPortion', parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1 h-8 text-sm" />
                       </div>
-                      <div className="col-span-5 sm:col-span-2">
-                        <Label className="text-xs">Var / Unit ({currency})</Label>
+                      <div className="col-span-5 sm:col-span-1">
+                        <Label className="text-xs">Var/Unit ({currency})</Label>
                         <Input type="number" min={0} value={cost.variablePortion ?? ''} onChange={e => updateDirectCost(cost.id, 'variablePortion', parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1 h-8 text-sm" />
                       </div>
                     </>
@@ -577,10 +713,10 @@ export default function COGSCalculator() {
             </CardContent>
           </Card>
 
-          {/* Unit Economics */}
+          {/* Quick Unit Economics Summary (shown when data is available) */}
           {revenuePerUnit > 0 && unitsPerMonth > 0 && (
             <Card className="border-primary/20 bg-primary/5">
-              <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">Unit Economics</CardTitle></CardHeader>
+              <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm">Unit Economics Summary</CardTitle></CardHeader>
               <CardContent className="pb-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   {[
@@ -595,6 +731,9 @@ export default function COGSCalculator() {
                     </div>
                   ))}
                 </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  → For full LTV/CAC analysis, payback period, and per-item waterfall, see the <button className="underline text-primary" onClick={() => setActiveTab('unit-econ')}>Unit Economics tab</button>.
+                </p>
               </CardContent>
             </Card>
           )}
@@ -604,6 +743,187 @@ export default function COGSCalculator() {
             <Label className="text-xs">Notes / Assumptions</Label>
             <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add assumptions, pricing notes, or context..." className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px] resize-y focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
+        </TabsContent>
+
+        {/* ── UNIT ECONOMICS ── */}
+        <TabsContent value="unit-econ" className="space-y-4 mt-4">
+          {/* LTV / CAC Inputs */}
+          <Card>
+            <CardHeader className="pb-2 pt-4">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Target className="w-4 h-4 text-primary" />
+                Customer Acquisition & Lifetime Value
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pb-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <Label className="text-xs">CAC — Cost to Acquire 1 Customer ({currency})</Label>
+                  <Input type="number" min={0} value={cac || ''} onChange={e => setCac(parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
+                </div>
+                <div>
+                  <Label className="text-xs">LTV — Lifetime Value per Customer ({currency})</Label>
+                  <Input type="number" min={0} value={ltv || ''} onChange={e => setLtv(parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
+                </div>
+                <div>
+                  <Label className="text-xs">Avg Customer Lifetime (months)</Label>
+                  <Input type="number" min={1} value={avgLifetimeMonths} onChange={e => setAvgLifetimeMonths(parseInt(e.target.value) || 24)} placeholder="24" className="mt-1" />
+                </div>
+                <div>
+                  <Label className="text-xs">Revenue / Unit ({currency}) — from Setup</Label>
+                  <Input type="number" min={0} value={revenuePerUnit || ''} onChange={e => setRevenuePerUnit(parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Per-Unit KPI Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              {
+                label: 'Revenue / Unit',
+                value: fmt(revenuePerUnit, currency),
+                sub: 'Selling price per unit',
+                color: 'text-green-600',
+              },
+              {
+                label: 'COGS / Unit',
+                value: fmt(metrics.cogPerUnit, currency),
+                sub: `${pct(revenuePerUnit > 0 ? (metrics.cogPerUnit / revenuePerUnit) * 100 : 0)} of revenue`,
+                color: 'text-red-500',
+              },
+              {
+                label: 'Gross Profit / Unit',
+                value: fmt(metrics.grossProfitPerUnit, currency),
+                sub: `${pct(revenuePerUnit > 0 ? (metrics.grossProfitPerUnit / revenuePerUnit) * 100 : 0)} gross margin`,
+                color: metrics.grossProfitPerUnit >= 0 ? 'text-blue-600' : 'text-red-500',
+              },
+              {
+                label: 'Contribution Margin / Unit',
+                value: fmt(metrics.contributionMarginPerUnit, currency),
+                sub: 'After variable costs only',
+                color: metrics.contributionMarginPerUnit >= 0 ? 'text-purple-600' : 'text-red-500',
+              },
+            ].map(card => (
+              <Card key={card.label}>
+                <CardContent className="pt-4 pb-4">
+                  <p className="text-xs text-muted-foreground mb-1">{card.label}</p>
+                  <p className={`text-xl font-bold ${card.color}`}>{card.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* LTV / CAC Analysis */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              {
+                label: 'LTV / CAC Ratio',
+                value: ltvCacRatio !== null ? `${ltvCacRatio.toFixed(2)}x` : 'N/A',
+                sub: ltvCacRatio !== null
+                  ? (ltvCacRatio >= 3 ? '✅ Healthy (≥3x)' : ltvCacRatio >= 1 ? '⚠️ Below target (<3x)' : '🔴 Unprofitable (<1x)')
+                  : 'Enter CAC & LTV to calculate',
+                color: ltvCacRatio !== null
+                  ? (ltvCacRatio >= 3 ? 'text-green-600' : ltvCacRatio >= 1 ? 'text-yellow-600' : 'text-red-500')
+                  : 'text-muted-foreground',
+              },
+              {
+                label: 'CAC Payback Period',
+                value: cacPaybackMonths !== null ? `${cacPaybackMonths} months` : 'N/A',
+                sub: 'Months to recover CAC from gross profit',
+                color: cacPaybackMonths !== null ? (cacPaybackMonths <= 12 ? 'text-green-600' : 'text-yellow-600') : 'text-muted-foreground',
+              },
+              {
+                label: 'Customer Lifetime Revenue',
+                value: fmt(revenuePerUnit * avgLifetimeMonths, currency),
+                sub: `${revenuePerUnit > 0 ? fmt(revenuePerUnit, currency) : '—'}/mo × ${avgLifetimeMonths}mo`,
+                color: 'text-foreground',
+              },
+              {
+                label: 'Net Contribution / Unit',
+                value: fmt(netContribPerUnit, currency),
+                sub: 'After COGS + allocated OpEx',
+                color: netContribPerUnit >= 0 ? 'text-green-600' : 'text-red-500',
+              },
+            ].map(card => (
+              <Card key={card.label}>
+                <CardContent className="pt-4 pb-4">
+                  <p className="text-xs text-muted-foreground mb-1">{card.label}</p>
+                  <p className={`text-xl font-bold ${card.color}`}>{card.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Per-Unit Waterfall */}
+          <Card>
+            <CardHeader className="pb-2 pt-4">
+              <CardTitle className="text-sm">Per-Unit P&L Waterfall</CardTitle>
+            </CardHeader>
+            <CardContent className="pb-4">
+              {revenuePerUnit === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">Enter Revenue / Unit in the Setup card above to see the waterfall.</p>
+              ) : (
+                <div className="space-y-3">
+                  {[
+                    { label: 'Revenue per Unit', value: revenuePerUnit, color: 'bg-green-500', textColor: 'text-green-600' },
+                    { label: '− COGS per Unit', value: metrics.cogPerUnit, color: 'bg-red-400', textColor: 'text-red-500', negative: true },
+                    { label: '= Gross Profit per Unit', value: metrics.grossProfitPerUnit, color: metrics.grossProfitPerUnit >= 0 ? 'bg-blue-500' : 'bg-red-500', textColor: metrics.grossProfitPerUnit >= 0 ? 'text-blue-600' : 'text-red-500' },
+                    { label: '− OpEx Allocated per Unit', value: opexPerUnit, color: 'bg-orange-400', textColor: 'text-orange-500', negative: true },
+                    { label: '= Net Contribution per Unit', value: netContribPerUnit, color: netContribPerUnit >= 0 ? 'bg-purple-500' : 'bg-red-500', textColor: netContribPerUnit >= 0 ? 'text-purple-600' : 'text-red-500' },
+                  ].map(row => (
+                    <div key={row.label} className="flex items-center gap-3">
+                      <div className="w-52 text-xs text-muted-foreground shrink-0">{row.label}</div>
+                      <div className="flex-1 h-5 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${row.color} rounded-full transition-all`}
+                          style={{ width: `${revenuePerUnit > 0 ? Math.min(100, Math.abs(row.value) / revenuePerUnit * 100) : 0}%` }}
+                        />
+                      </div>
+                      <div className={`text-xs font-semibold w-24 text-right ${row.textColor}`}>
+                        {row.negative ? '−' : ''}{fmt(Math.abs(row.value), currency)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Industry Benchmarks for this model */}
+          <Card>
+            <CardHeader className="pb-2 pt-4">
+              <CardTitle className="text-sm">Industry Benchmarks — {MARGIN_BENCHMARKS[businessModel].label}</CardTitle>
+            </CardHeader>
+            <CardContent className="pb-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-3 rounded-lg bg-muted/40">
+                  <p className="text-xs text-muted-foreground">Target Gross Margin</p>
+                  <p className="text-lg font-bold text-green-600">{MARGIN_BENCHMARKS[businessModel].gross}%</p>
+                  <p className="text-xs text-muted-foreground">Your: {pct(metrics.grossMarginPct)}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/40">
+                  <p className="text-xs text-muted-foreground">Target EBITDA Margin</p>
+                  <p className="text-lg font-bold text-blue-600">{MARGIN_BENCHMARKS[businessModel].ebitda}%</p>
+                  <p className="text-xs text-muted-foreground">Your: {pct(metrics.ebitdaMarginPct)}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/40">
+                  <p className="text-xs text-muted-foreground">Target LTV/CAC</p>
+                  <p className="text-lg font-bold text-purple-600">3x+</p>
+                  <p className="text-xs text-muted-foreground">Your: {ltvCacRatio !== null ? `${ltvCacRatio.toFixed(1)}x` : 'N/A'}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/40">
+                  <p className="text-xs text-muted-foreground">CAC Payback Target</p>
+                  <p className="text-lg font-bold text-orange-600">&lt;12 months</p>
+                  <p className="text-xs text-muted-foreground">
+                    {cacPaybackMonths !== null ? `Your: ${cacPaybackMonths}mo` : 'Enter CAC & Revenue/Unit'}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* ── WATERFALL ── */}
@@ -682,7 +1002,7 @@ export default function COGSCalculator() {
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                       <XAxis dataKey="units" tickFormatter={v => v.toLocaleString()} tick={{ fontSize: 11 }} />
                       <YAxis tickFormatter={v => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
-                      <Tooltip formatter={(v: any) => fmt(v, currency)} labelFormatter={v => `${v.toLocaleString()} units`} />
+                      <Tooltip formatter={(v: any) => fmt(v, currency)} />
                       <Legend />
                       <Line type="monotone" dataKey="revenue" stroke="#10B981" strokeWidth={2} dot={false} name="Revenue" />
                       <Line type="monotone" dataKey="totalCost" stroke="#EF4444" strokeWidth={2} dot={false} name="Total Cost" />
