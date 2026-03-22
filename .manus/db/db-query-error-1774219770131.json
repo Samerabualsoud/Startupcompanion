@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, name, isPublicProfilePublished, publicProfileSlug FROM startupProfiles LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user TdNWm56gC61uQyK.bac7586e525f --database M2SxUioygz4pYLdarmBijQ --execute SELECT id, name, isPublicProfilePublished, publicProfileSlug FROM startupProfiles LIMIT 5;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 1: Table 'm2sxuioygz4pyldarmbijq.startupProfiles' doesn't exist"
+  ]
+}

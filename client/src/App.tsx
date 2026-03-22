@@ -1,4 +1,4 @@
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Router as WouterRouter, Route, Switch } from "wouter";
@@ -19,7 +19,7 @@ import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import FAQ from './pages/FAQ';
 import PublicStartupDirectory from './pages/PublicStartupDirectory';
-import PublicStartupProfile from './pages/PublicStartupProfile';
+import PublicStartupDetail from './pages/PublicStartupDetail';
 import ProfileSettings from './pages/ProfileSettings';
 
 function AppRoutes() {
@@ -38,7 +38,7 @@ function AppRoutes() {
       <Route path={"/privacy"} component={PrivacyPolicy} />
       <Route path={"/faq"} component={FAQ} />
       <Route path={"/startups"} component={PublicStartupDirectory} />
-      <Route path={"/startup/:slug"} component={PublicStartupProfile} />
+      <Route path={"/startup/:slug"} component={PublicStartupDetail} />
       <Route path={"/profile-settings"} component={ProfileSettings} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

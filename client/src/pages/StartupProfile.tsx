@@ -14,6 +14,7 @@ import {
 import { trpc } from '@/lib/trpc';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { getLoginUrl } from '@/const';
+import { Link } from 'wouter';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -363,13 +364,12 @@ export default function StartupProfile() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => set('isPublic', !form.isPublic)}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-secondary/40 transition-colors text-muted-foreground"
-          >
-            {form.isPublic ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-            {form.isPublic ? 'Public' : 'Private'}
-          </button>
+          <Link href="/profile-settings">
+            <Button variant="outline" size="sm" className="flex items-center gap-1.5">
+              <Globe className="w-3.5 h-3.5" />
+              Publish Profile
+            </Button>
+          </Link>
           <Button
             onClick={handleSave}
             disabled={saving}
