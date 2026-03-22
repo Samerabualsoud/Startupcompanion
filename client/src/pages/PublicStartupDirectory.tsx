@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
-import { Loader2, Search, TrendingUp, DollarSign, ArrowLeft } from "lucide-react";
+import { Loader2, Search, TrendingUp, DollarSign, ArrowLeft, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,23 @@ export default function PublicStartupDirectory() {
   const [stage, setStage] = useState<string>("");
   const [country, setCountry] = useState<string>("");
   const [search, setSearch] = useState<string>("");
+  const [savedIds, setSavedIds] = useState<Set<number>>(new Set());
+
+  const { mutate: saveProfile } = trpc.watchlist.saveProfile.useMutation({
+    onSuccess: (_, { startupProfileId }) => {
+      setSavedIds(prev => new Set(prev).add(startupProfileId));
+    },
+  });
+
+  const { mutate: unsaveProfile } = trpc.watchlist.unsaveProfile.useMutation({
+    onSuccess: (_, { startupProfileId }) => {
+      setSavedIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(startupProfileId);
+        return newSet;
+      });
+    },
+  });
 
   const { data: directory, isLoading } = trpc.publicProfile.listPublicProfiles.useQuery({
     page,
@@ -156,9 +173,30 @@ export default function PublicStartupDirectory() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
               {filteredProfiles.map((startup) => (
                 <Link key={startup.id} href={`/startup/${startup.slug}`}>
-                  <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
+                  <Card className="p-6 hover:shadow-lg transition-shadow h-full flex flex-col relative">
+                    {/* Bookmark Button */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (savedIds.has(startup.id)) {
+                          unsaveProfile({ startupProfileId: startup.id });
+                        } else {
+                          saveProfile({ startupProfileId: startup.id });
+                        }
+                      }}
+                      className="absolute top-4 right-4 p-2 rounded-lg hover:bg-secondary transition-colors"
+                      title={savedIds.has(startup.id) ? "Remove from watchlist" : "Add to watchlist"}
+                    >
+                      <Bookmark
+                        className="w-5 h-5"
+                        fill={savedIds.has(startup.id) ? "currentColor" : "none"}
+                        color={savedIds.has(startup.id) ? "#3b82f6" : "currentColor"}
+                      />
+                    </button>
+
                     {/* Logo & Header */}
-                    <div className="flex items-start gap-4 mb-4">
+                    <div className="flex items-start gap-4 mb-4 cursor-pointer">
+                      <Link href={`/startup/${startup.slug}`} className="flex items-start gap-4 flex-1">
                       {startup.logoUrl ? (
                         <img
                           src={startup.logoUrl}
@@ -172,64 +210,67 @@ export default function PublicStartupDirectory() {
                           </span>
                         </div>
                       )}
-                      <div className="flex-1">
-                        <h3 className="font-bold text-lg mb-1">{startup.name}</h3>
-                        {startup.verified && (
-                          <span className="inline-block px-2 py-0.5 bg-green-100 text-green-800 text-xs font-semibold rounded">
-                            Verified
+                        <div className="flex-1">
+                          <h3 className="font-bold text-lg mb-1">{startup.name}</h3>
+                          {startup.verified && (
+                            <span className="inline-block px-2 py-0.5 bg-green-100 text-green-800 text-xs font-semibold rounded">
+                              Verified
+                            </span>
+                          )}
+                        </div>
+                      </Link>
+                    </div>
+
+                    <Link href={`/startup/${startup.slug}`}>
+                      {/* Tagline */}
+                      {startup.tagline && (
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                          {startup.tagline}
+                        </p>
+                      )}
+
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {startup.stage && (
+                          <span className="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded">
+                            {startup.stage}
+                          </span>
+                        )}
+                        {startup.sector && (
+                          <span className="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded">
+                            {startup.sector}
                           </span>
                         )}
                       </div>
-                    </div>
 
-                    {/* Tagline */}
-                    {startup.tagline && (
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                        {startup.tagline}
-                      </p>
-                    )}
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {startup.stage && (
-                        <span className="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded">
-                          {startup.stage}
-                        </span>
-                      )}
-                      {startup.sector && (
-                        <span className="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded">
-                          {startup.sector}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Metrics */}
-                    <div className="flex-1 space-y-2 mb-4">
-                      {startup.totalRaised && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <DollarSign className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">
-                            Raised: ${(startup.totalRaised / 1000000).toFixed(1)}M
-                          </span>
-                        </div>
-                      )}
-                      {startup.currentARR && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <TrendingUp className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">
-                            ARR: ${(startup.currentARR / 1000000).toFixed(1)}M
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* AI Score */}
-                    {startup.aiScore && (
-                      <div className="flex items-center justify-between pt-4 border-t border-border">
-                        <span className="text-sm text-muted-foreground">AI Score</span>
-                        <span className="text-lg font-bold text-accent">{startup.aiScore}/100</span>
+                      {/* Metrics */}
+                      <div className="flex-1 space-y-2 mb-4">
+                        {startup.totalRaised && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <DollarSign className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">
+                              Raised: ${(startup.totalRaised / 1000000).toFixed(1)}M
+                            </span>
+                          </div>
+                        )}
+                        {startup.currentARR && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">
+                              ARR: ${(startup.currentARR / 1000000).toFixed(1)}M
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    )}
+
+                      {/* AI Score */}
+                      {startup.aiScore && (
+                        <div className="flex items-center justify-between pt-4 border-t border-border">
+                          <span className="text-sm text-muted-foreground">AI Score</span>
+                          <span className="text-lg font-bold text-accent">{startup.aiScore}/100</span>
+                        </div>
+                      )}
+                    </Link>
                   </Card>
                 </Link>
               ))}

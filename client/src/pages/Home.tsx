@@ -64,7 +64,7 @@ import ZestEquity from '@/components/ZestEquity';
 import IdeaValidator from '@/components/IdeaValidator';
 import FinancialProjection from '@/components/FinancialProjection';
 import ProfileSettings from './ProfileSettings';
-type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'profile-settings' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator' | 'oqal-notes' | 'zest-equity' | 'financial-projection';
+type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'profile-settings' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'saved-startups' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator' | 'oqal-notes' | 'zest-equity' | 'financial-projection';
 
 interface NavItem {
   id: ToolId;
@@ -125,6 +125,7 @@ const NAV_ITEMS: NavItem[] = [
   // ESOP moved to My Startup group above
   // Community
   { id: 'startup-directory', tier: 'free', label: 'Startup Directory',       shortLabel: 'Directory',      navKey: 'navStartupDir',     icon: Globe,       group: 'Ecosystem Network',           newUntil: '2026-04-01' },
+  { id: 'saved-startups', tier: 'free',    label: 'Saved Startups',             shortLabel: 'Watchlist',      navKey: 'navSavedStartups',  icon: Heart,       group: 'Ecosystem Network',           newUntil: '2026-04-01' },
   { id: 'valuation-timeline', tier: 'pro',label: 'Valuation History & 409A',shortLabel: '409A History',   navKey: 'navValuationTimeline', icon: BarChart3, group: 'My Company',         newUntil: '2026-04-01' },
   // Equity & Cap Table
   { id: 'esop', tier: 'pro',              label: 'ESOP & Option Pool Manager',      shortLabel: 'ESOP',           navKey: 'navESOP',           icon: Users2,      group: 'My Company',         newUntil: '2026-04-01' },
@@ -408,6 +409,7 @@ function HomeInner() {
       case 'nda':                        return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><NDAGenerator /></div>;
       case 'esop':                       return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><ESOPPlanner /></div>;
       case 'startup-directory':          return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><StartupDirectory /></div>;
+      case 'saved-startups':             return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><iframe src="/saved-startups" className="w-full h-full border-0" /></div>;
       case 'valuation-timeline':         return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><ValuationTimeline /></div>;
       case 'dashboard':                  return <FounderDashboard onNavigate={(id) => {
         // Map profile sub-section IDs back to the profile page

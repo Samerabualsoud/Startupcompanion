@@ -21,6 +21,7 @@ import FAQ from './pages/FAQ';
 import PublicStartupDirectory from './pages/PublicStartupDirectory';
 import PublicStartupDetail from './pages/PublicStartupDetail';
 import ProfileSettings from './pages/ProfileSettings';
+import SavedStartups from './pages/SavedStartups';
 
 function AppRoutes() {
   return (
@@ -40,8 +41,8 @@ function AppRoutes() {
       <Route path={"/startups"} component={PublicStartupDirectory} />
       <Route path={"/startup/:slug"} component={PublicStartupDetail} />
       <Route path={"/profile-settings"} component={ProfileSettings} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
+      <Route path={"/saved-startups"} component={SavedStartups} />
+      <Route path={"/404"} component={NotFound} />     {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
   );

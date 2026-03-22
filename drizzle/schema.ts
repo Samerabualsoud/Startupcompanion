@@ -659,3 +659,17 @@ export const financialProjections = mysqlTable('financial_projections', {
 });
 export type FinancialProjection = typeof financialProjections.$inferSelect;
 export type InsertFinancialProjection = typeof financialProjections.$inferInsert;
+
+// ── Investor Watchlist ─────────────────────────────────────────────────────
+export const savedProfiles = mysqlTable("saved_profiles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  startupProfileId: int("startupProfileId").notNull(),
+  savedAt: timestamp("savedAt").defaultNow().notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SavedProfile = typeof savedProfiles.$inferSelect;
+export type InsertSavedProfile = typeof savedProfiles.$inferInsert;
