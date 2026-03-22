@@ -437,7 +437,7 @@ export default function COGSCalculator() {
 
   // ── Sub-components ─────────────────────────────────────────────────────
   const BenchmarkPill = ({ delta, label }: { delta: number; label: string }) => (
-    <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${delta >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+    <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${delta >= 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'}`}>
       {delta >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
       {delta >= 0 ? '+' : ''}{delta.toFixed(1)}pp vs {label}
     </span>
@@ -547,9 +547,9 @@ export default function COGSCalculator() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Monthly Revenue', value: fmt(metrics.monthlyRevenue, currency), icon: DollarSign, color: 'text-green-600' },
-          { label: 'Gross Margin', value: pct(metrics.grossMarginPct), icon: Percent, color: metrics.grossMarginPct >= metrics.benchmark.gross ? 'text-green-600' : 'text-red-500', sub: <BenchmarkPill delta={metrics.grossVsBenchmark} label={metrics.benchmark.label} /> },
-          { label: 'EBITDA', value: fmt(metrics.ebitda, currency), icon: TrendingUp, color: metrics.ebitda >= 0 ? 'text-blue-600' : 'text-red-500', sub: `${pct(metrics.ebitdaMarginPct)} margin` },
+          { label: 'Monthly Revenue', value: fmt(metrics.monthlyRevenue, currency), icon: DollarSign, color: 'text-green-600 dark:text-green-400' },
+          { label: 'Gross Margin', value: pct(metrics.grossMarginPct), icon: Percent, color: metrics.grossMarginPct >= metrics.benchmark.gross ? 'text-green-600 dark:text-green-400' : 'text-red-500', sub: <BenchmarkPill delta={metrics.grossVsBenchmark} label={metrics.benchmark.label} /> },
+          { label: 'EBITDA', value: fmt(metrics.ebitda, currency), icon: TrendingUp, color: metrics.ebitda >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-500', sub: `${pct(metrics.ebitdaMarginPct)} margin` },
           { label: 'Break-even', value: metrics.breakEvenUnits !== null ? `${metrics.breakEvenUnits.toLocaleString()} units` : 'N/A', icon: Target, color: 'text-foreground', sub: metrics.breakEvenRevenue !== null ? `${fmt(metrics.breakEvenRevenue, currency)}/mo` : undefined },
         ].map(card => (
           <Card key={card.label}>
@@ -759,10 +759,10 @@ export default function COGSCalculator() {
               <CardContent className="pb-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   {[
-                    { label: 'Revenue / Unit', value: fmt(revenuePerUnit, currency), color: 'text-green-600' },
+                    { label: 'Revenue / Unit', value: fmt(revenuePerUnit, currency), color: 'text-green-600 dark:text-green-400' },
                     { label: 'COGS / Unit', value: fmt(metrics.cogPerUnit, currency), color: 'text-red-500' },
-                    { label: 'Gross Profit / Unit', value: fmt(metrics.grossProfitPerUnit, currency), color: metrics.grossProfitPerUnit >= 0 ? 'text-blue-600' : 'text-red-500' },
-                    { label: 'Contribution Margin / Unit', value: fmt(metrics.contributionMarginPerUnit, currency), color: metrics.contributionMarginPerUnit >= 0 ? 'text-purple-600' : 'text-red-500' },
+                    { label: 'Gross Profit / Unit', value: fmt(metrics.grossProfitPerUnit, currency), color: metrics.grossProfitPerUnit >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-500' },
+                    { label: 'Contribution Margin / Unit', value: fmt(metrics.contributionMarginPerUnit, currency), color: metrics.contributionMarginPerUnit >= 0 ? 'text-purple-600 dark:text-purple-400' : 'text-red-500' },
                   ].map(item => (
                     <div key={item.label}>
                       <p className="text-xs text-muted-foreground">{item.label}</p>
@@ -823,7 +823,7 @@ export default function COGSCalculator() {
                 label: 'Revenue / Unit',
                 value: fmt(revenuePerUnit, currency),
                 sub: 'Selling price per unit',
-                color: 'text-green-600',
+                color: 'text-green-600 dark:text-green-400',
               },
               {
                 label: 'COGS / Unit',
@@ -835,13 +835,13 @@ export default function COGSCalculator() {
                 label: 'Gross Profit / Unit',
                 value: fmt(metrics.grossProfitPerUnit, currency),
                 sub: `${pct(revenuePerUnit > 0 ? (metrics.grossProfitPerUnit / revenuePerUnit) * 100 : 0)} gross margin`,
-                color: metrics.grossProfitPerUnit >= 0 ? 'text-blue-600' : 'text-red-500',
+                color: metrics.grossProfitPerUnit >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-500',
               },
               {
                 label: 'Contribution Margin / Unit',
                 value: fmt(metrics.contributionMarginPerUnit, currency),
                 sub: 'After variable costs only',
-                color: metrics.contributionMarginPerUnit >= 0 ? 'text-purple-600' : 'text-red-500',
+                color: metrics.contributionMarginPerUnit >= 0 ? 'text-purple-600 dark:text-purple-400' : 'text-red-500',
               },
             ].map(card => (
               <Card key={card.label}>
@@ -864,14 +864,14 @@ export default function COGSCalculator() {
                   ? (ltvCacRatio >= 3 ? '✅ Healthy (≥3x)' : ltvCacRatio >= 1 ? '⚠️ Below target (<3x)' : '🔴 Unprofitable (<1x)')
                   : 'Enter CAC & LTV to calculate',
                 color: ltvCacRatio !== null
-                  ? (ltvCacRatio >= 3 ? 'text-green-600' : ltvCacRatio >= 1 ? 'text-yellow-600' : 'text-red-500')
+                  ? (ltvCacRatio >= 3 ? 'text-green-600 dark:text-green-400' : ltvCacRatio >= 1 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-500')
                   : 'text-muted-foreground',
               },
               {
                 label: 'CAC Payback Period',
                 value: cacPaybackMonths !== null ? `${cacPaybackMonths} months` : 'N/A',
                 sub: 'Months to recover CAC from gross profit',
-                color: cacPaybackMonths !== null ? (cacPaybackMonths <= 12 ? 'text-green-600' : 'text-yellow-600') : 'text-muted-foreground',
+                color: cacPaybackMonths !== null ? (cacPaybackMonths <= 12 ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400') : 'text-muted-foreground',
               },
               {
                 label: 'Customer Lifetime Revenue',
@@ -883,7 +883,7 @@ export default function COGSCalculator() {
                 label: 'Net Contribution / Unit',
                 value: fmt(netContribPerUnit, currency),
                 sub: 'After COGS + allocated OpEx',
-                color: netContribPerUnit >= 0 ? 'text-green-600' : 'text-red-500',
+                color: netContribPerUnit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500',
               },
             ].map(card => (
               <Card key={card.label}>
@@ -907,11 +907,11 @@ export default function COGSCalculator() {
               ) : (
                 <div className="space-y-3">
                   {[
-                    { label: 'Revenue per Unit', value: revenuePerUnit, color: 'bg-green-500', textColor: 'text-green-600' },
+                    { label: 'Revenue per Unit', value: revenuePerUnit, color: 'bg-green-500', textColor: 'text-green-600 dark:text-green-400' },
                     { label: '− COGS per Unit', value: metrics.cogPerUnit, color: 'bg-red-400', textColor: 'text-red-500', negative: true },
-                    { label: '= Gross Profit per Unit', value: metrics.grossProfitPerUnit, color: metrics.grossProfitPerUnit >= 0 ? 'bg-blue-500' : 'bg-red-500', textColor: metrics.grossProfitPerUnit >= 0 ? 'text-blue-600' : 'text-red-500' },
+                    { label: '= Gross Profit per Unit', value: metrics.grossProfitPerUnit, color: metrics.grossProfitPerUnit >= 0 ? 'bg-blue-500' : 'bg-red-500', textColor: metrics.grossProfitPerUnit >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-500' },
                     { label: '− OpEx Allocated per Unit', value: opexPerUnit, color: 'bg-orange-400', textColor: 'text-orange-500', negative: true },
-                    { label: '= Net Contribution per Unit', value: netContribPerUnit, color: netContribPerUnit >= 0 ? 'bg-purple-500' : 'bg-red-500', textColor: netContribPerUnit >= 0 ? 'text-purple-600' : 'text-red-500' },
+                    { label: '= Net Contribution per Unit', value: netContribPerUnit, color: netContribPerUnit >= 0 ? 'bg-purple-500' : 'bg-red-500', textColor: netContribPerUnit >= 0 ? 'text-purple-600 dark:text-purple-400' : 'text-red-500' },
                   ].map(row => (
                     <div key={row.label} className="flex items-center gap-3">
                       <div className="w-52 text-xs text-muted-foreground shrink-0">{row.label}</div>
@@ -940,22 +940,22 @@ export default function COGSCalculator() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-3 rounded-lg bg-muted/40">
                   <p className="text-xs text-muted-foreground">Target Gross Margin</p>
-                  <p className="text-lg font-bold text-green-600">{MARGIN_BENCHMARKS[businessModel].gross}%</p>
+                  <p className="text-lg font-bold text-green-600 dark:text-green-400">{MARGIN_BENCHMARKS[businessModel].gross}%</p>
                   <p className="text-xs text-muted-foreground">Your: {pct(metrics.grossMarginPct)}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/40">
                   <p className="text-xs text-muted-foreground">Target EBITDA Margin</p>
-                  <p className="text-lg font-bold text-blue-600">{MARGIN_BENCHMARKS[businessModel].ebitda}%</p>
+                  <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{MARGIN_BENCHMARKS[businessModel].ebitda}%</p>
                   <p className="text-xs text-muted-foreground">Your: {pct(metrics.ebitdaMarginPct)}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/40">
                   <p className="text-xs text-muted-foreground">Target LTV/CAC</p>
-                  <p className="text-lg font-bold text-purple-600">3x+</p>
+                  <p className="text-lg font-bold text-purple-600 dark:text-purple-400">3x+</p>
                   <p className="text-xs text-muted-foreground">Your: {ltvCacRatio !== null ? `${ltvCacRatio.toFixed(1)}x` : 'N/A'}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/40">
                   <p className="text-xs text-muted-foreground">CAC Payback Target</p>
-                  <p className="text-lg font-bold text-orange-600">&lt;12 months</p>
+                  <p className="text-lg font-bold text-orange-600 dark:text-orange-400">&lt;12 months</p>
                   <p className="text-xs text-muted-foreground">
                     {cacPaybackMonths !== null ? `Your: ${cacPaybackMonths}mo` : 'Enter CAC & Revenue/Unit'}
                   </p>
@@ -983,11 +983,11 @@ export default function COGSCalculator() {
               </ResponsiveContainer>
               <div className="mt-4 space-y-1.5">
                 {[
-                  { label: 'Revenue', value: metrics.monthlyRevenue, pctVal: 100, color: 'text-green-600' },
+                  { label: 'Revenue', value: metrics.monthlyRevenue, pctVal: 100, color: 'text-green-600 dark:text-green-400' },
                   { label: '− Direct Costs (COGS)', value: -metrics.totalCOGS, pctVal: metrics.monthlyRevenue > 0 ? -(metrics.totalCOGS / metrics.monthlyRevenue) * 100 : 0, color: 'text-red-500' },
-                  { label: '= Gross Profit', value: metrics.grossProfit, pctVal: metrics.grossMarginPct, color: metrics.grossProfit >= 0 ? 'text-blue-600' : 'text-red-500', bold: true },
+                  { label: '= Gross Profit', value: metrics.grossProfit, pctVal: metrics.grossMarginPct, color: metrics.grossProfit >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-500', bold: true },
                   { label: '− Operating Expenses', value: -metrics.totalOpEx, pctVal: metrics.monthlyRevenue > 0 ? -(metrics.totalOpEx / metrics.monthlyRevenue) * 100 : 0, color: 'text-orange-500' },
-                  { label: '= EBITDA', value: metrics.ebitda, pctVal: metrics.ebitdaMarginPct, color: metrics.ebitda >= 0 ? 'text-purple-600' : 'text-red-500', bold: true },
+                  { label: '= EBITDA', value: metrics.ebitda, pctVal: metrics.ebitdaMarginPct, color: metrics.ebitda >= 0 ? 'text-purple-600 dark:text-purple-400' : 'text-red-500', bold: true },
                 ].map(row => (
                   <div key={row.label} className={`flex items-center justify-between text-sm px-3 py-2 rounded ${row.bold ? 'bg-muted/50 font-semibold' : ''}`}>
                     <span className="text-muted-foreground">{row.label}</span>
@@ -1030,7 +1030,7 @@ export default function COGSCalculator() {
             </CardHeader>
             <CardContent className="pb-4">
               {metrics.contributionMarginPerUnit <= 0 ? (
-                <div className="flex items-center gap-2 p-4 rounded-lg bg-red-50 text-red-700 text-sm">
+                <div className="flex items-center gap-2 p-4 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 text-sm">
                   <AlertCircle className="w-5 h-5 shrink-0" />
                   Variable cost per unit exceeds revenue per unit — break-even is not achievable at current pricing.
                 </div>
@@ -1054,13 +1054,13 @@ export default function COGSCalculator() {
                     {[
                       { label: 'Fixed Costs / Month', value: fmt(metrics.totalFixed, currency), color: '' },
                       { label: 'Variable Cost / Unit', value: fmt(metrics.variableCostPerUnit, currency), color: '' },
-                      { label: 'Contribution Margin / Unit', value: fmt(metrics.contributionMarginPerUnit, currency), color: 'text-purple-600' },
+                      { label: 'Contribution Margin / Unit', value: fmt(metrics.contributionMarginPerUnit, currency), color: 'text-purple-600 dark:text-purple-400' },
                       metrics.breakEvenUnits !== null ? { label: 'Break-even Units', value: metrics.breakEvenUnits.toLocaleString(), color: 'text-primary' } : null,
                       metrics.breakEvenRevenue !== null ? { label: 'Break-even Revenue', value: `${fmt(metrics.breakEvenRevenue, currency)}/mo`, color: 'text-primary' } : null,
                       metrics.breakEvenUnits !== null && unitsPerMonth > 0 ? {
                         label: 'Current vs BEP',
                         value: unitsPerMonth >= metrics.breakEvenUnits ? `+${(unitsPerMonth - metrics.breakEvenUnits).toLocaleString()} above` : `${(metrics.breakEvenUnits - unitsPerMonth).toLocaleString()} to go`,
-                        color: unitsPerMonth >= metrics.breakEvenUnits ? 'text-green-600' : 'text-red-500',
+                        color: unitsPerMonth >= metrics.breakEvenUnits ? 'text-green-600 dark:text-green-400' : 'text-red-500',
                       } : null,
                     ].filter(Boolean).map((item: any) => (
                       <div key={item.label} className="p-3 rounded-lg bg-muted/30">
@@ -1117,10 +1117,10 @@ export default function COGSCalculator() {
                     {trendData.map(row => (
                       <tr key={row.month} className="border-b border-border/50">
                         <td className="py-2 font-medium">{row.month}</td>
-                        <td className="text-right text-green-600">{fmt(row.revenue, currency)}</td>
+                        <td className="text-right text-green-600 dark:text-green-400">{fmt(row.revenue, currency)}</td>
                         <td className="text-right text-red-500">{fmt(row.cogs, currency)}</td>
-                        <td className={`text-right ${row.grossProfit >= 0 ? 'text-blue-600' : 'text-red-500'}`}>{fmt(row.grossProfit, currency)}</td>
-                        <td className={`text-right ${row.ebitda >= 0 ? 'text-purple-600' : 'text-red-500'}`}>{fmt(row.ebitda, currency)}</td>
+                        <td className={`text-right ${row.grossProfit >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-500'}`}>{fmt(row.grossProfit, currency)}</td>
+                        <td className={`text-right ${row.ebitda >= 0 ? 'text-purple-600 dark:text-purple-400' : 'text-red-500'}`}>{fmt(row.ebitda, currency)}</td>
                       </tr>
                     ))}
                   </tbody>

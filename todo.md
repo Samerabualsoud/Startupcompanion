@@ -664,3 +664,15 @@
 - [x] Add 'system' theme option to ThemeContext (follows OS prefers-color-scheme)
 - [x] Update theme toggle to cycle Light → Dark → System with appropriate icon
 - [x] Remove all sidebar nav badges (New, AI, 7 methods, 20 checks, etc.)
+
+## Round N+1 — Sales Analytics Enhancement
+- [ ] Enhance salesRouter analytics: auto-calculate MRR, ARR, MoM growth, YoY growth, YTD, LTD
+- [ ] Add early-startup detection: show YTD + LTD when <12 months of data instead of ARR
+- [ ] Rebuild SalesTracker KPI cards with all new metrics
+- [ ] Add cosmetic polish to SalesTracker UI
+
+## Round N+2 — Color Contrast Fixes
+- [ ] Audit index.css CSS variables for WCAG AA compliance in light and dark modes
+- [ ] Fix muted-foreground contrast on light backgrounds
+- [ ] Fix card/secondary text contrast across tool screens
+- [ ] Fix any hardcoded low-contrast colors remaining in components

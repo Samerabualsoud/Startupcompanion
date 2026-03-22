@@ -81,9 +81,9 @@ export default function AIMarketResearch() {
   };
 
   const impactColor = (impact: string) => {
-    if (impact === 'High') return 'bg-red-100 text-red-700 border-red-200';
-    if (impact === 'Medium') return 'bg-amber-100 text-amber-700 border-amber-200';
-    return 'bg-green-100 text-green-700 border-green-200';
+    if (impact === 'High') return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800';
+    if (impact === 'Medium') return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800';
+    return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800';
   };
 
   const Section = ({ id, title, icon: Icon, children }: { id: string; title: string; icon: any; children: React.ReactNode }) => (
@@ -279,7 +279,7 @@ export default function AIMarketResearch() {
                       <Badge variant="outline" className="text-[10px]">{c.funding}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mb-1">{c.description}</p>
-                    <p className="text-xs text-amber-600"><span className="font-semibold">Weakness:</span> {c.weakness}</p>
+                    <p className="text-xs text-amber-600 dark:text-amber-400"><span className="font-semibold">Weakness:</span> {c.weakness}</p>
                   </div>
                 ))}
               </div>
@@ -295,7 +295,7 @@ export default function AIMarketResearch() {
                       <span className="text-[10px] text-muted-foreground">{s.size}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mb-1"><span className="font-medium text-foreground">Pain:</span> {s.painPoint}</p>
-                    <p className="text-xs text-green-600"><span className="font-medium">WTP:</span> {s.willingness}</p>
+                    <p className="text-xs text-green-600 dark:text-green-400"><span className="font-medium">WTP:</span> {s.willingness}</p>
                   </div>
                 ))}
               </div>
@@ -305,7 +305,7 @@ export default function AIMarketResearch() {
             <Section id="oppsrisks" title="Opportunities & Risks" icon={Zap}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <div className="text-xs font-bold text-green-600 mb-2 flex items-center gap-1.5">
+                  <div className="text-xs font-bold text-green-600 dark:text-green-400 mb-2 flex items-center gap-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Opportunities
                   </div>
                   <ul className="space-y-1.5">
@@ -317,7 +317,7 @@ export default function AIMarketResearch() {
                   </ul>
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-red-600 mb-2 flex items-center gap-1.5">
+                  <div className="text-xs font-bold text-red-600 dark:text-red-400 mb-2 flex items-center gap-1.5">
                     <AlertTriangle className="w-3.5 h-3.5" /> Risks
                   </div>
                   <ul className="space-y-1.5">
@@ -344,8 +344,8 @@ export default function AIMarketResearch() {
             </Section>
 
             {/* Analyst Verdict */}
-            <div className="p-4 rounded-xl border border-amber-200 bg-amber-50">
-              <div className="text-xs font-bold text-amber-700 mb-1.5 flex items-center gap-1.5">
+            <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30">
+              <div className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-1.5 flex items-center gap-1.5">
                 <Zap className="w-3.5 h-3.5" /> Analyst Verdict
               </div>
               <p className="text-sm text-amber-900 leading-relaxed">{result.analystVerdict}</p>

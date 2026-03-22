@@ -278,7 +278,7 @@ export default function IdeaValidator() {
           <p className="text-sm text-muted-foreground mb-3">{result.timingAndTrends.assessment}</p>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <div className="text-xs font-semibold text-green-600 mb-1">Tailwinds</div>
+              <div className="text-xs font-semibold text-green-600 dark:text-green-400 mb-1">Tailwinds</div>
               <ul className="space-y-1">
                 {result.timingAndTrends.tailwinds.map(t => (
                   <li key={t} className="flex items-start gap-1.5 text-xs text-muted-foreground">
@@ -289,7 +289,7 @@ export default function IdeaValidator() {
               </ul>
             </div>
             <div>
-              <div className="text-xs font-semibold text-red-600 mb-1">Headwinds</div>
+              <div className="text-xs font-semibold text-red-600 dark:text-red-400 mb-1">Headwinds</div>
               <ul className="space-y-1">
                 {result.timingAndTrends.headwinds.map(h => (
                   <li key={h} className="flex items-start gap-1.5 text-xs text-muted-foreground">
@@ -312,7 +312,7 @@ export default function IdeaValidator() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <div className="text-xs font-semibold text-green-600 mb-2">Top Strengths</div>
+              <div className="text-xs font-semibold text-green-600 dark:text-green-400 mb-2">Top Strengths</div>
               <ul className="space-y-1.5">
                 {result.recommendations.topStrengths.map(s => (
                   <li key={s} className="flex items-start gap-2 text-sm">
@@ -323,7 +323,7 @@ export default function IdeaValidator() {
               </ul>
             </div>
             <div>
-              <div className="text-xs font-semibold text-red-600 mb-2">Critical Weaknesses</div>
+              <div className="text-xs font-semibold text-red-600 dark:text-red-400 mb-2">Critical Weaknesses</div>
               <ul className="space-y-1.5">
                 {result.recommendations.criticalWeaknesses.map(w => (
                   <li key={w} className="flex items-start gap-2 text-sm">
@@ -346,7 +346,7 @@ export default function IdeaValidator() {
             </div>
             {result.recommendations.pivotSuggestions.length > 0 && (
               <div>
-                <div className="text-xs font-semibold text-purple-600 mb-2">Pivot Suggestions</div>
+                <div className="text-xs font-semibold text-purple-600 dark:text-purple-400 mb-2">Pivot Suggestions</div>
                 <ul className="space-y-1.5">
                   {result.recommendations.pivotSuggestions.map(p => (
                     <li key={p} className="flex items-start gap-2 text-sm">

@@ -236,7 +236,7 @@ export default function FundraisingReadiness() {
                       </div>
                       <div className="text-xs text-muted-foreground mt-0.5">{item.description}</div>
                       {!item.checked && (
-                        <div className="mt-1.5 flex items-start gap-1.5 text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                        <div className="mt-1.5 flex items-start gap-1.5 text-[10px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded px-2 py-1">
                           <AlertCircle className="w-3 h-3 shrink-0 mt-0.5" />
                           <span>{item.tip}</span>
                         </div>

@@ -44,7 +44,7 @@ function InputField({ label, value, onChange, placeholder, type = 'text', requir
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none transition-all bg-white"
+        className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none transition-all bg-card"
         style={{ border: '1.5px solid var(--border)', color: 'var(--foreground)' }}
         onFocus={e => e.target.style.borderColor = 'var(--primary)'}
         onBlur={e => e.target.style.borderColor = 'var(--border)'}
@@ -63,7 +63,7 @@ function SelectField({ label, value, onChange, options, placeholder, required }:
         {label}{required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       <Select value={value || ''} onValueChange={onChange}>
-        <SelectTrigger className="w-full rounded-xl text-sm h-10 bg-white" style={{ border: '1.5px solid var(--border)' }}>
+        <SelectTrigger className="w-full rounded-xl text-sm h-10 bg-card" style={{ border: '1.5px solid var(--border)' }}>
           <SelectValue placeholder={placeholder || 'Select...'} />
         </SelectTrigger>
         <SelectContent className="max-h-64 overflow-y-auto">
@@ -103,7 +103,7 @@ function TagSelector({ label, options, selected, onChange, max }: {
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
               selected.includes(opt)
                 ? 'text-white border-transparent'
-                : 'border-border text-muted-foreground hover:border-foreground/30 bg-white'
+                : 'border-border text-muted-foreground hover:border-foreground/30 bg-card'
             }`}
             style={selected.includes(opt) ? { background: 'var(--primary)' } : {}}
           >
@@ -131,7 +131,7 @@ function TextareaField({ label, value, onChange, placeholder, rows = 3 }: {
         onChange={e => onChange(e.target.value)}
         rows={rows}
         placeholder={placeholder}
-        className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none transition-all resize-none bg-white"
+        className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none transition-all resize-none bg-card"
         style={{ border: '1.5px solid var(--border)', color: 'var(--foreground)' }}
         onFocus={e => e.target.style.borderColor = 'var(--primary)'}
         onBlur={e => e.target.style.borderColor = 'var(--border)'}
@@ -461,7 +461,7 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-border bg-white/80 backdrop-blur-md">
+      <div className="sticky top-0 z-10 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'var(--primary)' }}>
@@ -510,7 +510,7 @@ export default function Onboarding() {
                     key={id}
                     onClick={() => setUserType(id)}
                     className={`flex items-start gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
-                      userType === id ? 'border-transparent shadow-md' : 'border-border hover:border-foreground/20 bg-white'
+                      userType === id ? 'border-transparent shadow-md' : 'border-border hover:border-foreground/20 bg-card'
                     }`}
                     style={userType === id ? { background: color + '10', borderColor: color } : {}}
                   >
@@ -577,7 +577,7 @@ export default function Onboarding() {
               </div>
             )}
 
-            <div className="p-6 rounded-2xl border border-border bg-white/60 backdrop-blur-sm mb-5 shadow-sm">
+            <div className="p-6 rounded-2xl border border-border bg-card/60 backdrop-blur-sm mb-5 shadow-sm">
               {userType === 'vc' && <VCForm data={formData} onChange={handleFieldChange} isRTL={isRTL} />}
               {userType === 'angel' && <AngelForm data={formData} onChange={handleFieldChange} isRTL={isRTL} />}
               {userType === 'venture_lawyer' && <LawyerForm data={formData} onChange={handleFieldChange} isRTL={isRTL} />}
@@ -585,7 +585,7 @@ export default function Onboarding() {
             </div>
 
             {/* Visibility toggle */}
-            <div className="flex items-center gap-3 mb-8 p-4 rounded-xl border border-border bg-white">
+            <div className="flex items-center gap-3 mb-8 p-4 rounded-xl border border-border bg-card">
               <input
                 type="checkbox"
                 id="isPublic"

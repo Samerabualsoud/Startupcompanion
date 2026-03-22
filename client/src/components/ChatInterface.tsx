@@ -151,7 +151,7 @@ function SelectInput({ q, onSubmit }: { q: ChatQuestion; onSubmit: (v: any) => v
               <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1 py-1">{group}</div>
               {opts?.map(o => (
                 <button key={o.value} onClick={() => onSubmit(o.value)}
-                  className="w-full text-left text-sm px-3 py-2 rounded-md border border-border bg-card hover:bg-accent hover:text-white hover:border-accent transition-all flex items-center justify-between group mb-1">
+                  className="w-full text-left text-sm px-3 py-2 rounded-md border border-border bg-card hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all flex items-center justify-between group mb-1">
                   <span>{o.label}</span>
                   <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
@@ -160,7 +160,7 @@ function SelectInput({ q, onSubmit }: { q: ChatQuestion; onSubmit: (v: any) => v
           ))
         : q.options?.map(o => (
             <button key={o.value} onClick={() => onSubmit(o.value)}
-              className="w-full text-left text-sm px-3 py-2 rounded-md border border-border bg-card hover:bg-accent hover:text-white hover:border-accent transition-all flex items-center justify-between group">
+              className="w-full text-left text-sm px-3 py-2 rounded-md border border-border bg-card hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all flex items-center justify-between group">
               <span>{o.label}</span>
               <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
             </button>
@@ -494,7 +494,7 @@ export default function ChatInterface({ onComplete }: Props) {
               <div
                 className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
                   msg.role === 'user'
-                    ? 'rounded-br-sm text-white font-medium'
+                    ? 'rounded-br-sm text-primary-foreground font-medium'
                     : 'rounded-bl-sm border border-border bg-card text-foreground'
                 }`}
                 style={msg.role === 'user' ? { background: 'var(--primary)' } : {}}

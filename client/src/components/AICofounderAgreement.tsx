@@ -197,7 +197,7 @@ export default function AICofounderAgreement() {
             <div className="flex items-center justify-between mb-3">
               <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Founders</div>
               <div className="flex items-center gap-3">
-                <span className={`text-xs font-semibold ${equityValid ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`text-xs font-semibold ${equityValid ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                   Total: {totalEquity}% {equityValid ? '✓' : '(must be 100%)'}
                 </span>
                 <Button type="button" variant="outline" size="sm" onClick={addFounder} className="text-xs gap-1.5 h-7">
@@ -260,7 +260,7 @@ export default function AICofounderAgreement() {
             </div>
           </div>
 
-          <Button type="submit" disabled={mutation.isPending || !equityValid} className="w-full h-11 text-sm font-semibold" style={{ background: 'var(--primary)', color: 'white' }}>
+          <Button type="submit" disabled={mutation.isPending || !equityValid} className="w-full h-11 text-sm font-semibold" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
             {mutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Drafting agreement…</> : <><Users className="w-4 h-4 mr-2" /> Draft Co-founder Agreement</>}
           </Button>
         </form>
@@ -282,13 +282,13 @@ export default function AICofounderAgreement() {
 
             {/* Highlights */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="p-4 rounded-xl border border-green-200 bg-green-50">
-                <div className="text-xs font-bold text-green-700 mb-2">✓ Key Highlights</div>
-                <ul className="space-y-1.5">{result.keyHighlights.map((h, i) => <li key={i} className="text-xs text-green-800 flex gap-2"><span className="shrink-0">→</span>{h}</li>)}</ul>
+              <div className="p-4 rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30">
+                <div className="text-xs font-bold text-green-700 dark:text-green-400 mb-2">✓ Key Highlights</div>
+                <ul className="space-y-1.5">{result.keyHighlights.map((h, i) => <li key={i} className="text-xs text-green-800 dark:text-green-300 flex gap-2"><span className="shrink-0">→</span>{h}</li>)}</ul>
               </div>
-              <div className="p-4 rounded-xl border border-amber-200 bg-amber-50">
-                <div className="flex items-center gap-2 mb-2"><AlertTriangle className="w-3.5 h-3.5 text-amber-600" /><span className="text-xs font-bold text-amber-700">Warnings</span></div>
-                <ul className="space-y-1.5">{result.warnings.map((w, i) => <li key={i} className="text-xs text-amber-800 flex gap-2"><span className="shrink-0">⚠</span>{w}</li>)}</ul>
+              <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30">
+                <div className="flex items-center gap-2 mb-2"><AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" /><span className="text-xs font-bold text-amber-700 dark:text-amber-400">Warnings</span></div>
+                <ul className="space-y-1.5">{result.warnings.map((w, i) => <li key={i} className="text-xs text-amber-800 dark:text-amber-300 flex gap-2"><span className="shrink-0">⚠</span>{w}</li>)}</ul>
               </div>
             </div>
 
@@ -305,9 +305,9 @@ export default function AICofounderAgreement() {
                       <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
                         <div className="px-4 py-4 border-t border-border bg-background space-y-3">
                           <pre className="text-xs text-foreground whitespace-pre-wrap font-sans leading-relaxed">{section.content}</pre>
-                          <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
-                            <div className="text-[10px] font-bold uppercase text-blue-700 mb-1">Plain English</div>
-                            <p className="text-xs text-blue-800">{section.notes}</p>
+                          <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                            <div className="text-[10px] font-bold uppercase text-blue-700 dark:text-blue-400 mb-1">Plain English</div>
+                            <p className="text-xs text-blue-800 dark:text-blue-300">{section.notes}</p>
                           </div>
                         </div>
                       </motion.div>

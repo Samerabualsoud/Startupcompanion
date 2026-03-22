@@ -62,16 +62,16 @@ export default function AITermSheetAnalyzer() {
   });
 
   const ratingColor = (r: string) => {
-    if (r === 'Red Flag') return 'bg-red-100 text-red-700 border-red-200';
-    if (r === 'Concerning') return 'bg-amber-100 text-amber-700 border-amber-200';
-    if (r === 'Good') return 'bg-green-100 text-green-700 border-green-200';
+    if (r === 'Red Flag') return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800';
+    if (r === 'Concerning') return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800';
+    if (r === 'Good') return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800';
     return 'bg-secondary text-muted-foreground border-border';
   };
 
   const scoreColor = (s: number) => {
-    if (s >= 70) return 'text-green-600';
-    if (s >= 45) return 'text-amber-600';
-    return 'text-red-600';
+    if (s >= 70) return 'text-green-600 dark:text-green-400';
+    if (s >= 45) return 'text-amber-600 dark:text-amber-400';
+    return 'text-red-600 dark:text-red-400';
   };
 
   const scoreLabel = (s: number) => {
@@ -158,7 +158,7 @@ export default function AITermSheetAnalyzer() {
             }}
             disabled={mutation.isPending}
             className="w-full h-11 text-sm font-semibold"
-            style={{ background: 'var(--primary)', color: 'white' }}
+            style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
           >
             {mutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analyzing term sheet…</> : <><FileText className="w-4 h-4 mr-2" /> Analyze Term Sheet</>}
           </Button>
@@ -192,15 +192,15 @@ export default function AITermSheetAnalyzer() {
             {/* Red flags + Positives */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {result.redFlags.length > 0 && (
-                <div className="p-4 rounded-xl border border-red-200 bg-red-50">
-                  <div className="flex items-center gap-2 mb-2"><AlertTriangle className="w-4 h-4 text-red-600" /><span className="text-xs font-bold text-red-700">Red Flags</span></div>
-                  <ul className="space-y-1.5">{result.redFlags.map((f, i) => <li key={i} className="text-xs text-red-800 flex gap-2"><span className="shrink-0">⚠</span>{f}</li>)}</ul>
+                <div className="p-4 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30">
+                  <div className="flex items-center gap-2 mb-2"><AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" /><span className="text-xs font-bold text-red-700 dark:text-red-400">Red Flags</span></div>
+                  <ul className="space-y-1.5">{result.redFlags.map((f, i) => <li key={i} className="text-xs text-red-800 dark:text-red-300 flex gap-2"><span className="shrink-0">⚠</span>{f}</li>)}</ul>
                 </div>
               )}
               {result.positives.length > 0 && (
-                <div className="p-4 rounded-xl border border-green-200 bg-green-50">
-                  <div className="flex items-center gap-2 mb-2"><CheckCircle2 className="w-4 h-4 text-green-600" /><span className="text-xs font-bold text-green-700">Positives</span></div>
-                  <ul className="space-y-1.5">{result.positives.map((p, i) => <li key={i} className="text-xs text-green-800 flex gap-2"><span className="shrink-0">✓</span>{p}</li>)}</ul>
+                <div className="p-4 rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30">
+                  <div className="flex items-center gap-2 mb-2"><CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" /><span className="text-xs font-bold text-green-700 dark:text-green-400">Positives</span></div>
+                  <ul className="space-y-1.5">{result.positives.map((p, i) => <li key={i} className="text-xs text-green-800 dark:text-green-300 flex gap-2"><span className="shrink-0">✓</span>{p}</li>)}</ul>
                 </div>
               )}
             </div>
@@ -247,9 +247,9 @@ export default function AITermSheetAnalyzer() {
                               <div className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Impact on You</div>
                               <p className="text-xs text-foreground">{term.founderImpact}</p>
                             </div>
-                            <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
-                              <div className="text-[10px] font-bold uppercase text-amber-700 mb-1">Negotiation Tip</div>
-                              <p className="text-xs text-amber-800">{term.negotiationTip}</p>
+                            <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                              <div className="text-[10px] font-bold uppercase text-amber-700 dark:text-amber-400 mb-1">Negotiation Tip</div>
+                              <p className="text-xs text-amber-800 dark:text-amber-300">{term.negotiationTip}</p>
                             </div>
                           </div>
                         </motion.div>
@@ -262,9 +262,9 @@ export default function AITermSheetAnalyzer() {
 
             {/* Missing clauses */}
             {result.missingClauses.length > 0 && (
-              <div className="p-4 rounded-xl border border-amber-200 bg-amber-50">
-                <div className="text-xs font-bold text-amber-700 mb-2">⚠ Missing Clauses to Request</div>
-                <ul className="space-y-1.5">{result.missingClauses.map((c, i) => <li key={i} className="text-xs text-amber-800 flex gap-2"><span className="shrink-0">+</span>{c}</li>)}</ul>
+              <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30">
+                <div className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-2">⚠ Missing Clauses to Request</div>
+                <ul className="space-y-1.5">{result.missingClauses.map((c, i) => <li key={i} className="text-xs text-amber-800 dark:text-amber-300 flex gap-2"><span className="shrink-0">+</span>{c}</li>)}</ul>
               </div>
             )}
           </motion.div>

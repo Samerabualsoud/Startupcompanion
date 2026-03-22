@@ -20,7 +20,7 @@ function PasswordStrength({ password, isRTL }: { password: string; isRTL: boolea
       {checks.map(c => (
         <div key={c.label} className="flex items-center gap-1.5 text-xs">
           <CheckCircle2 className={`w-3.5 h-3.5 ${c.ok ? 'text-green-500' : 'text-muted-foreground/40'}`} />
-          <span className={c.ok ? 'text-green-700' : 'text-muted-foreground'}>{c.label}</span>
+          <span className={c.ok ? 'text-green-700 dark:text-green-400' : 'text-muted-foreground'}>{c.label}</span>
         </div>
       ))}
     </div>

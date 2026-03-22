@@ -271,12 +271,12 @@ export default function PitchDeckScorecard() {
         </div>
 
         {weakSlides.length > 0 && (
-          <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
-            <div className="text-xs font-semibold text-amber-800 mb-1.5">🎯 {lang === 'ar' ? 'أولويات التحسين' : 'Priority Improvements'}</div>
+          <div className="mt-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+            <div className="text-xs font-semibold text-amber-800 dark:text-amber-300 mb-1.5">🎯 {lang === 'ar' ? 'أولويات التحسين' : 'Priority Improvements'}</div>
             <div className="flex flex-wrap gap-2">
               {weakSlides.slice(0, 4).map(s => (
                 <button key={s.id} onClick={() => setExpandedId(s.id)}
-                  className="flex items-center gap-1.5 text-[10px] text-amber-700 bg-white border border-amber-300 px-2 py-1 rounded-full hover:bg-amber-50 transition-colors">
+                  className="flex items-center gap-1.5 text-[10px] text-amber-700 dark:text-amber-400 bg-background border border-amber-300 dark:border-amber-700 px-2 py-1 rounded-full hover:bg-amber-50 dark:bg-amber-950/30 transition-colors">
                   {s.emoji} {lang === 'ar' ? (SLIDE_NAMES_AR[s.id] || s.name) : s.name}: {s.score}/10
                 </button>
               ))}
@@ -348,7 +348,7 @@ export default function PitchDeckScorecard() {
                     <div className="text-xs font-semibold text-foreground mb-2">🚩 Common Red Flags</div>
                     <ul className="space-y-1.5">
                       {slide.redFlags.map((flag, i) => (
-                        <li key={i} className="flex items-start gap-2 text-xs text-red-600 bg-red-50 rounded px-2 py-1">
+                        <li key={i} className="flex items-start gap-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 rounded px-2 py-1">
                           <span className="shrink-0">✗</span>
                           {flag}
                         </li>

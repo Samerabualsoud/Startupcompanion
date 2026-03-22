@@ -383,7 +383,7 @@ You can manage cookie preferences through your browser settings. Please note tha
               : 'Polaris Arabia is committed to protecting your privacy in accordance with the Saudi Personal Data Protection Law (PDPL). This Policy explains how your personal data is collected, used, and protected.'}
           </p>
           {/* PDPL compliance badge */}
-          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
             <Shield className="w-3.5 h-3.5" />
             {isRTL ? 'متوافق مع نظام PDPL السعودي' : 'Compliant with Saudi PDPL'}
           </div>

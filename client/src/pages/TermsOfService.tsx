@@ -354,9 +354,9 @@ Address: Kingdom of Saudi Arabia, Riyadh`,
         </div>
 
         {/* Legal notice box */}
-        <div className="mt-10 p-5 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
+        <div className="mt-10 p-5 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-amber-600" />
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
             <div>
               <p className="text-sm font-semibold mb-1 text-amber-800 dark:text-amber-200">
                 {isRTL ? 'إشعار مهم' : 'Important Notice'}

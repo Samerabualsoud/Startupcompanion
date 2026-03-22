@@ -457,7 +457,7 @@ export default function CapTableManager() {
       )}
 
       {/* Info note */}
-      <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800">
+      <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300">
         <Info className="w-4 h-4 shrink-0 mt-0.5" />
         <p className="text-xs">
           This cap table is stored locally in your session. For a legally binding cap table, work with your attorney and use dedicated equity management software (e.g., Carta, Pulley, or Capshare).

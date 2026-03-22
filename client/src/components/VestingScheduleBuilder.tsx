@@ -305,7 +305,7 @@ export default function VestingScheduleBuilder() {
         </div>
         <div className="flex gap-2 flex-wrap items-center">
           {/* Cap table sync badge */}
-          <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-full">
+          <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 px-2 py-1 rounded-full">
             <Link2 className="w-3 h-3" />
             <span>Synced with Cap Table</span>
           </div>
@@ -484,7 +484,7 @@ export default function VestingScheduleBuilder() {
                   <span className="text-[10px] font-mono font-semibold text-foreground">{fmtPct(pctTotal)}</span>
                 </div>
                 <button onClick={(e) => { e.stopPropagation(); removeStakeholder(s.id); }}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors shrink-0">
+                  className="p-1.5 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:bg-red-950/30 transition-colors shrink-0">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
                 {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" /> : <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}

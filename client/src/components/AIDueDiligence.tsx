@@ -78,15 +78,15 @@ export default function AIDueDiligence() {
   };
 
   const priorityColor = (p: string) => {
-    if (p === 'Critical') return 'bg-red-100 text-red-700 border-red-200';
-    if (p === 'High') return 'bg-amber-100 text-amber-700 border-amber-200';
-    return 'bg-blue-100 text-blue-700 border-blue-200';
+    if (p === 'Critical') return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800';
+    if (p === 'High') return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800';
+    return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800';
   };
 
   const riskColor = (r: string) => {
-    if (r === 'High') return 'text-red-600 bg-red-50 border-red-200';
-    if (r === 'Medium') return 'text-amber-600 bg-amber-50 border-amber-200';
-    return 'text-green-600 bg-green-50 border-green-200';
+    if (r === 'High') return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800';
+    if (r === 'Medium') return 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800';
+    return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800';
   };
 
   const totalItems = result?.categories.reduce((sum, c) => sum + c.items.length, 0) ?? 0;
@@ -156,7 +156,7 @@ export default function AIDueDiligence() {
             <Label className="text-xs font-semibold mb-1.5 block">Company Description *</Label>
             <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="What does the company do, what's the business model, who are the customers?" className="text-sm min-h-[90px] resize-none" />
           </div>
-          <Button type="submit" disabled={mutation.isPending} className="w-full h-11 text-sm font-semibold" style={{ background: 'var(--primary)', color: 'white' }}>
+          <Button type="submit" disabled={mutation.isPending} className="w-full h-11 text-sm font-semibold" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
             {mutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating checklist…</> : <><ClipboardList className="w-4 h-4 mr-2" /> Generate Due Diligence Checklist</>}
           </Button>
         </form>
@@ -198,26 +198,26 @@ export default function AIDueDiligence() {
 
             {/* Red flags */}
             {result.topRedFlags.length > 0 && (
-              <div className="p-4 rounded-xl border border-red-200 bg-red-50">
+              <div className="p-4 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30">
                 <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="w-4 h-4 text-red-600" />
-                  <span className="text-xs font-bold text-red-700">Top Red Flags to Investigate</span>
+                  <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                  <span className="text-xs font-bold text-red-700 dark:text-red-400">Top Red Flags to Investigate</span>
                 </div>
                 <ul className="space-y-1">
-                  {result.topRedFlags.map((f, i) => <li key={i} className="text-xs text-red-700 flex gap-2"><span className="shrink-0">⚠</span>{f}</li>)}
+                  {result.topRedFlags.map((f, i) => <li key={i} className="text-xs text-red-700 dark:text-red-400 flex gap-2"><span className="shrink-0">⚠</span>{f}</li>)}
                 </ul>
               </div>
             )}
 
             {/* Quick wins */}
             {result.quickWins.length > 0 && (
-              <div className="p-4 rounded-xl border border-green-200 bg-green-50">
+              <div className="p-4 rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30">
                 <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span className="text-xs font-bold text-green-700">Quick Positive Signals</span>
+                  <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  <span className="text-xs font-bold text-green-700 dark:text-green-400">Quick Positive Signals</span>
                 </div>
                 <ul className="space-y-1">
-                  {result.quickWins.map((w, i) => <li key={i} className="text-xs text-green-700 flex gap-2"><span className="shrink-0">✓</span>{w}</li>)}
+                  {result.quickWins.map((w, i) => <li key={i} className="text-xs text-green-700 dark:text-green-400 flex gap-2"><span className="shrink-0">✓</span>{w}</li>)}
                 </ul>
               </div>
             )}

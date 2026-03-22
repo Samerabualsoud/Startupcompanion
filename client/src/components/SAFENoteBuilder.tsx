@@ -519,8 +519,8 @@ export default function SAFENoteBuilder() {
                     )}
                   </Button>
 
-                  <div className="flex items-start gap-1.5 text-xs text-muted-foreground p-2 bg-amber-50 rounded-lg border border-amber-200">
-                    <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-600" />
+                  <div className="flex items-start gap-1.5 text-xs text-muted-foreground p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
                     <span>This is a template only. Always have a qualified lawyer review before signing.</span>
                   </div>
                 </CardContent>
@@ -534,7 +534,7 @@ export default function SAFENoteBuilder() {
             <div className="space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">
+                  <Badge variant="outline" className="text-green-700 dark:text-green-400 border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/30">
                     Document Ready
                   </Badge>
                   <span className="text-sm text-muted-foreground">

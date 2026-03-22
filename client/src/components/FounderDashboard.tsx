@@ -214,17 +214,17 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-xl border border-amber-200 bg-amber-50 p-4 flex items-start gap-3"
+            className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 flex items-start gap-3"
           >
-            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-sm font-semibold text-amber-800">{t('dashboardCompleteProfile')}</p>
-              <p className="text-xs text-amber-700 mt-0.5">Complete your startup profile to unlock personalized insights across all tools.</p>
+              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">{t('dashboardCompleteProfile')}</p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">Complete your startup profile to unlock personalized insights across all tools.</p>
             </div>
             <Button
               size="sm"
               variant="outline"
-              className="shrink-0 border-amber-300 text-amber-700 hover:bg-amber-100"
+              className="shrink-0 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:bg-amber-900/30"
               onClick={() => onNavigate('profile')}
             >
               {t('dashboardGoToProfile')}
@@ -481,7 +481,7 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
                   <div className="flex items-center justify-between text-xs mt-1">
                     <span className="text-muted-foreground">Total: {fmtCurrency(snapshot.totalSalesRevenue)}</span>
                     {snapshot.salesMoMGrowth !== null && (
-                      <span className={`font-semibold flex items-center gap-0.5 ${snapshot.salesMoMGrowth >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                      <span className={`font-semibold flex items-center gap-0.5 ${snapshot.salesMoMGrowth >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
                         {snapshot.salesMoMGrowth >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                         {Math.abs(snapshot.salesMoMGrowth).toFixed(1)}% MoM
                       </span>

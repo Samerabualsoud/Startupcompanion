@@ -121,11 +121,11 @@ const MODEL_CONFIGS: Record<BusinessModel, ModelConfig> = {
     stages: {
       lead:        { label: 'Lead',        labelAr: 'عميل محتمل',   color: 'text-slate-600',  bg: 'bg-slate-100',   icon: Users,         defaultProb: 10 },
       trial:       { label: 'Trial',       labelAr: 'تجربة',        color: 'text-sky-600',    bg: 'bg-sky-50',      icon: Clock,         defaultProb: 20 },
-      demo:        { label: 'Demo',        labelAr: 'عرض توضيحي',   color: 'text-blue-600',   bg: 'bg-blue-50',     icon: Activity,      defaultProb: 35 },
-      proposal:    { label: 'Proposal',    labelAr: 'عرض سعر',      color: 'text-yellow-600', bg: 'bg-yellow-50',   icon: Clock,         defaultProb: 55 },
-      negotiation: { label: 'Negotiation', labelAr: 'تفاوض',        color: 'text-orange-600', bg: 'bg-orange-50',   icon: ArrowUpDown,   defaultProb: 75 },
-      closed_won:  { label: 'Closed Won',  labelAr: 'مُغلقة (ربح)', color: 'text-green-600',  bg: 'bg-green-50',    icon: CheckCircle2,  defaultProb: 100 },
-      closed_lost: { label: 'Closed Lost', labelAr: 'مُغلقة (خسارة)', color: 'text-red-600', bg: 'bg-red-50',      icon: XCircle,       defaultProb: 0 },
+      demo:        { label: 'Demo',        labelAr: 'عرض توضيحي',   color: 'text-blue-600 dark:text-blue-400',   bg: 'bg-blue-50 dark:bg-blue-950/30',     icon: Activity,      defaultProb: 35 },
+      proposal:    { label: 'Proposal',    labelAr: 'عرض سعر',      color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-950/30',   icon: Clock,         defaultProb: 55 },
+      negotiation: { label: 'Negotiation', labelAr: 'تفاوض',        color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/30',   icon: ArrowUpDown,   defaultProb: 75 },
+      closed_won:  { label: 'Closed Won',  labelAr: 'مُغلقة (ربح)', color: 'text-green-600 dark:text-green-400',  bg: 'bg-green-50 dark:bg-green-950/30',    icon: CheckCircle2,  defaultProb: 100 },
+      closed_lost: { label: 'Closed Lost', labelAr: 'مُغلقة (خسارة)', color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-950/30',      icon: XCircle,       defaultProb: 0 },
     },
     wonStage: 'closed_won', lostStage: 'closed_lost',
     dealLabel: 'Account', dealLabelAr: 'حساب',
@@ -164,10 +164,10 @@ const MODEL_CONFIGS: Record<BusinessModel, ModelConfig> = {
     stages: {
       browsing:   { label: 'Browsing',   labelAr: 'تصفح',         color: 'text-slate-600',  bg: 'bg-slate-100',   icon: Search,        defaultProb: 5 },
       cart:       { label: 'Cart',       labelAr: 'سلة التسوق',   color: 'text-sky-600',    bg: 'bg-sky-50',      icon: ShoppingCart,  defaultProb: 20 },
-      checkout:   { label: 'Checkout',   labelAr: 'الدفع',        color: 'text-blue-600',   bg: 'bg-blue-50',     icon: DollarSign,    defaultProb: 60 },
-      processing: { label: 'Processing', labelAr: 'قيد المعالجة', color: 'text-yellow-600', bg: 'bg-yellow-50',   icon: Clock,         defaultProb: 85 },
-      fulfilled:  { label: 'Fulfilled',  labelAr: 'تم الشحن',     color: 'text-green-600',  bg: 'bg-green-50',    icon: CheckCircle2,  defaultProb: 100 },
-      returned:   { label: 'Returned',   labelAr: 'مُرتجع',       color: 'text-red-600',    bg: 'bg-red-50',      icon: XCircle,       defaultProb: 0 },
+      checkout:   { label: 'Checkout',   labelAr: 'الدفع',        color: 'text-blue-600 dark:text-blue-400',   bg: 'bg-blue-50 dark:bg-blue-950/30',     icon: DollarSign,    defaultProb: 60 },
+      processing: { label: 'Processing', labelAr: 'قيد المعالجة', color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-950/30',   icon: Clock,         defaultProb: 85 },
+      fulfilled:  { label: 'Fulfilled',  labelAr: 'تم الشحن',     color: 'text-green-600 dark:text-green-400',  bg: 'bg-green-50 dark:bg-green-950/30',    icon: CheckCircle2,  defaultProb: 100 },
+      returned:   { label: 'Returned',   labelAr: 'مُرتجع',       color: 'text-red-600 dark:text-red-400',    bg: 'bg-red-50 dark:bg-red-950/30',      icon: XCircle,       defaultProb: 0 },
     },
     wonStage: 'fulfilled', lostStage: 'returned',
     dealLabel: 'Order', dealLabelAr: 'طلب',
@@ -207,10 +207,10 @@ const MODEL_CONFIGS: Record<BusinessModel, ModelConfig> = {
     stages: {
       inquiry:    { label: 'Inquiry',    labelAr: 'استفسار',      color: 'text-slate-600',  bg: 'bg-slate-100',   icon: Users,         defaultProb: 10 },
       matched:    { label: 'Matched',    labelAr: 'تم التطابق',   color: 'text-sky-600',    bg: 'bg-sky-50',      icon: UserCheck,     defaultProb: 30 },
-      negotiating:{ label: 'Negotiating',labelAr: 'تفاوض',        color: 'text-blue-600',   bg: 'bg-blue-50',     icon: ArrowUpDown,   defaultProb: 50 },
-      in_progress:{ label: 'In Progress',labelAr: 'قيد التنفيذ',  color: 'text-yellow-600', bg: 'bg-yellow-50',   icon: Clock,         defaultProb: 75 },
-      completed:  { label: 'Completed',  labelAr: 'مكتمل',        color: 'text-green-600',  bg: 'bg-green-50',    icon: CheckCircle2,  defaultProb: 100 },
-      cancelled:  { label: 'Cancelled',  labelAr: 'ملغى',         color: 'text-red-600',    bg: 'bg-red-50',      icon: XCircle,       defaultProb: 0 },
+      negotiating:{ label: 'Negotiating',labelAr: 'تفاوض',        color: 'text-blue-600 dark:text-blue-400',   bg: 'bg-blue-50 dark:bg-blue-950/30',     icon: ArrowUpDown,   defaultProb: 50 },
+      in_progress:{ label: 'In Progress',labelAr: 'قيد التنفيذ',  color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-950/30',   icon: Clock,         defaultProb: 75 },
+      completed:  { label: 'Completed',  labelAr: 'مكتمل',        color: 'text-green-600 dark:text-green-400',  bg: 'bg-green-50 dark:bg-green-950/30',    icon: CheckCircle2,  defaultProb: 100 },
+      cancelled:  { label: 'Cancelled',  labelAr: 'ملغى',         color: 'text-red-600 dark:text-red-400',    bg: 'bg-red-50 dark:bg-red-950/30',      icon: XCircle,       defaultProb: 0 },
     },
     wonStage: 'completed', lostStage: 'cancelled',
     dealLabel: 'Transaction', dealLabelAr: 'معاملة',
@@ -250,10 +250,10 @@ const MODEL_CONFIGS: Record<BusinessModel, ModelConfig> = {
     stages: {
       brief:      { label: 'Brief',      labelAr: 'موجز المشروع',  color: 'text-slate-600',  bg: 'bg-slate-100',   icon: Users,         defaultProb: 15 },
       proposal:   { label: 'Proposal',   labelAr: 'عرض سعر',      color: 'text-sky-600',    bg: 'bg-sky-50',      icon: Clock,         defaultProb: 30 },
-      scoping:    { label: 'Scoping',    labelAr: 'تحديد النطاق',  color: 'text-blue-600',   bg: 'bg-blue-50',     icon: Activity,      defaultProb: 50 },
-      contract:   { label: 'Contract',   labelAr: 'عقد',           color: 'text-yellow-600', bg: 'bg-yellow-50',   icon: ArrowUpDown,   defaultProb: 75 },
-      delivery:   { label: 'Delivery',   labelAr: 'تسليم',         color: 'text-green-600',  bg: 'bg-green-50',    icon: CheckCircle2,  defaultProb: 100 },
-      lost:       { label: 'Lost',       labelAr: 'خسارة',         color: 'text-red-600',    bg: 'bg-red-50',      icon: XCircle,       defaultProb: 0 },
+      scoping:    { label: 'Scoping',    labelAr: 'تحديد النطاق',  color: 'text-blue-600 dark:text-blue-400',   bg: 'bg-blue-50 dark:bg-blue-950/30',     icon: Activity,      defaultProb: 50 },
+      contract:   { label: 'Contract',   labelAr: 'عقد',           color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-950/30',   icon: ArrowUpDown,   defaultProb: 75 },
+      delivery:   { label: 'Delivery',   labelAr: 'تسليم',         color: 'text-green-600 dark:text-green-400',  bg: 'bg-green-50 dark:bg-green-950/30',    icon: CheckCircle2,  defaultProb: 100 },
+      lost:       { label: 'Lost',       labelAr: 'خسارة',         color: 'text-red-600 dark:text-red-400',    bg: 'bg-red-50 dark:bg-red-950/30',      icon: XCircle,       defaultProb: 0 },
     },
     wonStage: 'delivery', lostStage: 'lost',
     dealLabel: 'Project / Retainer', dealLabelAr: 'مشروع / عقد شهري',
@@ -293,10 +293,10 @@ const MODEL_CONFIGS: Record<BusinessModel, ModelConfig> = {
     stages: {
       lead:       { label: 'Lead',       labelAr: 'عميل محتمل',   color: 'text-slate-600',  bg: 'bg-slate-100',   icon: Users,         defaultProb: 10 },
       demo:       { label: 'Demo / PoC', labelAr: 'عرض / إثبات', color: 'text-sky-600',    bg: 'bg-sky-50',      icon: Activity,      defaultProb: 25 },
-      pilot:      { label: 'Pilot',      labelAr: 'تجربة تجريبية',color: 'text-blue-600',   bg: 'bg-blue-50',     icon: Package,       defaultProb: 50 },
-      po_received:{ label: 'PO Received',labelAr: 'أمر شراء',     color: 'text-yellow-600', bg: 'bg-yellow-50',   icon: CheckCircle2,  defaultProb: 85 },
-      shipped:    { label: 'Shipped',    labelAr: 'تم الشحن',     color: 'text-green-600',  bg: 'bg-green-50',    icon: CheckCircle2,  defaultProb: 100 },
-      lost:       { label: 'Lost',       labelAr: 'خسارة',        color: 'text-red-600',    bg: 'bg-red-50',      icon: XCircle,       defaultProb: 0 },
+      pilot:      { label: 'Pilot',      labelAr: 'تجربة تجريبية',color: 'text-blue-600 dark:text-blue-400',   bg: 'bg-blue-50 dark:bg-blue-950/30',     icon: Package,       defaultProb: 50 },
+      po_received:{ label: 'PO Received',labelAr: 'أمر شراء',     color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-950/30',   icon: CheckCircle2,  defaultProb: 85 },
+      shipped:    { label: 'Shipped',    labelAr: 'تم الشحن',     color: 'text-green-600 dark:text-green-400',  bg: 'bg-green-50 dark:bg-green-950/30',    icon: CheckCircle2,  defaultProb: 100 },
+      lost:       { label: 'Lost',       labelAr: 'خسارة',        color: 'text-red-600 dark:text-red-400',    bg: 'bg-red-50 dark:bg-red-950/30',      icon: XCircle,       defaultProb: 0 },
     },
     wonStage: 'shipped', lostStage: 'lost',
     dealLabel: 'Order / Account', dealLabelAr: 'طلب / حساب',
@@ -601,7 +601,7 @@ export default function SalesTracker() {
             </div>
             <div className="flex items-center gap-1 shrink-0">
               <button onClick={e => { e.stopPropagation(); openEdit(deal); }} className="p-1 rounded hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"><Edit2 className="w-3 h-3" /></button>
-              <button onClick={e => { e.stopPropagation(); deleteMutation.mutate({ id: deal.id }); }} className="p-1 rounded hover:bg-red-50 text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-3 h-3" /></button>
+              <button onClick={e => { e.stopPropagation(); deleteMutation.mutate({ id: deal.id }); }} className="p-1 rounded hover:bg-red-50 dark:bg-red-950/30 text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-3 h-3" /></button>
             </div>
           </div>
           <div className="flex items-center justify-between mt-1.5">
@@ -702,10 +702,10 @@ export default function SalesTracker() {
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 w-full min-w-0">
         {[
-          { label: isRTL ? cfg.kpiLabels.revenueAr : cfg.kpiLabels.revenue, value: fmt(kpis.totalRevenue, currency), sub: isRTL ? `${kpis.wonCount} ${cfg.dealLabelAr} مُغلق` : `${kpis.wonCount} ${cfg.dealLabel}s closed`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-100', accent: 'border-l-4 border-l-emerald-500' },
-          { label: isRTL ? cfg.kpiLabels.pipelineAr : cfg.kpiLabels.pipeline, value: fmt(kpis.pipeline, currency), sub: isRTL ? `${kpis.activeCount} نشط` : `${kpis.activeCount} active`, icon: GitMerge, color: 'text-blue-600', bg: 'bg-blue-100', accent: 'border-l-4 border-l-blue-500' },
-          { label: isRTL ? cfg.kpiLabels.weightedAr : cfg.kpiLabels.weighted, value: fmt(kpis.weighted, currency), sub: isRTL ? 'مُعدَّل حسب الاحتمالية' : 'probability-adjusted', icon: BarChart3, color: 'text-violet-600', bg: 'bg-violet-100', accent: 'border-l-4 border-l-violet-500' },
-          { label: isRTL ? cfg.kpiLabels.winRateAr : cfg.kpiLabels.winRate, value: `${kpis.winRate.toFixed(1)}%`, sub: isRTL ? `متوسط الصفقة: ${fmt(kpis.avgDealSize, currency)}` : `Avg deal: ${fmt(kpis.avgDealSize, currency)}`, icon: TrendingUp, color: kpis.winRate >= 25 ? 'text-emerald-600' : 'text-orange-500', bg: kpis.winRate >= 25 ? 'bg-emerald-100' : 'bg-orange-100', accent: kpis.winRate >= 25 ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-orange-400' },
+          { label: isRTL ? cfg.kpiLabels.revenueAr : cfg.kpiLabels.revenue, value: fmt(kpis.totalRevenue, currency), sub: isRTL ? `${kpis.wonCount} ${cfg.dealLabelAr} مُغلق` : `${kpis.wonCount} ${cfg.dealLabel}s closed`, icon: DollarSign, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/30', accent: 'border-l-4 border-l-emerald-500' },
+          { label: isRTL ? cfg.kpiLabels.pipelineAr : cfg.kpiLabels.pipeline, value: fmt(kpis.pipeline, currency), sub: isRTL ? `${kpis.activeCount} نشط` : `${kpis.activeCount} active`, icon: GitMerge, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30', accent: 'border-l-4 border-l-blue-500' },
+          { label: isRTL ? cfg.kpiLabels.weightedAr : cfg.kpiLabels.weighted, value: fmt(kpis.weighted, currency), sub: isRTL ? 'مُعدَّل حسب الاحتمالية' : 'probability-adjusted', icon: BarChart3, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-900/30', accent: 'border-l-4 border-l-violet-500' },
+          { label: isRTL ? cfg.kpiLabels.winRateAr : cfg.kpiLabels.winRate, value: `${kpis.winRate.toFixed(1)}%`, sub: isRTL ? `متوسط الصفقة: ${fmt(kpis.avgDealSize, currency)}` : `Avg deal: ${fmt(kpis.avgDealSize, currency)}`, icon: TrendingUp, color: kpis.winRate >= 25 ? 'text-emerald-600 dark:text-emerald-400' : 'text-orange-500', bg: kpis.winRate >= 25 ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-orange-100 dark:bg-orange-900/30', accent: kpis.winRate >= 25 ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-orange-400' },
         ].map(card => (
           <div key={card.label} className={`rounded-xl bg-card border border-border shadow-sm p-3 flex flex-col gap-2 min-w-0 overflow-hidden ${card.accent}`}>
             <div className="flex items-center justify-between">
@@ -765,7 +765,7 @@ export default function SalesTracker() {
                       </div>
                       <p className="text-xs font-medium text-muted-foreground">{fmt(total, currency)}</p>
                     </div>
-                    <div className={`flex-1 space-y-2 p-2 rounded-b-xl border border-t-0 border-border min-h-[200px] ${isWon ? 'bg-emerald-50/40' : isLost ? 'bg-red-50/40' : 'bg-muted/10'}`}>
+                    <div className={`flex-1 space-y-2 p-2 rounded-b-xl border border-t-0 border-border min-h-[200px] ${isWon ? 'bg-emerald-50 dark:bg-emerald-950/30/40' : isLost ? 'bg-red-50 dark:bg-red-950/30/40' : 'bg-muted/10'}`}>
                       {deals.map(deal => <DealCard key={deal.id} deal={deal} />)}
                       {deals.length === 0 && (
                         <div className="flex flex-col items-center justify-center py-8 gap-1">
@@ -814,7 +814,7 @@ export default function SalesTracker() {
                     <span className="text-sm font-bold text-foreground">{fmt(deal.amount, deal.currency)}</span>
                     <div className="flex gap-1">
                       <button onClick={() => openEdit(deal)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground"><Edit2 className="w-3.5 h-3.5" /></button>
-                      <button onClick={() => deleteMutation.mutate({ id: deal.id })} className="p-1.5 rounded-lg hover:bg-red-50 text-muted-foreground hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => deleteMutation.mutate({ id: deal.id })} className="p-1.5 rounded-lg hover:bg-red-50 dark:bg-red-950/30 text-muted-foreground hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </div>
                 </div>
@@ -908,10 +908,10 @@ export default function SalesTracker() {
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 w-full min-w-0">
             {[
-              { label: isRTL ? cfg.unitEconLabels.arpcAr : cfg.unitEconLabels.arpc, value: fmt(unitEcon.arpc, currency), sub: isRTL ? `من ${kpis.wonCount} ${cfg.dealLabelAr} مُغلق` : `from ${kpis.wonCount} closed ${cfg.dealLabel}s`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-100', accent: 'border-l-4 border-l-emerald-500' },
-              { label: isRTL ? cfg.unitEconLabels.ltvAr : cfg.unitEconLabels.ltv, value: unitEcon.ltv > 0 ? fmt(unitEcon.ltv, currency) : '—', sub: isRTL ? `عند ${churnRatePct}% معدل تراجع` : `at ${churnRatePct}% churn`, icon: Repeat, color: 'text-blue-600', bg: 'bg-blue-100', accent: 'border-l-4 border-l-blue-500' },
-              { label: isRTL ? 'نسبة LTV/CAC' : 'LTV / CAC Ratio', value: cacInput > 0 ? `${unitEcon.ltvCacRatio.toFixed(1)}x` : '—', sub: unitEcon.ltvCacRatio >= 3 ? (isRTL ? '✓ ممتاز (≥ 3x)' : '✓ Excellent (≥ 3x)') : unitEcon.ltvCacRatio >= 1 ? (isRTL ? '⚠ مقبول (1–3x)' : '⚠ Acceptable (1–3x)') : (isRTL ? '✗ تحت الهدف' : '✗ Below target'), icon: Activity, color: unitEcon.ltvCacRatio >= 3 ? 'text-emerald-600' : unitEcon.ltvCacRatio >= 1 ? 'text-yellow-600' : 'text-red-500', bg: unitEcon.ltvCacRatio >= 3 ? 'bg-emerald-100' : unitEcon.ltvCacRatio >= 1 ? 'bg-yellow-100' : 'bg-red-100', accent: unitEcon.ltvCacRatio >= 3 ? 'border-l-4 border-l-emerald-500' : unitEcon.ltvCacRatio >= 1 ? 'border-l-4 border-l-yellow-400' : 'border-l-4 border-l-red-400' },
-              { label: isRTL ? cfg.unitEconLabels.paybackAr : cfg.unitEconLabels.payback, value: cacInput > 0 && unitEcon.paybackMonths > 0 ? `${unitEcon.paybackMonths.toFixed(1)} ${isRTL ? 'شهر' : 'mo'}` : '—', sub: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? (isRTL ? '✓ جيد (≤ 12 شهر)' : '✓ Good (≤ 12 mo)') : unitEcon.paybackMonths > 12 ? (isRTL ? '⚠ طويل (> 12 شهر)' : '⚠ Long (> 12 mo)') : (isRTL ? 'أدخل CAC للحساب' : 'Enter CAC to compute'), icon: Clock, color: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'text-emerald-600' : 'text-orange-500', bg: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'bg-emerald-100' : 'bg-orange-100', accent: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-orange-400' },
+              { label: isRTL ? cfg.unitEconLabels.arpcAr : cfg.unitEconLabels.arpc, value: fmt(unitEcon.arpc, currency), sub: isRTL ? `من ${kpis.wonCount} ${cfg.dealLabelAr} مُغلق` : `from ${kpis.wonCount} closed ${cfg.dealLabel}s`, icon: DollarSign, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/30', accent: 'border-l-4 border-l-emerald-500' },
+              { label: isRTL ? cfg.unitEconLabels.ltvAr : cfg.unitEconLabels.ltv, value: unitEcon.ltv > 0 ? fmt(unitEcon.ltv, currency) : '—', sub: isRTL ? `عند ${churnRatePct}% معدل تراجع` : `at ${churnRatePct}% churn`, icon: Repeat, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30', accent: 'border-l-4 border-l-blue-500' },
+              { label: isRTL ? 'نسبة LTV/CAC' : 'LTV / CAC Ratio', value: cacInput > 0 ? `${unitEcon.ltvCacRatio.toFixed(1)}x` : '—', sub: unitEcon.ltvCacRatio >= 3 ? (isRTL ? '✓ ممتاز (≥ 3x)' : '✓ Excellent (≥ 3x)') : unitEcon.ltvCacRatio >= 1 ? (isRTL ? '⚠ مقبول (1–3x)' : '⚠ Acceptable (1–3x)') : (isRTL ? '✗ تحت الهدف' : '✗ Below target'), icon: Activity, color: unitEcon.ltvCacRatio >= 3 ? 'text-emerald-600 dark:text-emerald-400' : unitEcon.ltvCacRatio >= 1 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-500', bg: unitEcon.ltvCacRatio >= 3 ? 'bg-emerald-100 dark:bg-emerald-900/30' : unitEcon.ltvCacRatio >= 1 ? 'bg-yellow-100 dark:bg-yellow-900/30' : 'bg-red-100 dark:bg-red-900/30', accent: unitEcon.ltvCacRatio >= 3 ? 'border-l-4 border-l-emerald-500' : unitEcon.ltvCacRatio >= 1 ? 'border-l-4 border-l-yellow-400' : 'border-l-4 border-l-red-400' },
+              { label: isRTL ? cfg.unitEconLabels.paybackAr : cfg.unitEconLabels.payback, value: cacInput > 0 && unitEcon.paybackMonths > 0 ? `${unitEcon.paybackMonths.toFixed(1)} ${isRTL ? 'شهر' : 'mo'}` : '—', sub: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? (isRTL ? '✓ جيد (≤ 12 شهر)' : '✓ Good (≤ 12 mo)') : unitEcon.paybackMonths > 12 ? (isRTL ? '⚠ طويل (> 12 شهر)' : '⚠ Long (> 12 mo)') : (isRTL ? 'أدخل CAC للحساب' : 'Enter CAC to compute'), icon: Clock, color: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'text-emerald-600 dark:text-emerald-400' : 'text-orange-500', bg: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-orange-100 dark:bg-orange-900/30', accent: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-orange-400' },
             ].map(card => (
               <div key={card.label} className={`rounded-xl bg-card border border-border shadow-sm p-3 flex flex-col gap-2 min-w-0 overflow-hidden ${card.accent}`}>
                 <div className="flex items-center justify-between">

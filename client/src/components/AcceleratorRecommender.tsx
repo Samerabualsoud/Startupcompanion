@@ -103,7 +103,7 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
                 {TIER_LABELS[acc.tier]}
               </span>
               {acc.remote && (
-                <span className="text-[10px] font-mono text-green-600 border border-green-200 bg-green-50 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-mono text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 px-2 py-0.5 rounded-full">
                   Remote-friendly
                 </span>
               )}

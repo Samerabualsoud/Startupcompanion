@@ -51,17 +51,17 @@ function InfoTip({ text }: { text: string }) {
 
 function StatusBadge({ verified }: { verified: boolean | null }) {
   if (verified === true) return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
       <CheckCircle2 className="w-3 h-3" /> Verified
     </span>
   );
   if (verified === false) return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
       <XCircle className="w-3 h-3" /> Rejected
     </span>
   );
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
       <Clock className="w-3 h-3" /> Pending
     </span>
   );
@@ -81,7 +81,7 @@ function StatCard({ label, value, icon: Icon, color, sub, tooltip }: {
           {tooltip && <InfoTip text={tooltip} />}
         </div>
         <div className="text-xs text-muted-foreground">{label}</div>
-        {sub && <div className="text-[10px] text-amber-600 font-medium mt-0.5">{sub}</div>}
+        {sub && <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium mt-0.5">{sub}</div>}
       </div>
     </div>
   );
@@ -111,7 +111,7 @@ function KycEntryCard({ entry, type, onVerify, onTogglePublic, isUpdating }: {
           <span className="font-semibold text-sm text-foreground">{name}</span>
           <StatusBadge verified={entry.isVerified ?? null} />
           {entry.isPublic ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
               <Eye className="w-3 h-3" /> Public
             </span>
           ) : (
@@ -151,7 +151,7 @@ function KycEntryCard({ entry, type, onVerify, onTogglePublic, isUpdating }: {
         {entry.isVerified !== false && (
           <Button variant="outline" size="sm" disabled={isUpdating}
             onClick={() => onVerify(entry.id, false)}
-            className="h-7 text-xs gap-1 text-red-600 border-red-200 hover:bg-red-50">
+            className="h-7 text-xs gap-1 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-50 dark:bg-red-950/30">
             <XCircle className="w-3 h-3" /> Reject
           </Button>
         )}
@@ -340,7 +340,7 @@ export default function AdminDashboard() {
         </div>
         <div className="flex items-center gap-2">
           {(pendingKycCount > 0 || (stats?.pendingSubmissions ?? 0) > 0) && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
               <Bell className="w-3.5 h-3.5" />
               {pendingKycCount + (stats?.pendingSubmissions ?? 0)} pending
             </div>
@@ -494,7 +494,7 @@ export default function AdminDashboard() {
                       <div className="min-w-0">
                         <div className="font-medium text-sm text-foreground truncate flex items-center gap-1">
                           {u.name ?? 'Unnamed'}
-                          {u.isBanned && <span className="text-[10px] text-red-600 font-bold">[BANNED]</span>}
+                          {u.isBanned && <span className="text-[10px] text-red-600 dark:text-red-400 font-bold">[BANNED]</span>}
                         </div>
                         <div className="text-xs text-muted-foreground flex items-center gap-1 truncate">
                           <Mail className="w-2.5 h-2.5 shrink-0" />{u.email}
@@ -513,19 +513,19 @@ export default function AdminDashboard() {
                     </div>
                     <div className="px-2">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-semibold whitespace-nowrap ${
-                        u.role === 'admin' ? 'bg-amber-100 text-amber-700' : 'bg-secondary text-muted-foreground'
+                        u.role === 'admin' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' : 'bg-secondary text-muted-foreground'
                       }`}>{u.role}</span>
                     </div>
                     <div className="px-2">
                       <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${
-                        u.subscriptionStatus === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-secondary text-muted-foreground'
+                        u.subscriptionStatus === 'active' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-secondary text-muted-foreground'
                       }`}>{u.subscriptionPlan ?? u.subscriptionStatus ?? 'free'}</span>
                     </div>
                     <div className="px-2">
                       {u.isBanned ? (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-semibold whitespace-nowrap">Banned</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-semibold whitespace-nowrap">Banned</span>
                       ) : (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap">Active</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 whitespace-nowrap">Active</span>
                       )}
                     </div>
                     <div className="px-2 text-xs text-muted-foreground whitespace-nowrap">
@@ -548,7 +548,7 @@ export default function AdminDashboard() {
                           }
                         }}
                         disabled={banUserMutation.isPending}
-                        className={`h-7 text-xs whitespace-nowrap ${u.isBanned ? 'text-emerald-600 border-emerald-200 hover:bg-emerald-50' : 'text-orange-600 border-orange-200 hover:bg-orange-50'}`}>
+                        className={`h-7 text-xs whitespace-nowrap ${u.isBanned ? 'text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-50 dark:bg-emerald-950/30' : 'text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-800 hover:bg-orange-50 dark:bg-orange-950/30'}`}>
                         {u.isBanned ? <><Unlock className="w-3 h-3" /></> : <><Ban className="w-3 h-3" /></>}
                       </Button>
                       <Button variant="outline" size="sm"
@@ -558,7 +558,7 @@ export default function AdminDashboard() {
                           }
                         }}
                         disabled={deleteUserMutation.isPending}
-                        className="h-7 text-xs text-red-600 border-red-200 hover:bg-red-50">
+                        className="h-7 text-xs text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-50 dark:bg-red-950/30">
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
@@ -586,7 +586,7 @@ export default function AdminDashboard() {
               {(['vcs', 'angels', 'lawyers', 'startups'] as const).map(t => (
                 <button key={t} onClick={() => setKycTypeFilter(t)}
                   className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all capitalize ${
-                    kycTypeFilter === t ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'
+                    kycTypeFilter === t ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'
                   }`}>{t}</button>
               ))}
             </div>
@@ -644,7 +644,7 @@ export default function AdminDashboard() {
               {([undefined, 'pending', 'approved', 'rejected'] as const).map(s => (
                 <button key={String(s)} onClick={() => setSubmissionStatusFilter(s)}
                   className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all capitalize ${
-                    submissionStatusFilter === s ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'
+                    submissionStatusFilter === s ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'
                   }`}>{s ?? 'All'}</button>
               ))}
             </div>
@@ -673,9 +673,9 @@ export default function AdminDashboard() {
                           </span>
                           <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground capitalize">{sub.type}</span>
                           <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
-                            sub.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                            sub.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
-                            'bg-red-100 text-red-700'
+                            sub.status === 'pending' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
+                            sub.status === 'approved' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' :
+                            'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                           }`}>{sub.status}</span>
                         </div>
                         <p className="text-xs text-muted-foreground">
@@ -696,7 +696,7 @@ export default function AdminDashboard() {
                           onClick={() => reviewSubmissionMutation.mutate({ id: sub.id, status: 'approved', adminNote: reviewNote[sub.id] })}>
                           <CheckCircle2 className="w-3 h-3" /> Approve
                         </Button>
-                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-50 dark:bg-red-950/30"
                           disabled={reviewSubmissionMutation.isPending}
                           onClick={() => reviewSubmissionMutation.mutate({ id: sub.id, status: 'rejected', adminNote: reviewNote[sub.id] })}>
                           <XCircle className="w-3 h-3" /> Reject
@@ -746,7 +746,7 @@ export default function AdminDashboard() {
                       <div className="text-xs text-foreground">{v.userName ?? 'Unknown'}</div>
                       <div className="text-[10px] text-muted-foreground">{v.userEmail}</div>
                     </div>
-                    <div className="px-2 text-sm font-mono font-semibold text-emerald-600">
+                    <div className="px-2 text-sm font-mono font-semibold text-emerald-600 dark:text-emerald-400">
                       {v.blendedValue ? `$${(v.blendedValue / 1e6).toFixed(2)}M` : '—'}
                     </div>
                     <div className="px-2 text-xs text-muted-foreground whitespace-nowrap">
@@ -771,7 +771,7 @@ export default function AdminDashboard() {
                     a.href = url; a.download = 'valuations.csv'; a.click();
                     URL.revokeObjectURL(url);
                   }}
-                  className="text-xs text-indigo-600 hover:underline font-medium flex items-center gap-1"
+                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium flex items-center gap-1"
                 >
                   <FileText className="w-3.5 h-3.5" /> Export CSV
                 </button>
@@ -902,7 +902,7 @@ export default function AdminDashboard() {
                       {typeof val === 'boolean' ? (
                         <button onClick={() => setEditDraft(d => ({ ...d, [key]: !val }))}
                           className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                            val ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-secondary text-muted-foreground border-border'
+                            val ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' : 'bg-secondary text-muted-foreground border-border'
                           }`}>{val ? 'Active' : 'Inactive'}</button>
                       ) : (
                         <Input value={String(val ?? '')} onChange={e => setEditDraft(d => ({ ...d, [key]: e.target.value }))}
@@ -1017,11 +1017,11 @@ export default function AdminDashboard() {
                             <td key={c} className="px-4 py-3 max-w-[200px]">
                               {c === 'isActive' ? (
                                 <span className={`px-2 py-0.5 rounded-full font-semibold ${
-                                  item[c] ? 'bg-emerald-100 text-emerald-700' : 'bg-secondary text-muted-foreground'
+                                  item[c] ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-secondary text-muted-foreground'
                                 }`}>{item[c] ? 'Active' : 'Inactive'}</span>
                               ) : c === 'website' && item[c] ? (
                                 <a href={item[c] as string} target="_blank" rel="noreferrer"
-                                  className="text-indigo-600 hover:underline truncate block max-w-[150px]">
+                                  className="text-indigo-600 dark:text-indigo-400 hover:underline truncate block max-w-[150px]">
                                   {(item[c] as string).replace(/^https?:\/\//, '')}
                                 </a>
                               ) : c.includes('Min') || c.includes('Max') ? (
@@ -1041,7 +1041,7 @@ export default function AdminDashboard() {
                                 <FileText className="w-3.5 h-3.5" />
                               </button>
                               <button onClick={() => handleDelete(item.id as number)}
-                                className="p-1.5 rounded-lg hover:bg-red-50 transition-colors text-muted-foreground hover:text-red-600"
+                                className="p-1.5 rounded-lg hover:bg-red-50 dark:bg-red-950/30 transition-colors text-muted-foreground hover:text-red-600 dark:text-red-400"
                                 title="Delete permanently">
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -1094,7 +1094,7 @@ export default function AdminDashboard() {
                   onClick={() => updateDraft('announcementActive', !(settingsDraft.announcementActive ?? platformSettings?.announcementActive))}
                   className={`relative w-10 h-5 rounded-full transition-colors ${settingsDraft.announcementActive ?? platformSettings?.announcementActive ? 'bg-indigo-500' : 'bg-secondary'}`}
                 >
-                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${settingsDraft.announcementActive ?? platformSettings?.announcementActive ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-card shadow transition-transform ${settingsDraft.announcementActive ?? platformSettings?.announcementActive ? 'translate-x-5' : 'translate-x-0.5'}`} />
                 </button>
               </div>
               <div>
@@ -1121,10 +1121,10 @@ export default function AdminDashboard() {
                       onClick={() => updateDraft('announcementType', t)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all border ${
                         (settingsDraft.announcementType ?? platformSettings?.announcementType) === t
-                          ? t === 'info' ? 'bg-blue-100 text-blue-700 border-blue-300'
-                            : t === 'warning' ? 'bg-amber-100 text-amber-700 border-amber-300'
-                            : t === 'success' ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
-                            : 'bg-red-100 text-red-700 border-red-300'
+                          ? t === 'info' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-700'
+                            : t === 'warning' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700'
+                            : t === 'success' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700'
+                            : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-300 dark:border-red-700'
                           : 'border-border text-muted-foreground hover:bg-secondary/50'
                       }`}>{t}</button>
                   ))}
@@ -1153,7 +1153,7 @@ export default function AdminDashboard() {
                   onClick={() => updateDraft('allowNewRegistrations', !(settingsDraft.allowNewRegistrations ?? platformSettings?.allowNewRegistrations ?? true))}
                   className={`relative w-10 h-5 rounded-full transition-colors ${settingsDraft.allowNewRegistrations ?? platformSettings?.allowNewRegistrations ?? true ? 'bg-emerald-500' : 'bg-secondary'}`}
                 >
-                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${settingsDraft.allowNewRegistrations ?? platformSettings?.allowNewRegistrations ?? true ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-card shadow transition-transform ${settingsDraft.allowNewRegistrations ?? platformSettings?.allowNewRegistrations ?? true ? 'translate-x-5' : 'translate-x-0.5'}`} />
                 </button>
               </div>
 
@@ -1169,7 +1169,7 @@ export default function AdminDashboard() {
                   onClick={() => updateDraft('maintenanceMode', !(settingsDraft.maintenanceMode ?? platformSettings?.maintenanceMode))}
                   className={`relative w-10 h-5 rounded-full transition-colors ${settingsDraft.maintenanceMode ?? platformSettings?.maintenanceMode ? 'bg-red-500' : 'bg-secondary'}`}
                 >
-                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${settingsDraft.maintenanceMode ?? platformSettings?.maintenanceMode ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-card shadow transition-transform ${settingsDraft.maintenanceMode ?? platformSettings?.maintenanceMode ? 'translate-x-5' : 'translate-x-0.5'}`} />
                 </button>
               </div>
 
@@ -1196,7 +1196,7 @@ export default function AdminDashboard() {
             <div className="text-xs text-muted-foreground leading-relaxed">
               <strong>Note: </strong>Settings are saved to the database and take effect immediately. To manage individual resource entries (VCs, angels, grants, lawyers), use the <strong>Database</strong> panel in the Management UI sidebar.
               {platformSettings?.updatedAt && (
-                <span className="block mt-1 text-blue-600">Last updated: {new Date(platformSettings.updatedAt).toLocaleString()}</span>
+                <span className="block mt-1 text-blue-600 dark:text-blue-400">Last updated: {new Date(platformSettings.updatedAt).toLocaleString()}</span>
               )}
             </div>
           </div>

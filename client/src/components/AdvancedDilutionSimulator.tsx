@@ -222,7 +222,7 @@ export default function AdvancedDilutionSimulator() {
             {lang === 'ar' ? 'يُقرأ المؤسسون ومجموعة ESOP من جدول الملكية. حدّد نسبة التخفيف لكل جولة لترى كيف تتطور الملكية من ما قبل البذرة حتى السلسلة هـ.' : 'Founders and ESOP pool are read from the Cap Table. Set dilution per round to see how ownership evolves from Pre-Seed through Series E.'}
           </p>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-full shrink-0">
+        <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 px-2 py-1 rounded-full shrink-0">
           <Link2 className="w-3 h-3" />
           <span>{lang === 'ar' ? 'متزامن مع جدول الملكية' : 'Synced with Cap Table'}</span>
         </div>
@@ -265,7 +265,7 @@ export default function AdvancedDilutionSimulator() {
         <div className="px-4 py-3 border-t border-border bg-secondary/20 flex items-center gap-3 flex-wrap">
           <div className="w-3 h-3 rounded-full bg-purple-400 shrink-0" />
           <span className="text-sm font-medium text-foreground flex-1">{lang === 'ar' ? 'مجموعة خيارات الموظفين (ESOP)' : 'Employee Option Pool (ESOP)'}</span>
-          <span className="text-xs font-bold text-purple-600">{esopInitialPct.toFixed(1)}%</span>
+          <span className="text-xs font-bold text-purple-600 dark:text-purple-400">{esopInitialPct.toFixed(1)}%</span>
           <span className="text-[10px] text-muted-foreground">({capState.esop.totalPoolShares.toLocaleString()} shares)</span>
         </div>
       </div>
@@ -300,7 +300,7 @@ export default function AdvancedDilutionSimulator() {
                   className="w-9 h-5 rounded-full transition-all relative shrink-0"
                   style={{ background: round.enabled ? round.color : '#F3F4F6' }}
                 >
-                  <div className="w-3.5 h-3.5 rounded-full bg-white absolute top-0.5 transition-all"
+                  <div className="w-3.5 h-3.5 rounded-full bg-card absolute top-0.5 transition-all"
                     style={{ left: round.enabled ? '18px' : '2px' }} />
                 </button>
                 <div className="w-3 h-3 rounded-full shrink-0" style={{ background: round.color }} />
@@ -433,7 +433,7 @@ export default function AdvancedDilutionSimulator() {
         </div>
       </div>
 
-      <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-700 leading-relaxed">
+      <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
         <strong>Note:</strong> This models economic dilution only. Actual ownership depends on option pool refreshes, convertible notes, SAFEs, and pro-rata rights. Always model with a cap table tool (e.g., Carta, Pulley) before signing term sheets.
       </div>
     </div>

@@ -67,10 +67,10 @@ function NoteCard({
   const effectiveDiscount = nextRoundPrice > 0 ? ((nextRoundPrice - convPrice) / nextRoundPrice * 100) : 0;
 
   const statusColors: Record<string, string> = {
-    active: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-    converted: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+    active: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
+    converted: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800',
     repaid: 'bg-slate-100 text-slate-600 border-slate-200',
-    cancelled: 'bg-red-100 text-red-600 border-red-200',
+    cancelled: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800',
   };
 
   return (
@@ -83,8 +83,8 @@ function NoteCard({
     >
       {/* Header */}
       <div className="p-4 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
-          <FileText className="w-5 h-5 text-indigo-600" />
+        <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center shrink-0">
+          <FileText className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -98,7 +98,7 @@ function NoteCard({
             <span>·</span>
             <span>Cap: {fmt(note.valuationCap, note.currency)}</span>
             <span>·</span>
-            <span className={daysLeft < 0 ? 'text-red-500 font-semibold' : daysLeft < 90 ? 'text-amber-600 font-semibold' : ''}>
+            <span className={daysLeft < 0 ? 'text-red-500 font-semibold' : daysLeft < 90 ? 'text-amber-600 dark:text-amber-400 font-semibold' : ''}>
               {daysLeft < 0 ? `Matured ${Math.abs(daysLeft)}d ago` : `${daysLeft}d to maturity`}
             </span>
           </div>
@@ -107,7 +107,7 @@ function NoteCard({
         {/* Conversion preview */}
         {nextRoundPrice > 0 && note.status === 'active' && (
           <div className="hidden sm:flex flex-col items-end shrink-0 text-right">
-            <div className="text-xs font-bold text-indigo-600">{sharesReceived.toLocaleString()} shares</div>
+            <div className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{sharesReceived.toLocaleString()} shares</div>
             <div className="text-[10px] text-muted-foreground">{effectiveDiscount.toFixed(1)}% eff. discount</div>
           </div>
         )}
@@ -116,7 +116,7 @@ function NoteCard({
           <button onClick={() => setExpanded(v => !v)} className="p-1.5 rounded-lg hover:bg-secondary transition-colors text-muted-foreground">
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
-          <button onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors text-muted-foreground">
+          <button onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-50 dark:bg-red-950/30 hover:text-red-500 transition-colors text-muted-foreground">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -136,17 +136,17 @@ function NoteCard({
               {/* Conversion summary */}
               {nextRoundPrice > 0 && (
                 <div className="mb-4 grid grid-cols-3 gap-3">
-                  <div className="p-2.5 rounded-lg bg-indigo-50 border border-indigo-100 text-center">
-                    <div className="text-[10px] text-indigo-600 font-semibold mb-0.5">Conversion Price</div>
-                    <div className="text-sm font-bold text-indigo-700">{fmt(convPrice, note.currency)}/share</div>
+                  <div className="p-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 text-center">
+                    <div className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold mb-0.5">Conversion Price</div>
+                    <div className="text-sm font-bold text-indigo-700 dark:text-indigo-400">{fmt(convPrice, note.currency)}/share</div>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-100 text-center">
-                    <div className="text-[10px] text-emerald-600 font-semibold mb-0.5">Shares Received</div>
-                    <div className="text-sm font-bold text-emerald-700">{sharesReceived.toLocaleString()}</div>
+                  <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 text-center">
+                    <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mb-0.5">Shares Received</div>
+                    <div className="text-sm font-bold text-emerald-700 dark:text-emerald-400">{sharesReceived.toLocaleString()}</div>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-100 text-center">
-                    <div className="text-[10px] text-amber-600 font-semibold mb-0.5">Effective Discount</div>
-                    <div className="text-sm font-bold text-amber-700">{effectiveDiscount.toFixed(1)}%</div>
+                  <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-100 text-center">
+                    <div className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold mb-0.5">Effective Discount</div>
+                    <div className="text-sm font-bold text-amber-700 dark:text-amber-400">{effectiveDiscount.toFixed(1)}%</div>
                   </div>
                 </div>
               )}
@@ -342,13 +342,13 @@ export default function OQALNotes() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-full shrink-0">
+          <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 px-2 py-1 rounded-full shrink-0">
             <Link2 className="w-3 h-3" />
             <span>Synced with Cap Table</span>
           </div>
           <button
             onClick={addNote}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95 shrink-0"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-primary-foreground transition-all hover:opacity-90 active:scale-95 shrink-0"
             style={{ background: 'var(--primary)' }}
           >
             <Plus className="w-4 h-4" />
@@ -361,17 +361,17 @@ export default function OQALNotes() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {[
           {
-            icon: <DollarSign className="w-4 h-4 text-emerald-600" />, bg: 'bg-emerald-50',
+            icon: <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />, bg: 'bg-emerald-50 dark:bg-emerald-950/30',
             title: 'Qard Hassan',
             desc: 'Investor provides an interest-free loan (no riba). The principal is repayable if conversion does not occur.',
           },
           {
-            icon: <FileText className="w-4 h-4 text-indigo-600" />, bg: 'bg-indigo-50',
+            icon: <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />, bg: 'bg-indigo-50 dark:bg-indigo-950/30',
             title: 'Promise to Sell Shares',
             desc: 'A binding promise to convert the loan into equity at a discounted price upon a qualifying event (next round, maturity, or exit).',
           },
           {
-            icon: <TrendingUp className="w-4 h-4 text-amber-600" />, bg: 'bg-amber-50',
+            icon: <TrendingUp className="w-4 h-4 text-amber-600 dark:text-amber-400" />, bg: 'bg-amber-50 dark:bg-amber-950/30',
             title: 'Conversion Mechanics',
             desc: 'Investor receives shares at the lower of: (a) valuation cap price, or (b) next-round price minus discount rate.',
           },
@@ -389,9 +389,9 @@ export default function OQALNotes() {
       {/* Summary KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Total Raised via Notes', value: fmt(totalRaised, currency), icon: <DollarSign className="w-4 h-4" />, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Active Notes', value: activeCount.toString(), icon: <FileText className="w-4 h-4" />, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-          { label: 'Converted', value: convertedCount.toString(), icon: <TrendingUp className="w-4 h-4" />, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: 'Total Raised via Notes', value: fmt(totalRaised, currency), icon: <DollarSign className="w-4 h-4" />, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/30' },
+          { label: 'Active Notes', value: activeCount.toString(), icon: <FileText className="w-4 h-4" />, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-950/30' },
+          { label: 'Converted', value: convertedCount.toString(), icon: <TrendingUp className="w-4 h-4" />, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/30' },
           { label: 'Total Shares (Fully Diluted)', value: (computed?.totalSharesFullyDiluted ?? 0).toLocaleString(), icon: <Users className="w-4 h-4" />, color: 'text-slate-600', bg: 'bg-slate-50' },
         ].map((kpi, i) => (
           <div key={i} className="p-3.5 rounded-xl border border-border bg-card">
@@ -433,7 +433,7 @@ export default function OQALNotes() {
       {/* Notes list */}
       {oqalNotes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center mb-4">
             <Shield className="w-8 h-8 text-emerald-400" />
           </div>
           <h3 className="text-base font-semibold text-foreground mb-2">No OQAL Notes yet</h3>
@@ -442,7 +442,7 @@ export default function OQALNotes() {
           </p>
           <button
             onClick={addNote}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-primary-foreground transition-all hover:opacity-90 active:scale-95"
             style={{ background: 'var(--primary)' }}
           >
             <Plus className="w-4 h-4" />
@@ -475,12 +475,12 @@ export default function OQALNotes() {
       )}
 
       {/* Shariah compliance note */}
-      <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50">
+      <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30">
         <div className="flex items-start gap-2.5">
-          <Shield className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+          <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
           <div>
-            <div className="text-sm font-semibold text-emerald-800 mb-1">Shariah Compliance Note</div>
-            <p className="text-xs text-emerald-700 leading-relaxed">
+            <div className="text-sm font-semibold text-emerald-800 dark:text-emerald-300 mb-1">Shariah Compliance Note</div>
+            <p className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed">
               The OQAL Note is structured to comply with Islamic Shariah principles by using <strong>Qard Hassan</strong> (interest-free loan) instead of interest-bearing debt. The "conversion" is implemented as a <strong>Promise to Sell Shares (Wa'd Bi Al-Bay')</strong> — a binding unilateral promise by the startup to sell shares to the investor at a future date. This structure was developed by OQAL (Saudi Angel Investors Network) in 2021 and is compliant with both Saudi Arabian law and English law. Always consult a qualified Shariah advisor before issuing notes.
             </p>
           </div>

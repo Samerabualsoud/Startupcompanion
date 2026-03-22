@@ -276,7 +276,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
           </div>
           <div className="flex flex-col gap-2">
             <button onClick={() => { generatePDFReport(inputs, summary); toast.success('Opening print dialog…'); }}
-              className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-md border border-white/20 text-white/80 hover:bg-white/10 transition-all whitespace-nowrap">
+              className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-md border border-primary-foreground/20 text-primary-foreground/80 hover:bg-primary-foreground/10 transition-all whitespace-nowrap">
               <FileDown className="w-3.5 h-3.5" />
               {isRTL ? 'تقرير PDF' : 'PDF Report'}
             </button>
@@ -295,7 +295,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
                 <input value={scenarioName} onChange={e => setScenarioName(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSaveScenario()}
                   placeholder={isRTL ? 'سمّ هذا السيناريو…' : 'Name this scenario…'}
-                  className="flex-1 text-xs px-3 py-2 rounded-md border border-white/20 bg-white/10 text-white placeholder:text-white/40 outline-none focus:border-accent"
+                  className="flex-1 text-xs px-3 py-2 rounded-md border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/40 outline-none focus:border-accent"
                   autoFocus />
                 <button onClick={handleSaveScenario} className="text-xs px-3 py-2 rounded-md bg-accent text-white font-medium hover:bg-accent/80 transition-colors">{isRTL ? 'حفظ' : 'Save'}</button>
               </div>
@@ -455,9 +455,9 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
             </div>
 
             {/* MENA Benchmark Context & Disclaimer */}
-            <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 overflow-hidden">
+            <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 overflow-hidden">
               <div className="px-4 py-2.5 border-b border-amber-200 dark:border-amber-800 flex items-center gap-2">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                 <span className="text-xs font-semibold text-amber-800 dark:text-amber-400">{isRTL ? 'السياق والمعايير المرجعية' : 'Context & Market Benchmarks'}</span>
               </div>
               <div className="p-4 space-y-3 text-[11px] text-amber-900 dark:text-amber-300 leading-relaxed">

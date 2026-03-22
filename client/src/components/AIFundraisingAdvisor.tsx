@@ -140,7 +140,7 @@ export default function AIFundraisingAdvisor() {
       {hasProfile && messages.length === 0 && (
         <div className="shrink-0 px-4 py-2.5 border-b border-border bg-green-50 dark:bg-green-950/20">
           <div className="flex items-start gap-2">
-            <CheckCircle2 className="w-3.5 h-3.5 text-green-600 mt-0.5 shrink-0" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
             <div className="text-[11px] text-green-700 dark:text-green-400">
               <span className="font-semibold">Profile loaded:</span>{' '}
               Advice is personalized for{' '}
@@ -158,7 +158,7 @@ export default function AIFundraisingAdvisor() {
       {!hasProfile && messages.length === 0 && (
         <div className="shrink-0 px-4 py-2.5 border-b border-border bg-amber-50 dark:bg-amber-950/20">
           <div className="flex items-start gap-2">
-            <AlertCircle className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
+            <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
             <div className="text-[11px] text-amber-700 dark:text-amber-400">
               <span className="font-semibold">Tip:</span> Fill in your{' '}
               <span className="font-semibold">Company Profile</span> to get personalized advice based on your sector, stage, metrics, and fundraising target.
@@ -246,7 +246,7 @@ export default function AIFundraisingAdvisor() {
             className="flex-1 text-sm"
             disabled={isLoading}
           />
-          <Button type="submit" disabled={!input.trim() || isLoading} size="icon" className="shrink-0" style={{ background: 'var(--primary)', color: 'white' }}>
+          <Button type="submit" disabled={!input.trim() || isLoading} size="icon" className="shrink-0" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </Button>
         </form>

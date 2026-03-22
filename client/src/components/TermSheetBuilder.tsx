@@ -381,7 +381,7 @@ export default function TermSheetBuilder() {
           <div className="space-y-4">
             {generatedContent ? (
               <>
-                <div className="flex items-center gap-2 text-green-600">
+                <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
                   <CheckCircle2 className="w-5 h-5" />
                   <span className="font-medium text-sm">Term sheet generated successfully</span>
                 </div>
@@ -439,7 +439,7 @@ export default function TermSheetBuilder() {
           <div key={s} className="flex items-center gap-1 shrink-0">
             <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
               i === step ? 'bg-primary text-primary-foreground' :
-              i < step ? 'bg-green-100 text-green-700' :
+              i < step ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
               'bg-muted text-muted-foreground'
             }`}>
               {i < step ? <CheckCircle2 className="w-3 h-3" /> : <span>{i + 1}</span>}
@@ -492,7 +492,7 @@ export default function TermSheetBuilder() {
       )}
 
       {/* Disclaimer */}
-      <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800">
+      <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300">
         <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
         <p className="text-xs">
           <strong>Legal Disclaimer:</strong> This tool generates template term sheets for educational and drafting purposes only. Always review with a qualified attorney before signing or distributing any legal documents.

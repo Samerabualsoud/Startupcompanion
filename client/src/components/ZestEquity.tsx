@@ -62,9 +62,9 @@ function instrLabel(t: 'safe' | 'convertible_note' | 'oqal_note'): string {
 
 function instrColor(t: 'safe' | 'convertible_note' | 'oqal_note'): string {
   switch (t) {
-    case 'safe': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
-    case 'convertible_note': return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
-    case 'oqal_note': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+    case 'safe': return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+    case 'convertible_note': return 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+    case 'oqal_note': return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
   }
 }
 
@@ -354,7 +354,7 @@ export default function ZestEquity() {
           <div className="p-3.5 rounded-xl border border-border bg-card">
             <div className="flex items-center justify-between">
               <div className="text-sm font-semibold text-foreground">Conversion Scenario</div>
-              <button onClick={() => setShowConversion(v => !v)} className="text-xs text-indigo-600 flex items-center gap-1">
+              <button onClick={() => setShowConversion(v => !v)} className="text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
                 {showConversion ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                 {showConversion ? 'Hide' : 'Show'} preview
               </button>
@@ -414,9 +414,9 @@ export default function ZestEquity() {
                 <thead>
                   <tr className="border-b border-border">
                     <th className="text-left py-2 pr-4 text-muted-foreground font-medium">Feature</th>
-                    <th className="text-center py-2 px-3 text-amber-600 font-semibold">SAFE Note</th>
-                    <th className="text-center py-2 px-3 text-orange-600 font-semibold">Conv. Note</th>
-                    <th className="text-center py-2 px-3 text-emerald-600 font-semibold">OQAL Note</th>
+                    <th className="text-center py-2 px-3 text-amber-600 dark:text-amber-400 font-semibold">SAFE Note</th>
+                    <th className="text-center py-2 px-3 text-orange-600 dark:text-orange-400 font-semibold">Conv. Note</th>
+                    <th className="text-center py-2 px-3 text-emerald-600 dark:text-emerald-400 font-semibold">OQAL Note</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -494,9 +494,9 @@ export default function ZestEquity() {
               </select>
             </div>
           </div>
-          <div className="p-3.5 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900">
+          <div className="p-3.5 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900">
             <div className="flex gap-2">
-              <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               <div className="text-xs text-amber-700 dark:text-amber-400">
                 <strong>Connected tools:</strong> Co-Founder Equity Split, Dilution Simulator, and OQAL Notes all read from this cap table. Changes here are reflected across all equity tools instantly.
               </div>
@@ -535,7 +535,7 @@ function ShareholderRow({
             <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">
               {holderTypeLabel(holder.type)}
             </span>
-            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
+            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
               {shareClassLabel(holder.shareClass)}
             </span>
           </div>
@@ -558,7 +558,7 @@ function ShareholderRow({
           <button onClick={() => setExpanded(v => !v)} className="p-1.5 rounded-lg hover:bg-secondary transition-colors text-muted-foreground">
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
-          <button onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors text-muted-foreground">
+          <button onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-50 dark:bg-red-950/30 hover:text-red-500 transition-colors text-muted-foreground">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -677,7 +677,7 @@ function InstrumentRow({
               {instrLabel(instrument.type)}
             </span>
             <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
-              instrument.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-secondary text-muted-foreground'
+              instrument.status === 'active' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-secondary text-muted-foreground'
             }`}>
               {instrument.status}
             </span>
@@ -695,7 +695,7 @@ function InstrumentRow({
           <button onClick={() => setExpanded(v => !v)} className="p-1.5 rounded-lg hover:bg-secondary transition-colors text-muted-foreground">
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
-          <button onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors text-muted-foreground">
+          <button onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-50 dark:bg-red-950/30 hover:text-red-500 transition-colors text-muted-foreground">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -926,9 +926,9 @@ function GrantRow({
   const contractText = showContract ? generateEsopContract(grant, esop, companyName) : '';
 
   const statusColor: Record<string, string> = {
-    active: 'bg-green-100 text-green-700',
-    terminated: 'bg-red-100 text-red-700',
-    exercised: 'bg-blue-100 text-blue-700',
+    active: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+    terminated: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
+    exercised: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
     expired: 'bg-gray-100 text-gray-600',
   };
 
@@ -941,14 +941,14 @@ function GrantRow({
             <span className="text-sm font-semibold text-foreground">{grant.employeeName || 'Unnamed'}</span>
             <span className="text-[10px] text-muted-foreground">{grant.employeeTitle}</span>
             <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${statusColor[grant.status] || 'bg-gray-100 text-gray-600'}`}>{grant.status}</span>
-            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700">{grant.planType.toUpperCase()}</span>
+            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400">{grant.planType.toUpperCase()}</span>
           </div>
           <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
             <span className="font-semibold text-foreground font-mono">{grant.shares.toLocaleString()} shares</span>
             <span>·</span>
             <span>Strike: {grant.strikePrice.toFixed(4)}</span>
             <span>·</span>
-            <span className="text-violet-600 font-semibold">{vestedShares.toLocaleString()} vested ({vestedPct.toFixed(0)}%)</span>
+            <span className="text-violet-600 dark:text-violet-400 font-semibold">{vestedShares.toLocaleString()} vested ({vestedPct.toFixed(0)}%)</span>
             <span>·</span>
             <span>{grant.vestingMonths}mo vest / {grant.cliffMonths}mo cliff</span>
           </div>
@@ -959,7 +959,7 @@ function GrantRow({
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={() => { setShowContract(v => !v); if (!expanded) setExpanded(true); }}
-            className="p-1.5 rounded-lg hover:bg-violet-50 hover:text-violet-600 transition-colors text-muted-foreground"
+            className="p-1.5 rounded-lg hover:bg-violet-50 dark:bg-violet-950/30 hover:text-violet-600 dark:text-violet-400 transition-colors text-muted-foreground"
             title="Generate grant contract"
           >
             <FileText className="w-4 h-4" />
@@ -967,7 +967,7 @@ function GrantRow({
           <button onClick={() => setExpanded(v => !v)} className="p-1.5 rounded-lg hover:bg-secondary transition-colors text-muted-foreground">
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
-          <button onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors text-muted-foreground">
+          <button onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-50 dark:bg-red-950/30 hover:text-red-500 transition-colors text-muted-foreground">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -1072,7 +1072,7 @@ function GrantRow({
                   </div>
                   <div>
                     <div className="text-muted-foreground">Vested Today</div>
-                    <div className="font-semibold text-violet-700">{vestedShares.toLocaleString()} / {grant.shares.toLocaleString()}</div>
+                    <div className="font-semibold text-violet-700 dark:text-violet-400">{vestedShares.toLocaleString()} / {grant.shares.toLocaleString()}</div>
                   </div>
                 </div>
               </div>
@@ -1106,7 +1106,7 @@ function GrantRow({
                     </div>
                   </div>
                   <pre className="text-[10px] font-mono bg-secondary/50 rounded-lg p-3 overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto border border-border">{contractText}</pre>
-                  <p className="text-[10px] text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                  <p className="text-[10px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2">
                     ⚠️ This is a computer-generated draft for reference only. Have it reviewed by a qualified legal and tax advisor before use.
                   </p>
                 </div>

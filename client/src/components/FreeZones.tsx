@@ -882,20 +882,20 @@ const TYPE_LABELS: Record<string, string> = {
   'special-economic-zone': 'SEZ',
 };
 const TYPE_COLORS: Record<string, string> = {
-  'free-zone': 'bg-blue-100 text-blue-700',
-  'offshore': 'bg-purple-100 text-purple-700',
-  'onshore': 'bg-green-100 text-green-700',
-  'special-economic-zone': 'bg-amber-100 text-amber-700',
+  'free-zone': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+  'offshore': 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
+  'onshore': 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+  'special-economic-zone': 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
 };
 const VC_FRIENDLY_COLORS: Record<string, string> = {
-  high: 'text-emerald-600',
-  medium: 'text-amber-600',
-  low: 'text-red-600',
+  high: 'text-emerald-600 dark:text-emerald-400',
+  medium: 'text-amber-600 dark:text-amber-400',
+  low: 'text-red-600 dark:text-red-400',
 };
 const VC_FRIENDLY_BG: Record<string, string> = {
-  high: 'bg-emerald-100',
-  medium: 'bg-amber-100',
-  low: 'bg-red-100',
+  high: 'bg-emerald-100 dark:bg-emerald-900/30',
+  medium: 'bg-amber-100 dark:bg-amber-900/30',
+  low: 'bg-red-100 dark:bg-red-900/30',
 };
 
 function getRegionFilter(j: Jurisdiction): string {
@@ -1024,10 +1024,10 @@ export default function FreeZones() {
           {/* Quick stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-border border-t border-border bg-card">
             {[
-              { label: lang === 'ar' ? 'ضريبة الشركات' : 'Corporate Tax', value: j.corporateTax, color: 'text-emerald-600' },
-              { label: lang === 'ar' ? 'الملكية الأجنبية' : 'Foreign Ownership', value: j.foreignOwnership, color: 'text-blue-600' },
-              { label: lang === 'ar' ? 'تكلفة الإعداد' : 'Setup Cost', value: j.setupCost, color: 'text-amber-600' },
-              { label: lang === 'ar' ? 'وقت الإعداد' : 'Setup Time', value: j.setupTime, color: 'text-violet-600' },
+              { label: lang === 'ar' ? 'ضريبة الشركات' : 'Corporate Tax', value: j.corporateTax, color: 'text-emerald-600 dark:text-emerald-400' },
+              { label: lang === 'ar' ? 'الملكية الأجنبية' : 'Foreign Ownership', value: j.foreignOwnership, color: 'text-blue-600 dark:text-blue-400' },
+              { label: lang === 'ar' ? 'تكلفة الإعداد' : 'Setup Cost', value: j.setupCost, color: 'text-amber-600 dark:text-amber-400' },
+              { label: lang === 'ar' ? 'وقت الإعداد' : 'Setup Time', value: j.setupTime, color: 'text-violet-600 dark:text-violet-400' },
             ].map(stat => (
               <div key={stat.label} className="p-3 text-center">
                 <div className="text-[10px] text-muted-foreground mb-0.5">{stat.label}</div>
@@ -1065,7 +1065,7 @@ export default function FreeZones() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-2.5 text-xs font-semibold transition-colors ${activeTab === tab ? 'text-indigo-600 border-b-2 border-indigo-500 bg-indigo-50/50' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`flex-1 py-2.5 text-xs font-semibold transition-colors ${activeTab === tab ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30/50' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 {tab === 'rules' ? (lang === 'ar' ? 'القواعد الرئيسية' : 'Key Rules') :
                  tab === 'proscons' ? (lang === 'ar' ? 'المزايا والعيوب' : 'Pros & Cons') :
@@ -1088,28 +1088,28 @@ export default function FreeZones() {
 
             {activeTab === 'proscons' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 p-3">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-600" />
-                    <span className="text-xs font-semibold text-emerald-700">{lang === 'ar' ? 'المزايا' : 'Advantages'}</span>
+                    <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">{lang === 'ar' ? 'المزايا' : 'Advantages'}</span>
                   </div>
                   <ul className="space-y-1.5">
                     {(lang === 'ar' ? j.prosAr : j.pros).map((pro, i) => (
-                      <li key={i} className="flex items-start gap-1.5 text-xs text-emerald-700">
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-emerald-700 dark:text-emerald-400">
                         <CheckCircle className="w-3 h-3 mt-0.5 shrink-0" />
                         {pro}
                       </li>
                     ))}
                   </ul>
                 </div>
-                <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+                <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-3">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <XCircle className="w-4 h-4 text-red-600" />
-                    <span className="text-xs font-semibold text-red-700">{lang === 'ar' ? 'العيوب' : 'Disadvantages'}</span>
+                    <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                    <span className="text-xs font-semibold text-red-700 dark:text-red-400">{lang === 'ar' ? 'العيوب' : 'Disadvantages'}</span>
                   </div>
                   <ul className="space-y-1.5">
                     {(lang === 'ar' ? j.consAr : j.cons).map((con, i) => (
-                      <li key={i} className="flex items-start gap-1.5 text-xs text-red-700">
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-red-700 dark:text-red-400">
                         <XCircle className="w-3 h-3 mt-0.5 shrink-0" />
                         {con}
                       </li>
@@ -1144,19 +1144,19 @@ export default function FreeZones() {
 
         {/* Ideal / Not ideal */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+          <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 p-4">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="w-4 h-4 text-emerald-600" />
-              <span className="text-sm font-semibold text-emerald-700">{lang === 'ar' ? 'مثالي لـ' : 'Ideal For'}</span>
+              <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">{lang === 'ar' ? 'مثالي لـ' : 'Ideal For'}</span>
             </div>
-            <p className="text-xs text-emerald-700 leading-relaxed">{lang === 'ar' ? j.idealForAr : j.idealFor}</p>
+            <p className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed">{lang === 'ar' ? j.idealForAr : j.idealFor}</p>
           </div>
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+          <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4">
             <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className="w-4 h-4 text-red-600" />
-              <span className="text-sm font-semibold text-red-700">{lang === 'ar' ? 'غير مثالي لـ' : 'Not Ideal For'}</span>
+              <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
+              <span className="text-sm font-semibold text-red-700 dark:text-red-400">{lang === 'ar' ? 'غير مثالي لـ' : 'Not Ideal For'}</span>
             </div>
-            <p className="text-xs text-red-700 leading-relaxed">{lang === 'ar' ? j.notIdealForAr : j.notIdealFor}</p>
+            <p className="text-xs text-red-700 dark:text-red-400 leading-relaxed">{lang === 'ar' ? j.notIdealForAr : j.notIdealFor}</p>
           </div>
         </div>
 
@@ -1166,7 +1166,7 @@ export default function FreeZones() {
             <div className="text-xs font-semibold text-muted-foreground mb-2">{lang === 'ar' ? 'الأفضل لـ' : 'Best For'}</div>
             <div className="flex flex-wrap gap-1.5">
               {j.bestFor.map(tag => (
-                <span key={tag} className="text-[11px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">{tag}</span>
+                <span key={tag} className="text-[11px] px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 font-medium">{tag}</span>
               ))}
             </div>
           </div>
@@ -1191,7 +1191,7 @@ export default function FreeZones() {
           href={j.officialUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+          className="inline-flex items-center gap-2 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:text-indigo-400 font-medium"
         >
           <Globe className="w-4 h-4" />
           {lang === 'ar' ? 'الموقع الرسمي' : 'Official Website'}
@@ -1235,12 +1235,12 @@ export default function FreeZones() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-50 p-5"
+            className="rounded-2xl border border-indigo-200 dark:border-indigo-800 bg-gradient-to-br from-indigo-50 to-violet-50 p-5"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-indigo-600" />
-                <span className="text-sm font-semibold text-indigo-700">
+                <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-400">
                   {lang === 'ar' ? 'موصي الاختصاص القضائي' : 'Jurisdiction Recommender'}
                 </span>
               </div>
@@ -1248,7 +1248,7 @@ export default function FreeZones() {
                 {Object.keys(quizAnswers).length + 1} / {QUIZ_QUESTIONS.length}
               </div>
             </div>
-            <div className="w-full bg-indigo-100 rounded-full h-1.5 mb-4">
+            <div className="w-full bg-indigo-100 dark:bg-indigo-900/30 rounded-full h-1.5 mb-4">
               <div
                 className="bg-indigo-500 h-1.5 rounded-full transition-all"
                 style={{ width: `${((Object.keys(quizAnswers).length) / QUIZ_QUESTIONS.length) * 100}%` }}
@@ -1262,7 +1262,7 @@ export default function FreeZones() {
                 <button
                   key={opt.value}
                   onClick={() => handleQuizAnswer(currentQuizQuestion.id, opt.value)}
-                  className="text-left px-4 py-3 rounded-xl border border-indigo-200 bg-white hover:border-indigo-400 hover:bg-indigo-50 transition-all text-sm font-medium text-foreground flex items-center justify-between group"
+                  className="text-left px-4 py-3 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-card hover:border-indigo-400 hover:bg-indigo-50 dark:bg-indigo-950/30 transition-all text-sm font-medium text-foreground flex items-center justify-between group"
                 >
                   <span>{lang === 'ar' ? opt.labelAr : opt.label}</span>
                   <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-indigo-500 transition-colors" />
@@ -1281,8 +1281,8 @@ export default function FreeZones() {
 
       {/* Quiz result banner */}
       {quizComplete && (
-        <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-indigo-50 border border-indigo-200">
-          <div className="flex items-center gap-2 text-sm text-indigo-700">
+        <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800">
+          <div className="flex items-center gap-2 text-sm text-indigo-700 dark:text-indigo-400">
             <Sparkles className="w-4 h-4" />
             <span className="font-medium">
               {lang === 'ar' ? 'الاختصاصات مرتبة حسب توصياتك' : 'Jurisdictions ranked by your profile'}
@@ -1290,7 +1290,7 @@ export default function FreeZones() {
           </div>
           <button
             onClick={() => { setQuizComplete(false); setQuizAnswers({}); }}
-            className="text-xs text-indigo-500 hover:text-indigo-700"
+            className="text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400"
           >
             {lang === 'ar' ? 'إعادة تعيين' : 'Reset'}
           </button>
@@ -1317,7 +1317,7 @@ export default function FreeZones() {
         {compareList.length > 0 && (
           <button
             onClick={() => setShowCompare(v => !v)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-indigo-300 text-indigo-600 hover:bg-indigo-50 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:bg-indigo-950/30 transition-all"
           >
             <BarChart3 className="w-3.5 h-3.5" />
             {lang === 'ar' ? `مقارنة (${compareList.length})` : `Compare (${compareList.length})`}
@@ -1434,9 +1434,9 @@ export default function FreeZones() {
 
                 {/* Key stats */}
                 <div className="grid grid-cols-2 gap-2 mb-3">
-                  <div className="rounded-lg bg-emerald-50 border border-emerald-100 p-2">
-                    <div className="text-[10px] text-emerald-600 font-medium">{lang === 'ar' ? 'ضريبة' : 'Tax'}</div>
-                    <div className="text-xs font-bold text-emerald-700">{j.corporateTax}</div>
+                  <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 p-2">
+                    <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">{lang === 'ar' ? 'ضريبة' : 'Tax'}</div>
+                    <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400">{j.corporateTax}</div>
                   </div>
                   <div className="rounded-lg bg-muted/50 border border-border p-2">
                     <div className="text-[10px] text-muted-foreground font-medium">{lang === 'ar' ? 'إعداد' : 'Setup'}</div>
@@ -1466,7 +1466,7 @@ export default function FreeZones() {
                   <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${VC_FRIENDLY_BG[j.vcFriendly]} ${VC_FRIENDLY_COLORS[j.vcFriendly]}`}>
                     VC: {j.vcFriendly === 'high' ? '★★★' : j.vcFriendly === 'medium' ? '★★☆' : '★☆☆'}
                   </span>
-                  <div className="flex items-center gap-1 text-[11px] text-muted-foreground group-hover:text-indigo-600 transition-colors font-medium">
+                  <div className="flex items-center gap-1 text-[11px] text-muted-foreground group-hover:text-indigo-600 dark:text-indigo-400 transition-colors font-medium">
                     {lang === 'ar' ? 'التفاصيل' : 'Details'}
                     <ArrowRight className="w-3 h-3" />
                   </div>

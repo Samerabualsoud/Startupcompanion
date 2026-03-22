@@ -35,12 +35,12 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 const TYPE_BADGE_VARIANTS: Record<string, string> = {
-  '409a': 'bg-blue-100 text-blue-800 border-blue-200',
-  'priced-round': 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  'safe': 'bg-violet-100 text-violet-800 border-violet-200',
-  'convertible-note': 'bg-amber-100 text-amber-800 border-amber-200',
+  '409a': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+  'priced-round': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+  'safe': 'bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300 border-violet-200 dark:border-violet-800',
+  'convertible-note': 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800',
   'internal': 'bg-slate-100 text-slate-700 border-slate-200',
-  'other': 'bg-rose-100 text-rose-800 border-rose-200',
+  'other': 'bg-rose-100 dark:bg-rose-900/30 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800',
 };
 
 function formatCurrency(val: number | null | undefined): string {
@@ -328,30 +328,30 @@ export default function ValuationTimeline() {
               </div>
               {/* Auto-Calculate Shares Preview — shown for priced rounds when inputs are ready */}
               {shareCalc && (
-                <div className="col-span-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
+                <div className="col-span-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 p-3 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
                     <Zap className="w-3.5 h-3.5" />
                     Auto-Calculated Share Issuance
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div>
-                      <div className="text-[10px] text-emerald-600 font-medium">New Shares Issued</div>
+                      <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">New Shares Issued</div>
                       <div className="text-sm font-bold text-emerald-900">{shareCalc.newShares.toLocaleString()}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] text-emerald-600 font-medium">Post-Round Total</div>
+                      <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Post-Round Total</div>
                       <div className="text-sm font-bold text-emerald-900">{shareCalc.postRoundShares.toLocaleString()}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] text-emerald-600 font-medium">New Share Price</div>
+                      <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">New Share Price</div>
                       <div className="text-sm font-bold text-emerald-900">${shareCalc.newSharePrice.toFixed(4)}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] text-emerald-600 font-medium">Investor Dilution</div>
-                      <div className="text-sm font-bold text-amber-700">{shareCalc.dilutionPct.toFixed(1)}%</div>
+                      <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Investor Dilution</div>
+                      <div className="text-sm font-bold text-amber-700 dark:text-amber-400">{shareCalc.dilutionPct.toFixed(1)}%</div>
                     </div>
                   </div>
-                  <div className="text-[10px] text-emerald-700 flex items-center gap-1">
+                  <div className="text-[10px] text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
                     <Users className="w-3 h-3" />
                     Cap table will be updated automatically on save.
                   </div>
@@ -399,7 +399,7 @@ export default function ValuationTimeline() {
                 <TrendingUp className="w-3.5 h-3.5" />
                 Total Growth
               </div>
-              <div className={`text-2xl font-bold ${totalGrowth !== null && totalGrowth >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <div className={`text-2xl font-bold ${totalGrowth !== null && totalGrowth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                 {totalGrowth !== null ? `${totalGrowth >= 0 ? '+' : ''}${totalGrowth.toFixed(0)}%` : '—'}
               </div>
             </CardContent>
@@ -528,7 +528,7 @@ export default function ValuationTimeline() {
                             {entry.amountRaised && (
                               <div>
                                 <div className="text-[10px] text-muted-foreground">Raised</div>
-                                <div className="text-sm font-bold text-emerald-600">{formatCurrency(entry.amountRaised)}</div>
+                                <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(entry.amountRaised)}</div>
                               </div>
                             )}
                             {entry.sharePrice && (

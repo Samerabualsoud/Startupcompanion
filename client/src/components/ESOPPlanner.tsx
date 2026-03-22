@@ -113,9 +113,9 @@ const PLAN_TYPES = [
 ];
 const JURISDICTIONS = ['Delaware', 'Cayman Islands', 'BVI', 'Singapore', 'ADGM', 'DIFC', 'Saudi Arabia', 'UAE', 'Other'];
 const STATUS_CONFIG = {
-  active:    { label: 'Active',    color: 'bg-green-100 text-green-700',  icon: CheckCircle2 },
-  exercised: { label: 'Exercised', color: 'bg-blue-100 text-blue-700',    icon: Award },
-  cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-700',      icon: XCircle },
+  active:    { label: 'Active',    color: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',  icon: CheckCircle2 },
+  exercised: { label: 'Exercised', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',    icon: Award },
+  cancelled: { label: 'Cancelled', color: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',      icon: XCircle },
 };
 
 const EMPTY_GRANT: Omit<Grant, 'id'> = {
@@ -391,7 +391,7 @@ export default function ESOPPlanner() {
                     key={p.id}
                     className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
                       p.id === plan.id
-                        ? 'border-purple-300 bg-purple-50/50'
+                        ? 'border-purple-300 dark:border-purple-700 bg-purple-50 dark:bg-purple-950/30/50'
                         : 'border-border hover:bg-secondary/30'
                     }`}
                   >
@@ -471,10 +471,10 @@ export default function ESOPPlanner() {
       {/* ── Pool KPI Cards ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Option Pool', value: fmtNum(plan.currentOptionPool), sub: `${poolSummary.poolAsPct.toFixed(1)}% of total`, icon: Percent, color: 'text-purple-600' },
-          { label: 'Allocated', value: fmtNum(poolSummary.allocated), sub: `${poolSummary.utilPct.toFixed(1)}% utilised`, icon: Users, color: 'text-blue-600' },
-          { label: 'Vested Today', value: fmtNum(poolSummary.vested), sub: `${poolSummary.grantCount} active grants`, icon: CheckCircle2, color: 'text-green-600' },
-          { label: 'Strike Price', value: fmtUSD(plan.pricePerShare), sub: `FMV: ${fmtUSD(plan.fmvPerShare)}`, icon: DollarSign, color: 'text-amber-600' },
+          { label: 'Option Pool', value: fmtNum(plan.currentOptionPool), sub: `${poolSummary.poolAsPct.toFixed(1)}% of total`, icon: Percent, color: 'text-purple-600 dark:text-purple-400' },
+          { label: 'Allocated', value: fmtNum(poolSummary.allocated), sub: `${poolSummary.utilPct.toFixed(1)}% utilised`, icon: Users, color: 'text-blue-600 dark:text-blue-400' },
+          { label: 'Vested Today', value: fmtNum(poolSummary.vested), sub: `${poolSummary.grantCount} active grants`, icon: CheckCircle2, color: 'text-green-600 dark:text-green-400' },
+          { label: 'Strike Price', value: fmtUSD(plan.pricePerShare), sub: `FMV: ${fmtUSD(plan.fmvPerShare)}`, icon: DollarSign, color: 'text-amber-600 dark:text-amber-400' },
         ].map(card => (
           <Card key={card.label} className="border-0 shadow-sm">
             <CardContent className="p-4">
@@ -541,13 +541,13 @@ export default function ESOPPlanner() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm bg-blue-50/50">
+          <Card className="border-0 shadow-sm bg-blue-50 dark:bg-blue-950/30/50">
             <CardContent className="p-4">
               <div className="flex items-start gap-2 mb-3">
-                <Info className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                <span className="text-sm font-semibold text-blue-800">ESOP Best Practices</span>
+                <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                <span className="text-sm font-semibold text-blue-800 dark:text-blue-300">ESOP Best Practices</span>
               </div>
-              <ul className="space-y-1.5 text-xs text-blue-700">
+              <ul className="space-y-1.5 text-xs text-blue-700 dark:text-blue-400">
                 <li>• <strong>Pool size:</strong> 10–20% of fully diluted shares is standard for seed/Series A</li>
                 <li>• <strong>Standard vesting:</strong> 4 years with 1-year cliff (industry standard)</li>
                 <li>• <strong>Strike price:</strong> Set at FMV (409A valuation) to avoid tax issues</li>
@@ -667,7 +667,7 @@ export default function ESOPPlanner() {
                               </Button>
                               <Button
                                 variant="ghost" size="icon"
-                                className="h-7 w-7 text-red-500 hover:text-red-600"
+                                className="h-7 w-7 text-red-500 hover:text-red-600 dark:text-red-400"
                                 onClick={() => handleCancelGrant(grant.id)}
                                 title="Cancel grant"
                               >
@@ -718,7 +718,7 @@ export default function ESOPPlanner() {
                     <CardContent className="p-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                       <div><div className="text-xs text-muted-foreground">Employee</div><div className="font-semibold">{selectedGrant.employeeName}</div></div>
                       <div><div className="text-xs text-muted-foreground">Total Shares</div><div className="font-semibold">{fmtNum(selectedGrant.shares)}</div></div>
-                      <div><div className="text-xs text-muted-foreground">Vested Today</div><div className="font-semibold text-green-600">{fmtNum(computeVested(selectedGrant))}</div></div>
+                      <div><div className="text-xs text-muted-foreground">Vested Today</div><div className="font-semibold text-green-600 dark:text-green-400">{fmtNum(computeVested(selectedGrant))}</div></div>
                       <div><div className="text-xs text-muted-foreground">Cliff / Vesting</div><div className="font-semibold">{selectedGrant.cliffMonths}mo / {selectedGrant.vestingMonths}mo</div></div>
                     </CardContent>
                   </Card>
@@ -746,10 +746,10 @@ export default function ESOPPlanner() {
                     </CardContent>
                   </Card>
 
-                  <Card className="border-0 shadow-sm bg-amber-50/50">
+                  <Card className="border-0 shadow-sm bg-amber-50 dark:bg-amber-950/30/50">
                     <CardContent className="p-3 flex items-start gap-2">
-                      <Clock className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                      <div className="text-xs text-amber-800">
+                      <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                      <div className="text-xs text-amber-800 dark:text-amber-300">
                         <strong>Cliff date:</strong>{' '}
                         {(() => {
                           const d = new Date(selectedGrant.startDate);

@@ -44,18 +44,18 @@ export default function ToolGuide({
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div className="rounded-xl border border-indigo-200 bg-indigo-50/60 dark:bg-indigo-950/20 dark:border-indigo-900 overflow-hidden">
+    <div className="rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/30/60 dark:bg-indigo-950/20 dark:border-indigo-900 overflow-hidden">
       {/* Toggle header */}
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-indigo-100/60 dark:hover:bg-indigo-900/30 transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-indigo-100 dark:bg-indigo-900/30/60 dark:hover:bg-indigo-900/30 transition-colors"
       >
         <div className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center shrink-0">
           <BookOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-sm font-semibold text-indigo-800 dark:text-indigo-300">How to use: {toolName}</div>
-          <div className="text-xs text-indigo-600/80 dark:text-indigo-400/80 truncate">{tagline}</div>
+          <div className="text-xs text-indigo-600 dark:text-indigo-400/80 dark:text-indigo-400/80 truncate">{tagline}</div>
         </div>
         {open
           ? <ChevronUp className="w-4 h-4 text-indigo-500 shrink-0" />
@@ -87,7 +87,7 @@ export default function ToolGuide({
                       </div>
                       <div>
                         <div className="text-xs font-semibold text-indigo-800 dark:text-indigo-300">{s.title}</div>
-                        <div className="text-xs text-indigo-600/80 dark:text-indigo-400/80 leading-relaxed">{s.description}</div>
+                        <div className="text-xs text-indigo-600 dark:text-indigo-400/80 dark:text-indigo-400/80 leading-relaxed">{s.description}</div>
                       </div>
                     </div>
                   ))}
@@ -106,7 +106,7 @@ export default function ToolGuide({
                         <CheckCircle2 className="w-3.5 h-3.5 text-indigo-500 shrink-0 mt-0.5" />
                         <div>
                           <span className="text-xs font-semibold text-indigo-800 dark:text-indigo-300">{c.term}: </span>
-                          <span className="text-xs text-indigo-600/80 dark:text-indigo-400/80">{c.definition}</span>
+                          <span className="text-xs text-indigo-600 dark:text-indigo-400/80 dark:text-indigo-400/80">{c.definition}</span>
                         </div>
                       </div>
                     ))}
@@ -135,8 +135,8 @@ export default function ToolGuide({
 
               {/* Pro tip */}
               {tip && (
-                <div className="flex gap-2.5 p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-950/20 dark:border-amber-800">
-                  <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex gap-2.5 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:bg-amber-950/20 dark:border-amber-800">
+                  <Lightbulb className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                   <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
                     <strong>Pro tip:</strong> {tip}
                   </p>

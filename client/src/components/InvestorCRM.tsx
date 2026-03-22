@@ -498,7 +498,7 @@ export default function InvestorCRM() {
       {tracked.length > 0 && (
         <div className="border border-border rounded-xl overflow-hidden bg-card">
           <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-secondary/30">
-            <Rocket className="w-4 h-4 text-green-600" />
+            <Rocket className="w-4 h-4 text-green-600 dark:text-green-400" />
             <span className="text-sm font-semibold text-foreground">Tracked Accelerator Applications</span>
             <span className="ml-auto text-[10px] font-mono text-muted-foreground border border-border px-2 py-0.5 rounded-full">{tracked.length} tracked</span>
           </div>

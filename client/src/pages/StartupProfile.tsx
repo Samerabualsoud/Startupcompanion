@@ -328,7 +328,7 @@ export default function StartupProfile() {
         </div>
         <h2 className="text-xl font-bold text-foreground mb-2">Sign in to Build Your Profile</h2>
         <p className="text-sm text-muted-foreground mb-5 max-w-xs">Create a startup profile to save your data, track milestones, and auto-fill your valuation reports.</p>
-        <Button onClick={() => window.location.href = getLoginUrl()} style={{ background: 'var(--primary)', color: 'white' }}>
+        <Button onClick={() => window.location.href = getLoginUrl()} style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
           Sign In
         </Button>
       </div>
@@ -649,7 +649,7 @@ export default function StartupProfile() {
                       {m.esopShares > 0 ? ` · ${m.esopShares.toLocaleString()} ESOP (${m.esopVestingMonths}mo vest, ${m.esopCliffMonths}mo cliff)` : ''}
                     </div>
                   </div>
-                  <button onClick={() => deleteMember.mutate({ id: m.id })} className="p-1.5 rounded hover:bg-red-50 hover:text-red-500 transition-colors text-muted-foreground">
+                  <button onClick={() => deleteMember.mutate({ id: m.id })} className="p-1.5 rounded hover:bg-red-50 dark:bg-red-950/30 hover:text-red-500 transition-colors text-muted-foreground">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -677,8 +677,8 @@ export default function StartupProfile() {
                 </Field>
               </div>
               {/* ESOP Grant Fields */}
-              <div className="rounded-lg border border-border p-3 bg-purple-50/30 space-y-3">
-                <p className="text-xs font-semibold text-purple-700">ESOP Grant (optional)</p>
+              <div className="rounded-lg border border-border p-3 bg-purple-50 dark:bg-purple-950/30/30 space-y-3">
+                <p className="text-xs font-semibold text-purple-700 dark:text-purple-400">ESOP Grant (optional)</p>
                 <div className="grid grid-cols-3 gap-3">
                   <Field label="ESOP Shares" hint="Number of options/shares granted">
                     <Input type="number" value={newMember.esopShares || ''} onChange={e => setNewMember(m => ({ ...m, esopShares: parseInt(e.target.value) || 0 }))} placeholder="0" />
@@ -737,8 +737,8 @@ export default function StartupProfile() {
             <Input value={form.registrationNumber} onChange={e => set('registrationNumber', e.target.value)} placeholder="e.g. CR-1234567" />
           </Field>
         </div>
-        <div className="mt-3 p-3 rounded-lg bg-amber-50/50 border border-amber-200/50">
-          <p className="text-xs text-amber-700">
+        <div className="mt-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30/50 border border-amber-200 dark:border-amber-800/50">
+          <p className="text-xs text-amber-700 dark:text-amber-400">
             <Shield className="w-3 h-3 inline mr-1" />
             Legal information is stored securely and only visible to you unless you make your profile public.
           </p>
@@ -795,7 +795,7 @@ export default function StartupProfile() {
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: cat?.color + '20', color: cat?.color }}>
                     {cat?.label}
                   </span>
-                  <button onClick={() => deleteMilestoneM.mutate({ id: m.id })} className="p-1 rounded hover:bg-red-50 hover:text-red-500 transition-colors text-muted-foreground shrink-0">
+                  <button onClick={() => deleteMilestoneM.mutate({ id: m.id })} className="p-1 rounded hover:bg-red-50 dark:bg-red-950/30 hover:text-red-500 transition-colors text-muted-foreground shrink-0">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -889,7 +889,7 @@ export default function StartupProfile() {
                 <div className="flex items-center justify-end gap-2 mt-3 pt-2 border-t border-border/50">
                   <button
                     onClick={() => deleteValM.mutate({ id: v.id })}
-                    className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-red-500 transition-colors px-2 py-1 rounded hover:bg-red-50"
+                    className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-red-500 transition-colors px-2 py-1 rounded hover:bg-red-50 dark:bg-red-950/30"
                   >
                     <Trash2 className="w-3 h-3" />
                     Delete

@@ -304,7 +304,7 @@ export default function CoFounderEquitySplit() {
               : 'Rate each founder across 7 key factors. The calculator recommends a fair, weighted split based on each person\'s actual contribution.'}
           </p>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-full shrink-0">
+        <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 px-2 py-1 rounded-full shrink-0">
           <Link2 className="w-3 h-3" />
           <span>Synced with Cap Table</span>
         </div>
@@ -386,22 +386,22 @@ export default function CoFounderEquitySplit() {
 
           {/* ESOP Pool row in split summary */}
           {esopPoolShares > 0 && (
-            <div className="mt-3 flex items-center justify-between px-3 py-2 rounded-lg bg-purple-50 border border-purple-200">
+            <div className="mt-3 flex items-center justify-between px-3 py-2 rounded-lg bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-purple-500 shrink-0" />
-                <span className="text-xs font-semibold text-purple-800">ESOP Pool</span>
-                <span className="text-[10px] text-purple-600">{esopIssuedShares.toLocaleString()} / {esopPoolShares.toLocaleString()} shares issued</span>
+                <span className="text-xs font-semibold text-purple-800 dark:text-purple-300">ESOP Pool</span>
+                <span className="text-[10px] text-purple-600 dark:text-purple-400">{esopIssuedShares.toLocaleString()} / {esopPoolShares.toLocaleString()} shares issued</span>
               </div>
-              <span className="text-sm font-bold text-purple-700">{esopPct}% (fully diluted)</span>
+              <span className="text-sm font-bold text-purple-700 dark:text-purple-400">{esopPct}% (fully diluted)</span>
             </div>
           )}
 
           {/* Best practice note */}
-          <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200/80">
-            <div className="text-xs font-bold text-amber-800 mb-1">
+          <div className="mt-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/80">
+            <div className="text-xs font-bold text-amber-800 dark:text-amber-300 mb-1">
               {isRTL ? '💡 نصيحة مهمة' : '💡 Best Practice'}
             </div>
-            <div className="text-xs text-amber-700 leading-relaxed">
+            <div className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
               {isRTL
                 ? 'تُظهر الأبحاث أن التوزيع المتساوي (50/50) كثيراً ما يؤدي إلى نزاعات. فارق بسيط (مثل 55/45) مع تعريف واضح للأدوار وجداول استحقاق يُنتج نتائج أفضل. يجب أن تخضع جميع الحصص لـ جدول استحقاق 4 سنوات مع فترة انتظار سنة.'
                 : 'Research shows equal splits (50/50) often lead to co-founder conflicts. A slight imbalance (e.g., 55/45) with clear role definitions and vesting schedules tends to produce better outcomes. All splits should be subject to a 4-year vesting schedule with a 1-year cliff.'}
@@ -493,7 +493,7 @@ export default function CoFounderEquitySplit() {
       {founders.length < 6 && (
         <button
           onClick={addFounder}
-          className="flex items-center gap-2 w-full py-3 border-2 border-dashed border-border rounded-xl text-sm text-muted-foreground hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all justify-center"
+          className="flex items-center gap-2 w-full py-3 border-2 border-dashed border-border rounded-xl text-sm text-muted-foreground hover:border-indigo-400 hover:text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:bg-indigo-950/30/50 transition-all justify-center"
         >
           <Plus className="w-4 h-4" />
           {isRTL ? 'إضافة مؤسس مشارك' : 'Add Co-Founder'}
@@ -507,8 +507,8 @@ export default function CoFounderEquitySplit() {
           className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-foreground hover:bg-muted/30 transition-colors"
         >
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-indigo-100 flex items-center justify-center">
-              <Users className="w-3.5 h-3.5 text-indigo-600" />
+            <div className="w-6 h-6 rounded-md bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+              <Users className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
             </div>
             {isRTL ? 'جدول الاستحقاق الموصى به' : 'Recommended Vesting Schedule'}
           </div>

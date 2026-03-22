@@ -25,10 +25,10 @@ const SPECIALIZATIONS = ['term-sheets', 'equity', 'm&a', 'ip', 'employment', 're
 function Badge({ children, color = 'default' }: { children: React.ReactNode; color?: 'default' | 'green' | 'blue' | 'orange' | 'purple' }) {
   const colors = {
     default: 'bg-secondary text-muted-foreground',
-    green: 'bg-green-50 text-green-700 border border-green-200',
-    blue: 'bg-blue-50 text-blue-700 border border-blue-200',
-    orange: 'bg-orange-50 text-orange-700 border border-orange-200',
-    purple: 'bg-purple-50 text-purple-700 border border-purple-200',
+    green: 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800',
+    blue: 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800',
+    orange: 'bg-orange-50 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800',
+    purple: 'bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800',
   };
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${colors[color]}`}>
@@ -48,7 +48,7 @@ function formatMoney(min?: number | null, max?: number | null, currency = 'USD')
 // ── VC Firms ──────────────────────────────────────────────────────────────
 function VcCard({ firm }: { firm: any }) {
   return (
-    <div className="bg-white rounded-2xl p-5 border border-border hover:shadow-md transition-shadow">
+    <div className="bg-card rounded-2xl p-5 border border-border hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-base truncate" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', color: 'var(--foreground)' }}>
@@ -107,7 +107,7 @@ function VcCard({ firm }: { firm: any }) {
       {firm.applyUrl && (
         <a href={firm.applyUrl} target="_blank" rel="noopener noreferrer"
           className="flex items-center justify-center gap-1.5 w-full py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-          style={{ background: 'var(--primary)', color: 'white' }}>
+          style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
           <ExternalLink className="w-3.5 h-3.5" />
           Visit Website
         </a>
@@ -119,9 +119,9 @@ function VcCard({ firm }: { firm: any }) {
 // ── Angel Investors ───────────────────────────────────────────────────────
 function AngelCard({ angel }: { angel: any }) {
   return (
-    <div className="bg-white rounded-2xl p-5 border border-border hover:shadow-md transition-shadow">
+    <div className="bg-card rounded-2xl p-5 border border-border hover:shadow-md transition-shadow">
       <div className="flex items-start gap-3 mb-3">
-        <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm"
+        <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-primary-foreground font-bold text-sm"
           style={{ background: 'var(--primary)' }}>
           {angel.name.charAt(0)}
         </div>
@@ -191,7 +191,7 @@ function GrantCard({ grant }: { grant: any }) {
     government: 'blue', corporate: 'orange', foundation: 'purple', eu: 'green', other: 'default' as any,
   };
   return (
-    <div className="bg-white rounded-2xl p-5 border border-border hover:shadow-md transition-shadow">
+    <div className="bg-card rounded-2xl p-5 border border-border hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-sm leading-tight" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', color: 'var(--foreground)' }}>
@@ -228,7 +228,7 @@ function GrantCard({ grant }: { grant: any }) {
       {grant.applyUrl && (
         <a href={grant.applyUrl} target="_blank" rel="noopener noreferrer"
           className="flex items-center justify-center gap-1.5 w-full py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-          style={{ background: 'var(--primary)', color: 'white' }}>
+          style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
           <ExternalLink className="w-3.5 h-3.5" />
           Apply Now
         </a>
@@ -240,10 +240,10 @@ function GrantCard({ grant }: { grant: any }) {
 // ── Venture Lawyers ───────────────────────────────────────────────────────
 function LawyerCard({ lawyer }: { lawyer: any }) {
   return (
-    <div className="bg-white rounded-2xl p-5 border border-border hover:shadow-md transition-shadow">
+    <div className="bg-card rounded-2xl p-5 border border-border hover:shadow-md transition-shadow">
       <div className="flex items-start gap-3 mb-3">
-        <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm"
-          style={{ background: 'var(--border)' }}>
+        <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-foreground font-bold text-sm"
+          style={{ background: 'var(--muted)' }}>
           {lawyer.name.charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
@@ -288,7 +288,7 @@ function LawyerCard({ lawyer }: { lawyer: any }) {
         {lawyer.websiteUrl && (
           <a href={lawyer.websiteUrl} target="_blank" rel="noopener noreferrer"
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-            style={{ background: 'var(--primary)', color: 'white' }}>
+            style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
             <Globe className="w-3.5 h-3.5" />
             Website
           </a>
@@ -376,7 +376,7 @@ export default function ResourceDatabase() {
         </div>
         <button
           onClick={() => { setShowListModal(true); setListForm(f => ({ ...f, type: activeTab === 'grants' ? 'grant' : activeTab === 'lawyers' ? 'lawyer' : activeTab === 'angel' ? 'angel' : 'vc' })); }}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-white shrink-0 hover:opacity-90 transition-opacity"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-primary-foreground shrink-0 hover:opacity-90 transition-opacity"
           style={{ background: 'var(--primary)' }}
         >
           <Plus className="w-3.5 h-3.5" />
@@ -387,7 +387,7 @@ export default function ResourceDatabase() {
       {/* List Your Firm Modal */}
       {showListModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="p-5 border-b border-border flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-base" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', color: 'var(--foreground)' }}>List Your Firm</h3>
@@ -405,7 +405,7 @@ export default function ResourceDatabase() {
                   {(['vc', 'angel', 'lawyer', 'grant'] as const).map(t => (
                     <button key={t} onClick={() => setListForm(f => ({ ...f, type: t }))}
                       className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all capitalize ${
-                        listForm.type === t ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'
+                        listForm.type === t ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'
                       }`}>
                       {t === 'vc' ? 'VC Firm' : t === 'angel' ? 'Angel' : t === 'lawyer' ? 'Lawyer' : 'Grant'}
                     </button>
@@ -426,7 +426,7 @@ export default function ResourceDatabase() {
                     value={listForm[field.key] ?? ''}
                     onChange={e => setListForm(f => ({ ...f, [field.key]: e.target.value }))}
                     placeholder={field.placeholder}
-                    className="w-full px-3 py-2 rounded-lg text-sm border border-border bg-white outline-none focus:border-primary transition-colors"
+                    className="w-full px-3 py-2 rounded-lg text-sm border border-border bg-background outline-none focus:border-primary transition-colors"
                   />
                 </div>
               ))}
@@ -436,7 +436,7 @@ export default function ResourceDatabase() {
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Investment Stages (comma-separated)</label>
                   <input value={listForm.stages ?? ''} onChange={e => setListForm(f => ({ ...f, stages: e.target.value }))}
                     placeholder="e.g. pre-seed, seed, series-a"
-                    className="w-full px-3 py-2 rounded-lg text-sm border border-border bg-white outline-none focus:border-primary transition-colors" />
+                    className="w-full px-3 py-2 rounded-lg text-sm border border-border bg-background outline-none focus:border-primary transition-colors" />
                 </div>
               )}
               {listForm.type === 'grant' && (
@@ -444,7 +444,7 @@ export default function ResourceDatabase() {
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Grant Amount (USD)</label>
                   <input value={listForm.amount ?? ''} onChange={e => setListForm(f => ({ ...f, amount: e.target.value }))}
                     placeholder="e.g. 50000"
-                    className="w-full px-3 py-2 rounded-lg text-sm border border-border bg-white outline-none focus:border-primary transition-colors" />
+                    className="w-full px-3 py-2 rounded-lg text-sm border border-border bg-background outline-none focus:border-primary transition-colors" />
                 </div>
               )}
               <div>
@@ -454,7 +454,7 @@ export default function ResourceDatabase() {
                   onChange={e => setListForm(f => ({ ...f, description: e.target.value }))}
                   placeholder="Brief description of your firm, focus areas, and what you offer to startups..."
                   rows={4}
-                  className="w-full px-3 py-2 rounded-lg text-sm border border-border bg-white outline-none focus:border-primary transition-colors resize-none"
+                  className="w-full px-3 py-2 rounded-lg text-sm border border-border bg-background outline-none focus:border-primary transition-colors resize-none"
                 />
               </div>
               <button
@@ -465,7 +465,7 @@ export default function ResourceDatabase() {
                   submitterEmail: listForm.email,
                   submitterName: listForm.name,
                 })}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
                 style={{ background: 'var(--primary)' }}
               >
                 {submitListingMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
@@ -486,7 +486,7 @@ export default function ResourceDatabase() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
-                isActive ? 'text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                isActive ? 'text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
               }`}
               style={isActive ? { background: 'var(--primary)' } : {}}
             >
@@ -507,18 +507,18 @@ export default function ResourceDatabase() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={`Search ${TABS.find(t => t.id === activeTab)?.label.toLowerCase()}…`}
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm border border-border bg-white outline-none focus:border-primary transition-colors"
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm border border-border bg-background outline-none focus:border-primary transition-colors"
           />
         </div>
         <button
           onClick={() => setShowFilters(v => !v)}
           className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-medium border transition-all ${
-            showFilters || hasFilters ? 'border-primary text-foreground bg-orange-50' : 'border-border text-muted-foreground hover:bg-secondary'
+            showFilters || hasFilters ? 'border-primary text-foreground bg-orange-50 dark:bg-orange-950/30' : 'border-border text-muted-foreground hover:bg-secondary'
           }`}
         >
           <Filter className="w-3.5 h-3.5" />
           Filters
-          {hasFilters && <span className="w-4 h-4 rounded-full bg-secondary text-white text-[9px] flex items-center justify-center">!</span>}
+          {hasFilters && <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] flex items-center justify-center">!</span>}
         </button>
         {hasFilters && (
           <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2.5 rounded-xl text-xs text-muted-foreground border border-border hover:bg-secondary transition-colors">
@@ -529,11 +529,11 @@ export default function ResourceDatabase() {
 
       {/* Filter panel */}
       {showFilters && (
-        <div className="p-4 rounded-xl border border-border bg-white grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="p-4 rounded-xl border border-border bg-card grid grid-cols-2 md:grid-cols-4 gap-3">
           <div>
             <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Region</label>
             <select value={region} onChange={e => setRegion(e.target.value)}
-              className="w-full text-xs border border-border rounded-lg px-2.5 py-2 bg-white outline-none">
+              className="w-full text-xs border border-border rounded-lg px-2.5 py-2 bg-background outline-none">
               <option value="">All regions</option>
               {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
@@ -542,7 +542,7 @@ export default function ResourceDatabase() {
             <div>
               <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Stage</label>
               <select value={stage} onChange={e => setStage(e.target.value)}
-                className="w-full text-xs border border-border rounded-lg px-2.5 py-2 bg-white outline-none">
+                className="w-full text-xs border border-border rounded-lg px-2.5 py-2 bg-background outline-none">
                 <option value="">All stages</option>
                 {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
@@ -552,7 +552,7 @@ export default function ResourceDatabase() {
             <div>
               <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Sector</label>
               <select value={sector} onChange={e => setSector(e.target.value)}
-                className="w-full text-xs border border-border rounded-lg px-2.5 py-2 bg-white outline-none">
+                className="w-full text-xs border border-border rounded-lg px-2.5 py-2 bg-background outline-none">
                 <option value="">All sectors</option>
                 {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
@@ -562,7 +562,7 @@ export default function ResourceDatabase() {
             <div>
               <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Type</label>
               <select value={grantType} onChange={e => setGrantType(e.target.value)}
-                className="w-full text-xs border border-border rounded-lg px-2.5 py-2 bg-white outline-none">
+                className="w-full text-xs border border-border rounded-lg px-2.5 py-2 bg-background outline-none">
                 <option value="">All types</option>
                 {GRANT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
@@ -599,7 +599,7 @@ export default function ResourceDatabase() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl p-5 border border-border animate-pulse">
+            <div key={i} className="bg-card rounded-2xl p-5 border border-border animate-pulse">
               <div className="h-4 bg-secondary rounded w-2/3 mb-2" />
               <div className="h-3 bg-secondary rounded w-1/3 mb-4" />
               <div className="h-3 bg-secondary rounded w-full mb-2" />

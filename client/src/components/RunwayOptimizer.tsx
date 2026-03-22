@@ -76,10 +76,10 @@ function fmt(n: number): string {
 }
 
 function getRunwayStatus(months: number) {
-  if (months >= 24) return { label: 'Healthy', color: '#10B981', bg: 'bg-emerald-50', border: 'border-emerald-200' };
-  if (months >= 18) return { label: 'Comfortable', color: '#F59E0B', bg: 'bg-amber-50', border: 'border-amber-200' };
-  if (months >= 12) return { label: 'Tight', color: '#EF4444', bg: 'bg-red-50', border: 'border-red-200' };
-  return { label: 'Critical', color: '#DC2626', bg: 'bg-red-100', border: 'border-red-300' };
+  if (months >= 24) return { label: 'Healthy', color: '#10B981', bg: 'bg-emerald-50 dark:bg-emerald-950/30', border: 'border-emerald-200 dark:border-emerald-800' };
+  if (months >= 18) return { label: 'Comfortable', color: '#F59E0B', bg: 'bg-amber-50 dark:bg-amber-950/30', border: 'border-amber-200 dark:border-amber-800' };
+  if (months >= 12) return { label: 'Tight', color: '#EF4444', bg: 'bg-red-50 dark:bg-red-950/30', border: 'border-red-200 dark:border-red-800' };
+  return { label: 'Critical', color: '#DC2626', bg: 'bg-red-100 dark:bg-red-900/30', border: 'border-red-300 dark:border-red-700' };
 }
 
 // ── Runway gauge arc SVG ───────────────────────────────────────────────────
@@ -248,26 +248,26 @@ export default function RunwayOptimizer() {
       <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--primary)' }}>
         <div className="px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h2 className="text-xl font-bold text-white" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+            <h2 className="text-xl font-bold text-primary-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               {isRTL ? 'مخطط مدة البقاء' : 'Runway Planner'}
             </h2>
-            <p className="text-sm text-white/70 mt-0.5">{isRTL ? 'حلل معدل الحرق وامتد مدة بقائك بذكاء' : 'Analyze your burn rate and intelligently extend your runway'}</p>
-            <div className="mt-3 space-y-0.5 text-xs text-white/60">
-              <div><span className="text-white/80 font-semibold">{isRTL ? 'معدل الحرق الصافي: ' : 'Net Burn: '}</span>{analysis.netBurn === 0 ? (isRTL ? 'لا يوجد' : 'None') : `${fmt(analysis.netBurn)}/mo`}</div>
-              <div><span className="text-white/80 font-semibold">{isRTL ? 'إجمالي الإنفاق: ' : 'Total Spend: '}</span>{fmt(analysis.totalBurn)}/mo</div>
+            <p className="text-sm text-primary-foreground/70 mt-0.5">{isRTL ? 'حلل معدل الحرق وامتد مدة بقائك بذكاء' : 'Analyze your burn rate and intelligently extend your runway'}</p>
+            <div className="mt-3 space-y-0.5 text-xs text-primary-foreground/60">
+              <div><span className="text-primary-foreground/80 font-semibold">{isRTL ? 'معدل الحرق الصافي: ' : 'Net Burn: '}</span>{analysis.netBurn === 0 ? (isRTL ? 'لا يوجد' : 'None') : `${fmt(analysis.netBurn)}/mo`}</div>
+              <div><span className="text-primary-foreground/80 font-semibold">{isRTL ? 'إجمالي الإنفاق: ' : 'Total Spend: '}</span>{fmt(analysis.totalBurn)}/mo</div>
             </div>
           </div>
           <div className="text-center">
             <RunwayGauge months={analysis.currentRunway === 999 ? 36 : analysis.currentRunway} />
-            <div className="text-white font-bold text-lg -mt-2">{analysis.currentRunway >= 999 ? inf : `${analysis.currentRunway} ${mo}`}</div>
-            <div className="text-white/60 text-[10px]">{isRTL ? 'مدة البقاء الحالية' : 'Current Runway'}</div>
+            <div className="text-primary-foreground font-bold text-lg -mt-2">{analysis.currentRunway >= 999 ? inf : `${analysis.currentRunway} ${mo}`}</div>
+            <div className="text-primary-foreground/60 text-[10px]">{isRTL ? 'مدة البقاء الحالية' : 'Current Runway'}</div>
           </div>
         </div>
       </div>
 
       {/* Profile sync */}
       {profileSynced && (snapshot.cashOnHand || snapshot.monthlyBurnRate || snapshot.mrr) && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-xs text-indigo-700">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 text-xs text-indigo-700 dark:text-indigo-400">
           <Zap className="w-3.5 h-3.5 shrink-0" />
           <span>{isRTL ? 'تم ملء البيانات من ملف شركتك' : 'Pre-filled from your startup profile'}</span>
         </div>
@@ -312,7 +312,7 @@ export default function RunwayOptimizer() {
           <div className="grid grid-cols-3 gap-2">
             {([3, 6, 12] as const).map(m => (
               <button key={m} onClick={() => setTargetExtension(m)}
-                className={`py-2.5 rounded-lg text-xs font-bold transition-all ${targetExtension === m ? 'text-white shadow-md' : 'border border-border text-muted-foreground hover:border-indigo-400 hover:text-indigo-600'}`}
+                className={`py-2.5 rounded-lg text-xs font-bold transition-all ${targetExtension === m ? 'text-white shadow-md' : 'border border-border text-muted-foreground hover:border-indigo-400 hover:text-indigo-600 dark:text-indigo-400'}`}
                 style={targetExtension === m ? { background: 'var(--primary)' } : {}}>
                 +{m}{mo}
               </button>
@@ -327,9 +327,9 @@ export default function RunwayOptimizer() {
         {[
           { label: isRTL ? 'مدة البقاء الحالية' : 'Current Runway', value: analysis.currentRunway >= 999 ? '∞' : `${analysis.currentRunway}`, unit: analysis.currentRunway < 999 ? mo : '', color: currentStatus.color, bg: currentStatus.bg, border: currentStatus.border, icon: Clock,
             tooltip: isRTL ? 'عدد الأشهر التي يمكنك الاستمرار فيها بمعدل الإنفاق الحالي دون تمويل إضافي. الحد الأدنى الموصى به: 18 شهراً.' : 'Months you can operate at current spend without new funding. Minimum recommended: 18 months before a raise.' },
-          { label: isRTL ? 'الحرق الصافي الشهري' : 'Monthly Net Burn', value: fmt(analysis.netBurn), unit: '/mo', color: '#EF4444', bg: 'bg-red-50', border: 'border-red-200', icon: Flame,
+          { label: isRTL ? 'الحرق الصافي الشهري' : 'Monthly Net Burn', value: fmt(analysis.netBurn), unit: '/mo', color: '#EF4444', bg: 'bg-red-50 dark:bg-red-950/30', border: 'border-red-200 dark:border-red-800', icon: Flame,
             tooltip: isRTL ? 'الحرق الصافي = إجمالي الإنفاق − الإيرادات الشهرية. هذا هو المبلغ الذي تستهلكه من السيولة كل شهر.' : 'Net Burn = Total Spend − Monthly Revenue. This is how much cash you consume each month.' },
-          { label: isRTL ? 'مضاعف الحرق' : 'Burn Multiple', value: analysis.burnMultiple > 0 ? `${analysis.burnMultiple.toFixed(1)}x` : 'N/A', unit: '', color: analysis.burnMultiple < 1.5 ? '#10B981' : analysis.burnMultiple < 3 ? '#F59E0B' : '#EF4444', bg: analysis.burnMultiple < 1.5 ? 'bg-emerald-50' : analysis.burnMultiple < 3 ? 'bg-amber-50' : 'bg-red-50', border: analysis.burnMultiple < 1.5 ? 'border-emerald-200' : analysis.burnMultiple < 3 ? 'border-amber-200' : 'border-red-200', icon: BarChart3,
+          { label: isRTL ? 'مضاعف الحرق' : 'Burn Multiple', value: analysis.burnMultiple > 0 ? `${analysis.burnMultiple.toFixed(1)}x` : 'N/A', unit: '', color: analysis.burnMultiple < 1.5 ? '#10B981' : analysis.burnMultiple < 3 ? '#F59E0B' : '#EF4444', bg: analysis.burnMultiple < 1.5 ? 'bg-emerald-50 dark:bg-emerald-950/30' : analysis.burnMultiple < 3 ? 'bg-amber-50 dark:bg-amber-950/30' : 'bg-red-50 dark:bg-red-950/30', border: analysis.burnMultiple < 1.5 ? 'border-emerald-200 dark:border-emerald-800' : analysis.burnMultiple < 3 ? 'border-amber-200 dark:border-amber-800' : 'border-red-200 dark:border-red-800', icon: BarChart3,
             tooltip: isRTL ? 'مضاعف الحرق = الحرق الصافي ÷ الإيرادات. أقل من 1.5x ممتاز، 1.5–3x مقبول، أكثر من 3x مرتفع جداً.' : 'Burn Multiple = Net Burn ÷ Revenue. Under 1.5x = excellent, 1.5–3x = acceptable, above 3x = high.' },
           { label: isRTL ? 'بعد التحسين' : 'After Optimization', value: analysis.newRunway >= 999 ? '∞' : `${analysis.newRunway}`, unit: analysis.newRunway < 999 ? mo : '', color: newStatus.color, bg: newStatus.bg, border: newStatus.border, icon: CheckCircle,
             tooltip: isRTL ? 'مدة البقاء المتوقعة بعد تطبيق التخفيضات الموصى بها أدناه.' : 'Projected runway after applying the recommended cuts below. This is your target before the next fundraise.' },
@@ -423,7 +423,7 @@ export default function RunwayOptimizer() {
                       <RunwaySlider value={cat.cuttable} onChange={v => updateCategory(cat.id, 'cuttable', v)} />
                     </div>
                     <button onClick={() => removeCategory(cat.id)}
-                      className="p-1 rounded w-7 opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 transition-all">
+                      className="p-1 rounded w-7 opacity-0 group-hover:opacity-100 hover:bg-red-50 dark:bg-red-950/30 hover:text-red-500 transition-all">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -435,12 +435,12 @@ export default function RunwayOptimizer() {
                       <input type="text" value={newCatName} onChange={e => setNewCatName(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && addCategory()}
                         placeholder={isRTL ? 'اسم البند' : 'Expense name'}
-                        className="flex-1 px-3 py-1.5 text-xs rounded-lg border border-indigo-300 bg-background focus:outline-none focus:ring-2 focus:ring-indigo-400" autoFocus />
+                        className="flex-1 px-3 py-1.5 text-xs rounded-lg border border-indigo-300 dark:border-indigo-700 bg-background focus:outline-none focus:ring-2 focus:ring-indigo-400" autoFocus />
                       <button onClick={addCategory} className="px-3 py-1.5 text-xs font-semibold rounded-lg text-white" style={{ background: 'var(--primary)' }}>{isRTL ? 'إضافة' : 'Add'}</button>
                       <button onClick={() => { setAddingCat(false); setNewCatName(''); }} className="px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground">{isRTL ? 'إلغاء' : 'Cancel'}</button>
                     </div>
                   ) : (
-                    <button onClick={() => setAddingCat(true)} className="flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+                    <button onClick={() => setAddingCat(true)} className="flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:text-indigo-400 font-medium">
                       <Plus className="w-3.5 h-3.5" />{isRTL ? 'إضافة بند' : 'Add Expense'}
                     </button>
                   )}
@@ -472,12 +472,12 @@ export default function RunwayOptimizer() {
       {/* ── Recommendations ── */}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="px-4 py-3 border-b border-border flex items-center gap-2" style={{ background: 'var(--background)' }}>
-          <TrendingDown className="w-4 h-4 text-indigo-600" />
+          <TrendingDown className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
           <span className="text-sm font-semibold text-foreground">{isRTL ? 'التوصيات لتمديد المدة' : 'Recommended Cuts'} (+{targetExtension} {isRTL ? 'شهر' : 'months'})</span>
           <InfoTip text={isRTL ? 'محسوبة تلقائياً بناءً على الحد الأقصى للتخفيض لكل بند. النظام يختار الأكثر تأثيراً أولاً.' : 'Auto-calculated using the Max Cut % per category. The optimizer picks the highest-impact cuts first to reach your target.'} />
         </div>
         {analysis.recommendations.length === 0 ? (
-          <div className="p-5 flex items-center gap-3 text-sm text-emerald-700">
+          <div className="p-5 flex items-center gap-3 text-sm text-emerald-700 dark:text-emerald-400">
       <ToolGuide
         toolName='Runway Optimizer'
         tagline='Calculate your runway and optimize burn — financial data synced from your Startup Profile.'
@@ -509,18 +509,18 @@ export default function RunwayOptimizer() {
                   <div className="flex items-center gap-2 text-xs font-mono">
                     <span className="text-muted-foreground line-through">{fmt(rec.newAmount + rec.cut)}</span>
                     <ArrowRight className="w-3 h-3 text-muted-foreground" />
-                    <span className="font-bold text-emerald-600">{fmt(rec.newAmount)}</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">{fmt(rec.newAmount)}</span>
                     <span className="text-red-500 text-[10px]">−{fmt(rec.cut)}</span>
                   </div>
                 </motion.div>
               ))}
             </div>
-            <div className="px-4 py-3 bg-emerald-50 border-t border-emerald-200 flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-2 text-sm text-emerald-700">
+            <div className="px-4 py-3 bg-emerald-50 dark:bg-emerald-950/30 border-t border-emerald-200 dark:border-emerald-800 flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 text-sm text-emerald-700 dark:text-emerald-400">
                 <CheckCircle className="w-4 h-4 shrink-0" />
                 <span>{isRTL ? 'إجمالي التوفير الشهري' : 'Total Monthly Savings'}: <strong>{fmt(analysis.achievableSavings)}/mo</strong></span>
               </div>
-              <div className="text-sm font-bold text-emerald-700">
+              <div className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
                 {isRTL ? 'مدة البقاء الجديدة' : 'New Runway'}: {analysis.newRunway >= 999 ? inf : `${analysis.newRunway} ${mo}`}
               </div>
             </div>
@@ -529,9 +529,9 @@ export default function RunwayOptimizer() {
       </div>
 
       {/* ── Investor tip ── */}
-      <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 flex gap-3">
-        <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-        <div className="text-xs text-blue-700 leading-relaxed">
+      <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 p-4 flex gap-3">
+        <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+        <div className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
           <strong>{isRTL ? 'نصيحة للمستثمرين: ' : 'Investor Tip: '}</strong>
           {isRTL ? 'يريد المستثمرون رؤية 18 شهراً على الأقل من السيولة قبل الاستثمار. 24 شهراً هو المثالي. إذا كنت دون 12 شهراً، ركّز على تمديد مدة البقاء قبل بدء جمع التمويل — اليأس واضح في المفاوضات.'
             : "VCs want to see at least 18 months of runway before you raise. 24 months is ideal. If you're below 12 months, focus on extending runway before fundraising — desperation is visible in negotiations."}

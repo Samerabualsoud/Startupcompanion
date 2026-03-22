@@ -242,8 +242,8 @@ export default function DataRoom() {
         <div className="px-4 pt-4 pb-3 border-b border-border">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center">
-                <FolderOpen className="w-3.5 h-3.5 text-indigo-600" />
+              <div className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                <FolderOpen className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
               </div>
               <h2 className="text-sm font-bold text-foreground">Data Rooms</h2>
             </div>
@@ -283,25 +283,25 @@ export default function DataRoom() {
                 onClick={() => setSelectedRoomId(room.id)}
                 className={`w-full text-left px-3 py-2.5 rounded-lg transition-all group ${
                   selectedRoomId === room.id
-                    ? 'bg-indigo-50 border border-indigo-200/60'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/60'
                     : 'hover:bg-muted/60 border border-transparent'
                 }`}
               >
                 <div className="flex items-start gap-2.5">
                   <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${
-                    selectedRoomId === room.id ? 'bg-indigo-100' : 'bg-muted'
+                    selectedRoomId === room.id ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'bg-muted'
                   }`}>
                     <FolderOpen className={`w-3.5 h-3.5 ${
-                      room.isShared ? 'text-emerald-500' : selectedRoomId === room.id ? 'text-indigo-600' : 'text-muted-foreground'
+                      room.isShared ? 'text-emerald-500' : selectedRoomId === room.id ? 'text-indigo-600 dark:text-indigo-400' : 'text-muted-foreground'
                     }`} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className={`text-xs font-semibold truncate ${
-                      selectedRoomId === room.id ? 'text-indigo-700' : 'text-foreground'
+                      selectedRoomId === room.id ? 'text-indigo-700 dark:text-indigo-400' : 'text-foreground'
                     }`}>{room.name}</div>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       {room.isShared ? (
-                        <span className="text-[9px] font-medium text-emerald-600 flex items-center gap-0.5">
+                        <span className="text-[9px] font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
                           <Unlock className="w-2.5 h-2.5" /> Shared
                         </span>
                       ) : (
@@ -338,9 +338,9 @@ export default function DataRoom() {
             <div className="text-center max-w-md px-6">
               {/* Illustration */}
               <div className="relative mx-auto mb-6 w-24 h-24">
-                <div className="absolute inset-0 rounded-2xl bg-indigo-100 rotate-6" />
-                <div className="absolute inset-0 rounded-2xl bg-indigo-50 -rotate-3" />
-                <div className="relative w-24 h-24 rounded-2xl bg-white border border-indigo-200 shadow-sm flex items-center justify-center">
+                <div className="absolute inset-0 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 rotate-6" />
+                <div className="absolute inset-0 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 -rotate-3" />
+                <div className="relative w-24 h-24 rounded-2xl bg-card border border-indigo-200 dark:border-indigo-800 shadow-sm flex items-center justify-center">
                   <FolderOpen className="w-10 h-10 text-indigo-500" />
                 </div>
               </div>
@@ -389,8 +389,8 @@ export default function DataRoom() {
             {/* Header */}
             <div className="shrink-0 px-5 py-3 border-b border-border flex items-center justify-between bg-card">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
-                  <FolderOpen className="w-4 h-4 text-indigo-600" />
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
+                  <FolderOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-foreground">{selectedRoom.name}</h2>
@@ -399,7 +399,7 @@ export default function DataRoom() {
                   )}
                 </div>
                 {selectedRoom.isShared && (
-                  <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-[10px] font-medium">
+                  <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 text-[10px] font-medium">
                     <Unlock className="w-2.5 h-2.5 mr-1" /> Shared · {selectedRoom.viewCount} views
                   </Badge>
                 )}
@@ -588,8 +588,8 @@ export default function DataRoom() {
           >
             <div className="p-4 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-md bg-indigo-100 flex items-center justify-center">
-                  <Activity className="w-3.5 h-3.5 text-indigo-600" />
+                <div className="w-6 h-6 rounded-md bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                  <Activity className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <h3 className="text-sm font-bold text-foreground">Activity Log</h3>
               </div>
@@ -615,12 +615,12 @@ export default function DataRoom() {
                   <div key={entry.id} className="p-2.5 rounded-lg border border-border bg-background hover:bg-muted/30 transition-colors">
                     <div className="flex items-start gap-2">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                        entry.action === 'room_opened' ? 'bg-indigo-100' : 'bg-blue-100'
+                        entry.action === 'room_opened' ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'bg-blue-100 dark:bg-blue-900/30'
                       }`}>
                         {entry.action === 'room_opened' ? (
-                          <Eye className="w-3 h-3 text-indigo-600" />
+                          <Eye className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
                         ) : (
-                          <FileText className="w-3 h-3 text-blue-600" />
+                          <FileText className="w-3 h-3 text-blue-600 dark:text-blue-400" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -709,7 +709,7 @@ export default function DataRoom() {
               <div className="p-3 rounded-lg border border-green-500/30 bg-green-500/5">
                 <div className="flex items-center gap-2 mb-2">
                   <Unlock className="w-4 h-4 text-green-500" />
-                  <span className="text-sm font-semibold text-green-600">Room is currently shared</span>
+                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">Room is currently shared</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Input

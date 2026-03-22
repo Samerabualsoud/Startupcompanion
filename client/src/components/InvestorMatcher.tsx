@@ -292,7 +292,7 @@ export default function InvestorMatcher() {
                 onClick={() => toggleType(type)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
                 style={investorTypes.includes(type)
-                  ? { background: 'var(--primary)', color: 'white' }
+                  ? { background: 'var(--primary)', color: 'var(--primary-foreground)' }
                   : { background: 'var(--background)', color: 'var(--muted-foreground)' }
                 }
               >

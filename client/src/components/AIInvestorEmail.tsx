@@ -204,7 +204,7 @@ export default function AIInvestorEmail() {
             </div>
           </div>
 
-          <Button type="submit" disabled={mutation.isPending} className="w-full h-11 text-sm font-semibold" style={{ background: 'var(--primary)', color: 'white' }}>
+          <Button type="submit" disabled={mutation.isPending} className="w-full h-11 text-sm font-semibold" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
             {mutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Writing email…</> : <><Mail className="w-4 h-4 mr-2" /> Generate Investor Email</>}
           </Button>
         </form>
@@ -259,16 +259,16 @@ export default function AIInvestorEmail() {
 
             {/* Tips */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="p-4 rounded-xl border border-green-200 bg-green-50">
-                <div className="text-xs font-bold text-green-700 mb-2">✓ Tips for Success</div>
+              <div className="p-4 rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30">
+                <div className="text-xs font-bold text-green-700 dark:text-green-400 mb-2">✓ Tips for Success</div>
                 <ul className="space-y-1.5">
-                  {result.tips.map((t, i) => <li key={i} className="text-xs text-green-800 flex gap-2"><span className="shrink-0">→</span>{t}</li>)}
+                  {result.tips.map((t, i) => <li key={i} className="text-xs text-green-800 dark:text-green-300 flex gap-2"><span className="shrink-0">→</span>{t}</li>)}
                 </ul>
               </div>
-              <div className="p-4 rounded-xl border border-red-200 bg-red-50">
-                <div className="text-xs font-bold text-red-700 mb-2">✗ Avoid These Mistakes</div>
+              <div className="p-4 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30">
+                <div className="text-xs font-bold text-red-700 dark:text-red-400 mb-2">✗ Avoid These Mistakes</div>
                 <ul className="space-y-1.5">
-                  {result.doNotDo.map((d, i) => <li key={i} className="text-xs text-red-800 flex gap-2"><span className="shrink-0">✗</span>{d}</li>)}
+                  {result.doNotDo.map((d, i) => <li key={i} className="text-xs text-red-800 dark:text-red-300 flex gap-2"><span className="shrink-0">✗</span>{d}</li>)}
                 </ul>
               </div>
             </div>

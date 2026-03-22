@@ -65,7 +65,7 @@ function TermCard({ term, index, lang }: { term: TermDefinition; index: number; 
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
-      className={`border rounded-xl overflow-hidden bg-card transition-shadow hover:shadow-sm ${term.redFlag ? 'border-red-200' : 'border-border'}`}
+      className={`border rounded-xl overflow-hidden bg-card transition-shadow hover:shadow-sm ${term.redFlag ? 'border-red-200 dark:border-red-800' : 'border-border'}`}
     >
       <button
         onClick={() => setExpanded(v => !v)}
@@ -80,7 +80,7 @@ function TermCard({ term, index, lang }: { term: TermDefinition; index: number; 
                 {categoryLabels[term.category] ?? term.category}
               </span>
               {term.redFlag && (
-                <span className="flex items-center gap-1 text-[10px] font-semibold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                <span className="flex items-center gap-1 text-[10px] font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-2 py-0.5 rounded-full">
                   <AlertTriangle className="w-2.5 h-2.5" />
                   {isAr ? 'علامة تحذير' : 'Red Flag'}
                 </span>
@@ -122,28 +122,28 @@ function TermCard({ term, index, lang }: { term: TermDefinition; index: number; 
               )}
 
               {term.redFlag && term.redFlagReason && (
-                <div className="p-2.5 rounded-lg bg-red-50 border border-red-200">
+                <div className="p-2.5 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800">
                   <div className="flex items-start gap-2">
                     <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-[9px] font-semibold text-red-700 uppercase tracking-wider mb-0.5">
+                      <div className="text-[9px] font-semibold text-red-700 dark:text-red-400 uppercase tracking-wider mb-0.5">
                         {isAr ? 'لماذا هذه علامة تحذير' : 'Why This Is a Red Flag'}
                       </div>
-                      <div className="text-xs text-red-700 leading-relaxed">{term.redFlagReason}</div>
+                      <div className="text-xs text-red-700 dark:text-red-400 leading-relaxed">{term.redFlagReason}</div>
                     </div>
                   </div>
                 </div>
               )}
 
               {term.founderTip && (
-                <div className="p-2.5 rounded-lg bg-blue-50 border border-blue-200">
+                <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
                   <div className="flex items-start gap-2">
                     <CheckCircle className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-[9px] font-semibold text-blue-700 uppercase tracking-wider mb-0.5">
+                      <div className="text-[9px] font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wider mb-0.5">
                         {isAr ? 'نصيحة للمؤسس' : 'Founder Tip'}
                       </div>
-                      <div className="text-xs text-blue-700 leading-relaxed">{term.founderTip}</div>
+                      <div className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">{term.founderTip}</div>
                     </div>
                   </div>
                 </div>
@@ -237,7 +237,7 @@ export default function TermSheetGlossary() {
           ))}
           <button
             onClick={() => setShowRedFlagsOnly(v => !v)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${showRedFlagsOnly ? 'bg-red-500 text-white' : 'border border-red-200 text-red-600 hover:bg-red-50'}`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${showRedFlagsOnly ? 'bg-red-500 text-white' : 'border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-950/30'}`}
           >
             <AlertTriangle className="w-3 h-3" />
             {isAr ? 'علامات التحذير فقط' : 'Red Flags Only'}
