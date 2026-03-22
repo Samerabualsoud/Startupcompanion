@@ -3,6 +3,8 @@
  * Analyzes term sheets and explains clauses in plain English
  */
 
+import { useStartup } from '@/contexts/StartupContext';
+import ToolGuide from '@/components/ToolGuide';
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -46,6 +48,7 @@ No-shop Period: 45 days
 Closing Conditions: Satisfactory due diligence, legal documentation`;
 
 export default function AITermSheetAnalyzer() {
+  const { snapshot } = useStartup();
   const { t, lang } = useLanguage();
   const [termSheetText, setTermSheetText] = useState('');
   const [companyStage, setCompanyStage] = useState('Seed');
@@ -79,6 +82,21 @@ export default function AITermSheetAnalyzer() {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto p-5 lg:p-6 max-w-4xl mx-auto w-full">
+      <ToolGuide
+        toolName='Term Sheet Analyzer'
+        tagline='Analyze term sheets and flag investor-unfriendly clauses.'
+        steps={[
+          { step: 1, title: 'Paste term sheet', description: 'Paste the full text of the term sheet you received from an investor.' },
+          { step: 2, title: 'Run analysis', description: 'AI identifies key terms, flags unusual clauses, and explains each provision.' },
+          { step: 3, title: 'Review red flags', description: 'Pay special attention to liquidation preferences, anti-dilution, and pro-rata rights.' },
+          { step: 4, title: 'Negotiate', description: 'Use the analysis to prepare counter-proposals with your lawyer.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'company context used to assess whether terms are appropriate for your stage' },
+        ]}
+        tip='Never sign a term sheet without a lawyer. This tool helps you understand the terms, not replace legal counsel.'
+      />
+
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">

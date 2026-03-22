@@ -3,6 +3,7 @@
  * Generates comprehensive market research reports using AI
  */
 
+import ToolGuide from '@/components/ToolGuide';
 import { useState, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -117,6 +118,21 @@ export default function AIMarketResearch() {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto p-5 lg:p-6 max-w-4xl mx-auto w-full">
+      <ToolGuide
+        toolName='AI Market Research'
+        tagline='Generate market research reports — topic pre-filled from your company name.'
+        steps={[
+          { step: 1, title: 'Review topic', description: 'The research topic is pre-filled based on your company name from the Startup Profile.' },
+          { step: 2, title: 'Refine the query', description: 'Edit the topic to focus on a specific market segment or geography.' },
+          { step: 3, title: 'Generate report', description: 'AI produces a market size, trends, and competitive landscape analysis.' },
+          { step: 4, title: 'Export findings', description: 'Copy the report to include in your pitch deck or data room.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'pre-fills the research topic with your company name and market context' },
+        ]}
+        tip='Use the research output to validate your TAM/SAM/SOM numbers in your pitch deck.'
+      />
+
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">

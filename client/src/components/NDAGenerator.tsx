@@ -3,9 +3,11 @@
  * Generates mutual or one-way NDAs with jurisdiction selection and AI drafting
  */
 
-import { useState } from 'react';
+import ToolGuide from '@/components/ToolGuide';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { trpc } from '@/lib/trpc';
+import { useStartup } from '@/contexts/StartupContext';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,7 +64,25 @@ const DEFAULT_INPUTS: NDAInputs = {
 
 export default function NDAGenerator() {
   const { t, isRTL } = useLanguage();
+  const { snapshot } = useStartup();
   const [inputs, setInputs] = useState<NDAInputs>(DEFAULT_INPUTS);
+
+  // Auto-fill from startup profile
+  useEffect(() => {
+    const updates: Partial<NDAInputs> = {};
+    if (snapshot.companyName && !inputs.disclosingParty) updates.disclosingParty = snapshot.companyName;
+    if (snapshot.incorporationCountry && inputs.governingLaw === 'delaware') {
+      const countryMap: Record<string, string> = {
+        'Saudi Arabia': 'saudi', 'UAE': 'uae', 'Bahrain': 'bahrain',
+        'Egypt': 'egypt', 'Jordan': 'jordan', 'Singapore': 'singapore',
+        'United Kingdom': 'uk', 'Cayman Islands': 'cayman',
+      };
+      const mapped = countryMap[snapshot.incorporationCountry];
+      if (mapped) updates.governingLaw = mapped;
+    }
+    if (Object.keys(updates).length > 0) setInputs(prev => ({ ...prev, ...updates }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot.companyName, snapshot.incorporationCountry]);
   const [generatedDoc, setGeneratedDoc] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -176,6 +196,21 @@ export default function NDAGenerator() {
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
+      <ToolGuide
+        toolName='NDA Generator'
+        tagline='Generate Non-Disclosure Agreements — company name auto-filled from your Startup Profile.'
+        steps={[
+          { step: 1, title: 'Review pre-filled data', description: 'Company name is auto-filled from your Startup Profile. Verify it is correct.' },
+          { step: 2, title: 'Enter counterparty', description: 'Add the name and details of the other party signing the NDA.' },
+          { step: 3, title: 'Choose NDA type', description: 'Select mutual (both parties) or one-way (only counterparty is bound).' },
+          { step: 4, title: 'Generate & download', description: 'Click Generate to produce the NDA text ready for review by legal counsel.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'auto-fills your company name as the disclosing party' },
+        ]}
+        tip='Always have a lawyer review NDAs before signing. This tool generates a starting template, not final legal advice.'
+      />
+
                     <Label>
                       {inputs.ndaType === 'mutual' ? 'Party A' : 'Disclosing Party'} *
                     </Label>

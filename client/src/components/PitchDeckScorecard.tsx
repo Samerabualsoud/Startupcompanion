@@ -3,7 +3,9 @@
  * Design: "Venture Capital Clarity" — Editorial Finance
  */
 
+import ToolGuide from '@/components/ToolGuide';
 import { useState, useMemo, useEffect } from 'react';
+import { useStartup } from '@/contexts/StartupContext';
 import { motion } from 'framer-motion';
 import { Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts';
@@ -155,6 +157,7 @@ const INITIAL_SLIDES: Slide[] = [
 ];
 
 export default function PitchDeckScorecard() {
+  const { snapshot } = useStartup();
   const { state: slides, setState: setSlides } = useToolState<Slide[]>('pitch_scorecard', INITIAL_SLIDES);
   const [expandedId, setExpandedId] = useState<string | null>('problem');
   const { setPitchScore } = useReport();
@@ -190,6 +193,21 @@ export default function PitchDeckScorecard() {
 
   return (
     <div className="space-y-5">
+      <ToolGuide
+        toolName='Pitch Deck Scorecard'
+        tagline='Score your pitch deck across 10 investor criteria.'
+        steps={[
+          { step: 1, title: 'Rate each slide', description: 'Score each of the 10 pitch deck sections from 1-5.' },
+          { step: 2, title: 'Add notes', description: 'Note specific weaknesses to address in each section.' },
+          { step: 3, title: 'Review overall score', description: 'Your total score and grade appear at the top.' },
+          { step: 4, title: 'Improve weak areas', description: 'Focus on sections scoring below 3 — these are your biggest gaps.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'company name shown in the scorecard header' },
+        ]}
+        tip='Problem, Solution, and Traction slides are the most important. Investors decide in the first 3 slides.'
+      />
+
       {/* Header */}
       <div>
         <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>

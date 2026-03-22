@@ -4,6 +4,8 @@
  * Contacts are persisted per user via tRPC + MySQL.
  */
 
+import { useStartup } from '@/contexts/StartupContext';
+import ToolGuide from '@/components/ToolGuide';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Edit2, Check, X, Users, Download, Rocket, BookmarkCheck, Loader2, RefreshCw } from 'lucide-react';
@@ -57,6 +59,7 @@ function StatusBadge({ status }: { status: Status }) {
 }
 
 export default function InvestorCRM() {
+  const { snapshot } = useStartup();
   const { isAuthenticated } = useAuth();
   const utils = trpc.useUtils();
   const { tracked, untrack } = useTrackedApplications();
@@ -189,6 +192,21 @@ export default function InvestorCRM() {
   if (!isAuthenticated) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+      <ToolGuide
+        toolName='Investor Pipeline'
+        tagline='Track your investor relationships — company context available throughout.'
+        steps={[
+          { step: 1, title: 'Add investors', description: 'Add investors you are targeting with their fund, stage focus, and contact details.' },
+          { step: 2, title: 'Track status', description: "Update each investor's status: Identified → Contacted → Meeting → Term Sheet → Closed." },
+          { step: 3, title: 'Log interactions', description: 'Add notes after each meeting or email exchange.' },
+          { step: 4, title: 'Monitor pipeline', description: 'Use the pipeline view to see where each investor is in your process.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'company name and stage used as context for investor matching' },
+        ]}
+        tip='Run a parallel process with 20-30 investors. Most will say no — volume is key to closing a round.'
+      />
+
         <Users className="w-12 h-12 text-muted-foreground opacity-40" />
         <div>
           <div className="text-lg font-bold text-foreground mb-1">Sign in to use Investor CRM</div>

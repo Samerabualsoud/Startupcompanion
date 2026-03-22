@@ -3,6 +3,7 @@
  * Generates personalized cold outreach emails to investors
  */
 
+import ToolGuide from '@/components/ToolGuide';
 import { useState, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -88,6 +89,21 @@ export default function AIInvestorEmail() {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto p-5 lg:p-6 max-w-4xl mx-auto w-full">
+      <ToolGuide
+        toolName='AI Investor Email'
+        tagline='Draft investor outreach emails — startup name and details auto-filled from your profile.'
+        steps={[
+          { step: 1, title: 'Review pre-filled data', description: 'Your startup name is auto-filled from the Startup Profile.' },
+          { step: 2, title: 'Choose email type', description: 'Select cold outreach, follow-up, or thank-you email.' },
+          { step: 3, title: 'Add investor context', description: "Optionally add the investor's name and fund for personalization." },
+          { step: 4, title: 'Generate & send', description: 'Review the generated email and customize before sending.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'auto-fills startup name, stage, and key metrics in the email' },
+        ]}
+        tip="Personalize each email with the investor's specific thesis and portfolio companies for higher response rates."
+      />
+
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">

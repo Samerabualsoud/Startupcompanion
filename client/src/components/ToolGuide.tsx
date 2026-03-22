@@ -3,7 +3,7 @@
  * Shows a "How to use this tool" section with steps and key concepts.
  */
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, BookOpen, Lightbulb, CheckCircle2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, BookOpen, Lightbulb, CheckCircle2, Link2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export interface ToolGuideStep {
@@ -17,11 +17,17 @@ export interface ToolGuideConcept {
   definition: string;
 }
 
+export interface ToolGuideConnection {
+  from: string;  // source tool/data
+  to: string;    // what it fills in this tool
+}
+
 export interface ToolGuideProps {
   toolName: string;
   tagline: string;
   steps: ToolGuideStep[];
   concepts?: ToolGuideConcept[];
+  connections?: ToolGuideConnection[];
   tip?: string;
   defaultOpen?: boolean;
 }
@@ -31,6 +37,7 @@ export default function ToolGuide({
   tagline,
   steps,
   concepts,
+  connections,
   tip,
   defaultOpen = false,
 }: ToolGuideProps) {
@@ -100,6 +107,25 @@ export default function ToolGuide({
                         <div>
                           <span className="text-xs font-semibold text-indigo-800 dark:text-indigo-300">{c.term}: </span>
                           <span className="text-xs text-indigo-600/80 dark:text-indigo-400/80">{c.definition}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Data connections */}
+              {connections && connections.length > 0 && (
+                <div>
+                  <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider mb-2">
+                    Connected data sources
+                  </div>
+                  <div className="space-y-1.5">
+                    {connections.map((c, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <Link2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                        <div className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed">
+                          <span className="font-semibold">{c.from}</span> → {c.to}
                         </div>
                       </div>
                     ))}

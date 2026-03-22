@@ -3,7 +3,9 @@
  * Generates customized due diligence checklists for startups
  */
 
-import { useState } from 'react';
+import { useStartup } from '@/contexts/StartupContext';
+import ToolGuide from '@/components/ToolGuide';
+import { useState, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -31,8 +33,19 @@ type DDResult = {
 };
 
 export default function AIDueDiligence() {
+  const { snapshot } = useStartup();
   const { t, isRTL, lang } = useLanguage();
   const [form, setForm] = useState({ companyName: '', sector: '', stage: 'Seed', description: '' });
+  useEffect(() => {
+    setForm(prev => ({
+      ...prev,
+      companyName: prev.companyName || snapshot.companyName || '',
+      sector: prev.sector || snapshot.sector || '',
+      stage: prev.stage !== 'Seed' ? prev.stage : (snapshot.stage ? snapshot.stage.charAt(0).toUpperCase() + snapshot.stage.slice(1).replace('-', ' ') : 'Seed'),
+      description: prev.description || (snapshot.problem && snapshot.solution ? `${snapshot.problem} ${snapshot.solution}` : ''),
+    }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot.companyName, snapshot.sector, snapshot.stage, snapshot.problem, snapshot.solution]);
   const [result, setResult] = useState<DDResult | null>(null);
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
@@ -82,6 +95,21 @@ export default function AIDueDiligence() {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto p-5 lg:p-6 max-w-4xl mx-auto w-full">
+      <ToolGuide
+        toolName='AI Due Diligence'
+        tagline='Generate a customized due diligence checklist — company data auto-filled from your profile.'
+        steps={[
+          { step: 1, title: 'Review pre-filled data', description: 'Company name, sector, and stage are auto-filled from your Startup Profile.' },
+          { step: 2, title: 'Add description', description: 'Describe your business model and what makes it unique.' },
+          { step: 3, title: 'Generate checklist', description: 'AI generates a stage-appropriate due diligence checklist with risk flags.' },
+          { step: 4, title: 'Work through items', description: 'Check off items as you prepare your materials for investor review.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'auto-fills company name, sector, stage, and business description' },
+        ]}
+        tip='Use this checklist to prepare your data room before approaching investors. Address red flags proactively.'
+      />
+
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">

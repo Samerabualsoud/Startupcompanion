@@ -3,6 +3,8 @@
  * Features: create rooms, upload files (S3), organize by folder,
  * generate shareable links, view activity log (who opened, what they viewed).
  */
+import { useStartup } from '@/contexts/StartupContext';
+import ToolGuide from '@/components/ToolGuide';
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -72,6 +74,7 @@ const ACTION_LABELS: Record<string, string> = {
 
 // ── Main Component ─────────────────────────────────────────────────────────
 export default function DataRoom() {
+  const { snapshot } = useStartup();
   const { t, isRTL } = useLanguage();
   const utils = trpc.useUtils();
 
@@ -346,6 +349,21 @@ export default function DataRoom() {
                 Organize your startup documents into secure, shareable rooms for investor due diligence.
               </p>
               <div className="flex flex-col gap-1.5 mb-6 text-left">
+      <ToolGuide
+        toolName='Virtual Data Room'
+        tagline='Organize your investor data room — company name auto-filled from your profile.'
+        steps={[
+          { step: 1, title: 'Review checklist', description: 'The data room checklist is organized by category: Legal, Financial, Team, Product.' },
+          { step: 2, title: 'Upload documents', description: 'Upload each required document to the appropriate category.' },
+          { step: 3, title: 'Track completeness', description: 'Your data room completeness score updates as you upload documents.' },
+          { step: 4, title: 'Share with investors', description: 'Generate a secure link to share your data room with specific investors.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'company name used in the data room header and document naming' },
+        ]}
+        tip='Have your data room 80%+ complete before sending to investors. Missing documents slow down due diligence.'
+      />
+
                 {[
                   { icon: Lock, text: isRTL ? 'مشاركة آمنة مع رابط مخصص' : 'Secure sharing with a custom link' },
                   { icon: Eye, text: isRTL ? 'تتبع من فتح الملفات وشاهدها' : 'Track who opened files and when' },

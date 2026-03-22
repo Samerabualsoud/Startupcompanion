@@ -3,6 +3,7 @@
  * v2: info tooltips on every element, visible slider styling, inline explanations
  */
 
+import ToolGuide from '@/components/ToolGuide';
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -476,7 +477,22 @@ export default function RunwayOptimizer() {
           <InfoTip text={isRTL ? 'محسوبة تلقائياً بناءً على الحد الأقصى للتخفيض لكل بند. النظام يختار الأكثر تأثيراً أولاً.' : 'Auto-calculated using the Max Cut % per category. The optimizer picks the highest-impact cuts first to reach your target.'} />
         </div>
         {analysis.recommendations.length === 0 ? (
-          <div className="p-5 flex items-center gap-3 text-sm text-emerald-700"><CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />{isRTL ? 'مدة بقائك كافية — لا حاجة لتخفيضات' : 'Your runway is sufficient — no cuts needed'}</div>
+          <div className="p-5 flex items-center gap-3 text-sm text-emerald-700">
+      <ToolGuide
+        toolName='Runway Optimizer'
+        tagline='Calculate your runway and optimize burn — financial data synced from your Startup Profile.'
+        steps={[
+          { step: 1, title: 'Review financials', description: 'Cash balance, MRR, and burn rate are pre-filled from your Startup Profile.' },
+          { step: 2, title: 'Adjust projections', description: 'Model different growth and cost scenarios.' },
+          { step: 3, title: 'See runway', description: 'Your runway in months is calculated automatically.' },
+          { step: 4, title: 'Optimize', description: 'Use the scenario tool to find the burn rate that maximizes runway.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'auto-fills cash balance, MRR, and monthly burn rate' },
+        ]}
+        tip='Maintain at least 18 months of runway before starting your next fundraise. Fundraising takes 3-6 months.'
+      />
+<CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />{isRTL ? 'مدة بقائك كافية — لا حاجة لتخفيضات' : 'Your runway is sufficient — no cuts needed'}</div>
         ) : (
           <>
             <div className="divide-y divide-border">

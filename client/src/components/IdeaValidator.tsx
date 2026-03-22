@@ -2,7 +2,9 @@
  * AI Startup Idea Validator
  * AI-powered assessment of startup ideas: market size, competition, moat, risks
  */
-import { useState } from 'react';
+import ToolGuide from '@/components/ToolGuide';
+import { useState, useEffect } from 'react';
+import { useStartup } from '@/contexts/StartupContext';
 import { Sparkles, Target, TrendingUp, Shield, AlertTriangle, CheckCircle2, XCircle, ChevronDown, ChevronUp, RotateCcw, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +43,21 @@ const VERDICT_CONFIG: Record<string, { color: string; bg: string; icon: React.El
 function ScoreBar({ score, label, color = '#2D4A6B' }: { score: number; label: string; color?: string }) {
   return (
     <div className="space-y-1">
+      <ToolGuide
+        toolName='Idea Validator'
+        tagline='Validate your startup idea — problem, solution, and stage auto-filled from your profile.'
+        steps={[
+          { step: 1, title: 'Review pre-filled data', description: 'Problem, solution, revenue model, and stage are loaded from your Startup Profile.' },
+          { step: 2, title: 'Add missing details', description: "Fill in any fields that weren't auto-populated." },
+          { step: 3, title: 'Run validation', description: 'AI scores your idea across 8 dimensions: market size, competition, feasibility, etc.' },
+          { step: 4, title: 'Act on feedback', description: 'Use the detailed feedback to refine your value proposition.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'auto-fills problem statement, solution, revenue model, geography, and stage' },
+        ]}
+        tip='Run the validator at different stages to track how your idea has evolved and strengthened.'
+      />
+
       <div className="flex justify-between text-xs">
         <span className="text-muted-foreground">{label}</span>
         <span className="font-semibold">{score}/10</span>
@@ -85,6 +102,7 @@ function CollapsibleSection({ title, icon: Icon, children, defaultOpen = false }
 
 export default function IdeaValidator() {
   const { isRTL, lang: language } = useLanguage();
+  const { snapshot } = useStartup();
   const [result, setResult] = useState<ValidationResult | null>(null);
 
   const [ideaTitle, setIdeaTitle] = useState('');
@@ -94,6 +112,17 @@ export default function IdeaValidator() {
   const [revenueModel, setRevenueModel] = useState('');
   const [geography, setGeography] = useState('MENA');
   const [stage, setStage] = useState('idea');
+
+  // Auto-fill from startup profile
+  useEffect(() => {
+    if (snapshot.companyName && !ideaTitle) setIdeaTitle(snapshot.companyName);
+    if (snapshot.problem && !problemStatement) setProblemStatement(snapshot.problem);
+    if (snapshot.solution && !solution) setSolution(snapshot.solution);
+    if (snapshot.businessModel && !revenueModel) setRevenueModel(snapshot.businessModel);
+    if (snapshot.incorporationCountry) setGeography(snapshot.incorporationCountry);
+    if (snapshot.stage && snapshot.stage !== 'idea') setStage(snapshot.stage);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot.companyName, snapshot.problem, snapshot.solution, snapshot.businessModel, snapshot.incorporationCountry, snapshot.stage]);
 
   const validateMutation = (trpc as any).ideaValidator.validate.useMutation({
     onSuccess: (data: ValidationResult) => {

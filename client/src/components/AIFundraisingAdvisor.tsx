@@ -3,6 +3,7 @@
  * Personalized with founder's startup profile data
  */
 
+import ToolGuide from '@/components/ToolGuide';
 import { useState, useRef, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -97,6 +98,21 @@ export default function AIFundraisingAdvisor() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
+      <ToolGuide
+        toolName='AI Fundraising Advisor'
+        tagline='Get personalized fundraising advice — context auto-loaded from your Startup Profile.'
+        steps={[
+          { step: 1, title: 'Profile loaded', description: 'Your company name, stage, sector, and financials are automatically loaded as context.' },
+          { step: 2, title: 'Ask your question', description: 'Type any fundraising question — term sheets, investor types, pitch strategy, etc.' },
+          { step: 3, title: 'Get tailored advice', description: "AI responds with advice specific to your startup's stage and sector." },
+          { step: 4, title: 'Follow up', description: 'Continue the conversation to drill into specific topics.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'auto-loads company name, stage, sector, MRR, and burn rate as AI context' },
+        ]}
+        tip='The more complete your Startup Profile, the more personalized and accurate the advice will be.'
+      />
+
       {/* Header */}
       <div className="shrink-0 px-5 py-3.5 border-b border-border flex items-center justify-between" style={{ background: 'oklch(0.35 0.2 270)' }}>
         <div className="flex items-center gap-2.5">

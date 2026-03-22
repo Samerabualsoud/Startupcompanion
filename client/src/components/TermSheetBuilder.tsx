@@ -2,6 +2,7 @@
  * Term Sheet Builder
  * Generates downloadable term sheets for SAFE, Convertible Note, and Priced Round
  */
+import ToolGuide from '@/components/ToolGuide';
 import { useState } from 'react';
 import { FileText, Download, ChevronRight, ChevronLeft, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -146,6 +147,22 @@ export default function TermSheetBuilder() {
       case 0:
         return (
           <div className="space-y-4">
+      <ToolGuide
+        toolName='Term Sheet Builder'
+        tagline='Build investor-ready term sheets — company details auto-filled from your profile.'
+        steps={[
+          { step: 1, title: 'Review company details', description: 'Company name and stage are auto-filled from your Startup Profile.' },
+          { step: 2, title: 'Set investment terms', description: 'Enter the pre-money valuation, investment amount, and security type.' },
+          { step: 3, title: 'Configure rights', description: 'Set pro-rata rights, information rights, and board composition.' },
+          { step: 4, title: 'Generate term sheet', description: 'Download a formatted term sheet ready for investor review.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'auto-fills company name, incorporation details, and funding stage' },
+          { from: 'ZestEquity Cap Table', to: 'pre-money valuation and share structure pulled from cap table' },
+        ]}
+        tip='Use this as a starting point for negotiation. Always have a lawyer finalize the term sheet before signing.'
+      />
+
             <p className="text-sm text-muted-foreground">Select the type of investment instrument for your term sheet.</p>
             <div className="grid gap-3">
               {(['safe', 'convertible-note', 'priced-round'] as InstrumentType[]).map((type) => (

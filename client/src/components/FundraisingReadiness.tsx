@@ -3,7 +3,9 @@
  * Design: "Venture Capital Clarity" — Editorial Finance
  */
 
+import ToolGuide from '@/components/ToolGuide';
 import { useState, useMemo, useEffect } from 'react';
+import { useStartup } from '@/contexts/StartupContext';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Circle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts';
@@ -59,6 +61,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function FundraisingReadiness() {
+  const { snapshot } = useStartup();
   const { state: items, setState: setItems } = useToolState<CheckItem[]>('readiness', INITIAL_ITEMS);
   const [expandedCat, setExpandedCat] = useState<string | null>('Product');
   const { setReadiness } = useReport();
@@ -105,6 +108,22 @@ export default function FundraisingReadiness() {
 
   return (
     <div className="space-y-5">
+      <ToolGuide
+        toolName='Fundraising Readiness'
+        tagline='Assess your readiness to raise — 20 checks across team, product, traction, and financials.'
+        steps={[
+          { step: 1, title: 'Work through checklist', description: 'Go through all 20 readiness checks across 4 categories.' },
+          { step: 2, title: 'Mark completed items', description: 'Check off items you have ready (pitch deck, cap table, financials, etc.).' },
+          { step: 3, title: 'Review score', description: 'Your readiness score updates in real time as you check items.' },
+          { step: 4, title: 'Fix gaps', description: 'Use the unchecked items as your fundraising preparation to-do list.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'company name shown in the header for context' },
+          { from: 'ZestEquity Cap Table', to: 'cap table readiness check reflects your ZestEquity data' },
+        ]}
+        tip='Aim for 80%+ readiness before approaching investors. The cap table and financials categories are most scrutinized.'
+      />
+
       {/* Header */}
       <div>
         <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>

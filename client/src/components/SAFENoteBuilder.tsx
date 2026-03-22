@@ -3,9 +3,13 @@
  * Generates SAFE or convertible note term sheets with AI-powered document drafting
  */
 
-import { useState } from 'react';
+import ToolGuide from '@/components/ToolGuide';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { trpc } from '@/lib/trpc';
+import { useStartup } from '@/contexts/StartupContext';
+import { useCapTable } from '@/hooks/useCapTable';
+import type { CapTableInstrument } from '@shared/equity';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -75,7 +79,17 @@ function formatCurrency(val: number): string {
 
 export default function SAFENoteBuilder() {
   const { t, isRTL } = useLanguage();
+  const { snapshot } = useStartup();
+  const { state: capState, setInstruments } = useCapTable();
   const [inputs, setInputs] = useState<SAFEInputs>(DEFAULT_INPUTS);
+
+  // Auto-fill company name from startup profile on first load
+  useEffect(() => {
+    if (snapshot.companyName && !inputs.companyName) {
+      setInputs(prev => ({ ...prev, companyName: snapshot.companyName }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot.companyName]);
   const [generatedDoc, setGeneratedDoc] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -102,6 +116,33 @@ export default function SAFENoteBuilder() {
     }
     setIsGenerating(true);
     generateMutation.mutate({ inputs, language: docLanguage });
+    // Automatically save instrument to ZestEquity cap table
+    if (capState) {
+      const existing = capState.instruments.find(
+        i => i.investorName === inputs.investorName && i.investmentAmount === inputs.investmentAmount
+      );
+      if (!existing) {
+        const instrument: CapTableInstrument = {
+          id: `safe-${Date.now()}`,
+          investorName: inputs.investorName,
+          type: inputs.instrumentType === 'safe' ? 'safe' : 'convertible_note',
+          investmentAmount: inputs.investmentAmount,
+          currency: 'USD',
+          valuationCap: inputs.valuationCap,
+          discountRate: inputs.discountRate,
+          interestRate: inputs.instrumentType === 'convertible-note' ? inputs.interestRate : 0,
+          issueDate: inputs.closingDate || new Date().toISOString().split('T')[0],
+          maturityMonths: inputs.instrumentType === 'convertible-note' ? inputs.maturityMonths : 0,
+          qualifiedRoundThreshold: 0,
+          conversionTrigger: 'qualified_round',
+          status: 'active',
+          color: '#10B981',
+          notes: `Created via SAFE/Note Builder`,
+        };
+        setInstruments([...capState.instruments, instrument]);
+        toast.info('Instrument added to ZestEquity Cap Table');
+      }
+    }
   };
 
   const handleCopy = async () => {
@@ -197,6 +238,22 @@ export default function SAFENoteBuilder() {
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
+      <ToolGuide
+        toolName='SAFE Note Builder'
+        tagline='Generate SAFE and convertible note agreements — automatically added to your cap table.'
+        steps={[
+          { step: 1, title: 'Set note type', description: 'Choose SAFE, Convertible Note, or OQAL. Company name is auto-filled from your Startup Profile.' },
+          { step: 2, title: 'Enter terms', description: 'Set the investment amount, valuation cap, discount rate, and interest rate.' },
+          { step: 3, title: 'Generate document', description: 'Click Generate to produce the legal agreement text.' },
+          { step: 4, title: 'Save to cap table', description: 'Click "Add to Cap Table" to register the instrument in ZestEquity automatically.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'auto-fills company name and incorporation details' },
+          { from: 'ZestEquity Cap Table', to: 'SAFE/note instruments are saved as cap table entries on generation' },
+        ]}
+        tip='SAFE notes convert to equity at the next priced round. The valuation cap protects investors from excessive dilution.'
+      />
+
                     <Label>Company Name</Label>
                     <Input
                       placeholder="e.g. Acme Technologies Inc."

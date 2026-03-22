@@ -615,3 +615,17 @@
 - [ ] Fix ESOP saving so grants reflect in CoFounderEquitySplit share calculations
 - [ ] Connect vesting planner to founders shares and ESOP grants automatically
 - [ ] Push all code to GitHub
+
+## Round 28 — Full Platform Wiring + Help Content Updates
+- [x] Wire SAFENoteBuilder → startup profile (company name) + cap table (auto-add instrument on generate)
+- [x] Wire NDAGenerator → startup profile (company name, jurisdiction)
+- [x] Wire AICofounderAgreement → startup profile (company name, jurisdiction) + cap table (founders pre-populated)
+- [ ] Wire AcceleratorRecommender → startup profile (stage, country, sector)
+- [ ] Wire IdeaValidator → startup profile (stage, geography, company description)
+- [ ] Wire FundraisingReadiness → startup profile (show company name in header)
+- [ ] Wire PitchDeckScorecard → startup profile (show company name in header)
+- [ ] Wire InvestorCRM → startup profile (company name, stage, sector)
+- [ ] Wire AITermSheetAnalyzer → startup profile (company name, stage)
+- [ ] Wire DataRoom → startup profile (company name)
+- [ ] Update ToolGuide help content in all tools to reflect connections
+- [ ] Push all changes to GitHub

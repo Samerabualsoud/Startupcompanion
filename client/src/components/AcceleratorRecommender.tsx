@@ -3,7 +3,9 @@
  * Design: "Venture Capital Clarity" — Editorial Finance
  */
 
-import { useState, useMemo } from 'react';
+import ToolGuide from '@/components/ToolGuide';
+import { useState, useMemo, useEffect } from 'react';
+import { useStartup } from '@/contexts/StartupContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, MapPin, Clock, DollarSign, Percent, Star, ChevronDown, ChevronUp, Filter, BookmarkPlus, BookmarkCheck } from 'lucide-react';
 import { ACCELERATORS, COUNTRIES, recommendAccelerators, type Accelerator, type Stage } from '@/lib/accelerators';
@@ -200,9 +202,33 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
 }
 
 export default function AcceleratorRecommender() {
+  const { snapshot } = useStartup();
   const [stage, setStage] = useState<Stage>('seed');
   const [country, setCountry] = useState('United States');
   const [sector, setSector] = useState('saas');
+
+  // Auto-fill from startup profile
+  useEffect(() => {
+    if (snapshot.stage && ['pre-seed','seed','series-a','series-b','growth'].includes(snapshot.stage)) {
+      const stageMap: Record<string, Stage> = {
+        'pre-seed': 'pre-seed', 'seed': 'seed', 'series-a': 'series-a',
+        'series-b': 'series-b', 'growth': 'growth',
+      };
+      const mapped = stageMap[snapshot.stage];
+      if (mapped) setStage(mapped);
+    }
+    if (snapshot.incorporationCountry) setCountry(snapshot.incorporationCountry);
+    if (snapshot.sector) {
+      const sectorMap: Record<string, string> = {
+        'SaaS': 'saas', 'Fintech': 'fintech', 'Healthtech': 'healthtech',
+        'Edtech': 'edtech', 'E-commerce': 'ecommerce', 'AI/ML': 'ai',
+        'Cleantech': 'cleantech', 'Logistics': 'logistics',
+      };
+      const mapped = sectorMap[snapshot.sector];
+      if (mapped) setSector(mapped);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot.stage, snapshot.incorporationCountry, snapshot.sector]);
   const [showFilters, setShowFilters] = useState(false);
 
   const recommendations = useMemo(
@@ -212,6 +238,21 @@ export default function AcceleratorRecommender() {
 
   return (
     <div className="space-y-5">
+      <ToolGuide
+        toolName='Accelerator Finder'
+        tagline='Find the right accelerators — stage and sector auto-matched from your Startup Profile.'
+        steps={[
+          { step: 1, title: 'Review filters', description: 'Stage, country, and sector are pre-filled from your Startup Profile.' },
+          { step: 2, title: 'Adjust filters', description: 'Refine by geography, funding amount, or program type.' },
+          { step: 3, title: 'Browse matches', description: 'Review matched accelerators with program details and application deadlines.' },
+          { step: 4, title: 'Apply', description: "Click through to the accelerator's website to start your application." },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'auto-sets stage, country, and sector filters for relevant matches' },
+        ]}
+        tip='Apply to 5-10 accelerators simultaneously. Top programs like YC and Techstars have <2% acceptance rates.'
+      />
+
       {/* Header */}
       <div>
         <h2 className="text-xl font-bold text-foreground mb-1" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>

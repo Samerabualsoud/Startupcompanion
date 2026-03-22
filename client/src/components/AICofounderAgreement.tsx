@@ -3,9 +3,12 @@
  * Drafts comprehensive co-founder agreements based on equity and roles
  */
 
-import { useState } from 'react';
+import ToolGuide from '@/components/ToolGuide';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { trpc } from '@/lib/trpc';
+import { useStartup } from '@/contexts/StartupContext';
+import { useCapTable } from '@/hooks/useCapTable';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Plus, Trash2, Loader2, RefreshCw, Copy, Check, ChevronDown, ChevronUp, AlertTriangle, Globe } from 'lucide-react';
 import { Label } from '@/components/ui/label';
@@ -38,6 +41,8 @@ function CopyButton({ text }: { text: string }) {
 
 export default function AICofounderAgreement() {
   const { t } = useLanguage();
+  const { snapshot } = useStartup();
+  const { state: capState } = useCapTable();
   const [companyName, setCompanyName] = useState('');
   const [vestingSchedule, setVestingSchedule] = useState('4 years with 1-year cliff');
   const [jurisdiction, setJurisdiction] = useState('Delaware, USA');
@@ -48,6 +53,34 @@ export default function AICofounderAgreement() {
     { name: '', role: 'CEO', equityPercent: 50, contribution: '' },
     { name: '', role: 'CTO', equityPercent: 50, contribution: '' },
   ]);
+
+  // Auto-fill from startup profile and cap table founders
+  useEffect(() => {
+    if (snapshot.companyName && !companyName) setCompanyName(snapshot.companyName);
+    if (snapshot.incorporationCountry && jurisdiction === 'Delaware, USA') {
+      const countryMap: Record<string, string> = {
+        'Saudi Arabia': 'Saudi Arabia', 'UAE': 'DIFC, Dubai', 'Bahrain': 'Bahrain',
+        'Egypt': 'Egypt', 'Jordan': 'Jordan', 'Singapore': 'Singapore',
+      };
+      const mapped = countryMap[snapshot.incorporationCountry];
+      if (mapped) setJurisdiction(mapped);
+    }
+    // Pre-populate founders from cap table shareholders (type=founder)
+    if (capState?.shareholders) {
+      const capFounders = capState.shareholders.filter((s: any) => s.type === 'founder');
+      if (capFounders.length >= 2) {
+        const total = capFounders.reduce((s: number, f: any) => s + f.shares, 0);
+        const mapped = capFounders.map((f: any) => ({
+          name: f.name,
+          role: f.title || 'Co-Founder',
+          equityPercent: total > 0 ? Math.round((f.shares / total) * 100 * 10) / 10 : 0,
+          contribution: f.title || '',
+        }));
+        setFounders(mapped);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot.companyName, snapshot.incorporationCountry, capState?.shareholders]);
   const [result, setResult] = useState<AgreementResult | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [docLanguage, setDocLanguage] = useState<'english' | 'arabic' | 'both'>('english');
@@ -76,6 +109,22 @@ export default function AICofounderAgreement() {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto p-5 lg:p-6 max-w-4xl mx-auto w-full">
+      <ToolGuide
+        toolName='Co-Founder Agreement'
+        tagline='Generate co-founder agreements — founders and equity splits pulled from ZestEquity.'
+        steps={[
+          { step: 1, title: 'Review founders', description: 'Founders and their equity percentages are pre-filled from ZestEquity cap table.' },
+          { step: 2, title: 'Set vesting terms', description: 'Configure the vesting schedule, cliff period, and good/bad leaver clauses.' },
+          { step: 3, title: 'Add IP assignment', description: 'Specify IP assignment terms and non-compete clauses.' },
+          { step: 4, title: 'Generate agreement', description: 'Click Generate to produce the co-founder agreement text.' },
+        ]}
+        connections={[
+          { from: 'Startup Profile', to: 'auto-fills company name and incorporation details' },
+          { from: 'ZestEquity Cap Table', to: 'pre-populates founders and their equity percentages' },
+        ]}
+        tip='Co-founder agreements should be signed before any significant work begins. Vesting protects all founders if someone leaves early.'
+      />
+
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
