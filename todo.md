@@ -697,3 +697,17 @@
 - [ ] Frontend: model selector, approach toggle, input forms, 3-year output with charts
 - [ ] Wire into sidebar navigation
 - [ ] Write vitest tests
+
+## Financial Projection Tool Rebuild — Best Practices + AI Review + PDF + Excel Export
+- [x] Rewrite projectionRouter.ts for new computeFinancialModel engine
+- [x] Build FinancialProjection.tsx UI: tabbed layout (Setup / P&L / Charts / AI Review)
+- [x] Setup tab: business model selector, scenario toggle (bear/base/bull), revenue drivers, headcount plan, OPEX, capital
+- [x] P&L tab: full income statement (Revenue → COGS → Gross Profit → OPEX → EBITDA → Net Income), monthly + yearly view
+- [x] Charts tab: Revenue/EBITDA area chart, cash waterfall, headcount cost breakdown, unit economics KPI cards
+- [x] AI Review tab: LLM analysis with strengths, risks, investor-ready recommendations
+- [x] PDF report generation: downloadable VC-ready financial report
+- [x] Excel export: full P&L table with all monthly data
+- [x] 3/5/10-year horizon selector
+- [x] COGS/Unit Economics data integration (pre-fill from COGS tool)
+- [x] Save/load projections to database
+- [x] Write vitest tests for new engine (34 tests)

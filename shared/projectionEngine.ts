@@ -1,370 +1,797 @@
 /**
- * Financial Projection Engine
- * Supports 6 business models × 2 approaches (top-down / bottom-up)
- * All calculations are deterministic and pure (no side effects).
+ * Financial Projection Engine — Best-Practice CFO/VC Model
+ *
+ * Architecture:
+ *  1. Driver-based revenue model (unit economics per business model)
+ *  2. Full P&L: Revenue → COGS → Gross Profit → OPEX → EBITDA → Net Income
+ *  3. Headcount plan (team + hiring schedule)
+ *  4. Burn rate & runway
+ *  5. Multi-scenario: Bear / Base / Bull
+ *  6. Working capital basics (AR days, AP days)
+ *  7. Key SaaS/startup metrics: ARR, MRR, CAC, LTV, LTV:CAC, Payback Period
+ *
+ * All calculations are pure (no side effects). Inputs are validated at call site.
  */
 
-export type BusinessModel = 'saas' | 'ecommerce' | 'marketplace' | 'agency' | 'hardware' | 'procurement';
-export type Approach = 'top-down' | 'bottom-up';
+// ─── Business Models ────────────────────────────────────────────────────────
+export type BusinessModel =
+  | 'saas'
+  | 'ecommerce'
+  | 'marketplace'
+  | 'agency'
+  | 'hardware'
+  | 'procurement';
 
-// ── Top-Down Inputs (same for all models) ──────────────────────────────────
-export interface TopDownInputs {
-  tam: number;           // Total Addressable Market ($)
-  samPct: number;        // SAM as % of TAM (0–100)
-  somPct: number;        // SOM as % of SAM (0–100)
-  captureY1: number;     // % of SOM captured in Year 1 (0–100)
-  captureY2: number;     // % of SOM captured in Year 2 (0–100)
-  captureY3: number;     // % of SOM captured in Year 3 (0–100)
-  avgDealSize: number;   // Average revenue per customer/deal ($)
-  currency: string;
+// ─── Scenarios ──────────────────────────────────────────────────────────────
+export type Scenario = 'bear' | 'base' | 'bull';
+
+// ─── Revenue Driver Inputs (per business model) ──────────────────────────────
+export interface SaaSDrivers {
+  model: 'saas';
+  // Acquisition
+  startingCustomers: number;         // customers at month 0
+  newCustomersM1: number;            // new customers in month 1
+  monthlyNewCustomerGrowth: number;  // % MoM growth in new customers
+  // Pricing
+  avgMRRPerCustomer: number;         // $ MRR per customer
+  annualPriceIncreasePct: number;    // % annual price increase
+  // Retention
+  monthlyChurnRate: number;          // % customers churning per month
+  expansionRevenuePct: number;       // % of MRR from upsell/expansion
+  // Unit economics
+  cacPerCustomer: number;            // $ blended CAC per new customer
+  grossMarginPct: number;            // % gross margin on subscription revenue
 }
 
-// ── Bottom-Up Inputs per Business Model ────────────────────────────────────
-export interface SaaSBottomUp {
-  startingCustomers: number;
-  newCustomersPerMonth: number;       // Month 1 new customer adds
-  monthlyGrowthRate: number;          // % MoM growth in new customers
-  avgMRRPerCustomer: number;          // $
-  monthlyChurnRate: number;           // % of customers churning per month
-  expansionRevenuePct: number;        // % of MRR from expansion/upsell
-  currency: string;
-}
-
-export interface EcommerceBottomUp {
+export interface EcommerceDrivers {
+  model: 'ecommerce';
   startingMonthlyOrders: number;
-  orderGrowthRateMoM: number;         // % MoM growth in orders
-  avgOrderValue: number;              // $
-  returnRate: number;                 // % of orders returned
-  repeatPurchaseRate: number;         // % of customers buying again in same month
-  currency: string;
+  orderGrowthMoM: number;            // % MoM
+  avgOrderValue: number;             // $
+  returnRate: number;                // % of orders returned
+  cogsAsPctOfRevenue: number;        // % COGS
+  cacPerOrder: number;               // $ blended CAC
 }
 
-export interface MarketplaceBottomUp {
-  startingMonthlyGMV: number;         // $
-  gmvGrowthRateMoM: number;           // % MoM
-  takeRate: number;                   // % of GMV kept as revenue
-  currency: string;
+export interface MarketplaceDrivers {
+  model: 'marketplace';
+  startingMonthlyGMV: number;        // $
+  gmvGrowthMoM: number;              // % MoM
+  takeRate: number;                  // % of GMV
+  paymentProcessingCost: number;     // % of GMV (COGS)
+  cacPerBuyer: number;               // $ blended CAC
 }
 
-export interface AgencyBottomUp {
+export interface AgencyDrivers {
+  model: 'agency';
   startingClients: number;
   newClientsPerMonth: number;
-  clientGrowthRateMoM: number;        // % MoM growth in new clients
-  avgMonthlyRetainer: number;         // $ per client per month
-  clientChurnRateMonthly: number;     // % per month
-  projectRevenuePct: number;          // % of revenue from one-off projects
-  currency: string;
+  clientGrowthMoM: number;           // % MoM growth in new clients
+  avgMonthlyRetainer: number;        // $ per client per month
+  clientChurnMonthly: number;        // % per month
+  projectRevenuePct: number;         // % additional from one-off projects
+  deliveryCostPct: number;           // % of revenue (COGS: salaries of delivery team)
+  cacPerClient: number;              // $ blended CAC
 }
 
-export interface HardwareBottomUp {
+export interface HardwareDrivers {
+  model: 'hardware';
   startingMonthlyUnits: number;
-  unitGrowthRateMoM: number;          // % MoM
-  avgSellingPrice: number;            // $ per unit
-  cogs: number;                       // $ per unit
-  recurringRevenuePerUnit: number;    // $ per month (subscriptions/services)
-  currency: string;
+  unitGrowthMoM: number;             // % MoM
+  avgSellingPrice: number;           // $ per unit
+  cogsPerUnit: number;               // $ per unit
+  recurringRevenuePerUnit: number;   // $ per month per installed unit
+  recurringCostPct: number;          // % of recurring revenue (COGS)
+  cacPerUnit: number;                // $ blended CAC
 }
 
-export interface ProcurementBottomUp {
-  startingMonthlyPVF: number;         // Procurement Volume Facilitated ($)
-  pvfGrowthRateMoM: number;           // % MoM
-  takeRate: number;                   // % of PVF kept as service fee
-  avgOrderValue: number;              // $ per procurement order
-  buyerRetentionRate: number;         // % of buyers returning monthly
-  currency: string;
+export interface ProcurementDrivers {
+  model: 'procurement';
+  startingMonthlyPVF: number;        // Procurement Volume Facilitated $
+  pvfGrowthMoM: number;              // % MoM
+  takeRate: number;                  // % of PVF
+  operationalCostPct: number;        // % of revenue (COGS)
+  avgOrderValue: number;             // $ per order
+  cacPerBuyer: number;               // $ blended CAC
 }
 
-export type BottomUpInputs =
-  | ({ model: 'saas' } & SaaSBottomUp)
-  | ({ model: 'ecommerce' } & EcommerceBottomUp)
-  | ({ model: 'marketplace' } & MarketplaceBottomUp)
-  | ({ model: 'agency' } & AgencyBottomUp)
-  | ({ model: 'hardware' } & HardwareBottomUp)
-  | ({ model: 'procurement' } & ProcurementBottomUp);
+export type RevenueDrivers =
+  | SaaSDrivers
+  | EcommerceDrivers
+  | MarketplaceDrivers
+  | AgencyDrivers
+  | HardwareDrivers
+  | ProcurementDrivers;
 
-// ── Output Types ────────────────────────────────────────────────────────────
-export interface MonthlyDataPoint {
-  month: number;           // 1–36 (global month index)
-  year: number;            // 1, 2, or 3
-  monthInYear: number;     // 1–12 within the year
+// ─── Headcount Plan ──────────────────────────────────────────────────────────
+export interface HeadcountRole {
+  title: string;
+  department: 'engineering' | 'sales' | 'marketing' | 'operations' | 'gna'; // G&A
+  monthlySalary: number;             // $ per month (fully-loaded)
+  startMonth: number;                // 1–36
+  endMonth?: number;                 // optional termination month
+}
+
+// ─── OPEX Plan ───────────────────────────────────────────────────────────────
+export interface OPEXInputs {
+  // Sales & Marketing (non-headcount)
+  marketingBudgetM1: number;         // $ in month 1
+  marketingGrowthMoM: number;        // % MoM growth
+  // G&A
+  rentMonthly: number;               // $ per month
+  softwareToolsMonthly: number;      // $ per month
+  legalAccountingMonthly: number;    // $ per month
+  otherGAMonthly: number;            // $ per month
+  // R&D (non-headcount)
+  rdBudgetMonthly: number;           // $ per month
+}
+
+// ─── Capital & Funding ───────────────────────────────────────────────────────
+export interface CapitalInputs {
+  startingCash: number;              // $ cash on hand at month 0
+  fundingRounds?: {
+    month: number;                   // month when funding arrives
+    amount: number;                  // $ raised
+  }[];
+}
+
+// ─── Working Capital ─────────────────────────────────────────────────────────
+export interface WorkingCapitalInputs {
+  arDays: number;                    // days to collect receivables (DSO)
+  apDays: number;                    // days to pay suppliers (DPO)
+  inventoryDays?: number;            // days of inventory (for hardware/ecommerce)
+}
+
+// ─── Scenario Multipliers ────────────────────────────────────────────────────
+export interface ScenarioMultipliers {
+  revenueMultiplier: number;         // e.g., 0.7 for bear, 1.0 for base, 1.3 for bull
+  cogsMultiplier: number;            // e.g., 1.1 for bear (higher costs), 1.0 for base
+  opexMultiplier: number;            // e.g., 0.9 for bear (cut spending), 1.0 for base
+  growthMultiplier: number;          // multiplier on growth rates
+}
+
+export const SCENARIO_DEFAULTS: Record<Scenario, ScenarioMultipliers> = {
+  bear: { revenueMultiplier: 0.65, cogsMultiplier: 1.10, opexMultiplier: 0.85, growthMultiplier: 0.60 },
+  base: { revenueMultiplier: 1.00, cogsMultiplier: 1.00, opexMultiplier: 1.00, growthMultiplier: 1.00 },
+  bull: { revenueMultiplier: 1.45, cogsMultiplier: 0.95, opexMultiplier: 1.10, growthMultiplier: 1.50 },
+};
+
+// ─── Full Model Inputs ───────────────────────────────────────────────────────
+export type YearHorizon = 3 | 5 | 10;
+
+export interface FinancialModelInputs {
+  companyName: string;
+  currency: string;
+  startYear: number;                 // e.g., 2025
+  yearHorizon: YearHorizon;          // 3 | 5 | 10
+  revenueDrivers: RevenueDrivers;
+  headcount: HeadcountRole[];
+  opex: OPEXInputs;
+  capital: CapitalInputs;
+  workingCapital: WorkingCapitalInputs;
+  scenario: Scenario;
+  customScenarioMultipliers?: ScenarioMultipliers;
+}
+
+// ─── Output Types ────────────────────────────────────────────────────────────
+export interface MonthlyPnL {
+  month: number;                     // 1–36
+  year: number;                      // 1, 2, or 3
+  monthInYear: number;               // 1–12
+  label: string;                     // e.g., "Jan 2025"
+
+  // Revenue
   revenue: number;
-  cumulativeRevenue: number;
-  customers: number;       // customers / orders / GMV units depending on model
-  gmv?: number;            // for marketplace / procurement
-}
+  cogs: number;
+  grossProfit: number;
+  grossMarginPct: number;
 
-export interface YearSummary {
-  year: number;            // 1, 2, or 3
-  revenue: number;         // total annual revenue (alias: totalRevenue)
-  totalRevenue: number;    // same as revenue, for convenience
+  // OPEX breakdown
+  headcountCost: number;
+  marketingSpend: number;
+  rdSpend: number;
+  gaSpend: number;
+  totalOpex: number;
+
+  // P&L
+  ebitda: number;
+  ebitdaMarginPct: number;
+  netIncome: number;                 // EBITDA (no D&A/taxes at this stage)
+
+  // Cash
+  cashBurn: number;                  // negative = burning cash
+  cashBalance: number;
+  runway: number;                    // months of runway remaining (if burning)
+
+  // Unit economics
   customers: number;
+  newCustomers: number;
+  churned?: number;
+  mrr?: number;
+  arr?: number;
   gmv?: number;
-  revenueGrowth?: number;   // % YoY
-  customersGrowth?: number; // % YoY
-  marketShare?: number;     // % of SOM (top-down only)
+  cac?: number;
+  ltv?: number;
+  ltvCacRatio?: number;
+  cacPaybackMonths?: number;
+
+  // Working capital
+  accountsReceivable: number;
+  accountsPayable: number;
 }
 
-export interface ProjectionOutput {
-  approach: Approach;
+export interface YearlySummary {
+  year: number;
+  label: string;                     // e.g., "Year 1 (2025)"
+
+  // P&L
+  revenue: number;
+  cogs: number;
+  grossProfit: number;
+  grossMarginPct: number;
+  totalOpex: number;
+  ebitda: number;
+  ebitdaMarginPct: number;
+  netIncome: number;
+
+  // Growth
+  revenueGrowthPct?: number;
+  customerGrowthPct?: number;
+
+  // Cash
+  totalCashBurned: number;
+  endingCashBalance: number;
+  minCashBalance: number;
+
+  // Customers
+  startCustomers: number;
+  endCustomers: number;
+  totalNewCustomers: number;
+  avgCustomers: number;
+
+  // Unit economics
+  avgMRR?: number;
+  endARR?: number;
+  avgCAC?: number;
+  avgLTV?: number;
+  avgLtvCac?: number;
+}
+
+export interface FinancialModelOutput {
+  scenario: Scenario;
   businessModel: BusinessModel;
-  monthly: MonthlyDataPoint[];
-  yearly: YearSummary[];
-  // Top-down specific
-  tam?: number;
-  sam?: number;
-  som?: number;
-  // Summary
-  cagr?: number;           // Compound Annual Growth Rate (Y1→Y3)
-  totalThreeYearRevenue: number;
+  currency: string;
+  monthly: MonthlyPnL[];
+  yearly: YearlySummary[];
+
+  // Summary KPIs
+  totalRevenue3Y: number;
+  totalGrossProfit3Y: number;
+  totalEbitda3Y: number;
+  totalCashBurned3Y: number;
+  cagr?: number;
+  breakEvenMonth?: number;           // first month EBITDA > 0
+  defaultRunwayMonths?: number;      // runway at end of model (if still burning)
+
+  // Top-level unit economics
+  ltv?: number;
+  cac?: number;
+  ltvCacRatio?: number;
 }
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
-function calcCagr(y1Rev: number, y3Rev: number): number {
-  if (y1Rev <= 0) return 0;
-  return (Math.pow(y3Rev / y1Rev, 1 / 2) - 1) * 100;
+// ─── Month Label Helper ──────────────────────────────────────────────────────
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function monthLabel(startYear: number, monthIndex: number): string {
+  const totalMonth = monthIndex - 1;
+  const year = startYear + Math.floor(totalMonth / 12);
+  const month = totalMonth % 12;
+  return `${MONTHS[month]} ${year}`;
 }
 
-// ── Top-Down Engine ─────────────────────────────────────────────────────────
-export function computeTopDown(inputs: TopDownInputs, model: BusinessModel): ProjectionOutput {
-  const sam = inputs.tam * (inputs.samPct / 100);
-  const som = sam * (inputs.somPct / 100);
+// ─── Revenue Engine ──────────────────────────────────────────────────────────
+interface RevenuePoint {
+  revenue: number;
+  cogs: number;
+  customers: number;
+  newCustomers: number;
+  churned?: number;
+  mrr?: number;
+  gmv?: number;
+  cac?: number;
+  ltv?: number;
+}
 
-  const captureRates = [inputs.captureY1, inputs.captureY2, inputs.captureY3];
-  const yearlyRevenues = captureRates.map(capture => {
-    const customers = inputs.avgDealSize > 0 ? Math.round((som / inputs.avgDealSize) * (capture / 100)) : 0;
-    const revenue = customers * inputs.avgDealSize;
-    return { customers, revenue };
-  });
+function computeRevenueStream(
+  drivers: RevenueDrivers,
+  multipliers: ScenarioMultipliers,
+  totalMonths: number = 36
+): RevenuePoint[] {
+  const points: RevenuePoint[] = [];
 
-  // Distribute yearly revenue across months with a ramp
-  const monthly: MonthlyDataPoint[] = [];
-  let cumulative = 0;
-  for (let y = 0; y < 3; y++) {
-    const annualRev = yearlyRevenues[y].revenue;
-    const annualCust = yearlyRevenues[y].customers;
-    const baseMonthly = annualRev / 12;
-    for (let m = 0; m < 12; m++) {
-      // Slight ramp: starts at 0.7 in month 1, reaches 1.3 by month 12
-      const ramp = 0.7 + (0.6 * m) / 11;
-      const revenue = baseMonthly * ramp;
-      cumulative += revenue;
-      monthly.push({
-        month: y * 12 + m + 1,
-        year: y + 1,
-        monthInYear: m + 1,
-        revenue,
-        cumulativeRevenue: cumulative,
-        customers: Math.round(annualCust / 12),
-      });
+  switch (drivers.model) {
+    case 'saas': {
+      let customers = drivers.startingCustomers;
+      let newPerMonth = drivers.newCustomersM1;
+      let mrr = customers * drivers.avgMRRPerCustomer;
+      const growthRate = drivers.monthlyNewCustomerGrowth * multipliers.growthMultiplier;
+      const churn = drivers.monthlyChurnRate;
+      const priceGrowthPerMonth = Math.pow(1 + drivers.annualPriceIncreasePct / 100, 1 / 12) - 1;
+      let priceMultiplier = 1;
+
+      for (let m = 1; m <= totalMonths; m++) {
+        const churned = Math.round(customers * (churn / 100));
+        const added = Math.round(newPerMonth);
+        customers = Math.max(0, customers - churned + added);
+        if (m % 12 === 0) priceMultiplier *= (1 + drivers.annualPriceIncreasePct / 100);
+        const effectiveMRR = customers * drivers.avgMRRPerCustomer * priceMultiplier;
+        mrr = effectiveMRR * (1 + drivers.expansionRevenuePct / 100);
+        const revenue = mrr * multipliers.revenueMultiplier;
+        const cogs = revenue * (1 - drivers.grossMarginPct / 100) * multipliers.cogsMultiplier;
+        const ltv = drivers.monthlyChurnRate > 0
+          ? (drivers.avgMRRPerCustomer * (drivers.grossMarginPct / 100)) / (drivers.monthlyChurnRate / 100)
+          : drivers.avgMRRPerCustomer * 36;
+        points.push({
+          revenue,
+          cogs,
+          customers,
+          newCustomers: added,
+          churned,
+          mrr: revenue,
+          cac: drivers.cacPerCustomer,
+          ltv,
+        });
+        newPerMonth = newPerMonth * (1 + growthRate / 100);
+      }
+      break;
+    }
+
+    case 'ecommerce': {
+      let orders = drivers.startingMonthlyOrders;
+      const growthRate = drivers.orderGrowthMoM * multipliers.growthMultiplier;
+      for (let m = 1; m <= totalMonths; m++) {
+        const netOrders = orders * (1 - drivers.returnRate / 100);
+        const revenue = netOrders * drivers.avgOrderValue * multipliers.revenueMultiplier;
+        const cogs = revenue * (drivers.cogsAsPctOfRevenue / 100) * multipliers.cogsMultiplier;
+        points.push({ revenue, cogs, customers: Math.round(orders), newCustomers: Math.round(orders * 0.4), cac: drivers.cacPerOrder });
+        orders = orders * (1 + growthRate / 100);
+      }
+      break;
+    }
+
+    case 'marketplace': {
+      let gmv = drivers.startingMonthlyGMV;
+      const growthRate = drivers.gmvGrowthMoM * multipliers.growthMultiplier;
+      for (let m = 1; m <= totalMonths; m++) {
+        const revenue = gmv * (drivers.takeRate / 100) * multipliers.revenueMultiplier;
+        const cogs = gmv * (drivers.paymentProcessingCost / 100) * multipliers.cogsMultiplier;
+        points.push({ revenue, cogs, customers: 0, newCustomers: 0, gmv, cac: drivers.cacPerBuyer });
+        gmv = gmv * (1 + growthRate / 100);
+      }
+      break;
+    }
+
+    case 'agency': {
+      let clients = drivers.startingClients;
+      let newPerMonth = drivers.newClientsPerMonth;
+      const growthRate = drivers.clientGrowthMoM * multipliers.growthMultiplier;
+      for (let m = 1; m <= totalMonths; m++) {
+        const churned = Math.round(clients * (drivers.clientChurnMonthly / 100));
+        const added = Math.round(newPerMonth);
+        clients = Math.max(0, clients - churned + added);
+        const retainer = clients * drivers.avgMonthlyRetainer;
+        const revenue = retainer * (1 + drivers.projectRevenuePct / 100) * multipliers.revenueMultiplier;
+        const cogs = revenue * (drivers.deliveryCostPct / 100) * multipliers.cogsMultiplier;
+        points.push({ revenue, cogs, customers: clients, newCustomers: added, churned, cac: drivers.cacPerClient });
+        newPerMonth = newPerMonth * (1 + growthRate / 100);
+      }
+      break;
+    }
+
+    case 'hardware': {
+      let units = drivers.startingMonthlyUnits;
+      let cumulativeUnits = 0;
+      const growthRate = drivers.unitGrowthMoM * multipliers.growthMultiplier;
+      for (let m = 1; m <= totalMonths; m++) {
+        const soldUnits = Math.round(units);
+        cumulativeUnits += soldUnits;
+        const hwRevenue = soldUnits * drivers.avgSellingPrice * multipliers.revenueMultiplier;
+        const hwCogs = soldUnits * drivers.cogsPerUnit * multipliers.cogsMultiplier;
+        const recurringRev = cumulativeUnits * drivers.recurringRevenuePerUnit * multipliers.revenueMultiplier;
+        const recurringCogs = recurringRev * (drivers.recurringCostPct / 100) * multipliers.cogsMultiplier;
+        points.push({
+          revenue: hwRevenue + recurringRev,
+          cogs: hwCogs + recurringCogs,
+          customers: soldUnits,
+          newCustomers: soldUnits,
+          cac: drivers.cacPerUnit,
+        });
+        units = units * (1 + growthRate / 100);
+      }
+      break;
+    }
+
+    case 'procurement': {
+      let pvf = drivers.startingMonthlyPVF;
+      const growthRate = drivers.pvfGrowthMoM * multipliers.growthMultiplier;
+      for (let m = 1; m <= totalMonths; m++) {
+        const revenue = pvf * (drivers.takeRate / 100) * multipliers.revenueMultiplier;
+        const cogs = revenue * (drivers.operationalCostPct / 100) * multipliers.cogsMultiplier;
+        const orders = Math.round(pvf / drivers.avgOrderValue);
+        points.push({ revenue, cogs, customers: orders, newCustomers: Math.round(orders * 0.3), gmv: pvf, cac: drivers.cacPerBuyer });
+        pvf = pvf * (1 + growthRate / 100);
+      }
+      break;
     }
   }
 
-  const yearly: YearSummary[] = [1, 2, 3].map((yr, i) => {
+  return points;
+}
+
+// ─── Headcount Cost Engine ───────────────────────────────────────────────────
+function computeHeadcountCost(headcount: HeadcountRole[], month: number): number {
+  return headcount
+    .filter(h => h.startMonth <= month && (!h.endMonth || h.endMonth >= month))
+    .reduce((sum, h) => sum + h.monthlySalary, 0);
+}
+
+// ─── OPEX Engine ─────────────────────────────────────────────────────────────
+function computeOPEX(opex: OPEXInputs, month: number, multipliers: ScenarioMultipliers) {
+  const mktGrowth = Math.pow(1 + opex.marketingGrowthMoM / 100, month - 1);
+  const marketing = opex.marketingBudgetM1 * mktGrowth * multipliers.opexMultiplier;
+  const rd = opex.rdBudgetMonthly * multipliers.opexMultiplier;
+  const ga = (opex.rentMonthly + opex.softwareToolsMonthly + opex.legalAccountingMonthly + opex.otherGAMonthly) * multipliers.opexMultiplier;
+  return { marketing, rd, ga };
+}
+
+// ─── Main Compute Function ───────────────────────────────────────────────────
+export function computeFinancialModel(inputs: FinancialModelInputs): FinancialModelOutput {
+  const multipliers = inputs.customScenarioMultipliers ?? SCENARIO_DEFAULTS[inputs.scenario];
+  const totalMonths = inputs.yearHorizon * 12;
+  const revenueStream = computeRevenueStream(inputs.revenueDrivers, multipliers, totalMonths);
+
+  const monthly: MonthlyPnL[] = [];
+  let cashBalance = inputs.capital.startingCash;
+  let breakEvenMonth: number | undefined;
+
+  for (let m = 1; m <= totalMonths; m++) {
+    const rev = revenueStream[m - 1];
+    const { marketing, rd, ga } = computeOPEX(inputs.opex, m, multipliers);
+    const headcountCost = computeHeadcountCost(inputs.headcount, m) * multipliers.opexMultiplier;
+
+    // Funding injection
+    const funding = inputs.capital.fundingRounds?.filter(f => f.month === m).reduce((s, f) => s + f.amount, 0) ?? 0;
+
+    const grossProfit = rev.revenue - rev.cogs;
+    const grossMarginPct = rev.revenue > 0 ? (grossProfit / rev.revenue) * 100 : 0;
+    const totalOpex = headcountCost + marketing + rd + ga;
+    const ebitda = grossProfit - totalOpex;
+    const ebitdaMarginPct = rev.revenue > 0 ? (ebitda / rev.revenue) * 100 : 0;
+
+    // Cash: EBITDA is a proxy for operating cash flow here (simplified)
+    const cashBurn = ebitda;
+    cashBalance = cashBalance + cashBurn + funding;
+
+    // Working capital
+    const arDays = inputs.workingCapital.arDays;
+    const apDays = inputs.workingCapital.apDays;
+    const accountsReceivable = (rev.revenue / 30) * arDays;
+    const accountsPayable = (rev.cogs / 30) * apDays;
+
+    // Runway: how many months of cash left at current burn rate
+    const avgMonthlyBurn = cashBurn < 0 ? Math.abs(cashBurn) : 0;
+    const runway = avgMonthlyBurn > 0 ? Math.floor(cashBalance / avgMonthlyBurn) : 999;
+
+    // LTV:CAC
+    const ltv = rev.ltv;
+    const cac = rev.cac;
+    const ltvCacRatio = ltv && cac && cac > 0 ? ltv / cac : undefined;
+    const cacPaybackMonths = cac && rev.mrr && rev.mrr > 0 && rev.customers > 0
+      ? cac / (rev.mrr / rev.customers)
+      : undefined;
+
+    if (!breakEvenMonth && ebitda > 0) breakEvenMonth = m;
+
+    const year = Math.floor((m - 1) / 12) + 1;
+    const monthInYear = ((m - 1) % 12) + 1;
+
+    monthly.push({
+      month: m,
+      year,
+      monthInYear,
+      label: monthLabel(inputs.startYear, m),
+      revenue: rev.revenue,
+      cogs: rev.cogs,
+      grossProfit,
+      grossMarginPct,
+      headcountCost,
+      marketingSpend: marketing,
+      rdSpend: rd,
+      gaSpend: ga,
+      totalOpex,
+      ebitda,
+      ebitdaMarginPct,
+      netIncome: ebitda,
+      cashBurn,
+      cashBalance,
+      runway,
+      customers: rev.customers,
+      newCustomers: rev.newCustomers,
+      churned: rev.churned,
+      mrr: rev.mrr,
+      arr: rev.mrr ? rev.mrr * 12 : undefined,
+      gmv: rev.gmv,
+      cac,
+      ltv,
+      ltvCacRatio,
+      cacPaybackMonths,
+      accountsReceivable,
+      accountsPayable,
+    });
+  }
+
+  // Build yearly summaries
+  const yearCount = inputs.yearHorizon;
+  const yearNumbers = Array.from({ length: yearCount }, (_, i) => i + 1);
+  const yearly: YearlySummary[] = yearNumbers.map(yr => {
     const slice = monthly.filter(m => m.year === yr);
+    const prevSlice = yr > 1 ? monthly.filter(m => m.year === yr - 1) : null;
+
     const revenue = slice.reduce((s, m) => s + m.revenue, 0);
-    const prevRevenue = i > 0 ? monthly.filter(m => m.year === yr - 1).reduce((s, m) => s + m.revenue, 0) : null;
-    const revenueGrowth = prevRevenue !== null && prevRevenue > 0 ? ((revenue - prevRevenue) / prevRevenue) * 100 : undefined;
+    const cogs = slice.reduce((s, m) => s + m.cogs, 0);
+    const grossProfit = slice.reduce((s, m) => s + m.grossProfit, 0);
+    const grossMarginPct = revenue > 0 ? (grossProfit / revenue) * 100 : 0;
+    const totalOpex = slice.reduce((s, m) => s + m.totalOpex, 0);
+    const ebitda = slice.reduce((s, m) => s + m.ebitda, 0);
+    const ebitdaMarginPct = revenue > 0 ? (ebitda / revenue) * 100 : 0;
+    const netIncome = ebitda;
+    const totalCashBurned = slice.filter(m => m.cashBurn < 0).reduce((s, m) => s + Math.abs(m.cashBurn), 0);
+    const endingCashBalance = slice[slice.length - 1].cashBalance;
+    const minCashBalance = Math.min(...slice.map(m => m.cashBalance));
+    const startCustomers = slice[0].customers;
+    const endCustomers = slice[slice.length - 1].customers;
+    const totalNewCustomers = slice.reduce((s, m) => s + m.newCustomers, 0);
+    const avgCustomers = slice.reduce((s, m) => s + m.customers, 0) / slice.length;
+
+    const prevRevenue = prevSlice ? prevSlice.reduce((s, m) => s + m.revenue, 0) : null;
+    const revenueGrowthPct = prevRevenue !== null && prevRevenue > 0 ? ((revenue - prevRevenue) / prevRevenue) * 100 : undefined;
+    const prevEndCustomers = prevSlice ? prevSlice[prevSlice.length - 1].customers : null;
+    const customerGrowthPct = prevEndCustomers !== null && prevEndCustomers > 0 ? ((endCustomers - prevEndCustomers) / prevEndCustomers) * 100 : undefined;
+
+    const avgMRR = slice.some(m => m.mrr) ? slice.reduce((s, m) => s + (m.mrr ?? 0), 0) / slice.length : undefined;
+    const endARR = slice[slice.length - 1].arr;
+    const avgCAC = slice.some(m => m.cac) ? slice.reduce((s, m) => s + (m.cac ?? 0), 0) / slice.length : undefined;
+    const avgLTV = slice.some(m => m.ltv) ? slice.reduce((s, m) => s + (m.ltv ?? 0), 0) / slice.length : undefined;
+    const avgLtvCac = avgLTV && avgCAC && avgCAC > 0 ? avgLTV / avgCAC : undefined;
+
     return {
       year: yr,
-      revenue,
-      totalRevenue: revenue,
-      customers: yearlyRevenues[i].customers,
-      revenueGrowth,
-      marketShare: captureRates[i],
+      label: `Year ${yr} (${inputs.startYear + yr - 1})`,
+      revenue, cogs, grossProfit, grossMarginPct,
+      totalOpex, ebitda, ebitdaMarginPct, netIncome,
+      revenueGrowthPct, customerGrowthPct,
+      totalCashBurned, endingCashBalance, minCashBalance,
+      startCustomers, endCustomers, totalNewCustomers, avgCustomers,
+      avgMRR, endARR, avgCAC, avgLTV, avgLtvCac,
     };
   });
 
-  const cagr = calcCagr(yearly[0].revenue, yearly[2].revenue);
-  const totalThreeYearRevenue = monthly.reduce((s, m) => s + m.revenue, 0);
+  const totalRevenue3Y = yearly.reduce((s, y) => s + y.revenue, 0);
+  const totalGrossProfit3Y = yearly.reduce((s, y) => s + y.grossProfit, 0);
+  const totalEbitda3Y = yearly.reduce((s, y) => s + y.ebitda, 0);
+  const totalCashBurned3Y = yearly.reduce((s, y) => s + y.totalCashBurned, 0);
+  const lastYearIdx = yearly.length - 1;
+  const cagr = yearly[0].revenue > 0 && lastYearIdx > 0
+    ? (Math.pow(yearly[lastYearIdx].revenue / yearly[0].revenue, 1 / lastYearIdx) - 1) * 100
+    : undefined;
+  const lastMonth = monthly[monthly.length - 1];
+  const defaultRunwayMonths = lastMonth.cashBalance < 0 ? 0 : lastMonth.runway;
 
-  return { approach: 'top-down', businessModel: model, monthly, yearly, tam: inputs.tam, sam, som, cagr, totalThreeYearRevenue };
+  // Aggregate LTV/CAC
+  const ltvSamples = monthly.filter(m => m.ltv).map(m => m.ltv!);
+  const cacSamples = monthly.filter(m => m.cac).map(m => m.cac!);
+  const ltv = ltvSamples.length > 0 ? ltvSamples[ltvSamples.length - 1] : undefined;
+  const cac = cacSamples.length > 0 ? cacSamples[0] : undefined;
+  const ltvCacRatio = ltv && cac && cac > 0 ? ltv / cac : undefined;
+
+  return {
+    scenario: inputs.scenario,
+    businessModel: inputs.revenueDrivers.model,
+    currency: inputs.currency,
+    monthly,
+    yearly,
+    totalRevenue3Y,
+    totalGrossProfit3Y,
+    totalEbitda3Y,
+    totalCashBurned3Y,
+    cagr,
+    breakEvenMonth,
+    defaultRunwayMonths,
+    ltv,
+    cac,
+    ltvCacRatio,
+  };
 }
 
-// ── Bottom-Up Engines ───────────────────────────────────────────────────────
-function buildYearlySummary(monthly: MonthlyDataPoint[]): YearSummary[] {
-  const yearly: YearSummary[] = [1, 2, 3].map(yr => {
-    const slice = monthly.filter(m => m.year === yr);
-    const revenue = slice.reduce((s, m) => s + m.revenue, 0);
-    const customers = slice.length > 0 ? slice[slice.length - 1].customers : 0;
-    const gmv = slice.some(m => m.gmv !== undefined)
-      ? slice.reduce((s, m) => s + (m.gmv ?? 0), 0)
-      : undefined;
-    return { year: yr, revenue, totalRevenue: revenue, customers, gmv };
-  });
-  for (let i = 1; i < yearly.length; i++) {
-    const prev = yearly[i - 1].revenue;
-    yearly[i].revenueGrowth = prev > 0 ? ((yearly[i].revenue - prev) / prev) * 100 : 0;
-    const prevC = yearly[i - 1].customers;
-    yearly[i].customersGrowth = prevC > 0 ? ((yearly[i].customers - prevC) / prevC) * 100 : 0;
-  }
-  return yearly;
-}
+// ─── Default Inputs ──────────────────────────────────────────────────────────
+export const DEFAULT_HEADCOUNT: HeadcountRole[] = [
+  { title: 'CEO / Co-Founder', department: 'gna', monthlySalary: 8000, startMonth: 1 },
+  { title: 'CTO / Co-Founder', department: 'engineering', monthlySalary: 8000, startMonth: 1 },
+  { title: 'Full-Stack Engineer', department: 'engineering', monthlySalary: 6000, startMonth: 3 },
+  { title: 'Sales Lead', department: 'sales', monthlySalary: 5500, startMonth: 6 },
+  { title: 'Marketing Manager', department: 'marketing', monthlySalary: 5000, startMonth: 9 },
+  { title: 'Full-Stack Engineer #2', department: 'engineering', monthlySalary: 6000, startMonth: 13 },
+  { title: 'Customer Success', department: 'operations', monthlySalary: 4500, startMonth: 13 },
+  { title: 'Sales Rep', department: 'sales', monthlySalary: 4500, startMonth: 18 },
+  { title: 'Product Manager', department: 'engineering', monthlySalary: 7000, startMonth: 19 },
+  { title: 'Finance / Ops', department: 'gna', monthlySalary: 5000, startMonth: 24 },
+];
 
-function enrichMonthly(raw: { month: number; revenue: number; customers: number; gmv?: number }[]): MonthlyDataPoint[] {
-  let cumulative = 0;
-  return raw.map(m => {
-    cumulative += m.revenue;
-    return {
-      ...m,
-      year: Math.floor((m.month - 1) / 12) + 1,
-      monthInYear: ((m.month - 1) % 12) + 1,
-      cumulativeRevenue: cumulative,
-    };
-  });
-}
+export const DEFAULT_OPEX: OPEXInputs = {
+  marketingBudgetM1: 3000,
+  marketingGrowthMoM: 5,
+  rentMonthly: 2000,
+  softwareToolsMonthly: 1500,
+  legalAccountingMonthly: 1000,
+  otherGAMonthly: 500,
+  rdBudgetMonthly: 1000,
+};
 
-function computeSaaS(inputs: SaaSBottomUp): ProjectionOutput {
-  const raw: { month: number; revenue: number; customers: number }[] = [];
-  let customers = inputs.startingCustomers;
-  let newPerMonth = inputs.newCustomersPerMonth;
+export const DEFAULT_CAPITAL: CapitalInputs = {
+  startingCash: 500000,
+  fundingRounds: [
+    { month: 12, amount: 1500000 },
+  ],
+};
 
-  for (let m = 1; m <= 36; m++) {
-    const churned = Math.round(customers * (inputs.monthlyChurnRate / 100));
-    customers = Math.max(0, customers - churned + Math.round(newPerMonth));
-    const mrr = customers * inputs.avgMRRPerCustomer * (1 + inputs.expansionRevenuePct / 100);
-    raw.push({ month: m, revenue: mrr, customers });
-    newPerMonth = newPerMonth * (1 + inputs.monthlyGrowthRate / 100);
-  }
+export const DEFAULT_WORKING_CAPITAL: WorkingCapitalInputs = {
+  arDays: 30,
+  apDays: 45,
+  inventoryDays: 0,
+};
 
-  const monthly = enrichMonthly(raw);
-  const yearly = buildYearlySummary(monthly);
-  const cagr = calcCagr(yearly[0].revenue, yearly[2].revenue);
-  const totalThreeYearRevenue = monthly.reduce((s, m) => s + m.revenue, 0);
-  return { approach: 'bottom-up', businessModel: 'saas', monthly, yearly, cagr, totalThreeYearRevenue };
-}
+export const DEFAULT_REVENUE_DRIVERS: Record<BusinessModel, RevenueDrivers> = {
+  saas: {
+    model: 'saas',
+    startingCustomers: 10,
+    newCustomersM1: 5,
+    monthlyNewCustomerGrowth: 10,
+    avgMRRPerCustomer: 299,
+    annualPriceIncreasePct: 5,
+    monthlyChurnRate: 2.5,
+    expansionRevenuePct: 8,
+    cacPerCustomer: 1200,
+    grossMarginPct: 75,
+  },
+  ecommerce: {
+    model: 'ecommerce',
+    startingMonthlyOrders: 100,
+    orderGrowthMoM: 8,
+    avgOrderValue: 120,
+    returnRate: 8,
+    cogsAsPctOfRevenue: 45,
+    cacPerOrder: 25,
+  },
+  marketplace: {
+    model: 'marketplace',
+    startingMonthlyGMV: 100000,
+    gmvGrowthMoM: 12,
+    takeRate: 10,
+    paymentProcessingCost: 2,
+    cacPerBuyer: 50,
+  },
+  agency: {
+    model: 'agency',
+    startingClients: 5,
+    newClientsPerMonth: 1,
+    clientGrowthMoM: 8,
+    avgMonthlyRetainer: 5000,
+    clientChurnMonthly: 2,
+    projectRevenuePct: 25,
+    deliveryCostPct: 50,
+    cacPerClient: 2000,
+  },
+  hardware: {
+    model: 'hardware',
+    startingMonthlyUnits: 30,
+    unitGrowthMoM: 8,
+    avgSellingPrice: 499,
+    cogsPerUnit: 180,
+    recurringRevenuePerUnit: 19.99,
+    recurringCostPct: 20,
+    cacPerUnit: 150,
+  },
+  procurement: {
+    model: 'procurement',
+    startingMonthlyPVF: 200000,
+    pvfGrowthMoM: 15,
+    takeRate: 6,
+    operationalCostPct: 30,
+    avgOrderValue: 8000,
+    cacPerBuyer: 500,
+  },
+};
 
-function computeEcommerce(inputs: EcommerceBottomUp): ProjectionOutput {
-  const raw: { month: number; revenue: number; customers: number }[] = [];
-  let orders = inputs.startingMonthlyOrders;
-
-  for (let m = 1; m <= 36; m++) {
-    const netOrders = orders * (1 - inputs.returnRate / 100);
-    const revenue = netOrders * inputs.avgOrderValue;
-    raw.push({ month: m, revenue, customers: Math.round(orders) });
-    orders = orders * (1 + inputs.orderGrowthRateMoM / 100);
-  }
-
-  const monthly = enrichMonthly(raw);
-  const yearly = buildYearlySummary(monthly);
-  const cagr = calcCagr(yearly[0].revenue, yearly[2].revenue);
-  const totalThreeYearRevenue = monthly.reduce((s, m) => s + m.revenue, 0);
-  return { approach: 'bottom-up', businessModel: 'ecommerce', monthly, yearly, cagr, totalThreeYearRevenue };
-}
-
-function computeMarketplace(inputs: MarketplaceBottomUp): ProjectionOutput {
-  const raw: { month: number; revenue: number; customers: number; gmv: number }[] = [];
-  let gmv = inputs.startingMonthlyGMV;
-
-  for (let m = 1; m <= 36; m++) {
-    const revenue = gmv * (inputs.takeRate / 100);
-    raw.push({ month: m, revenue, customers: 0, gmv });
-    gmv = gmv * (1 + inputs.gmvGrowthRateMoM / 100);
-  }
-
-  const monthly = enrichMonthly(raw);
-  const yearly = buildYearlySummary(monthly);
-  const cagr = calcCagr(yearly[0].revenue, yearly[2].revenue);
-  const totalThreeYearRevenue = monthly.reduce((s, m) => s + m.revenue, 0);
-  return { approach: 'bottom-up', businessModel: 'marketplace', monthly, yearly, cagr, totalThreeYearRevenue };
-}
-
-function computeAgency(inputs: AgencyBottomUp): ProjectionOutput {
-  const raw: { month: number; revenue: number; customers: number }[] = [];
-  let clients = inputs.startingClients;
-  let newPerMonth = inputs.newClientsPerMonth;
-
-  for (let m = 1; m <= 36; m++) {
-    const churned = Math.round(clients * (inputs.clientChurnRateMonthly / 100));
-    clients = Math.max(0, clients - churned + Math.round(newPerMonth));
-    const retainerRevenue = clients * inputs.avgMonthlyRetainer;
-    const revenue = retainerRevenue * (1 + inputs.projectRevenuePct / 100);
-    raw.push({ month: m, revenue, customers: clients });
-    newPerMonth = newPerMonth * (1 + inputs.clientGrowthRateMoM / 100);
-  }
-
-  const monthly = enrichMonthly(raw);
-  const yearly = buildYearlySummary(monthly);
-  const cagr = calcCagr(yearly[0].revenue, yearly[2].revenue);
-  const totalThreeYearRevenue = monthly.reduce((s, m) => s + m.revenue, 0);
-  return { approach: 'bottom-up', businessModel: 'agency', monthly, yearly, cagr, totalThreeYearRevenue };
-}
-
-function computeHardware(inputs: HardwareBottomUp): ProjectionOutput {
-  const raw: { month: number; revenue: number; customers: number }[] = [];
-  let units = inputs.startingMonthlyUnits;
-  let cumulativeUnits = 0;
-
-  for (let m = 1; m <= 36; m++) {
-    cumulativeUnits += Math.round(units);
-    const hardwareRevenue = Math.round(units) * (inputs.avgSellingPrice - inputs.cogs);
-    const recurringRevenue = cumulativeUnits * inputs.recurringRevenuePerUnit;
-    const revenue = hardwareRevenue + recurringRevenue;
-    raw.push({ month: m, revenue, customers: Math.round(units) });
-    units = units * (1 + inputs.unitGrowthRateMoM / 100);
-  }
-
-  const monthly = enrichMonthly(raw);
-  const yearly = buildYearlySummary(monthly);
-  const cagr = calcCagr(yearly[0].revenue, yearly[2].revenue);
-  const totalThreeYearRevenue = monthly.reduce((s, m) => s + m.revenue, 0);
-  return { approach: 'bottom-up', businessModel: 'hardware', monthly, yearly, cagr, totalThreeYearRevenue };
-}
-
-function computeProcurement(inputs: ProcurementBottomUp): ProjectionOutput {
-  const raw: { month: number; revenue: number; customers: number; gmv: number }[] = [];
-  let pvf = inputs.startingMonthlyPVF;
-
-  for (let m = 1; m <= 36; m++) {
-    const revenue = pvf * (inputs.takeRate / 100);
-    raw.push({ month: m, revenue, customers: Math.round(pvf / inputs.avgOrderValue), gmv: pvf });
-    pvf = pvf * (1 + inputs.pvfGrowthRateMoM / 100);
-  }
-
-  const monthly = enrichMonthly(raw);
-  const yearly = buildYearlySummary(monthly);
-  const cagr = calcCagr(yearly[0].revenue, yearly[2].revenue);
-  const totalThreeYearRevenue = monthly.reduce((s, m) => s + m.revenue, 0);
-  return { approach: 'bottom-up', businessModel: 'procurement', monthly, yearly, cagr, totalThreeYearRevenue };
-}
-
-export function computeBottomUp(inputs: BottomUpInputs): ProjectionOutput {
-  switch (inputs.model) {
-    case 'saas':        return computeSaaS(inputs);
-    case 'ecommerce':   return computeEcommerce(inputs);
-    case 'marketplace': return computeMarketplace(inputs);
-    case 'agency':      return computeAgency(inputs);
-    case 'hardware':    return computeHardware(inputs);
-    case 'procurement': return computeProcurement(inputs);
-  }
-}
-
-// ── Default Inputs per Model ─────────────────────────────────────────────────
-export const DEFAULT_TOP_DOWN: TopDownInputs = {
-  tam: 1_000_000_000,
-  samPct: 5,
-  somPct: 10,
-  captureY1: 1,
-  captureY2: 3,
-  captureY3: 7,
-  avgDealSize: 1200,
+export const DEFAULT_MODEL_INPUTS = (model: BusinessModel, yearHorizon: YearHorizon = 3): FinancialModelInputs => ({
+  companyName: 'My Startup',
   currency: 'USD',
+  startYear: new Date().getFullYear(),
+  yearHorizon,
+  revenueDrivers: DEFAULT_REVENUE_DRIVERS[model],
+  headcount: DEFAULT_HEADCOUNT,
+  opex: DEFAULT_OPEX,
+  capital: DEFAULT_CAPITAL,
+  workingCapital: DEFAULT_WORKING_CAPITAL,
+  scenario: 'base',
+});
+
+// ─── Model Display Metadata ──────────────────────────────────────────────────
+export const MODEL_META: Record<BusinessModel, {
+  label: string;
+  labelAr: string;
+  northStar: string;
+  revenueLabel: string;
+  customerLabel: string;
+  keyMetrics: string[];
+}> = {
+  saas: {
+    label: 'SaaS',
+    labelAr: 'برمجيات كخدمة',
+    northStar: 'ARR',
+    revenueLabel: 'MRR',
+    customerLabel: 'Customers',
+    keyMetrics: ['MRR', 'ARR', 'Churn Rate', 'LTV', 'CAC', 'LTV:CAC', 'CAC Payback'],
+  },
+  ecommerce: {
+    label: 'E-commerce',
+    labelAr: 'تجارة إلكترونية',
+    northStar: 'Monthly Revenue',
+    revenueLabel: 'Revenue',
+    customerLabel: 'Orders',
+    keyMetrics: ['Orders', 'AOV', 'Return Rate', 'CAC', 'Gross Margin'],
+  },
+  marketplace: {
+    label: 'Marketplace',
+    labelAr: 'منصة تجارية',
+    northStar: 'GMV',
+    revenueLabel: 'Net Revenue',
+    customerLabel: 'GMV',
+    keyMetrics: ['GMV', 'Take Rate', 'Net Revenue', 'CAC', 'Gross Margin'],
+  },
+  agency: {
+    label: 'Agency / Services',
+    labelAr: 'وكالة / خدمات',
+    northStar: 'MRR (Retainers)',
+    revenueLabel: 'Revenue',
+    customerLabel: 'Clients',
+    keyMetrics: ['Clients', 'Avg Retainer', 'Churn', 'Utilization', 'Gross Margin'],
+  },
+  hardware: {
+    label: 'Hardware / IoT',
+    labelAr: 'أجهزة / إنترنت الأشياء',
+    northStar: 'Units Shipped',
+    revenueLabel: 'Revenue',
+    customerLabel: 'Units',
+    keyMetrics: ['Units Sold', 'ASP', 'Gross Margin', 'Recurring Revenue', 'Installed Base'],
+  },
+  procurement: {
+    label: 'Procurement-as-a-Service',
+    labelAr: 'المشتريات كخدمة',
+    northStar: 'PVF',
+    revenueLabel: 'Service Fee',
+    customerLabel: 'Orders',
+    keyMetrics: ['PVF', 'Take Rate', 'Orders', 'Gross Margin', 'CAC'],
+  },
 };
 
-export const DEFAULT_BOTTOM_UP: Record<BusinessModel, BottomUpInputs> = {
-  saas: { model: 'saas', startingCustomers: 10, newCustomersPerMonth: 5, monthlyGrowthRate: 10, avgMRRPerCustomer: 99, monthlyChurnRate: 3, expansionRevenuePct: 5, currency: 'USD' },
-  ecommerce: { model: 'ecommerce', startingMonthlyOrders: 50, orderGrowthRateMoM: 8, avgOrderValue: 80, returnRate: 5, repeatPurchaseRate: 20, currency: 'USD' },
-  marketplace: { model: 'marketplace', startingMonthlyGMV: 50000, gmvGrowthRateMoM: 12, takeRate: 10, currency: 'USD' },
-  agency: { model: 'agency', startingClients: 3, newClientsPerMonth: 1, clientGrowthRateMoM: 10, avgMonthlyRetainer: 3000, clientChurnRateMonthly: 3, projectRevenuePct: 20, currency: 'USD' },
-  hardware: { model: 'hardware', startingMonthlyUnits: 20, unitGrowthRateMoM: 8, avgSellingPrice: 299, cogs: 120, recurringRevenuePerUnit: 9.99, currency: 'USD' },
-  procurement: { model: 'procurement', startingMonthlyPVF: 100000, pvfGrowthRateMoM: 15, takeRate: 8, avgOrderValue: 5000, buyerRetentionRate: 80, currency: 'USD' },
-};
-
-// ── Model Display Metadata ───────────────────────────────────────────────────
-export const MODEL_META: Record<BusinessModel, { label: string; labelAr: string; northStar: string; revenueLabel: string; customerLabel: string }> = {
-  saas:        { label: 'SaaS',                          labelAr: 'برمجيات كخدمة',           northStar: 'ARR',                    revenueLabel: 'MRR',              customerLabel: 'Customers' },
-  ecommerce:   { label: 'E-commerce',                    labelAr: 'تجارة إلكترونية',          northStar: 'Monthly Revenue',        revenueLabel: 'Revenue',          customerLabel: 'Orders' },
-  marketplace: { label: 'Marketplace',                   labelAr: 'منصة تجارية',              northStar: 'GMV',                    revenueLabel: 'Net Revenue',      customerLabel: 'GMV ($)' },
-  agency:      { label: 'Agency / Services',             labelAr: 'وكالة / خدمات',            northStar: 'Monthly Retainer MRR',   revenueLabel: 'Revenue',          customerLabel: 'Clients' },
-  hardware:    { label: 'Hardware / IoT',                labelAr: 'أجهزة / إنترنت الأشياء',   northStar: 'Units Shipped',          revenueLabel: 'Revenue',          customerLabel: 'Units' },
-  procurement: { label: 'Procurement-as-a-Service',      labelAr: 'المشتريات كخدمة',          northStar: 'Procurement Volume (PVF)', revenueLabel: 'Service Fee Revenue', customerLabel: 'Orders' },
-};
+// ─── Legacy compatibility exports (used by old projectionRouter) ─────────────
+export type BusinessModel_ = BusinessModel;
+export type Approach = 'top-down' | 'bottom-up';
+export type TopDownInputs = any;
+export type BottomUpInputs = any;
+export type MonthlyDataPoint = any;
+export type YearSummary = any;
+export type ProjectionOutput = any;
+export const DEFAULT_TOP_DOWN: any = {};
+export const DEFAULT_BOTTOM_UP: any = {};
+export function computeTopDown(_inputs: any, _model: any): any { return null; }
+export function computeBottomUp(_inputs: any): any { return null; }

@@ -1129,5 +1129,60 @@ Paragraph 3: Investment thesis — why this team and opportunity deserve capital
       });
       return { narrative: response.choices[0].message.content as string };
     }),
+
+  // ── Financial Projection AI Review ────────────────────────────────────────
+  reviewProjection: protectedProcedure
+    .input(z.object({
+      companyName: z.string(),
+      businessModel: z.string(),
+      scenario: z.string(),
+      yearHorizon: z.number(),
+      currency: z.string().default('USD'),
+      language: z.enum(['english', 'arabic']).default('english'),
+      year1Revenue: z.number(),
+      year2Revenue: z.number(),
+      year3Revenue: z.number(),
+      finalYearRevenue: z.number(),
+      year1GrossMargin: z.number(),
+      finalYearGrossMargin: z.number(),
+      year1Ebitda: z.number(),
+      finalYearEbitda: z.number(),
+      cagr: z.number().nullable(),
+      breakEvenMonth: z.number().nullable(),
+      totalCashBurned: z.number(),
+      endingCashBalance: z.number(),
+      runwayMonths: z.number(),
+      peakCustomers: z.number().optional(),
+      avgCac: z.number().optional(),
+      avgLtv: z.number().optional(),
+      totalHeadcount: z.number(),
+      totalPayroll: z.number(),
+    }))
+    .mutation(async ({ input }) => {
+      const fmt = (n: number) => {
+        const abs = Math.abs(n);
+        const sign = n < 0 ? '-' : '';
+        if (abs >= 1e9) return `${sign}${input.currency} ${(abs/1e9).toFixed(2)}B`;
+        if (abs >= 1e6) return `${sign}${input.currency} ${(abs/1e6).toFixed(2)}M`;
+        if (abs >= 1e3) return `${sign}${input.currency} ${(abs/1e3).toFixed(0)}K`;
+        return `${sign}${input.currency} ${abs.toFixed(0)}`;
+      };
+      const langNote = input.language === 'arabic'
+        ? '\nIMPORTANT: Respond entirely in Arabic (العربية). Use Arabic financial and business terminology.'
+        : '';
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: 'system',
+            content: `You are a senior VC partner and CFO advisor who has reviewed hundreds of startup financial models. Provide a rigorous, structured review of this financial projection. Your response must follow this exact structure with these 5 sections using markdown headers:\n\n## Executive Summary\n(2-3 sentences: overall assessment, investment readiness)\n\n## Strengths\n(3-4 specific strengths with data points from the model)\n\n## Key Risks & Red Flags\n(3-4 specific risks with quantified impact where possible)\n\n## Benchmarking\n(Compare key metrics to industry benchmarks for this business model and stage)\n\n## Recommendations\n(5 specific, actionable recommendations to improve the model or the business)\n\nBe direct, data-driven, and specific. Reference actual numbers from the model. Avoid generic advice.${langNote}`,
+          },
+          {
+            role: 'user',
+            content: `Review this ${input.yearHorizon}-year financial projection:\n\nCompany: ${input.companyName}\nBusiness Model: ${input.businessModel}\nScenario: ${input.scenario}\nProjection Horizon: ${input.yearHorizon} years\n\nRevenue Trajectory:\n- Year 1: ${fmt(input.year1Revenue)}\n- Year 2: ${fmt(input.year2Revenue)}\n- Year 3: ${fmt(input.year3Revenue)}${input.yearHorizon > 3 ? `\n- Final Year (Y${input.yearHorizon}): ${fmt(input.finalYearRevenue)}` : ''}\n- CAGR: ${input.cagr != null ? input.cagr.toFixed(1) + '%' : 'N/A'}\n\nProfitability:\n- Year 1 Gross Margin: ${input.year1GrossMargin.toFixed(1)}%\n- Final Year Gross Margin: ${input.finalYearGrossMargin.toFixed(1)}%\n- Year 1 EBITDA: ${fmt(input.year1Ebitda)}\n- Final Year EBITDA: ${fmt(input.finalYearEbitda)}\n- Break-even Month: ${input.breakEvenMonth != null ? 'Month ' + input.breakEvenMonth : 'Not reached in projection'}\n\nCash & Runway:\n- Total Cash Burned: ${fmt(input.totalCashBurned)}\n- Ending Cash Balance: ${fmt(input.endingCashBalance)}\n- Runway: ${input.runwayMonths} months\n\nUnit Economics:\n${input.peakCustomers ? `- Peak Customers: ${input.peakCustomers.toLocaleString()}` : ''}\n${input.avgCac ? `- Avg CAC: ${fmt(input.avgCac)}` : ''}\n${input.avgLtv ? `- Avg LTV: ${fmt(input.avgLtv)}` : ''}\n\nHeadcount:\n- Total Headcount: ${input.totalHeadcount}\n- Total Annual Payroll: ${fmt(input.totalPayroll)}`,
+          },
+        ],
+      });
+      return { review: response.choices[0].message.content as string };
+    }),
 });
 

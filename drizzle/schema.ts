@@ -630,13 +630,18 @@ export const financialProjections = mysqlTable('financial_projections', {
   userId: int('userId').notNull(),
   name: varchar('name', { length: 256 }).notNull().default('My Projection'),
   businessModel: varchar('businessModel', { length: 64 }).notNull().default('saas'),
+  scenario: varchar('scenario', { length: 16 }).notNull().default('base'), // bear | base | bull
+  yearHorizon: int('yearHorizon').notNull().default(3), // 3 | 5 | 10
+  // New best-practice model inputs (full driver-based model)
+  modelInputs: json('modelInputs'),       // FinancialModelInputs (revenue drivers, headcount, opex, capital)
+  // Legacy fields kept for backward compatibility
   approach: mysqlEnum('approach', ['top-down', 'bottom-up']).notNull().default('bottom-up'),
-  // Shared inputs (JSON blobs per approach)
-  topDownInputs: json('topDownInputs'),   // { tam, samPct, somPct, captureRateY1, captureRateY2, captureRateY3, avgDealSize }
-  bottomUpInputs: json('bottomUpInputs'), // model-specific unit economics inputs
-  // Computed outputs (stored for history)
-  projectionOutput: json('projectionOutput'), // { years: [{year, revenue, customers, ...}] }
+  topDownInputs: json('topDownInputs'),
+  bottomUpInputs: json('bottomUpInputs'),
+  // Computed outputs (stored for history / quick reload)
+  projectionOutput: json('projectionOutput'),
   currency: varchar('currency', { length: 8 }).notNull().default('USD'),
+  aiReview: text('aiReview'),             // cached AI review text
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
 });
