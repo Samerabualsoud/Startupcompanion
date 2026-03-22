@@ -10,7 +10,8 @@ import {
   BarChart3, TrendingUp, TrendingDown, DollarSign, Target, Users, Sparkles,
   RefreshCw, Search, ArrowUpDown, CheckCircle2, Clock, XCircle,
   GitMerge, Zap, Activity, ShoppingCart, Briefcase, Cpu, Store,
-  Package, UserCheck, Repeat, Calendar, CalendarRange, Rocket
+  Package, UserCheck, Repeat, Calendar, CalendarRange, Rocket,
+  Star, Info, AlertCircle, Award, ArrowRight
 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -398,6 +399,7 @@ export default function SalesTracker() {
   // ── tRPC ───────────────────────────────────────────────────────────────
   const { data: rawEntries = [], refetch } = trpc.sales.listEntries.useQuery({ limit: 500 });
   const { data: analyticsData } = trpc.sales.getAnalytics.useQuery();
+  const { data: kpiBenchmarks } = trpc.sales.getKpiBenchmarks.useQuery();
   const entries: Deal[] = rawEntries as Deal[];
   const addMutation = trpc.sales.addEntry.useMutation({ onSuccess: () => { refetch(); setShowForm(false); setForm(emptyForm()); setExtraValues({}); toast.success(isRTL ? 'تمت إضافة الصفقة' : 'Deal added'); } });
   const updateMutation = trpc.sales.updateEntry.useMutation({ onSuccess: () => { refetch(); setEditingDeal(null); toast.success(isRTL ? 'تم تحديث الصفقة' : 'Deal updated'); } });
@@ -1201,6 +1203,196 @@ export default function SalesTracker() {
                     </CardContent>
                   </Card>
                 )}
+              {/* ── KPI Benchmarking Section ── */}
+              {kpiBenchmarks && (
+                <div className="space-y-4">
+                  {/* Section header */}
+                  <div className="flex items-center gap-2 pt-2">
+                    <Award className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-bold text-foreground">
+                      {isRTL ? 'مقاييس الأداء ومعايير الصناعة' : 'KPI Benchmarks vs. Industry'}
+                    </h3>
+                    <span className="ml-auto text-[10px] text-muted-foreground capitalize">
+                      {kpiBenchmarks.businessModel} · {kpiBenchmarks.sector || (isRTL ? 'عام' : 'General')}
+                    </span>
+                  </div>
+
+                  {/* North Star Metric Card */}
+                  <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <Star className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                            {isRTL ? '★ النجم الشمالي' : '★ North Star Metric'}
+                          </span>
+                        </div>
+                        <p className="text-sm font-bold text-foreground mt-0.5">
+                          {isRTL ? kpiBenchmarks.northStar.labelAr : kpiBenchmarks.northStar.label}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                          {isRTL ? kpiBenchmarks.northStar.whyAr : kpiBenchmarks.northStar.why}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        {kpiBenchmarks.northStar.actual !== null ? (
+                          <>
+                            <p className="text-xl font-bold text-primary">
+                              {kpiBenchmarks.northStar.key === 'arr'
+                                ? fmt(kpiBenchmarks.northStar.actual, currency)
+                                : kpiBenchmarks.northStar.key === 'revenue_per_employee'
+                                ? fmt(kpiBenchmarks.northStar.actual, currency)
+                                : `${kpiBenchmarks.northStar.actual.toFixed(1)}${kpiBenchmarks.northStar.unit === '%' ? '%' : ''}`
+                              }
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {kpiBenchmarks.northStar.unit === '$' ? (isRTL ? 'الإيراد السنوي' : 'Annualised') : (isRTL ? 'الشهر الأخير' : 'Latest month')}
+                            </p>
+                          </>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">{isRTL ? 'أدخل بيانات' : 'Add data'}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* KPI vs Benchmark rows */}
+                  {!kpiBenchmarks.hasRevenueData && !kpiBenchmarks.hasProfileData ? (
+                    <div className="flex items-center gap-3 p-4 rounded-xl border border-border bg-muted/30">
+                      <Info className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <p className="text-xs text-muted-foreground">
+                        {isRTL
+                          ? 'أضف صفقات مُغلقة أو أكمل ملف شركتك الناشئة (الهامش الإجمالي، معدل التراجع، LTV، CAC) لرؤية مقاييس الأداء.'
+                          : 'Add closed-won deals or complete your startup profile (Gross Margin, Churn Rate, LTV, CAC) to see your KPI benchmarks.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <Card>
+                      <CardHeader className="pb-2 pt-4">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <BarChart3 className="w-4 h-4 text-primary" />
+                          {isRTL ? 'مقاييسك مقابل معايير الصناعة' : 'Your KPIs vs. Industry Benchmarks'}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pb-4">
+                        <div className="space-y-3">
+                          {kpiBenchmarks.kpis.map(kpi => {
+                            const hasData = kpi.actual !== null;
+                            const statusColors: Record<string, string> = {
+                              excellent: 'text-emerald-600 dark:text-emerald-400',
+                              good: 'text-blue-600 dark:text-blue-400',
+                              fair: 'text-amber-600 dark:text-amber-400',
+                              poor: 'text-red-500',
+                              'no-data': 'text-muted-foreground',
+                            };
+                            const statusBg: Record<string, string> = {
+                              excellent: 'bg-emerald-100 dark:bg-emerald-900/30',
+                              good: 'bg-blue-100 dark:bg-blue-900/30',
+                              fair: 'bg-amber-100 dark:bg-amber-900/30',
+                              poor: 'bg-red-100 dark:bg-red-900/30',
+                              'no-data': 'bg-muted',
+                            };
+                            const statusLabel: Record<string, string> = {
+                              excellent: isRTL ? 'ممتاز' : 'Excellent',
+                              good: isRTL ? 'جيد' : 'Good',
+                              fair: isRTL ? 'مقبول' : 'Fair',
+                              poor: isRTL ? 'يحتاج تحسين' : 'Needs work',
+                              'no-data': isRTL ? 'لا توجد بيانات' : 'No data',
+                            };
+
+                            // Compute gauge fill %
+                            let gaugePct = 0;
+                            if (hasData && kpi.actual !== null) {
+                              if (kpi.lowerIsBetter) {
+                                const worst = (kpi.fair.max ?? 100) * 1.5;
+                                gaugePct = Math.max(0, Math.min(100, 100 - (kpi.actual / worst) * 100));
+                              } else {
+                                const target = kpi.excellent.min;
+                                gaugePct = Math.min(100, (kpi.actual / target) * 100);
+                              }
+                            }
+
+                            return (
+                              <div key={kpi.key} className="flex flex-col gap-1.5">
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-semibold text-foreground truncate">
+                                      {isRTL ? kpi.labelAr : kpi.label}
+                                    </p>
+                                    <p className="text-[10px] text-muted-foreground">
+                                      {isRTL ? 'المعيار:' : 'Benchmark:'} {kpi.benchmarkLabel} · {kpi.source}
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    {hasData && kpi.actual !== null ? (
+                                      <span className={`text-sm font-bold ${statusColors[kpi.status]}`}>
+                                        {kpi.unit === '$' ? fmt(kpi.actual, currency)
+                                          : kpi.unit === 'x' ? `${kpi.actual.toFixed(1)}x`
+                                          : kpi.unit === 'months' ? `${kpi.actual.toFixed(0)} mo`
+                                          : kpi.unit === 'score' ? kpi.actual.toFixed(0)
+                                          : `${kpi.actual.toFixed(1)}%`
+                                        }
+                                      </span>
+                                    ) : (
+                                      <span className="text-xs text-muted-foreground">—</span>
+                                    )}
+                                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${statusColors[kpi.status]} ${statusBg[kpi.status]}`}>
+                                      {statusLabel[kpi.status]}
+                                    </span>
+                                  </div>
+                                </div>
+                                {/* Progress bar */}
+                                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-500 ${
+                                      kpi.status === 'excellent' ? 'bg-emerald-500'
+                                      : kpi.status === 'good' ? 'bg-blue-500'
+                                      : kpi.status === 'fair' ? 'bg-amber-500'
+                                      : kpi.status === 'poor' ? 'bg-red-500'
+                                      : 'bg-muted-foreground/30'
+                                    }`}
+                                    style={{ width: `${hasData ? gaugePct : 0}%` }}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Industry context note */}
+                  {kpiBenchmarks.industryNote && (
+                    <div className="flex items-start gap-2.5 p-3 rounded-lg border border-border bg-muted/30">
+                      <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-[11px] font-semibold text-foreground mb-0.5">
+                          {isRTL ? kpiBenchmarks.industryNote.labelAr : kpiBenchmarks.industryNote.label} {isRTL ? '— ملاحظات الصناعة' : '— Industry Notes'}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground leading-relaxed">
+                          {isRTL ? kpiBenchmarks.industryNote.notesAr : kpiBenchmarks.industryNote.notes}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Profile data prompt */}
+                  {kpiBenchmarks.hasRevenueData && !kpiBenchmarks.hasProfileData && (
+                    <div className="flex items-center gap-2.5 p-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
+                      <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                      <p className="text-[11px] text-amber-700 dark:text-amber-300">
+                        {isRTL
+                          ? 'أكمل ملف شركتك الناشئة (الهامش الإجمالي، معدل التراجع، LTV، CAC) للحصول على مقارنة أكثر دقة.'
+                          : 'Complete your startup profile (Gross Margin, Churn Rate, LTV, CAC) for more accurate benchmark comparisons.'}
+                      </p>
+                      <ArrowRight className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0 ml-auto" />
+                    </div>
+                  )}
+                </div>
+              )}
               </>
             );
           })()}

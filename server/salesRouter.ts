@@ -7,9 +7,10 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from './_core/trpc';
 import { getDb } from './db';
-import { salesEntries, salesTargets } from '../drizzle/schema';
+import { salesEntries, salesTargets, startupProfiles } from '../drizzle/schema';
 import { eq, and, desc, gte, lte } from 'drizzle-orm';
 import { invokeLLM } from './_core/llm';
+import { BUSINESS_MODEL_BENCHMARKS, INDUSTRY_CONTEXT, getKpiStatus, getBenchmarkLabel } from '../shared/kpiBenchmarks';
 
 export const salesRouter = router({
   // ── Add a sales entry ──────────────────────────────────────────────────
@@ -373,6 +374,122 @@ export const salesRouter = router({
       ? (last3.reduce((s, m) => s + monthlyRevMap[m], 0) / last3.length) * 12
       : 0;
     return { total, thisMonth, lastMonth, annualizedRevenue };
+  }),
+
+  // ── KPI Benchmarking: compute actuals vs industry benchmarks ────────────
+  getKpiBenchmarks: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) return null;
+
+    // 1. Fetch startup profile for business model, sector, and manually entered KPIs
+    const [profile] = await db
+      .select()
+      .from(startupProfiles)
+      .where(eq(startupProfiles.userId, ctx.user.id))
+      .limit(1);
+
+    const businessModel = (profile?.businessModel ?? 'saas').toLowerCase();
+    const sector = (profile?.sector ?? '').toLowerCase();
+
+    // 2. Get benchmark profile for this business model
+    const benchmarkProfile = BUSINESS_MODEL_BENCHMARKS[businessModel] ?? BUSINESS_MODEL_BENCHMARKS['saas'];
+
+    // 3. Fetch all closed_won sales entries to compute actuals
+    const entries = await db
+      .select()
+      .from(salesEntries)
+      .where(and(eq(salesEntries.userId, ctx.user.id), eq(salesEntries.dealStage, 'closed_won')));
+
+    // 4. Compute actual KPI values from sales data + profile
+    const now = new Date();
+    const monthlyMap: Record<string, number> = {};
+    for (const e of entries) {
+      const m = new Date(e.date).toISOString().slice(0, 7);
+      monthlyMap[m] = (monthlyMap[m] ?? 0) + e.amount;
+    }
+    const sortedMonthKeys = Object.keys(monthlyMap).sort();
+    const lastMonthKey = sortedMonthKeys[sortedMonthKeys.length - 1];
+    const prevMonthKey = sortedMonthKeys[sortedMonthKeys.length - 2];
+
+    const mrr = lastMonthKey ? (monthlyMap[lastMonthKey] ?? 0) : 0;
+    const prevMrr = prevMonthKey ? (monthlyMap[prevMonthKey] ?? 0) : 0;
+    const momGrowthPct = prevMrr > 0 ? ((mrr - prevMrr) / prevMrr) * 100 : null;
+
+    // CAC payback: if profile has cac and gross margin, compute months
+    const cacPayback = (profile?.cac && profile?.grossMargin && profile.grossMargin > 0)
+      ? profile.cac / (mrr > 0 ? mrr / Math.max(profile.numberOfCustomers ?? 1, 1) * (profile.grossMargin / 100) : 1)
+      : null;
+
+    // LTV:CAC ratio from profile fields
+    const ltvCacRatio = (profile?.ltv && profile?.cac && profile.cac > 0)
+      ? profile.ltv / profile.cac
+      : null;
+
+    // Build actuals map
+    const actuals: Record<string, number | null> = {
+      mom_growth: momGrowthPct !== null && isFinite(momGrowthPct) ? momGrowthPct : null,
+      churn_rate: profile?.churnRate ?? null,
+      ltv_cac_ratio: ltvCacRatio,
+      cac_payback_months: cacPayback !== null && isFinite(cacPayback) ? cacPayback : null,
+      gross_margin: profile?.grossMargin ?? null,
+      nps_score: profile?.npsScore ?? null,
+      gmv_growth: momGrowthPct !== null && isFinite(momGrowthPct) ? momGrowthPct : null,
+      revenue_growth: momGrowthPct !== null && isFinite(momGrowthPct) ? momGrowthPct : null,
+      net_revenue_retention: null, // requires historical data not yet tracked
+      revenue_per_employee: (entries.length > 0 && profile?.employeeCount && profile.employeeCount > 0)
+        ? entries.reduce((s, e) => s + e.amount, 0) / profile.employeeCount
+        : null,
+    };
+
+    // North Star actual value
+    const northStarKey = benchmarkProfile.northStar.key;
+    let northStarActual: number | null = null;
+    if (northStarKey === 'arr') northStarActual = mrr * 12;
+    else if (northStarKey === 'revenue_growth' || northStarKey === 'gmv_growth') northStarActual = actuals.mom_growth;
+    else if (northStarKey === 'gross_margin') northStarActual = actuals.gross_margin;
+    else if (northStarKey === 'net_revenue_retention') northStarActual = actuals.net_revenue_retention;
+    else if (northStarKey === 'revenue_per_employee') northStarActual = actuals.revenue_per_employee;
+
+    // 5. Build KPI result rows
+    const kpiResults = benchmarkProfile.kpis.map(kpi => {
+      const actual = actuals[kpi.key] ?? null;
+      const status = getKpiStatus(kpi, actual);
+      const benchmarkLabel = getBenchmarkLabel(kpi);
+      return {
+        key: kpi.key,
+        label: kpi.label,
+        labelAr: kpi.labelAr,
+        unit: kpi.unit,
+        description: kpi.description,
+        descriptionAr: kpi.descriptionAr,
+        actual,
+        status,
+        benchmarkLabel,
+        excellent: kpi.excellent,
+        good: kpi.good,
+        fair: kpi.fair,
+        lowerIsBetter: kpi.lowerIsBetter ?? false,
+        source: kpi.source,
+      };
+    });
+
+    // 6. Industry context note
+    const industryNote = INDUSTRY_CONTEXT[sector] ?? INDUSTRY_CONTEXT[businessModel] ?? null;
+
+    return {
+      businessModel,
+      sector,
+      northStar: {
+        ...benchmarkProfile.northStar,
+        actual: northStarActual,
+        mrr,
+        arr: mrr * 12,
+      },
+      kpis: kpiResults,
+      industryNote,
+      hasProfileData: !!profile,
+      hasRevenueData: entries.length > 0,
+    };
   }),
 
   analyzeAI: protectedProcedure
