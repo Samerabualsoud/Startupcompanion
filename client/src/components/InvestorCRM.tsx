@@ -275,7 +275,7 @@ export default function InvestorCRM() {
         <div className="flex items-center gap-2 shrink-0">
           <button onClick={exportCSV}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
-            style={{ background: 'oklch(0.35 0.2 270)', color: '#FAF6EF', border: '1px solid oklch(0.42 0.18 270)' }}
+            style={{ background: 'var(--primary)', color: '#FAF6EF', border: '1.5px solid var(--border)' }}
             title="Export to CSV">
             <Download className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">{lang === 'ar' ? 'تصدير CSV' : 'Export CSV'}</span>
@@ -515,7 +515,7 @@ export default function InvestorCRM() {
                 <div className="flex items-center gap-2 shrink-0">
                   <a href={app.website} target="_blank" rel="noopener noreferrer"
                     className="text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-all hover:opacity-90"
-                    style={{ background: 'oklch(0.35 0.2 270)', color: '#FAF6EF', border: '1px solid oklch(0.42 0.18 270)' }}>
+                    style={{ background: 'var(--primary)', color: '#FAF6EF', border: '1.5px solid var(--border)' }}>
                     Apply
                   </a>
                   <button onClick={() => untrack(app.acceleratorName)}

@@ -159,7 +159,7 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
               className="flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-all hover:opacity-90"
               style={tracked
                 ? { background: '#D1FAE5', color: '#059669', border: '1px solid #6EE7B7' }
-                : { background: 'oklch(0.35 0.2 270)', color: '#FAF6EF', border: '1px solid oklch(0.42 0.18 270)' }
+                : { background: 'var(--primary)', color: '#FAF6EF', border: '1.5px solid var(--border)' }
               }
               title={tracked ? (lang === 'ar' ? 'إزالة من المتابعة' : 'Remove from tracker') : (lang === 'ar' ? 'تتبع هذا الطلب' : 'Track this application')}
             >
@@ -210,7 +210,7 @@ function AcceleratorCard({ acc, index }: { acc: Accelerator; index: number }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
-                style={{ background: 'oklch(0.35 0.2 270)' }}
+                style={{ background: 'var(--primary)' }}
               >
                 {lang === 'ar' ? 'تقدّم الآن' : 'Apply Now'}
                 <ExternalLink className="w-3.5 h-3.5" />

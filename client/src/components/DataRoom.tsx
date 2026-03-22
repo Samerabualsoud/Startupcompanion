@@ -515,7 +515,7 @@ export default function DataRoom() {
                         }}
                       >
                         {expandedFolders.has(folder) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                        <FolderOpen className="w-4 h-4" style={{ color: 'oklch(0.45 0.2 270)' }} />
+                        <FolderOpen className="w-4 h-4" style={{ color: 'var(--primary)' }} />
                         {folder}
                         <span className="text-xs text-muted-foreground font-normal">({folderFiles.length})</span>
                       </button>
@@ -656,7 +656,7 @@ export default function DataRoom() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <FolderPlus className="w-5 h-5" style={{ color: 'oklch(0.45 0.2 270)' }} />
+              <FolderPlus className="w-5 h-5" style={{ color: 'var(--primary)' }} />
               Create Data Room
             </DialogTitle>
           </DialogHeader>
@@ -682,7 +682,7 @@ export default function DataRoom() {
               <Button variant="outline" className="flex-1" onClick={() => setShowCreateRoom(false)}>Cancel</Button>
               <Button
                 className="flex-1"
-                style={{ background: 'oklch(0.45 0.2 270)' }}
+                style={{ background: 'var(--primary)' }}
                 disabled={!newRoomName.trim() || createRoom.isPending}
                 onClick={() => createRoom.mutate({ name: newRoomName.trim(), description: newRoomDesc || undefined })}
               >

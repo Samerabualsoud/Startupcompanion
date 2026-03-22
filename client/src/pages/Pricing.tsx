@@ -40,7 +40,7 @@ export default function Pricing() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'oklch(0.978 0.008 80)' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--background)' }}>
       {/* Header */}
       <header className="shrink-0 border-b border-border bg-card px-6 py-4 flex items-center gap-3">
         <a href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm">
@@ -49,8 +49,8 @@ export default function Pricing() {
         </a>
         <div className="flex-1" />
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
-            <TrendingUp className="w-4 h-4" style={{ color: 'oklch(0.45 0.2 270)' }} />
+          <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ background: 'var(--primary)' }}>
+            <TrendingUp className="w-4 h-4" style={{ color: 'var(--primary)' }} />
           </div>
           <span className="text-sm font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             Polaris Arabia
@@ -69,7 +69,7 @@ export default function Pricing() {
           {/* Badge */}
           <div className="flex justify-center mb-6">
             <div className="flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold"
-              style={{ background: 'oklch(0.35 0.2 270)', color: 'oklch(0.45 0.2 270)', border: '1px solid oklch(0.42 0.18 270)' }}>
+              style={{ background: 'var(--primary)', color: 'var(--primary)', border: '1.5px solid var(--border)' }}>
               <Zap className="w-3 h-3" />
               Simple, transparent pricing
             </div>
@@ -86,22 +86,22 @@ export default function Pricing() {
           {/* Pricing Card */}
           <div className="rounded-2xl overflow-hidden shadow-xl border border-border bg-card">
             {/* Card Header */}
-            <div className="px-8 py-8 text-white" style={{ background: 'oklch(0.35 0.2 270)' }}>
+            <div className="px-8 py-8 text-white" style={{ background: 'var(--primary)' }}>
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'oklch(0.45 0.2 270)' }}>
+                  <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--primary)' }}>
                     Pro Plan
                   </div>
                   <div className="flex items-end gap-2">
                     <span className="text-5xl font-bold" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>$9.99</span>
-                    <span className="text-lg mb-2" style={{ color: 'oklch(0.65 0.1 270)' }}>/month</span>
+                    <span className="text-lg mb-2" style={{ color: 'var(--muted-foreground)' }}>/month</span>
                   </div>
-                  <p className="text-sm mt-2" style={{ color: 'oklch(0.65 0.1 270)' }}>
+                  <p className="text-sm mt-2" style={{ color: 'var(--muted-foreground)' }}>
                     Cancel anytime. No long-term commitment.
                   </p>
                 </div>
                 <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
-                  style={{ background: 'oklch(0.45 0.2 270)', color: 'white' }}>
+                  style={{ background: 'var(--primary)', color: 'white' }}>
                   <Star className="w-3 h-3 fill-white" />
                   Most Popular
                 </div>
@@ -120,7 +120,7 @@ export default function Pricing() {
                     className="flex items-start gap-2.5"
                   >
                     <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                      style={{ background: 'oklch(0.45 0.2 270)' }}>
+                      style={{ background: 'var(--primary)' }}>
                       <Check className="w-2.5 h-2.5 text-white" />
                     </div>
                     <span className="text-sm text-foreground">{feature}</span>
@@ -133,7 +133,7 @@ export default function Pricing() {
                 onClick={handleSubscribe}
                 disabled={loading}
                 className="w-full py-4 rounded-xl font-bold text-base text-white transition-all hover:opacity-90 active:scale-[0.99] disabled:opacity-60 flex items-center justify-center gap-2"
-                style={{ background: 'oklch(0.45 0.2 270)' }}
+                style={{ background: 'var(--primary)' }}
               >
                 {loading ? (
                   <>

@@ -68,12 +68,12 @@ function StatusBadge({ verified }: { verified: boolean | null }) {
 }
 
 function StatCard({ label, value, icon: Icon, color, sub, tooltip }: {
-  label: string; value: number | string; icon: React.ElementType; color: string; sub?: string; tooltip?: string;
+  label: string; value: number | string; icon: React.ElementType; color?: string; sub?: string; tooltip?: string;
 }) {
   return (
     <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: color }}>
-        <Icon className="w-5 h-5 text-white" />
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-primary/15" style={color ? { background: `${color}22` } : undefined}>
+        <Icon className="w-5 h-5 text-primary" style={color ? { color } : undefined} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
@@ -328,8 +328,8 @@ export default function AdminDashboard() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'oklch(0.35 0.2 270)' }}>
-            <Shield className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-primary">
+            <Shield className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
@@ -364,10 +364,7 @@ export default function AdminDashboard() {
           const isActive = activeTab === tab.id;
           return (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap relative"
-              style={isActive
-                ? { background: 'oklch(0.25 0.05 270)', color: 'oklch(0.85 0.1 270)', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }
-                : { color: 'oklch(0.55 0.03 240)' }}>
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap relative ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}>
               <Icon className="w-3.5 h-3.5" />
               {tab.label}
               {tab.badge != null && tab.badge > 0 && (
@@ -384,25 +381,25 @@ export default function AdminDashboard() {
       {activeTab === 'overview' && (
         <div className="space-y-5">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <StatCard label="Total Users" value={stats?.totalUsers ?? 0} icon={Users} color="oklch(0.35 0.2 270)"
+            <StatCard label="Total Users" value={stats?.totalUsers ?? 0} icon={Users} color="#0F52DE"
               tooltip="All registered accounts on the platform, including all user types."
               sub={stats?.pendingSubmissions ? `${stats.pendingSubmissions} pending submissions` : undefined} />
-            <StatCard label="VC Firms" value={stats?.vcCount ?? 0} icon={Building2} color="oklch(0.45 0.2 270)"
+            <StatCard label="VC Firms" value={stats?.vcCount ?? 0} icon={Building2} color="#7C3AED"
               tooltip="Number of VC firm KYC profiles submitted (verified + unverified)." />
-            <StatCard label="Angel Investors" value={stats?.angelCount ?? 0} icon={Star} color="oklch(0.4 0.1 280)"
+            <StatCard label="Angel Investors" value={stats?.angelCount ?? 0} icon={Star} color="#6366F1"
               tooltip="Number of angel investor KYC profiles submitted." />
-            <StatCard label="Startups" value={stats?.startupCount ?? 0} icon={Rocket} color="oklch(0.35 0.12 145)"
+            <StatCard label="Startups" value={stats?.startupCount ?? 0} icon={Rocket} color="#059669"
               tooltip="Number of startup KYC profiles submitted." />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <StatCard label="Venture Lawyers" value={stats?.lawyerCount ?? 0} icon={Briefcase} color="oklch(0.45 0.08 200)"
+            <StatCard label="Venture Lawyers" value={stats?.lawyerCount ?? 0} icon={Briefcase} color="#0284C7"
               tooltip="Number of venture lawyer KYC profiles submitted." />
-            <StatCard label="Saved Valuations" value={stats?.savedValuationCount ?? 0} icon={TrendingUp} color="oklch(0.5 0.12 60)"
+            <StatCard label="Saved Valuations" value={stats?.savedValuationCount ?? 0} icon={TrendingUp} color="#D97706"
               tooltip="Total number of valuations saved by all users across the platform." />
-            <StatCard label="Pending KYC" value={pendingKycCount} icon={Clock} color="oklch(0.6 0.15 50)"
+            <StatCard label="Pending KYC" value={pendingKycCount} icon={Clock} color="#F59E0B"
               tooltip="KYC profiles awaiting your review. These are not yet visible to other users."
               sub={pendingKycCount > 0 ? 'Needs review' : undefined} />
-            <StatCard label="Pending Submissions" value={stats?.pendingSubmissions ?? 0} icon={ClipboardList} color="oklch(0.5 0.1 340)"
+            <StatCard label="Pending Submissions" value={stats?.pendingSubmissions ?? 0} icon={ClipboardList} color="#DC2626"
               tooltip="Self-registration requests from VCs, angels, lawyers, and grant providers waiting for approval."
               sub={(stats?.pendingSubmissions ?? 0) > 0 ? 'Self-registrations' : undefined} />
           </div>
@@ -422,7 +419,7 @@ export default function AdminDashboard() {
               {(stats?.recentUsers ?? []).slice(0, 5).map((u: { id: number; name: string | null; email: string; role: string; userType: string; createdAt: Date }) => (
                 <div key={u.id} className="px-4 py-3 flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                    style={{ background: u.role === 'admin' ? 'oklch(0.45 0.2 270)' : 'oklch(0.35 0.2 270)' }}>
+                    style={{ background: u.role === 'admin' ? '#7C3AED' : '#0F52DE' }}>
                     {(u.name ?? u.email ?? '?').charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -491,7 +488,7 @@ export default function AdminDashboard() {
                   <div key={u.id} className={`grid grid-cols-[minmax(160px,1fr)_80px_60px_70px_80px_70px_90px_120px] gap-0 px-4 py-3 hover:bg-secondary/20 transition-colors items-center ${u.isBanned ? 'opacity-60' : ''}`}>
                     <div className="flex items-center gap-3 min-w-0 px-2">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                        style={{ background: u.isBanned ? '#EF4444' : u.role === 'admin' ? 'oklch(0.45 0.2 270)' : 'oklch(0.35 0.2 270)' }}>
+                        style={{ background: u.isBanned ? '#EF4444' : u.role === 'admin' ? '#7C3AED' : '#0F52DE' }}>
                         {(u.name ?? u.email ?? '?').charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
@@ -860,10 +857,10 @@ export default function AdminDashboard() {
             </div>
             <div className="space-y-3">
               {[
-                { label: 'VC Firms', value: stats?.vcCount ?? 0, total: stats?.totalUsers ?? 1, color: 'oklch(0.35 0.2 270)' },
-                { label: 'Angel Investors', value: stats?.angelCount ?? 0, total: stats?.totalUsers ?? 1, color: 'oklch(0.45 0.2 270)' },
-                { label: 'Venture Lawyers', value: stats?.lawyerCount ?? 0, total: stats?.totalUsers ?? 1, color: 'oklch(0.4 0.1 280)' },
-                { label: 'Startups', value: stats?.startupCount ?? 0, total: stats?.totalUsers ?? 1, color: 'oklch(0.35 0.12 145)' },
+                { label: 'VC Firms', value: stats?.vcCount ?? 0, total: stats?.totalUsers ?? 1, color: '#0F52DE' },
+                { label: 'Angel Investors', value: stats?.angelCount ?? 0, total: stats?.totalUsers ?? 1, color: '#7C3AED' },
+                { label: 'Venture Lawyers', value: stats?.lawyerCount ?? 0, total: stats?.totalUsers ?? 1, color: '#0284C7' },
+                { label: 'Startups', value: stats?.startupCount ?? 0, total: stats?.totalUsers ?? 1, color: '#059669' },
               ].map(item => (
                 <div key={item.label}>
                   <div className="flex items-center justify-between mb-1">
@@ -915,7 +912,7 @@ export default function AdminDashboard() {
                   ))}
                 </div>
                 <div className="flex gap-2 pt-2">
-                  <Button size="sm" className="flex-1 text-xs" style={{ background: 'oklch(0.35 0.2 270)' }}
+                  <Button size="sm" className="flex-1 text-xs bg-primary text-primary-foreground hover:bg-primary/90"
                     disabled={updateVCMutation.isPending || updateAngelMutation.isPending || updateGrantMutation.isPending || updateLawyerMutation.isPending}
                     onClick={() => {
                       const id = editDraft.id as number;
@@ -951,10 +948,7 @@ export default function AdminDashboard() {
               { id: 'lawyers', label: 'Venture Lawyers', count: resourceDb?.lawyers?.length },
             ] as const).map(sub => (
               <button key={sub.id} onClick={() => setResourceSubTab(sub.id)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap"
-                style={resourceSubTab === sub.id
-                  ? { background: 'white', color: 'oklch(0.35 0.2 270)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }
-                  : { color: 'oklch(0.5 0.03 240)' }}>
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${resourceSubTab === sub.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}>
                 {sub.label}
                 {sub.count != null && (
                   <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary text-muted-foreground">{sub.count}</span>
@@ -1075,8 +1069,7 @@ export default function AdminDashboard() {
               <h3 className="text-sm font-semibold text-foreground">Platform Settings</h3>
               <InfoTip text="Global settings that affect all users on the platform. Changes take effect immediately after saving." />
             </div>
-            <Button size="sm" className="gap-1.5 h-8 text-xs"
-              style={{ background: 'oklch(0.35 0.2 270)' }}
+            <Button size="sm" className="gap-1.5 h-8 text-xs bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={setPlatformSettingsMutation.isPending}
               onClick={savePlatformSettings}>
               {setPlatformSettingsMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}

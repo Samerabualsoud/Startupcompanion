@@ -105,7 +105,7 @@ export default function DilutionCalculator() {
                 <stop offset="95%" stopColor="#C4614A" stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.88 0.01 80)" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
             <XAxis dataKey="name" tick={{ fontSize: 10, fontFamily: 'DM Sans' }} />
             <YAxis
               domain={[0, 100]}

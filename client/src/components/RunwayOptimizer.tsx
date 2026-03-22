@@ -117,7 +117,7 @@ function RunwaySlider({ value, onChange, min = 0, max = 100, step = 5 }: {
         onChange={e => onChange(parseInt(e.target.value))}
         className="w-full h-2 rounded-full appearance-none cursor-pointer focus:outline-none"
         style={{
-          background: `linear-gradient(to right, oklch(0.55 0.2 270) 0%, oklch(0.55 0.2 270) ${pct}%, oklch(0.88 0.02 270) ${pct}%, oklch(0.88 0.02 270) 100%)`,
+          background: `linear-gradient(to right, #5B4EFF 0%, #5B4EFF ${pct}%, #EEF2FF ${pct}%, #EEF2FF 100%)`,
         }}
       />
       <style>{`
@@ -126,20 +126,20 @@ function RunwaySlider({ value, onChange, min = 0, max = 100, step = 5 }: {
           width: 18px; height: 18px;
           border-radius: 50%;
           background: white;
-          border: 2.5px solid oklch(0.55 0.2 270);
+          border: 2.5px solid #5B4EFF;
           box-shadow: 0 1px 4px rgba(0,0,0,0.25);
           cursor: pointer;
           transition: transform 0.1s, border-color 0.1s;
         }
         input[type=range]::-webkit-slider-thumb:hover {
           transform: scale(1.2);
-          border-color: oklch(0.45 0.22 270);
+          border-color: #4338CA;
         }
         input[type=range]::-moz-range-thumb {
           width: 18px; height: 18px;
           border-radius: 50%;
           background: white;
-          border: 2.5px solid oklch(0.55 0.2 270);
+          border: 2.5px solid #5B4EFF;
           box-shadow: 0 1px 4px rgba(0,0,0,0.25);
           cursor: pointer;
         }
@@ -245,7 +245,7 @@ export default function RunwayOptimizer() {
     <div className={`space-y-5 ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
 
       {/* ── Header ── */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, oklch(0.35 0.2 270) 0%, oklch(0.45 0.22 300) 100%)' }}>
+      <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--primary)' }}>
         <div className="px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h2 className="text-xl font-bold text-white" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
@@ -313,7 +313,7 @@ export default function RunwayOptimizer() {
             {([3, 6, 12] as const).map(m => (
               <button key={m} onClick={() => setTargetExtension(m)}
                 className={`py-2.5 rounded-lg text-xs font-bold transition-all ${targetExtension === m ? 'text-white shadow-md' : 'border border-border text-muted-foreground hover:border-indigo-400 hover:text-indigo-600'}`}
-                style={targetExtension === m ? { background: 'oklch(0.45 0.2 270)' } : {}}>
+                style={targetExtension === m ? { background: 'var(--primary)' } : {}}>
                 +{m}{mo}
               </button>
             ))}
@@ -361,7 +361,7 @@ export default function RunwayOptimizer() {
               <linearGradient id="gradC" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#6366F1" stopOpacity={0.3} /><stop offset="95%" stopColor="#6366F1" stopOpacity={0} /></linearGradient>
               <linearGradient id="gradO" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10B981" stopOpacity={0.3} /><stop offset="95%" stopColor="#10B981" stopOpacity={0} /></linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.01 270)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="month" tick={{ fontSize: 9 }} />
             <YAxis tick={{ fontSize: 9 }} tickFormatter={v => `$${v}K`} />
             <ReferenceLine y={0} stroke="#EF4444" strokeWidth={1.5} strokeDasharray="4 2" />
@@ -417,7 +417,7 @@ export default function RunwayOptimizer() {
                     </div>
                     <div className="w-32 shrink-0 space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-mono font-bold" style={{ color: 'oklch(0.55 0.2 270)' }}>{cat.cuttable}%</span>
+                        <span className="text-[10px] font-mono font-bold" style={{ color: 'var(--primary)' }}>{cat.cuttable}%</span>
                         <span className="text-[9px] text-muted-foreground">{isRTL ? 'الحد الأقصى' : 'max cut'}</span>
                       </div>
                       <RunwaySlider value={cat.cuttable} onChange={v => updateCategory(cat.id, 'cuttable', v)} />
@@ -436,7 +436,7 @@ export default function RunwayOptimizer() {
                         onKeyDown={e => e.key === 'Enter' && addCategory()}
                         placeholder={isRTL ? 'اسم البند' : 'Expense name'}
                         className="flex-1 px-3 py-1.5 text-xs rounded-lg border border-indigo-300 bg-background focus:outline-none focus:ring-2 focus:ring-indigo-400" autoFocus />
-                      <button onClick={addCategory} className="px-3 py-1.5 text-xs font-semibold rounded-lg text-white" style={{ background: 'oklch(0.45 0.2 270)' }}>{isRTL ? 'إضافة' : 'Add'}</button>
+                      <button onClick={addCategory} className="px-3 py-1.5 text-xs font-semibold rounded-lg text-white" style={{ background: 'var(--primary)' }}>{isRTL ? 'إضافة' : 'Add'}</button>
                       <button onClick={() => { setAddingCat(false); setNewCatName(''); }} className="px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground">{isRTL ? 'إلغاء' : 'Cancel'}</button>
                     </div>
                   ) : (
@@ -459,7 +459,7 @@ export default function RunwayOptimizer() {
         </div>
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={categories.map(c => { const rec = analysis.recommendations.find(r => r.id === c.id); return { name: (isRTL ? c.nameAr : c.name).split(' ')[0], Current: c.monthly, Optimized: rec ? Math.round(rec.newAmount) : c.monthly }; })} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.01 270)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="name" tick={{ fontSize: 9 }} />
             <YAxis tick={{ fontSize: 9 }} tickFormatter={v => `$${v / 1000}K`} />
             <RechartTooltip formatter={(v: number) => [fmt(v), '']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
@@ -471,7 +471,7 @@ export default function RunwayOptimizer() {
 
       {/* ── Recommendations ── */}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="px-4 py-3 border-b border-border flex items-center gap-2" style={{ background: 'oklch(0.97 0.01 270)' }}>
+        <div className="px-4 py-3 border-b border-border flex items-center gap-2" style={{ background: 'var(--background)' }}>
           <TrendingDown className="w-4 h-4 text-indigo-600" />
           <span className="text-sm font-semibold text-foreground">{isRTL ? 'التوصيات لتمديد المدة' : 'Recommended Cuts'} (+{targetExtension} {isRTL ? 'شهر' : 'months'})</span>
           <InfoTip text={isRTL ? 'محسوبة تلقائياً بناءً على الحد الأقصى للتخفيض لكل بند. النظام يختار الأكثر تأثيراً أولاً.' : 'Auto-calculated using the Max Cut % per category. The optimizer picks the highest-impact cuts first to reach your target.'} />

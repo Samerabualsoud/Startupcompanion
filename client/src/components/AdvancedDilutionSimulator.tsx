@@ -298,7 +298,7 @@ export default function AdvancedDilutionSimulator() {
                 <button
                   onClick={() => updateRound(round.id, 'enabled', !round.enabled)}
                   className="w-9 h-5 rounded-full transition-all relative shrink-0"
-                  style={{ background: round.enabled ? round.color : 'oklch(0.88 0.01 80)' }}
+                  style={{ background: round.enabled ? round.color : '#F3F4F6' }}
                 >
                   <div className="w-3.5 h-3.5 rounded-full bg-white absolute top-0.5 transition-all"
                     style={{ left: round.enabled ? '18px' : '2px' }} />
@@ -374,7 +374,7 @@ export default function AdvancedDilutionSimulator() {
                 </linearGradient>
               ))}
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.88 0.01 80)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="stage" tick={{ fontSize: 10 }} />
             <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${v}%`} domain={[0, 100]} />
             <RechartTooltip

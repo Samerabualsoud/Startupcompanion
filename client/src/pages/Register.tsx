@@ -82,14 +82,14 @@ export default function Register() {
   ];
 
   return (
-    <div className="min-h-screen flex" style={{ background: 'oklch(0.978 0.008 80)' }}>
+    <div className="min-h-screen flex" style={{ background: 'var(--background)' }}>
       {/* Left panel */}
       <div
         className="hidden lg:flex flex-col justify-between w-[480px] shrink-0 p-12"
-        style={{ background: 'oklch(0.35 0.2 270)' }}
+        style={{ background: 'var(--primary)' }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.45 0.2 270)' }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--primary)' }}>
             <TrendingUp className="w-5 h-5 text-white" />
           </div>
           <span className="text-white font-bold text-lg" style={{ fontFamily }}>
@@ -105,15 +105,15 @@ export default function Register() {
           </h2>
           <div className="space-y-3">
             {FEATURES.map(feat => (
-              <div key={feat} className="flex items-center gap-3 text-sm" style={{ color: 'oklch(0.7 0.03 240)' }}>
-                <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: 'oklch(0.65 0.13 30)' }} />
+              <div key={feat} className="flex items-center gap-3 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: 'var(--secondary)' }} />
                 {feat}
               </div>
             ))}
           </div>
         </div>
 
-        <div className="text-xs" style={{ color: 'oklch(0.4 0.03 240)' }}>
+        <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
           {isRTL ? 'مجاني للأبد · لا يلزم بطاقة ائتمان' : 'Free forever · No credit card required'}
         </div>
       </div>
@@ -124,8 +124,8 @@ export default function Register() {
           {/* Mobile logo + language switcher */}
           <div className="flex items-center justify-between mb-8 lg:hidden">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
-                <TrendingUp className="w-4 h-4" style={{ color: 'oklch(0.45 0.2 270)' }} />
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--primary)' }}>
+                <TrendingUp className="w-4 h-4" style={{ color: 'var(--primary)' }} />
               </div>
               <span className="font-bold" style={{ fontFamily }}>{t('appName')}</span>
             </div>
@@ -138,7 +138,7 @@ export default function Register() {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'oklch(0.35 0.2 270)' }}>
+            <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'var(--foreground)' }}>
               {t('registerTitle')}
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -148,14 +148,14 @@ export default function Register() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="flex items-center gap-2.5 p-3.5 rounded-xl text-sm" style={{ background: 'oklch(0.97 0.02 30)', border: '1px solid oklch(0.85 0.06 30)', color: 'oklch(0.45 0.12 30)' }}>
+              <div className="flex items-center gap-2.5 p-3.5 rounded-xl text-sm" style={{ background: 'var(--background)', border: '1.5px solid var(--border)', color: 'var(--primary)' }}>
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'oklch(0.3 0.04 240)' }}>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>
                 {t('nameLabel')}
               </label>
               <input
@@ -166,14 +166,14 @@ export default function Register() {
                 autoComplete="name"
                 required
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
-                style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-                onFocus={e => e.target.style.borderColor = 'oklch(0.45 0.2 270)'}
-                onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
+                style={{ background: 'white', border: '1.5px solid var(--border)', color: 'var(--foreground)' }}
+                onFocus={e => e.target.style.borderColor = 'var(--primary)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'oklch(0.3 0.04 240)' }}>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>
                 {t('emailLabel')}
               </label>
               <input
@@ -184,14 +184,14 @@ export default function Register() {
                 autoComplete="email"
                 required
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
-                style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-                onFocus={e => e.target.style.borderColor = 'oklch(0.45 0.2 270)'}
-                onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
+                style={{ background: 'white', border: '1.5px solid var(--border)', color: 'var(--foreground)' }}
+                onFocus={e => e.target.style.borderColor = 'var(--primary)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'oklch(0.3 0.04 240)' }}>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>
                 {t('passwordLabel')}
               </label>
               <div className="relative">
@@ -203,9 +203,9 @@ export default function Register() {
                   autoComplete="new-password"
                   required
                   className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all pr-11"
-                  style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-                  onFocus={e => e.target.style.borderColor = 'oklch(0.45 0.2 270)'}
-                  onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
+                  style={{ background: 'white', border: '1.5px solid var(--border)', color: 'var(--foreground)' }}
+                  onFocus={e => e.target.style.borderColor = 'var(--primary)'}
+                  onBlur={e => e.target.style.borderColor = 'var(--border)'}
                 />
                 <button
                   type="button"
@@ -222,7 +222,7 @@ export default function Register() {
               type="submit"
               disabled={registerMutation.isPending}
               className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
-              style={{ background: 'oklch(0.35 0.2 270)' }}
+              style={{ background: 'var(--primary)' }}
             >
               {registerMutation.isPending ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> {isRTL ? 'جارٍ إنشاء الحساب...' : 'Creating account…'}</>
@@ -241,7 +241,7 @@ export default function Register() {
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             {t('haveAccount')}{' '}
-            <Link href={LOGIN_PATH} className="font-semibold hover:underline" style={{ color: 'oklch(0.45 0.2 270)' }}>
+            <Link href={LOGIN_PATH} className="font-semibold hover:underline" style={{ color: 'var(--primary)' }}>
               {t('signInLink')}
             </Link>
           </div>

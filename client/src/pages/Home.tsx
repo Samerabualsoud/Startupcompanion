@@ -183,8 +183,28 @@ function HomeInner() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [, navigate] = useLocation();
   const { t, isRTL } = useLanguage();
-  const { theme, toggleTheme } = useTheme();
-
+   const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
+  // Theme-aware color tokens for inline styles (using CSS variables)
+  const C = {
+    sidebarBg:    'var(--card)',
+    sidebarBorder:'1px solid var(--border)',
+    headerBg:     'var(--background)',
+    headerBorder: 'var(--border)',
+    contentBg:    'var(--background)',
+    navText:      'var(--muted-foreground)',
+    navHover:     'var(--secondary)',
+    groupHeader:  'var(--muted-foreground)',
+    activeBg:     'color-mix(in srgb, var(--primary) 12%, transparent)',
+    activeText:   'var(--primary)',
+    activeIcon:   'var(--primary)',
+    chatPanelBg:  'var(--background)',
+    chatHeaderBg: 'var(--card)',
+    chatHeaderText:'var(--foreground)',
+    placeholderBg:'var(--secondary)',
+    methodCardBg: 'var(--card)',
+    methodText:   'var(--muted-foreground)',
+  };
   // Persist active tool across refreshes using localStorage + URL hash
   const VALID_TOOL_IDS: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator', 'oqal-notes', 'zest-equity'];
   const getInitialTool = (): ToolId => {
@@ -262,17 +282,16 @@ function HomeInner() {
         return (
           <div className="flex flex-1 overflow-hidden h-full">
             {/* Chat Panel */}
-            <div className={`flex flex-col border-r border-border transition-all duration-500 ${chatComplete ? 'w-full lg:w-[400px]' : 'w-full'}`}
-              style={{ background: 'oklch(0.993 0.003 80)' }}>
-              <div className="shrink-0 px-5 py-3.5 border-b border-border flex items-center gap-2.5" style={{ background: 'oklch(0.13 0.04 265)' }}>
-                <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'oklch(0.45 0.2 270)' }}>
+            <div className={`flex flex-col border-r border-border transition-all duration-500 bg-background ${chatComplete ? 'w-full lg:w-[400px]' : 'w-full'}`}>
+              <div className="shrink-0 px-5 py-3.5 border-b border-border flex items-center gap-2.5 bg-card">
+                <div className="w-7 h-7 rounded-full flex items-center justify-center bg-primary">
                   <Sparkles className="w-3.5 h-3.5 text-white" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-white">{t('valuationAssistantTitle')}</div>
+                  <div className="text-sm font-semibold text-foreground">{t('valuationAssistantTitle')}</div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-[10px]" style={{ color: 'oklch(0.65 0.03 265)' }}>{t('valuationAssistantStatus')}</span>
+                    <span className="text-[10px] text-muted-foreground">{t('valuationAssistantStatus')}</span>
                   </div>
                 </div>
               </div>
@@ -288,9 +307,7 @@ function HomeInner() {
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 30 }}
-                  transition={{ duration: 0.35, ease: 'easeOut' }}
-                  className="hidden lg:flex flex-col flex-1 overflow-hidden"
-                  style={{ background: 'oklch(0.165 0 0)' }}
+                  className="hidden lg:flex flex-col flex-1 overflow-hidden bg-background"
                 >
                   <ValuationReport inputs={inputs} summary={summary} onReset={handleReset} />
                 </motion.div>
@@ -303,8 +320,8 @@ function HomeInner() {
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="lg:hidden fixed inset-0 z-50 flex flex-col"
-                  style={{ background: 'oklch(0.165 0 0)', top: 57 }}
+                  className="lg:hidden fixed inset-0 z-50 flex flex-col bg-background"
+                  style={{ top: 57 }}
                 >
                   <ValuationReport inputs={inputs} summary={summary} onReset={handleReset} />
                 </motion.div>
@@ -313,15 +330,15 @@ function HomeInner() {
 
             {/* Placeholder when not complete */}
             {!chatComplete && (
-              <div className="hidden lg:flex flex-1 flex-col items-center justify-center p-8" style={{ background: 'oklch(0.13 0.04 265)' }}>
+              <div className="hidden lg:flex flex-1 flex-col items-center justify-center p-8 bg-secondary/30">
                 <div className="max-w-sm text-center">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: 'oklch(0.52 0.22 265 / 0.2)', border: '1px solid oklch(0.52 0.22 265 / 0.4)' }}>
-                    <TrendingUp className="w-8 h-8" style={{ color: 'oklch(0.45 0.2 270)' }} />
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 bg-primary/10 border border-primary/20">
+                    <TrendingUp className="w-8 h-8 text-primary" />
                   </div>
-                  <h2 className="text-2xl font-bold text-white mb-3" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                  <h2 className="text-2xl font-bold text-foreground mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>
                     {t('valuationReportWillAppear')}
                   </h2>
-                  <p className="text-sm leading-relaxed mb-6" style={{ color: 'oklch(0.65 0.03 265)' }}>
+                  <p className="text-sm leading-relaxed mb-6 text-muted-foreground">
                     {t('valuationReportWillAppearDesc')}
                   </p>
                   <div className="space-y-2">
@@ -343,11 +360,11 @@ function HomeInner() {
                       { label: 'First Chicago Method', desc: 'Bear / base / bull scenarios', color: '#C4614A' },
                     ]).map((m, i) => (
                       <motion.div key={m.label} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }}
-                        className="flex items-center gap-3 text-left p-2.5 rounded-lg" style={{ background: 'oklch(0.20 0.05 265)' }}>
+                        className="flex items-center gap-3 text-left p-2.5 rounded-lg bg-card">
                         <div className="w-2 h-2 rounded-full shrink-0" style={{ background: m.color }} />
                         <div>
-                          <div className="text-xs font-semibold text-white">{m.label}</div>
-                          <div className="text-[10px]" style={{ color: 'oklch(0.50 0.04 265)' }}>{m.desc}</div>
+                          <div className="text-xs font-semibold text-foreground">{m.label}</div>
+                          <div className="text-[10px] text-muted-foreground">{m.desc}</div>
                         </div>
                       </motion.div>
                     ))}
@@ -407,7 +424,7 @@ function HomeInner() {
     <div className="min-h-screen flex flex-col bg-background">
 
       {/* ── Top Bar ── */}
-      <header className={`shrink-0 border-b border-border bg-card px-4 py-3 flex items-center justify-between z-40 relative ${isRTL ? 'flex-row-reverse' : ''}`} style={{ boxShadow: '0 1px 0 oklch(0.26 0 0)' }}>
+      <header className={`shrink-0 border-b border-border px-4 py-3 flex items-center justify-between z-40 relative ${isRTL ? 'flex-row-reverse' : ''}`} style={{ background: C.headerBg, boxShadow: `0 1px 0 ${C.headerBorder}` }}>
         <div className="flex items-center gap-3">
           {/* Mobile menu button */}
           <button
@@ -426,7 +443,7 @@ function HomeInner() {
             }}
             className="flex items-center gap-2.5 hover:opacity-80 transition-opacity cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.50 0.22 264)' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--primary)' }}>
               <TrendingUp className="w-4 h-4 text-white" />
             </div>
             <div>
@@ -455,8 +472,7 @@ function HomeInner() {
           {chatComplete && chatAnswers && (
             <button
               onClick={handleShare}
-              className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-90 active:scale-95"
-              style={{ background: linkCopied ? 'oklch(0.72 0.19 155)' : 'oklch(0.52 0.22 265)', color: 'white', border: 'none' }}
+              className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-90 active:scale-95 text-white border-none ${linkCopied ? 'bg-emerald-500' : 'bg-primary'}`}
               title="Copy shareable link"
             >
               {linkCopied ? <Check className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
@@ -525,7 +541,7 @@ function HomeInner() {
               });
             }}
             className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-xl transition-all hover:opacity-90 active:scale-95 text-white"
-            style={{ background: 'oklch(0.50 0.22 264)' }}
+            style={{ background: 'var(--primary)' }}
             title="Download Full Report (PDF)"
           >
             <FileDown className="w-3.5 h-3.5" />
@@ -560,9 +576,9 @@ function HomeInner() {
             ${!sidebarOpen ? (isRTL ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0') : 'translate-x-0'}
           `}
           style={{
-            background: 'oklch(0.18 0 0)',
-            borderRight: isRTL ? 'none' : '1px solid oklch(0.26 0 0)',
-            borderLeft: isRTL ? '1px solid oklch(0.26 0 0)' : 'none',
+            background: C.sidebarBg,
+            borderRight: isRTL ? 'none' : C.sidebarBorder,
+            borderLeft: isRTL ? C.sidebarBorder : 'none',
             top: 57,
             height: 'calc(100vh - 57px)',
             // RTL: anchor to right side; LTR: anchor to left side
@@ -593,16 +609,16 @@ function HomeInner() {
               };
               // Per-group color config
               const groupColors: Record<string, { header: string; activeBg: string; activeText: string; activeIcon: string }> = {
-                'Overview':           { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
-                'My Company':         { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
-                'Valuation':          { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
-                'Equity & Ownership': { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
-                'Capital Raising':    { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
-                'Legal & Compliance': { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
-                'Market Intelligence':{ header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
-                'Investor Network':   { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
-                'AI Advisory':        { header: 'oklch(0.55 0 0)',    activeBg: 'oklch(0.50 0.22 264 / 0.15)', activeText: 'oklch(0.80 0.15 264)', activeIcon: 'oklch(0.65 0.18 264)' },
-                'Admin':              { header: 'oklch(0.45 0 0)',    activeBg: 'oklch(0.26 0 0)',             activeText: 'oklch(0.80 0 0)',       activeIcon: 'oklch(0.65 0 0)' },
+                'Overview':           { header: C.groupHeader, activeBg: C.activeBg, activeText: C.activeText, activeIcon: C.activeIcon },
+                'My Company':         { header: C.groupHeader, activeBg: C.activeBg, activeText: C.activeText, activeIcon: C.activeIcon },
+                'Valuation':          { header: C.groupHeader, activeBg: C.activeBg, activeText: C.activeText, activeIcon: C.activeIcon },
+                'Equity & Ownership': { header: C.groupHeader, activeBg: C.activeBg, activeText: C.activeText, activeIcon: C.activeIcon },
+                'Capital Raising':    { header: C.groupHeader, activeBg: C.activeBg, activeText: C.activeText, activeIcon: C.activeIcon },
+                'Legal & Compliance': { header: C.groupHeader, activeBg: C.activeBg, activeText: C.activeText, activeIcon: C.activeIcon },
+                'Market Intelligence':{ header: C.groupHeader, activeBg: C.activeBg, activeText: C.activeText, activeIcon: C.activeIcon },
+                'Investor Network':   { header: C.groupHeader, activeBg: C.activeBg, activeText: C.activeText, activeIcon: C.activeIcon },
+                'AI Advisory':        { header: C.groupHeader, activeBg: C.activeBg, activeText: C.activeText, activeIcon: C.activeIcon },
+                'Admin':              { header: 'var(--muted-foreground)', activeBg: 'var(--secondary)', activeText: 'var(--foreground)', activeIcon: 'var(--foreground)' },
               };
               const gc = groupColors[group] ?? groupColors['Overview'];
               return (
@@ -627,9 +643,9 @@ function HomeInner() {
                           color: gc.activeText,
                           fontWeight: 600,
                         } : {
-                          color: 'oklch(0.65 0 0)',
+                          color: C.navText,
                         }}
-                        onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'oklch(0.24 0 0)'; }}
+                        onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = C.navHover; }}
                         onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = ''; }}
                       >
                         <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: isActive ? gc.activeIcon : undefined }} />

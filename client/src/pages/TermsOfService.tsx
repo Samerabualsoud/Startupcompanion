@@ -260,23 +260,23 @@ Address: Kingdom of Saudi Arabia, Riyadh`,
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="min-h-screen flex flex-col bg-background text-foreground"
       dir={isRTL ? 'rtl' : 'ltr'}
-      style={{ background: 'oklch(0.99 0.005 60)', color: 'oklch(0.18 0.03 30)', fontFamily: "'DM Sans', sans-serif" }}
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
       {/* Header */}
-      <header className="border-b sticky top-0 z-40 backdrop-blur-sm" style={{ borderColor: 'oklch(0.91 0.015 60)', background: 'rgba(255,252,248,0.95)' }}>
+      <header className="border-b border-border sticky top-0 z-40 backdrop-blur-sm bg-background/95">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/">
             <div className="flex items-center gap-2.5 cursor-pointer">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, oklch(0.62 0.22 30), oklch(0.60 0.24 290))' }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary">
                 <TrendingUp className="w-4 h-4 text-white" />
               </div>
               <span className="font-extrabold text-sm" style={{ fontFamily: "'Nunito', sans-serif" }}>Polaris Arabia</span>
             </div>
           </Link>
           <Link href="/">
-            <button className="flex items-center gap-1.5 text-sm font-medium transition-colors hover:opacity-70" style={{ color: 'oklch(0.50 0.05 240)' }}>
+            <button className="flex items-center gap-1.5 text-sm font-medium transition-colors hover:opacity-70 text-muted-foreground">
               <BackArrow className="w-4 h-4" />
               {isRTL ? 'العودة' : 'Back'}
             </button>
@@ -285,22 +285,22 @@ Address: Kingdom of Saudi Arabia, Riyadh`,
       </header>
 
       {/* Hero */}
-      <div className="border-b" style={{ borderColor: 'oklch(0.91 0.015 60)', background: 'oklch(0.97 0.01 240)' }}>
+      <div className="border-b border-border bg-secondary/20">
         <div className="max-w-4xl mx-auto px-6 py-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.62 0.22 30)', color: 'white' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-primary text-primary-foreground">
               <FileText className="w-5 h-5" />
             </div>
             <div>
               <h1 className="text-2xl font-extrabold" style={{ fontFamily: "'Nunito', sans-serif" }}>
                 {isRTL ? 'شروط الخدمة' : 'Terms of Service'}
               </h1>
-              <p className="text-sm" style={{ color: 'oklch(0.55 0.03 240)' }}>
+              <p className="text-sm text-muted-foreground">
                 {isRTL ? `آخر تحديث: ${LAST_UPDATED_AR}` : `Last updated: ${LAST_UPDATED}`}
               </p>
             </div>
           </div>
-          <p className="text-sm leading-relaxed max-w-2xl" style={{ color: 'oklch(0.45 0.03 60)' }}>
+          <p className="text-sm leading-relaxed max-w-2xl text-muted-foreground">
             {isRTL
               ? 'يُرجى قراءة هذه الشروط بعناية قبل استخدام منصة بولاريس أرابيا. تحكم هذه الشروط استخدامك للمنصة وتُشكّل اتفاقية ملزمة بينك وبين بولاريس أرابيا.'
               : 'Please read these Terms carefully before using the Polaris Arabia platform. These Terms govern your use of the Platform and constitute a binding agreement between you and Polaris Arabia.'}
@@ -309,9 +309,9 @@ Address: Kingdom of Saudi Arabia, Riyadh`,
       </div>
 
       {/* Table of Contents */}
-      <div className="border-b" style={{ borderColor: 'oklch(0.91 0.015 60)' }}>
+      <div className="border-b border-border">
         <div className="max-w-4xl mx-auto px-6 py-6">
-          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'oklch(0.62 0.22 30)' }}>
+          <p className="text-xs font-bold uppercase tracking-widest mb-3 text-primary">
             {isRTL ? 'المحتويات' : 'Contents'}
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -319,8 +319,7 @@ Address: Kingdom of Saudi Arabia, Riyadh`,
               <a
                 key={s.id}
                 href={`#${s.id}`}
-                className="text-xs px-3 py-2 rounded-lg transition-colors hover:opacity-80"
-                style={{ background: 'oklch(0.95 0.02 240)', color: 'oklch(0.40 0.05 240)' }}
+                className="text-xs px-3 py-2 rounded-lg transition-colors hover:opacity-80 bg-secondary text-secondary-foreground"
               >
                 {s.title}
               </a>
@@ -335,7 +334,7 @@ Address: Kingdom of Saudi Arabia, Riyadh`,
           {sections.map(({ id, icon: Icon, title, content }) => (
             <section key={id} id={id} className="scroll-mt-20">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'oklch(0.95 0.03 30)', color: 'oklch(0.62 0.22 30)' }}>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-primary/10 text-primary">
                   <Icon className="w-4 h-4" />
                 </div>
                 <h2 className="text-lg font-bold" style={{ fontFamily: "'Nunito', sans-serif" }}>{title}</h2>
@@ -343,26 +342,26 @@ Address: Kingdom of Saudi Arabia, Riyadh`,
               <div className="prose prose-sm max-w-none">
                 {content.split('\n').map((para, i) => (
                   para.trim() ? (
-                    <p key={i} className="text-sm leading-relaxed mb-3" style={{ color: 'oklch(0.35 0.03 60)' }}>
+                    <p key={i} className="text-sm leading-relaxed mb-3 text-foreground">
                       {para}
                     </p>
                   ) : <div key={i} className="h-1" />
                 ))}
               </div>
-              <div className="mt-6 border-b" style={{ borderColor: 'oklch(0.93 0.01 60)' }} />
+              <div className="mt-6 border-b border-border" />
             </section>
           ))}
         </div>
 
         {/* Legal notice box */}
-        <div className="mt-10 p-5 rounded-xl border" style={{ background: 'oklch(0.97 0.03 55)', borderColor: 'oklch(0.88 0.06 55)' }}>
+        <div className="mt-10 p-5 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'oklch(0.62 0.20 55)' }} />
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-amber-600" />
             <div>
-              <p className="text-sm font-semibold mb-1" style={{ color: 'oklch(0.40 0.10 55)' }}>
+              <p className="text-sm font-semibold mb-1 text-amber-800 dark:text-amber-200">
                 {isRTL ? 'إشعار مهم' : 'Important Notice'}
               </p>
-              <p className="text-xs leading-relaxed" style={{ color: 'oklch(0.50 0.08 55)' }}>
+              <p className="text-xs leading-relaxed text-amber-700 dark:text-amber-300">
                 {isRTL
                   ? 'هذه الشروط مكتوبة باللغتين العربية والإنجليزية. في حال وجود أي تعارض بين النسختين، تسود النسخة العربية وفقاً للأنظمة السعودية المعمول بها.'
                   : 'These Terms are provided in both Arabic and English. In the event of any conflict between the two versions, the Arabic version shall prevail in accordance with applicable Saudi regulations.'}

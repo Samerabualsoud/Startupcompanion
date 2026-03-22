@@ -1002,7 +1002,7 @@ export default function FreeZones() {
 
         {/* Hero header */}
         <div className="rounded-2xl overflow-hidden border border-border">
-          <div className="px-5 py-5 flex items-start gap-4" style={{ background: 'linear-gradient(135deg, oklch(0.35 0.2 270) 0%, oklch(0.45 0.22 300) 100%)' }}>
+          <div className="px-5 py-5 flex items-start gap-4" style={{ background: 'var(--primary)' }}>
             <span className="text-5xl">{j.flag}</span>
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -1204,7 +1204,7 @@ export default function FreeZones() {
   return (
     <div className={`max-w-5xl mx-auto space-y-5 ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, oklch(0.35 0.2 270) 0%, oklch(0.45 0.22 300) 100%)' }}>
+      <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--primary)' }}>
         <div className="px-5 py-5">
           <div className="flex items-center gap-2 mb-1">
             <Landmark className="w-5 h-5 text-white/80" />
@@ -1308,7 +1308,7 @@ export default function FreeZones() {
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                 activeFilter === f ? 'text-white shadow-sm' : 'bg-muted text-muted-foreground hover:bg-muted/80'
               }`}
-              style={activeFilter === f ? { background: 'oklch(0.45 0.2 270)' } : {}}
+              style={activeFilter === f ? { background: 'var(--primary)' } : {}}
             >
               {f}
             </button>
@@ -1396,7 +1396,7 @@ export default function FreeZones() {
               onClick={() => setSelectedJurisdiction(j)}
             >
               {isRecommended && (
-                <div className="absolute -top-2.5 left-3 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style={{ background: 'oklch(0.45 0.2 270)' }}>
+                <div className="absolute -top-2.5 left-3 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style={{ background: 'var(--primary)' }}>
                   <Sparkles className="w-2.5 h-2.5" />
                   {lang === 'ar' ? 'الأفضل لك' : 'Best Match'}
                 </div>

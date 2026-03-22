@@ -262,7 +262,7 @@ export default function PitchDeckScorecard() {
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <RadarChart data={radarData}>
-              <PolarGrid stroke="oklch(0.88 0.01 80)" />
+              <PolarGrid stroke="var(--border)" />
               <PolarAngleAxis dataKey="subject" tick={{ fontSize: 8, fontFamily: 'DM Sans' }} />
               <Radar name="Score" dataKey="score" stroke="#C4614A" fill="#C4614A" fillOpacity={0.25} strokeWidth={2} />
               <Tooltip formatter={(v: any) => [`${v / 10}/10`, 'Score']} contentStyle={{ fontSize: 11, fontFamily: 'DM Sans', borderRadius: 6 }} />
@@ -323,7 +323,7 @@ export default function PitchDeckScorecard() {
                       type="range" min={0} max={10} step={1} value={slide.score}
                       onChange={e => updateScore(slide.id, parseInt(e.target.value))}
                       className="w-full h-2 rounded-full appearance-none cursor-pointer"
-                      style={{ background: `linear-gradient(to right, ${scoreColor} ${slide.score * 10}%, oklch(0.88 0.01 80) ${slide.score * 10}%)` }}
+                      style={{ background: `linear-gradient(to right, ${scoreColor} ${slide.score * 10}%, #F3F4F6 ${slide.score * 10}%)` }}
                     />
                     <div className="flex justify-between text-[9px] text-muted-foreground mt-1">
                       <span>0 — Weak</span><span>5 — Average</span><span>10 — Exceptional</span>

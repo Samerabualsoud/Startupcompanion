@@ -28,11 +28,11 @@ function getInitials(name: string): string {
 
 function getAvatarColor(name: string): string {
   const colors = [
-    'oklch(0.45 0.18 270)',
-    'oklch(0.40 0.15 200)',
-    'oklch(0.42 0.16 160)',
-    'oklch(0.38 0.14 30)',
-    'oklch(0.43 0.17 310)',
+    '#5B4EFF',
+    '#0284C7',
+    '#059669',
+    '#D97706',
+    '#7C3AED',
   ];
   return colors[name.charCodeAt(0) % colors.length];
 }
@@ -80,7 +80,7 @@ export default function StartupDirectory() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--primary)' }}>
             <Building2 className="w-4 h-4 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>

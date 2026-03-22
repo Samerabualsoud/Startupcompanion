@@ -39,10 +39,10 @@ function formatMoney(n?: number | null) {
 
 function ScoreBadge({ score }: { score: number }) {
   const color = score >= 80
-    ? { bg: 'oklch(0.94 0.08 145)', text: 'oklch(0.35 0.15 145)', label: 'Excellent' }
+    ? { bg: '#D1FAE5', text: '#065F46', label: 'Excellent' }
     : score >= 60
-    ? { bg: 'oklch(0.94 0.06 220)', text: 'oklch(0.35 0.12 220)', label: 'Strong' }
-    : { bg: 'oklch(0.94 0.04 80)', text: 'oklch(0.45 0.08 80)', label: 'Partial' };
+    ? { bg: '#DBEAFE', text: '#1E40AF', label: 'Strong' }
+    : { bg: '#FEF3C7', text: '#92400E', label: 'Partial' };
 
   return (
     <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: color.bg, color: color.text }}>
@@ -80,14 +80,14 @@ function MatchCard({ match, isRTL }: { match: MatchResult; isRTL: boolean }) {
     <div className="rounded-2xl border border-border bg-card p-5 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: match.type === 'vc' ? 'oklch(0.35 0.2 270)' : 'oklch(0.45 0.2 270)' }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: match.type === 'vc' ? '#0F52DE' : '#7C3AED' }}>
             {match.type === 'vc' ? <Building2 className="w-5 h-5 text-white" /> : <User className="w-5 h-5 text-white" />}
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-sm text-foreground">{match.name}</span>
               {match.isCommunity && (
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: 'oklch(0.92 0.06 280)', color: 'oklch(0.4 0.15 280)' }}>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: 'var(--background)', color: 'var(--primary)' }}>
                   Community
                 </span>
               )}
@@ -109,7 +109,7 @@ function MatchCard({ match, isRTL }: { match: MatchResult; isRTL: boolean }) {
           <span key={s} className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">{s}</span>
         ))}
         {stages.slice(0, 2).map(s => (
-          <span key={s} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: 'oklch(0.92 0.03 240)', color: 'oklch(0.4 0.06 240)' }}>{s}</span>
+          <span key={s} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: 'var(--background)', color: 'var(--muted-foreground)' }}>{s}</span>
         ))}
       </div>
 
@@ -136,7 +136,7 @@ function MatchCard({ match, isRTL }: { match: MatchResult; isRTL: boolean }) {
           {(match.applyUrl || match.website) && (
             <a href={match.applyUrl ?? match.website ?? '#'} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: 'oklch(0.35 0.2 270)' }}>
+              style={{ background: 'var(--primary)' }}>
               {isRTL ? 'تواصل' : 'Connect'}
               <ExternalLink className="w-3 h-3" />
             </a>
@@ -188,7 +188,7 @@ export default function InvestorMatcher() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--primary)' }}>
           <Target className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -292,8 +292,8 @@ export default function InvestorMatcher() {
                 onClick={() => toggleType(type)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
                 style={investorTypes.includes(type)
-                  ? { background: 'oklch(0.35 0.2 270)', color: 'white' }
-                  : { background: 'oklch(0.94 0.01 240)', color: 'oklch(0.4 0.04 240)' }
+                  ? { background: 'var(--primary)', color: 'white' }
+                  : { background: 'var(--background)', color: 'var(--muted-foreground)' }
                 }
               >
                 {type === 'vc' ? <Building2 className="w-3.5 h-3.5" /> : <Users className="w-3.5 h-3.5" />}
@@ -307,7 +307,7 @@ export default function InvestorMatcher() {
           onClick={handleSearch}
           disabled={isLoading || investorTypes.length === 0}
           className="w-full py-3 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
-          style={{ background: 'oklch(0.45 0.2 270)' }}
+          style={{ background: 'var(--primary)' }}
         >
           {isLoading ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> {isRTL ? 'جارٍ البحث...' : 'Finding matches…'}</>
@@ -319,7 +319,7 @@ export default function InvestorMatcher() {
 
       {/* Results */}
       {error && (
-        <div className="flex items-center gap-2.5 p-4 rounded-xl text-sm" style={{ background: 'oklch(0.97 0.02 30)', border: '1px solid oklch(0.85 0.06 30)', color: 'oklch(0.45 0.12 30)' }}>
+        <div className="flex items-center gap-2.5 p-4 rounded-xl text-sm border border-border bg-background text-destructive">
           <AlertCircle className="w-4 h-4 shrink-0" />
           {isRTL ? 'حدث خطأ أثناء البحث. يرجى المحاولة مرة أخرى.' : 'An error occurred. Please try again.'}
         </div>

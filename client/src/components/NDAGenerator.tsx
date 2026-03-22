@@ -137,7 +137,7 @@ export default function NDAGenerator() {
       <div className="flex items-start gap-4 flex-wrap">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--primary)' }}>
               <Shield className="w-4 h-4 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
@@ -382,7 +382,7 @@ export default function NDAGenerator() {
                     className="w-full"
                     onClick={handleGenerate}
                     disabled={isGenerating || !inputs.disclosingParty || !inputs.receivingParty || !inputs.purpose}
-                    style={{ background: 'oklch(0.35 0.2 270)' }}
+                    style={{ background: 'var(--primary)' }}
                   >
                     {isGenerating ? (
                       <><Sparkles className="w-4 h-4 mr-2 animate-spin" /> Generating…</>

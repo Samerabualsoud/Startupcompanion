@@ -107,7 +107,7 @@ export default function AIInvestorEmail() {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.55 0.18 280)' }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--primary)' }}>
             <Mail className="w-4.5 h-4.5 text-white" />
           </div>
           <div>
@@ -204,7 +204,7 @@ export default function AIInvestorEmail() {
             </div>
           </div>
 
-          <Button type="submit" disabled={mutation.isPending} className="w-full h-11 text-sm font-semibold" style={{ background: 'oklch(0.55 0.18 280)', color: 'white' }}>
+          <Button type="submit" disabled={mutation.isPending} className="w-full h-11 text-sm font-semibold" style={{ background: 'var(--primary)', color: 'white' }}>
             {mutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Writing email…</> : <><Mail className="w-4 h-4 mr-2" /> Generate Investor Email</>}
           </Button>
         </form>

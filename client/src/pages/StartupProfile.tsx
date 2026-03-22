@@ -323,12 +323,12 @@ export default function StartupProfile() {
   if (!isAuthenticated) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'oklch(0.45 0.2 270)' }}>
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'var(--primary)' }}>
           <Building2 className="w-7 h-7 text-white" />
         </div>
         <h2 className="text-xl font-bold text-foreground mb-2">Sign in to Build Your Profile</h2>
         <p className="text-sm text-muted-foreground mb-5 max-w-xs">Create a startup profile to save your data, track milestones, and auto-fill your valuation reports.</p>
-        <Button onClick={() => window.location.href = getLoginUrl()} style={{ background: 'oklch(0.45 0.2 270)', color: 'white' }}>
+        <Button onClick={() => window.location.href = getLoginUrl()} style={{ background: 'var(--primary)', color: 'white' }}>
           Sign In
         </Button>
       </div>
@@ -344,7 +344,7 @@ export default function StartupProfile() {
             <img src={form.logoUrl} alt="logo" className="w-12 h-12 rounded-xl object-cover border border-border" />
           ) : (
             <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg"
-              style={{ background: 'oklch(0.45 0.2 270)' }}>
+              style={{ background: 'var(--primary)' }}>
               {form.name ? form.name[0].toUpperCase() : '?'}
             </div>
           )}
@@ -355,7 +355,7 @@ export default function StartupProfile() {
             <p className="text-xs text-muted-foreground">{form.tagline || 'Add a tagline below'}</p>
             {form.stage && (
               <span className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                style={{ background: 'oklch(0.45 0.2 270 / 0.15)', color: 'oklch(0.55 0.2 270)' }}>
+                style={{ background: 'var(--primary)', color: 'var(--primary)' }}>
                 {STAGE_OPTIONS.find(s => s.value === form.stage)?.label || form.stage}
               </span>
             )}
@@ -374,7 +374,7 @@ export default function StartupProfile() {
             disabled={saving}
             size="sm"
             className="flex items-center gap-1.5 text-white"
-            style={{ background: 'oklch(0.45 0.2 270)' }}
+            style={{ background: 'var(--primary)' }}
           >
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
             Save Profile
@@ -383,7 +383,7 @@ export default function StartupProfile() {
       </div>
 
       {/* ── 1. Identity & Overview ── */}
-      <Section title="Identity & Overview" icon={Building2} color="oklch(0.45 0.2 270)">
+      <Section title="Identity & Overview" icon={Building2} color="#5B4EFF">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Startup Name *">
             <Input value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Acme AI" />
@@ -438,7 +438,7 @@ export default function StartupProfile() {
       </Section>
 
       {/* ── 2. Problem & Solution ── */}
-      <Section title="Problem & Solution" icon={Lightbulb} color="oklch(0.6 0.18 45)" defaultOpen={false}>
+      <Section title="Problem & Solution" icon={Lightbulb} color="#D97706" defaultOpen={false}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Problem Statement" span2>
             <Textarea value={form.problem} onChange={e => set('problem', e.target.value)}
@@ -464,7 +464,7 @@ export default function StartupProfile() {
       </Section>
 
       {/* ── 3. Business Model & Product ── */}
-      <Section title="Business Model & Product" icon={ShoppingCart} color="oklch(0.55 0.18 200)" defaultOpen={false}>
+      <Section title="Business Model & Product" icon={ShoppingCart} color="#0284C7" defaultOpen={false}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Business Model">
             <Select value={form.businessModel} onValueChange={v => set('businessModel', v)}>
@@ -498,7 +498,7 @@ export default function StartupProfile() {
       </Section>
 
       {/* ── 4. Financial Metrics ── */}
-      <Section title="Financial Metrics" icon={DollarSign} color="oklch(0.55 0.18 145)">
+      <Section title="Financial Metrics" icon={DollarSign} color="#059669">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <Field label="MRR ($)" hint="Monthly Recurring Revenue">
             <Input type="number" value={form.mrr || ''} onChange={e => setNum('mrr', e.target.value)} placeholder="0" />
@@ -538,15 +538,15 @@ export default function StartupProfile() {
         {/* Quick metrics display */}
         {(runway !== null || form.currentARR > 0 || form.totalRaised > 0) && (
           <div className="mt-4 grid grid-cols-3 gap-3">
-            {runway !== null && <MetricCard label="Runway" value={`${runway} mo`} color="oklch(0.55 0.18 145)" />}
-            {form.currentARR > 0 && <MetricCard label="ARR" value={fmt(form.currentARR)} color="oklch(0.55 0.18 145)" />}
+            {runway !== null && <MetricCard label="Runway" value={`${runway} mo`} color="#059669" />}
+            {form.currentARR > 0 && <MetricCard label="ARR" value={fmt(form.currentARR)} color="#059669" />}
             {form.totalRaised > 0 && <MetricCard label="Total Raised" value={fmt(form.totalRaised)} />}
           </div>
         )}
       </Section>
 
       {/* ── 5. Traction Metrics ── */}
-      <Section title="Traction Metrics" icon={Activity} color="oklch(0.5 0.2 300)" defaultOpen={false}>
+      <Section title="Traction Metrics" icon={Activity} color="#7C3AED" defaultOpen={false}>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <Field label="Customers / Accounts" hint="Paying customers or accounts">
             <Input type="number" value={form.numberOfCustomers || ''} onChange={e => setInt('numberOfCustomers', e.target.value)} placeholder="0" />
@@ -570,9 +570,9 @@ export default function StartupProfile() {
         {/* Traction summary */}
         {(ltvCacRatio || form.numberOfCustomers > 0 || form.churnRate > 0) && (
           <div className="mt-4 grid grid-cols-3 gap-3">
-            {ltvCacRatio && <MetricCard label="LTV:CAC" value={`${ltvCacRatio}x`} color={parseFloat(ltvCacRatio) >= 3 ? 'oklch(0.55 0.18 145)' : 'oklch(0.55 0.18 30)'} />}
+            {ltvCacRatio && <MetricCard label="LTV:CAC" value={`${ltvCacRatio}x`} color={parseFloat(ltvCacRatio) >= 3 ? '#059669' : '#D97706'} />}
             {form.numberOfCustomers > 0 && <MetricCard label="Customers" value={form.numberOfCustomers.toLocaleString()} />}
-            {form.churnRate > 0 && <MetricCard label="Churn" value={`${form.churnRate}%/mo`} color={form.churnRate < 3 ? 'oklch(0.55 0.18 145)' : 'oklch(0.55 0.18 30)'} />}
+            {form.churnRate > 0 && <MetricCard label="Churn" value={`${form.churnRate}%/mo`} color={form.churnRate < 3 ? '#059669' : '#D97706'} />}
           </div>
         )}
         {ltvCacRatio && (
@@ -585,7 +585,7 @@ export default function StartupProfile() {
       </Section>
 
       {/* ── 6. Cap Table ── */}
-      <Section title="Cap Table" icon={BarChart3} color="oklch(0.5 0.2 270)" defaultOpen={false}>
+      <Section title="Cap Table" icon={BarChart3} color="#5B4EFF" defaultOpen={false}>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <Field label="Total Shares Outstanding" hint="Current total issued shares">
             <Input type="number" value={form.totalSharesOutstanding || ''} onChange={e => setNum('totalSharesOutstanding', e.target.value)} placeholder="e.g. 10,000,000" />
@@ -613,7 +613,7 @@ export default function StartupProfile() {
       </Section>
 
       {/* ── 7. Team & Headcount ── */}
-      <Section title="Team & Headcount" icon={UserCheck} color="oklch(0.5 0.18 180)" defaultOpen={false}>
+      <Section title="Team & Headcount" icon={UserCheck} color="#0D9488" defaultOpen={false}>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
           <Field label="Total Employees">
             <Input type="number" value={form.employeeCount || ''} onChange={e => setInt('employeeCount', e.target.value)} placeholder="0" />
@@ -636,7 +636,7 @@ export default function StartupProfile() {
               team.map((m: any) => (
                 <div key={m.id} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-secondary/20">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
-                    style={{ background: m.isFounder ? 'oklch(0.5 0.2 270)' : 'oklch(0.5 0.18 180)' }}>
+                    style={{ background: m.isFounder ? '#5B4EFF' : '#0D9488' }}>
                     {m.name[0].toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -712,7 +712,7 @@ export default function StartupProfile() {
       </Section>
 
       {/* ── 8. Legal & Incorporation ── */}
-      <Section title="Legal & Incorporation" icon={Scale} color="oklch(0.45 0.15 240)" defaultOpen={false}>
+      <Section title="Legal & Incorporation" icon={Scale} color="#2D4A6B" defaultOpen={false}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Incorporation Country">
             <Select value={form.incorporationCountry} onValueChange={v => set('incorporationCountry', v)}>
@@ -746,7 +746,7 @@ export default function StartupProfile() {
       </Section>
 
       {/* ── 9. Social & Links ── */}
-      <Section title="Social & Links" icon={Globe} color="oklch(0.5 0.2 220)" defaultOpen={false}>
+      <Section title="Social & Links" icon={Globe} color="#0284C7" defaultOpen={false}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="LinkedIn">
             <Input value={form.linkedinUrl} onChange={e => set('linkedinUrl', e.target.value)} placeholder="https://linkedin.com/company/..." />
@@ -773,7 +773,7 @@ export default function StartupProfile() {
       </Section>
 
       {/* ── 10. Milestones ── */}
-      <Section title={`Milestones (${milestoneList.length})`} icon={Flag} color="oklch(0.6 0.18 80)" defaultOpen={false}>
+      <Section title={`Milestones (${milestoneList.length})`} icon={Flag} color="#F59E0B" defaultOpen={false}>
         <div className="space-y-2 mb-4">
           {milestoneList.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-3">Track key milestones — product launches, revenue targets, funding goals.</p>
@@ -839,11 +839,11 @@ export default function StartupProfile() {
       </Section>
 
       {/* ── 11. Saved Valuations ── */}
-      <Section title={`Saved Valuations (${savedVals.length})`} icon={TrendingUp} color="oklch(0.55 0.18 145)" defaultOpen={savedVals.length > 0}>
+      <Section title={`Saved Valuations (${savedVals.length})`} icon={TrendingUp} color="#059669" defaultOpen={savedVals.length > 0}>
         {savedVals.length === 0 ? (
           <div className="text-center py-6">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: 'oklch(0.95 0.01 145)' }}>
-              <TrendingUp className="w-5 h-5" style={{ color: 'oklch(0.55 0.18 145)' }} />
+            <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: 'var(--background)' }}>
+              <TrendingUp className="w-5 h-5" style={{ color: 'var(--primary)' }} />
             </div>
             <p className="text-sm font-medium text-foreground mb-1">No saved valuations yet</p>
             <p className="text-xs text-muted-foreground">Complete a valuation in the Valuation Calculator and click "Save Scenario" to save it here.</p>
@@ -863,14 +863,14 @@ export default function StartupProfile() {
                     </div>
                     {v.summary?.stage && (
                       <span className="inline-block mt-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full"
-                        style={{ background: 'oklch(0.92 0.02 270)', color: 'oklch(0.35 0.1 270)' }}>
+                        style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
                         {v.summary.stage}
                       </span>
                     )}
                   </div>
                   <div className="text-right shrink-0">
                     {v.blendedValue && (
-                      <div className="text-lg font-bold font-mono" style={{ color: 'oklch(0.55 0.18 145)' }}>
+                      <div className="text-lg font-bold font-mono" style={{ color: 'var(--primary)' }}>
                         {fmt(v.blendedValue)}
                       </div>
                     )}
@@ -904,7 +904,7 @@ export default function StartupProfile() {
       {/* Save button at bottom */}
       <div className="flex justify-end mt-2 mb-8">
         <Button onClick={handleSave} disabled={saving} className="flex items-center gap-2 text-white px-6"
-          style={{ background: 'oklch(0.45 0.2 270)' }}>
+          style={{ background: 'var(--primary)' }}>
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save All Changes
         </Button>

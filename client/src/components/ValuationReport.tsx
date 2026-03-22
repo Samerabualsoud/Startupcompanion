@@ -253,24 +253,24 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* ── Valuation Hero ── */}
-      <div className="shrink-0 p-5" style={{ background: 'oklch(0.35 0.2 270)' }}>
+      <div className="shrink-0 p-5 bg-primary">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-[10px] font-mono uppercase tracking-widest mb-1" style={{ color: 'oklch(0.45 0.2 270)' }}>
+            <div className="text-[10px] font-mono uppercase tracking-widest mb-1 text-primary-foreground/60">
               {inputs.companyName}
             </div>
-            <div className="text-3xl font-bold metric-value" style={{ color: 'oklch(0.978 0.008 80)', fontFamily: 'JetBrains Mono, monospace' }}>
+            <div className="text-3xl font-bold metric-value text-primary-foreground" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
               {formatCurrency(summary.blended, true)}
             </div>
-            <div className="text-xs mt-1" style={{ color: 'oklch(0.65 0.1 270)' }}>
+            <div className="text-xs mt-1 text-primary-foreground/70">
               {isRTL ? 'النطاق' : 'Range'}: {formatCurrency(summary.weightedLow, true)} — {formatCurrency(summary.weightedHigh, true)}
             </div>
             <div className="flex items-center gap-3 mt-2">
-              <div className="text-[10px] font-mono" style={{ color: 'oklch(0.65 0.1 270)' }}>
-                {isRTL ? 'الثقة' : 'Confidence'}: <span className="font-semibold" style={{ color: 'oklch(0.978 0.008 80)' }}>{summary.confidenceScore}%</span>
+              <div className="text-[10px] font-mono text-primary-foreground/70">
+                {isRTL ? 'الثقة' : 'Confidence'}: <span className="font-semibold text-primary-foreground">{summary.confidenceScore}%</span>
               </div>
-              <div className="text-[10px] font-mono" style={{ color: 'oklch(0.65 0.1 270)' }}>
-                {isRTL ? 'المرحلة' : 'Stage'}: <span className="font-semibold" style={{ color: 'oklch(0.978 0.008 80)' }}>{summary.stage}</span>
+              <div className="text-[10px] font-mono text-primary-foreground/70">
+                {isRTL ? 'المرحلة' : 'Stage'}: <span className="font-semibold text-primary-foreground">{summary.stage}</span>
               </div>
             </div>
           </div>
@@ -311,9 +311,9 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
             { label: isRTL ? 'مضاعف ARR' : 'ARR Multiple', value: `${summary.impliedARRMultiple}x` },
             { label: isRTL ? 'المخاطرة' : 'Risk', value: summary.riskLevel, color: riskColor },
           ].map(m => (
-            <div key={m.label} className="rounded-md p-2 text-center" style={{ background: 'oklch(0.38 0.18 270)' }}>
-              <div className="text-[9px] font-mono uppercase tracking-wider mb-0.5" style={{ color: 'oklch(0.55 0.12 270)' }}>{m.label}</div>
-              <div className="text-sm font-bold metric-value" style={{ color: m.color || (m.warn ? '#EF4444' : 'oklch(0.978 0.008 80)') }}>{m.value}</div>
+            <div key={m.label} className="rounded-md p-2 text-center bg-primary-foreground/10">
+              <div className="text-[9px] font-mono uppercase tracking-wider mb-0.5 text-primary-foreground/60">{m.label}</div>
+              <div className="text-sm font-bold metric-value" style={{ color: m.color || (m.warn ? '#EF4444' : 'white') }}>{m.value}</div>
             </div>
           ))}
         </div>
@@ -345,7 +345,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
               </div>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 55 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.88 0.01 80)" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                   <XAxis dataKey="name" tick={{ fontSize: 9, fontFamily: 'DM Sans' }} angle={-35} textAnchor="end" interval={0} />
                   <YAxis tick={{ fontSize: 9, fontFamily: 'JetBrains Mono' }} tickFormatter={v => `$${v}M`} />
                   <RechartTooltip formatter={(v: any) => [`$${v}M`, 'Value']} contentStyle={{ fontSize: 11, fontFamily: 'DM Sans', borderRadius: 4 }} />
@@ -370,11 +370,11 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
 
             {/* ── Valuation Rationale ── */}
             <div className="border border-border rounded-xl overflow-hidden bg-card">
-              <div className="px-4 py-3 border-b border-border" style={{ background: 'oklch(0.35 0.2 270)' }}>
-                <h3 className="text-sm font-semibold text-white" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+              <div className="px-4 py-3 border-b border-border bg-primary">
+                <h3 className="text-sm font-semibold text-primary-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                   {isRTL ? 'لماذا استخدمنا هذه الطرق' : 'Why These Methods Were Used'}
                 </h3>
-                <p className="text-[10px] mt-0.5" style={{ color: 'oklch(0.65 0.1 270)' }}>
+                <p className="text-[10px] mt-0.5 text-primary-foreground/70">
                   {isRTL ? 'يتم اختيار كل طريقة وترجيحها بناءً على مرحلتك وقطاعك والبيانات المتاحة.' : 'Each method is selected and weighted based on your stage, sector, and available data.'}
                 </p>
               </div>
@@ -407,7 +407,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
                             </div>
                           </div>
                           {rationale.interpretation && (
-                            <div className="mt-2 text-[10px] rounded-md px-3 py-2 border-l-2 text-muted-foreground italic" style={{ borderColor: color, background: 'oklch(0.97 0.003 80)' }}>
+                            <div className="mt-2 text-[10px] rounded-md px-3 py-2 border-l-2 text-muted-foreground italic bg-muted" style={{ borderColor: color }}>
                               <strong className="text-foreground not-italic">{isRTL ? 'نتيجتك: ' : 'Your result: '}</strong>{rationale.interpretation(r, inputs)}
                             </div>
                           )}
@@ -424,7 +424,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
               <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{isRTL ? 'بطاقة أداء الفريق والمنتج' : 'Team & Product Scorecard'}</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <RadarChart data={radarData}>
-                  <PolarGrid stroke="oklch(0.88 0.01 80)" />
+                  <PolarGrid stroke="var(--border)" />
                   <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fontFamily: 'DM Sans' }} />
                   <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 8 }} />
                   <Radar name="Score" dataKey="score" stroke="#C4614A" fill="#C4614A" fillOpacity={0.25} strokeWidth={2} />
@@ -501,17 +501,16 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
           <div className="p-5 space-y-5">
             {/* AI Analyst Panel */}
             <div className="rounded-xl overflow-hidden border border-border">
-              <div className="px-4 py-3 flex items-center justify-between" style={{ background: 'oklch(0.22 0.08 270)' }}>
+              <div className="px-4 py-3 flex items-center justify-between bg-primary/10 border-b border-border">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" style={{ color: 'oklch(0.75 0.15 270)' }} />
-                  <span className="text-sm font-semibold text-white">{isRTL ? 'تحليل المحلل الذكي' : 'AI Analyst Narrative'}</span>
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-semibold text-foreground">AI Analyst Narrative</span>
                 </div>
                 {!aiNarrative && (
                   <button
                     onClick={() => { handleGenerateNarrative(); }}
                     disabled={aiNarrativeLoading || !isAuthenticated}
-                    className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md transition-all disabled:opacity-50"
-                    style={{ background: 'oklch(0.55 0.18 270)', color: 'white' }}
+                    className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md transition-all disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90"
                   >
                     {aiNarrativeLoading ? (
                       <><span className="animate-spin inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />{isRTL ? 'جارٍ التحليل...' : 'Analyzing...'}</>
@@ -534,7 +533,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <Sparkles className="w-10 h-10 mx-auto mb-3" style={{ color: 'oklch(0.65 0.15 270)' }} />
+                    <Sparkles className="w-10 h-10 mx-auto mb-3 text-primary" />
                     <p className="text-sm font-medium text-foreground mb-1">{isRTL ? 'تحليل ذكاء اصطناعي عميق' : 'Deep AI Analysis'}</p>
                     <p className="text-xs text-muted-foreground max-w-xs mx-auto">{isRTL ? 'احصل على تفسير احترافي لنتائج التقييم، ونقاط القوة والمخاطر، وخطوات عملية للأشهر التسعين القادمة.' : 'Get a professional interpretation of your valuation results, key strengths and risks, and concrete action steps for the next 90 days.'}</p>
                   </div>
@@ -639,7 +638,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
                           <div className="text-[10px] font-mono text-muted-foreground w-16">{adjustedGrowth.toFixed(0)}% {isRTL ? 'نمو' : 'growth'}</div>
                           <div className="flex-1">
                             <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-                              <div className="h-full rounded-full" style={{ width: `${Math.min(100, (adjustedVal / (summary.blended * 1.6)) * 100)}%`, background: isBase ? 'oklch(0.55 0.18 270)' : isUp ? '#10B981' : '#EF4444' }} />
+                              <div className="h-full rounded-full" style={{ width: `${Math.min(100, (adjustedVal / (summary.blended * 1.6)) * 100)}%`, background: isBase ? 'var(--primary)' : isUp ? '#10B981' : '#EF4444' }} />
                             </div>
                           </div>
                           <div className={`text-xs font-bold font-mono w-20 text-right ${isBase ? 'text-accent' : isUp ? 'text-green-500' : 'text-red-500'}`}>
@@ -703,7 +702,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
                           <div className="text-[10px] font-mono text-muted-foreground w-16">{adjustedMargin.toFixed(0)}% {isRTL ? 'هامش' : 'margin'}</div>
                           <div className="flex-1">
                             <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-                              <div className="h-full rounded-full" style={{ width: `${adjustedMargin}%`, background: isBase ? 'oklch(0.55 0.18 270)' : isUp ? '#10B981' : '#EF4444' }} />
+                              <div className="h-full rounded-full" style={{ width: `${adjustedMargin}%`, background: isBase ? 'var(--primary)' : isUp ? '#10B981' : '#EF4444' }} />
                             </div>
                           </div>
                           <div className={`text-xs font-bold font-mono w-20 text-right ${isBase ? 'text-accent' : isUp ? 'text-green-500' : 'text-red-500'}`}>

@@ -136,7 +136,7 @@ export default function AIMarketResearch() {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--primary)' }}>
             <Search className="w-4.5 h-4.5 text-white" />
           </div>
           <div>
@@ -207,7 +207,7 @@ export default function AIMarketResearch() {
             type="submit"
             disabled={mutation.isPending}
             className="w-full h-11 text-sm font-semibold"
-            style={{ background: 'oklch(0.35 0.2 270)', color: '#FAF6EF' }}
+            style={{ background: 'var(--primary)', color: '#FAF6EF' }}
           >
             {mutation.isPending ? (
               <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Researching market… (30-60s)</>
@@ -233,7 +233,7 @@ export default function AIMarketResearch() {
             </div>
 
             {/* Executive Summary */}
-            <div className="p-4 rounded-xl border border-border" style={{ background: 'oklch(0.35 0.2 270)' }}>
+            <div className="p-4 rounded-xl border border-border" style={{ background: 'var(--primary)' }}>
               <p className="text-sm text-white/90 leading-relaxed">{result.executiveSummary}</p>
             </div>
 
@@ -336,7 +336,7 @@ export default function AIMarketResearch() {
               <ul className="space-y-2">
                 {result.goToMarketSuggestions.map((s, i) => (
                   <li key={i} className="flex gap-2.5 text-xs text-foreground">
-                    <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'oklch(0.45 0.2 270)' }}>{i + 1}</span>
+                    <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'var(--primary)' }}>{i + 1}</span>
                     {s}
                   </li>
                 ))}

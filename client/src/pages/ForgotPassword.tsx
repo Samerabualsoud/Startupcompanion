@@ -29,24 +29,24 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'oklch(0.978 0.008 80)' }}>
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--background)' }}>
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center gap-2.5 mb-8">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
-            <TrendingUp className="w-4 h-4" style={{ color: 'oklch(0.45 0.2 270)' }} />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--primary)' }}>
+            <TrendingUp className="w-4 h-4" style={{ color: 'var(--primary)' }} />
           </div>
-          <span className="font-bold text-lg" style={{ fontFamily, color: 'oklch(0.35 0.2 270)' }}>
+          <span className="font-bold text-lg" style={{ fontFamily, color: 'var(--foreground)' }}>
             {isRTL ? 'أداة الشركات الناشئة' : 'Polaris Arabia'}
           </span>
         </div>
 
         {submitted ? (
           <div className="text-center">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'oklch(0.94 0.05 145)' }}>
-              <CheckCircle2 className="w-8 h-8" style={{ color: 'oklch(0.5 0.15 145)' }} />
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'var(--background)' }}>
+              <CheckCircle2 className="w-8 h-8" style={{ color: 'var(--primary)' }} />
             </div>
-            <h1 className="text-2xl font-bold mb-3" style={{ fontFamily, color: 'oklch(0.35 0.2 270)' }}>
+            <h1 className="text-2xl font-bold mb-3" style={{ fontFamily, color: 'var(--foreground)' }}>
               {isRTL ? 'تحقق من بريدك الإلكتروني' : 'Check your email'}
             </h1>
             <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
@@ -54,7 +54,7 @@ export default function ForgotPassword() {
                 ? `إذا كان هناك حساب مرتبط بـ ${email}، فستتلقى رابط إعادة تعيين كلمة المرور خلال دقائق قليلة.`
                 : `If an account exists for ${email}, you'll receive a password reset link within a few minutes.`}
             </p>
-            <Link href={LOGIN_PATH} className="inline-flex items-center gap-2 text-sm font-semibold hover:underline" style={{ color: 'oklch(0.45 0.2 270)' }}>
+            <Link href={LOGIN_PATH} className="inline-flex items-center gap-2 text-sm font-semibold hover:underline" style={{ color: 'var(--primary)' }}>
               <ArrowLeft className="w-4 h-4" />
               {isRTL ? 'العودة إلى تسجيل الدخول' : 'Back to Sign In'}
             </Link>
@@ -62,7 +62,7 @@ export default function ForgotPassword() {
         ) : (
           <>
             <div className="mb-8">
-              <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'oklch(0.35 0.2 270)' }}>
+              <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'var(--foreground)' }}>
                 {isRTL ? 'نسيت كلمة المرور؟' : 'Forgot your password?'}
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -74,14 +74,14 @@ export default function ForgotPassword() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="flex items-center gap-2.5 p-3.5 rounded-xl text-sm" style={{ background: 'oklch(0.97 0.02 30)', border: '1px solid oklch(0.85 0.06 30)', color: 'oklch(0.45 0.12 30)' }}>
+                <div className="flex items-center gap-2.5 p-3.5 rounded-xl text-sm" style={{ background: 'var(--background)', border: '1.5px solid var(--border)', color: 'var(--primary)' }}>
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   {error}
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'oklch(0.3 0.04 240)' }}>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>
                   {isRTL ? 'البريد الإلكتروني' : 'Email address'}
                 </label>
                 <div className="relative">
@@ -94,9 +94,9 @@ export default function ForgotPassword() {
                     autoComplete="email"
                     required
                     className="w-full pl-10 pr-4 py-3 rounded-xl text-sm outline-none transition-all"
-                    style={{ background: 'white', border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-                    onFocus={e => e.target.style.borderColor = 'oklch(0.45 0.2 270)'}
-                    onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
+                    style={{ background: 'white', border: '1.5px solid var(--border)', color: 'var(--foreground)' }}
+                    onFocus={e => e.target.style.borderColor = 'var(--primary)'}
+                    onBlur={e => e.target.style.borderColor = 'var(--border)'}
                   />
                 </div>
               </div>
@@ -105,7 +105,7 @@ export default function ForgotPassword() {
                 type="submit"
                 disabled={requestReset.isPending}
                 className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
-                style={{ background: 'oklch(0.35 0.2 270)' }}
+                style={{ background: 'var(--primary)' }}
               >
                 {requestReset.isPending ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> {isRTL ? 'جارٍ الإرسال...' : 'Sending…'}</>

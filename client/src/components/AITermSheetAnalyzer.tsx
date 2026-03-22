@@ -100,7 +100,7 @@ export default function AITermSheetAnalyzer() {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.55 0.15 30)' }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--primary)' }}>
             <FileText className="w-4.5 h-4.5 text-white" />
           </div>
           <div>
@@ -158,7 +158,7 @@ export default function AITermSheetAnalyzer() {
             }}
             disabled={mutation.isPending}
             className="w-full h-11 text-sm font-semibold"
-            style={{ background: 'oklch(0.55 0.15 30)', color: 'white' }}
+            style={{ background: 'var(--primary)', color: 'white' }}
           >
             {mutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analyzing term sheet…</> : <><FileText className="w-4 h-4 mr-2" /> Analyze Term Sheet</>}
           </Button>

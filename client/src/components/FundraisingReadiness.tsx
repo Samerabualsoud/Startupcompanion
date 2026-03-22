@@ -183,7 +183,7 @@ export default function FundraisingReadiness() {
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <RadarChart data={radarData}>
-              <PolarGrid stroke="oklch(0.88 0.01 80)" />
+              <PolarGrid stroke="var(--border)" />
               <PolarAngleAxis dataKey="subject" tick={{ fontSize: 9, fontFamily: 'DM Sans' }} />
               <Radar name="Readiness" dataKey="score" stroke="#C4614A" fill="#C4614A" fillOpacity={0.25} strokeWidth={2} />
               <Tooltip formatter={(v: any) => [`${v}%`, 'Readiness']} contentStyle={{ fontSize: 11, fontFamily: 'DM Sans', borderRadius: 6 }} />

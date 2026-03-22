@@ -129,14 +129,14 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
   const progressPct = Math.round((completedCount / toolProgress.length) * 100);
 
   const quickActions = [
-    { id: 'valuation',    label: 'Valuation',        icon: TrendingUp,   color: '#5B4EFF', bg: 'oklch(0.97 0.01 265)' },
-    { id: 'cogs',         label: 'COGS',             icon: Calculator,   color: '#059669', bg: 'oklch(0.97 0.01 160)' },
-    { id: 'esop',         label: 'ESOP',             icon: Users,        color: '#2D4A6B', bg: 'oklch(0.97 0.01 240)' },
-    { id: 'sales',        label: 'Sales',            icon: ShoppingCart, color: '#F59E0B', bg: 'oklch(0.97 0.02 80)' },
-    { id: 'investor-crm', label: 'Investors',        icon: Building2,    color: '#7C3AED', bg: 'oklch(0.97 0.01 290)' },
-    { id: 'data-room',    label: 'Data Room',        icon: FolderOpen,   color: '#0284C7', bg: 'oklch(0.97 0.01 210)' },
-    { id: 'readiness',    label: 'Readiness',        icon: Target,       color: '#F59E0B', bg: 'oklch(0.97 0.02 80)' },
-    { id: 'dilution',     label: 'Dilution',         icon: GitBranch,    color: '#8B4A38', bg: 'oklch(0.97 0.01 30)' },
+    { id: 'valuation',    label: 'Valuation',        icon: TrendingUp,   color: '#5B4EFF', bg: '#5B4EFF1A' },
+    { id: 'cogs',         label: 'COGS',             icon: Calculator,   color: '#059669', bg: '#0596691A' },
+    { id: 'esop',         label: 'ESOP',             icon: Users,        color: '#2D4A6B', bg: '#2D4A6B1A' },
+    { id: 'sales',        label: 'Sales',            icon: ShoppingCart, color: '#F59E0B', bg: '#F59E0B1A' },
+    { id: 'investor-crm', label: 'Investors',        icon: Building2,    color: '#7C3AED', bg: '#7C3AED1A' },
+    { id: 'data-room',    label: 'Data Room',        icon: FolderOpen,   color: '#0284C7', bg: '#0284C71A' },
+    { id: 'readiness',    label: 'Readiness',        icon: Target,       color: '#F59E0B', bg: '#F59E0B1A' },
+    { id: 'dilution',     label: 'Dilution',         icon: GitBranch,    color: '#8B4A38', bg: '#8B4A381A' },
   ];
 
   if (isLoading) {
@@ -157,13 +157,13 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
       style={{ background: 'var(--background)' }}
     >
       {/* ── Header ── */}
-      <div className="px-6 py-5 border-b border-border" style={{ background: 'oklch(0.13 0.04 265)' }}>
+      <div className="px-6 py-5 border-b border-border bg-card">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-2xl font-bold text-foreground">
               {hasProfile ? snapshot.companyName : t('dashboardTitle')}
             </h1>
-            <p className="text-sm mt-0.5" style={{ color: 'oklch(0.65 0.03 265)' }}>
+            <p className="text-sm mt-0.5 text-muted-foreground">
               {hasProfile
                 ? `${snapshot.sector || ''}${snapshot.sector && snapshot.stage ? ' · ' : ''}${snapshot.stage || ''}`
                 : t('dashboardSubtitle')}
@@ -171,17 +171,17 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
           </div>
           <div className="flex items-center gap-2 flex-wrap justify-end">
             {snapshot.stage && (
-              <Badge variant="outline" className="text-xs border-white/20 text-white/70">{snapshot.stage}</Badge>
+              <Badge variant="outline" className="text-xs">{snapshot.stage}</Badge>
             )}
             {snapshot.country && (
-              <Badge variant="outline" className="text-xs border-white/20 text-white/70">
+              <Badge variant="outline" className="text-xs">
                 <Globe className="w-3 h-3 mr-1" />{snapshot.country}
               </Badge>
             )}
             {runway !== null && (
               <Badge
                 variant="outline"
-                className="text-xs border-white/20"
+                className="text-xs"
                 style={{ color: runwayColor }}
               >
                 <Clock className="w-3 h-3 mr-1" />{runway}mo runway
@@ -193,12 +193,12 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
         {/* Workspace progress bar in header */}
         <div className="mt-4">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-medium" style={{ color: 'oklch(0.65 0.03 265)' }}>
+            <span className="text-xs font-medium text-muted-foreground">
               Workspace Completion
             </span>
-            <span className="text-xs font-semibold text-white">{progressPct}%</span>
+            <span className="text-xs font-semibold text-foreground">{progressPct}%</span>
           </div>
-          <div className="h-1.5 rounded-full" style={{ background: 'oklch(0.24 0.04 265)' }}>
+          <div className="h-1.5 rounded-full bg-muted">
             <div
               className="h-full rounded-full transition-all duration-700"
               style={{ width: `${progressPct}%`, background: progressPct >= 80 ? '#22C55E' : progressPct >= 50 ? '#F59E0B' : '#5B4EFF' }}
@@ -471,7 +471,7 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
                           <stop offset="95%" stopColor="#5B4EFF" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.9 0 0)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="month" tick={{ fontSize: 9 }} tickFormatter={v => v.slice(5)} />
                       <YAxis tick={{ fontSize: 9 }} tickFormatter={v => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'K' : v}`} />
                       <Tooltip formatter={(v: any) => [`$${Number(v).toLocaleString()}`, 'Revenue']} labelFormatter={l => `Month: ${l}`} />

@@ -121,7 +121,7 @@ export default function ScenarioComparison({ scenarios, onDelete }: Props) {
           </div>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={blendedData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.88 0.01 80)" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="name" tick={{ fontSize: 10, fontFamily: 'DM Sans' }} />
               <YAxis tick={{ fontSize: 10, fontFamily: 'JetBrains Mono' }} tickFormatter={v => `$${v}M`} />
               <RechartTooltip
@@ -146,7 +146,7 @@ export default function ScenarioComparison({ scenarios, onDelete }: Props) {
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.88 0.01 80)" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="method" tick={{ fontSize: 9, fontFamily: 'DM Sans' }} angle={-35} textAnchor="end" interval={0} />
               <YAxis tick={{ fontSize: 10, fontFamily: 'JetBrains Mono' }} tickFormatter={v => `$${v}M`} />
               <RechartTooltip

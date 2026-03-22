@@ -349,7 +349,7 @@ export default function OQALNotes() {
           <button
             onClick={addNote}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95 shrink-0"
-            style={{ background: 'linear-gradient(135deg, oklch(0.55 0.18 150), oklch(0.45 0.2 160))' }}
+            style={{ background: 'var(--primary)' }}
           >
             <Plus className="w-4 h-4" />
             Add OQAL Note
@@ -443,7 +443,7 @@ export default function OQALNotes() {
           <button
             onClick={addNote}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95"
-            style={{ background: 'linear-gradient(135deg, oklch(0.55 0.18 150), oklch(0.45 0.2 160))' }}
+            style={{ background: 'var(--primary)' }}
           >
             <Plus className="w-4 h-4" />
             Add First OQAL Note

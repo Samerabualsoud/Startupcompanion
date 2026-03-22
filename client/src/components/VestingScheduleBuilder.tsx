@@ -321,7 +321,7 @@ export default function VestingScheduleBuilder() {
             onClick={handleAiRecommend}
             disabled={aiLoading}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-60"
-            style={{ background: 'oklch(0.45 0.2 270)' }}
+            style={{ background: 'var(--primary)' }}
           >
             {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
             AI Review
@@ -366,9 +366,9 @@ export default function VestingScheduleBuilder() {
         {showAiPanel && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             className="border border-border rounded-xl p-4 bg-card"
-            style={{ borderLeft: '3px solid oklch(0.45 0.2 270)' }}>
+            style={{ borderLeft: '3px solid #5B4EFF' }}>
             <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="w-4 h-4" style={{ color: 'oklch(0.45 0.2 270)' }} />
+              <Sparkles className="w-4 h-4" style={{ color: 'var(--primary)' }} />
               <span className="text-sm font-semibold text-foreground">AI Vesting Review</span>
               <button onClick={() => setShowAiPanel(false)} className="ml-auto text-muted-foreground hover:text-foreground">✕</button>
             </div>
@@ -548,7 +548,7 @@ export default function VestingScheduleBuilder() {
                         <div className="overflow-x-auto rounded-lg border border-border">
                           <table className="w-full text-xs">
                             <thead>
-                              <tr className="border-b border-border" style={{ background: 'oklch(0.97 0.003 80)' }}>
+                              <tr className="border-b border-border" style={{ background: 'var(--background)' }}>
                                 <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Month</th>
                                 <th className="text-right px-3 py-2 font-semibold text-muted-foreground">Newly Vested</th>
                                 <th className="text-right px-3 py-2 font-semibold text-muted-foreground">Total Vested</th>
@@ -615,7 +615,7 @@ export default function VestingScheduleBuilder() {
                     </linearGradient>
                   ))}
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.9 0.003 80)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="month" tick={{ fontSize: 10 }} tickFormatter={v => `M${v}`} />
                 <YAxis tick={{ fontSize: 10 }} tickFormatter={v => fmt(v)} width={55} />
                 <RechartTooltip content={<CustomTooltip />} />
@@ -634,7 +634,7 @@ export default function VestingScheduleBuilder() {
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-border" style={{ background: 'oklch(0.97 0.003 80)' }}>
+                <tr className="border-b border-border" style={{ background: 'var(--background)' }}>
                   <th className="text-left px-3 py-2.5 font-semibold text-muted-foreground sticky left-0 bg-inherit">Month</th>
                   {stakeholders.map(s => (
                     <th key={s.id} className="text-right px-3 py-2.5 font-semibold" style={{ color: s.color }}>{s.name}</th>
@@ -710,7 +710,7 @@ export default function VestingScheduleBuilder() {
             </div>
 
             {/* Info box */}
-            <div className="flex gap-2.5 p-3 rounded-lg text-xs" style={{ background: 'oklch(0.97 0.003 80)', border: '1px solid oklch(0.9 0.003 80)' }}>
+            <div className="flex gap-2.5 p-3 rounded-lg text-xs" style={{ background: 'var(--background)', border: '1.5px solid var(--border)' }}>
               <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
               <div className="text-muted-foreground leading-relaxed">
                 <strong className="text-foreground">Standard 4-year / 1-year cliff</strong> is the most common structure for founders and early employees.

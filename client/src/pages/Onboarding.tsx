@@ -36,7 +36,7 @@ function InputField({ label, value, onChange, placeholder, type = 'text', requir
 }) {
   return (
     <div>
-      <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'oklch(0.55 0.12 270)' }}>
+      <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--primary)' }}>
         {label}{required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       <input
@@ -45,9 +45,9 @@ function InputField({ label, value, onChange, placeholder, type = 'text', requir
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none transition-all bg-white"
-        style={{ border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-        onFocus={e => e.target.style.borderColor = 'oklch(0.45 0.2 270)'}
-        onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
+        style={{ border: '1.5px solid var(--border)', color: 'var(--foreground)' }}
+        onFocus={e => e.target.style.borderColor = 'var(--primary)'}
+        onBlur={e => e.target.style.borderColor = 'var(--border)'}
       />
     </div>
   );
@@ -59,11 +59,11 @@ function SelectField({ label, value, onChange, options, placeholder, required }:
 }) {
   return (
     <div>
-      <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'oklch(0.55 0.12 270)' }}>
+      <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--primary)' }}>
         {label}{required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       <Select value={value || ''} onValueChange={onChange}>
-        <SelectTrigger className="w-full rounded-xl text-sm h-10 bg-white" style={{ border: '1.5px solid oklch(0.88 0.02 240)' }}>
+        <SelectTrigger className="w-full rounded-xl text-sm h-10 bg-white" style={{ border: '1.5px solid var(--border)' }}>
           <SelectValue placeholder={placeholder || 'Select...'} />
         </SelectTrigger>
         <SelectContent className="max-h-64 overflow-y-auto">
@@ -90,7 +90,7 @@ function TagSelector({ label, options, selected, onChange, max }: {
   return (
     <div>
       {label && (
-        <label className="block text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'oklch(0.55 0.12 270)' }}>
+        <label className="block text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--primary)' }}>
           {label}
         </label>
       )}
@@ -105,7 +105,7 @@ function TagSelector({ label, options, selected, onChange, max }: {
                 ? 'text-white border-transparent'
                 : 'border-border text-muted-foreground hover:border-foreground/30 bg-white'
             }`}
-            style={selected.includes(opt) ? { background: 'oklch(0.35 0.2 270)' } : {}}
+            style={selected.includes(opt) ? { background: 'var(--primary)' } : {}}
           >
             {opt}
           </button>
@@ -123,7 +123,7 @@ function TextareaField({ label, value, onChange, placeholder, rows = 3 }: {
 }) {
   return (
     <div>
-      <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'oklch(0.55 0.12 270)' }}>
+      <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--primary)' }}>
         {label}
       </label>
       <textarea
@@ -132,9 +132,9 @@ function TextareaField({ label, value, onChange, placeholder, rows = 3 }: {
         rows={rows}
         placeholder={placeholder}
         className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none transition-all resize-none bg-white"
-        style={{ border: '1.5px solid oklch(0.88 0.02 240)', color: 'oklch(0.2 0.04 240)' }}
-        onFocus={e => e.target.style.borderColor = 'oklch(0.45 0.2 270)'}
-        onBlur={e => e.target.style.borderColor = 'oklch(0.88 0.02 240)'}
+        style={{ border: '1.5px solid var(--border)', color: 'var(--foreground)' }}
+        onFocus={e => e.target.style.borderColor = 'var(--primary)'}
+        onBlur={e => e.target.style.borderColor = 'var(--border)'}
       />
     </div>
   );
@@ -155,7 +155,7 @@ function VCForm({ data, onChange, isRTL }: { data: Record<string, any>; onChange
       </div>
 
       <div className="border-t border-border pt-4">
-        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.55 0.12 270)' }}>
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--primary)' }}>
           {isRTL ? 'الموقع الجغرافي' : 'Headquarters'}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -165,7 +165,7 @@ function VCForm({ data, onChange, isRTL }: { data: Record<string, any>; onChange
       </div>
 
       <div className="border-t border-border pt-4">
-        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.55 0.12 270)' }}>
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--primary)' }}>
           {isRTL ? 'معلومات الاستثمار' : 'Investment Details'}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -196,7 +196,7 @@ function AngelForm({ data, onChange, isRTL }: { data: Record<string, any>; onCha
       <TextareaField label={isRTL ? 'نبذة شخصية' : 'Bio'} value={data.bio || ''} onChange={v => onChange('bio', v)} placeholder={isRTL ? 'أخبرنا عن خلفيتك ومجالات اهتمامك...' : 'Tell us about your background and investment interests...'} />
 
       <div className="border-t border-border pt-4">
-        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.55 0.12 270)' }}>
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--primary)' }}>
           {isRTL ? 'الموقع والتواصل' : 'Location & Contact'}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -206,7 +206,7 @@ function AngelForm({ data, onChange, isRTL }: { data: Record<string, any>; onCha
       </div>
 
       <div className="border-t border-border pt-4">
-        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.55 0.12 270)' }}>
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--primary)' }}>
           {isRTL ? 'معلومات الاستثمار' : 'Investment Details'}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -240,7 +240,7 @@ function LawyerForm({ data, onChange, isRTL }: { data: Record<string, any>; onCh
       <TextareaField label={isRTL ? 'نبذة' : 'Bio'} value={data.bio || ''} onChange={v => onChange('bio', v)} placeholder={isRTL ? 'صف خبرتك في العمل مع الشركات الناشئة...' : 'Describe your experience working with startups...'} />
 
       <div className="border-t border-border pt-4">
-        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.55 0.12 270)' }}>
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--primary)' }}>
           {isRTL ? 'الموقع والاختصاص القانوني' : 'Location & Jurisdiction'}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -287,7 +287,7 @@ function StartupForm({ data, onChange, isRTL }: { data: Record<string, any>; onC
       <TextareaField label={isRTL ? 'الوصف' : 'Description'} value={data.description || ''} onChange={v => onChange('description', v)} placeholder={isRTL ? 'صف ما تبنيه ومن تخدم...' : "Describe what you're building and who you serve..."} />
 
       <div className="border-t border-border pt-4">
-        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.55 0.12 270)' }}>
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--primary)' }}>
           {isRTL ? 'تفاصيل الشركة' : 'Company Details'}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -298,7 +298,7 @@ function StartupForm({ data, onChange, isRTL }: { data: Record<string, any>; onC
       </div>
 
       <div className="border-t border-border pt-4">
-        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.55 0.12 270)' }}>
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--primary)' }}>
           {isRTL ? 'الموقع والفريق' : 'Location & Team'}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -309,7 +309,7 @@ function StartupForm({ data, onChange, isRTL }: { data: Record<string, any>; onC
       </div>
 
       <div className="border-t border-border pt-4">
-        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'oklch(0.55 0.12 270)' }}>
+        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--primary)' }}>
           {isRTL ? 'التمويل والتواصل' : 'Funding & Links'}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -439,13 +439,13 @@ export default function Onboarding() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'oklch(0.978 0.008 80)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--background)' }}>
         <div className="text-center max-w-sm px-6">
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
-            style={{ background: 'oklch(0.35 0.2 270)' }}>
+            style={{ background: 'var(--primary)' }}>
             <Check className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold mb-3" style={{ fontFamily, color: 'oklch(0.35 0.2 270)' }}>
+          <h2 className="text-2xl font-bold mb-3" style={{ fontFamily, color: 'var(--foreground)' }}>
             {isRTL ? 'تم إرسال ملفك الشخصي!' : 'Profile submitted!'}
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -459,15 +459,15 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'oklch(0.978 0.008 80)' }}>
+    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       {/* Header */}
       <div className="sticky top-0 z-10 border-b border-border bg-white/80 backdrop-blur-md">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.35 0.2 270)' }}>
-              <TrendingUp className="w-3.5 h-3.5" style={{ color: 'oklch(0.65 0.13 30)' }} />
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'var(--primary)' }}>
+              <TrendingUp className="w-3.5 h-3.5" style={{ color: 'var(--primary)' }} />
             </div>
-            <span className="font-bold text-sm" style={{ fontFamily, color: 'oklch(0.35 0.2 270)' }}>{t('appName')}</span>
+            <span className="font-bold text-sm" style={{ fontFamily, color: 'var(--foreground)' }}>{t('appName')}</span>
           </div>
           {/* Step indicator */}
           <div className="flex items-center gap-2">
@@ -477,7 +477,7 @@ export default function Onboarding() {
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                     step >= s ? 'text-white' : 'text-muted-foreground border border-border'
                   }`}
-                  style={step >= s ? { background: 'oklch(0.35 0.2 270)' } : {}}
+                  style={step >= s ? { background: 'var(--primary)' } : {}}
                 >
                   {step > s ? <Check className="w-3 h-3" /> : s}
                 </div>
@@ -493,13 +493,13 @@ export default function Onboarding() {
         {step === 1 && (
           <div>
             <div className="mb-8">
-              <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'oklch(0.35 0.2 270)' }}>
+              <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'var(--foreground)' }}>
                 {t('kycTitle')}
               </h1>
               <p className="text-sm text-muted-foreground">{t('kycSubtitle')}</p>
             </div>
 
-            <p className="text-sm font-medium mb-4" style={{ color: 'oklch(0.3 0.04 240)' }}>{t('iAm')}</p>
+            <p className="text-sm font-medium mb-4" style={{ color: 'var(--foreground)' }}>{t('iAm')}</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
               {USER_TYPES.map(({ id, icon: Icon, color }) => {
@@ -519,7 +519,7 @@ export default function Onboarding() {
                       <Icon className="w-5 h-5" style={{ color }} />
                     </div>
                     <div className="flex-1">
-                      <div className="font-semibold text-sm" style={{ color: 'oklch(0.35 0.2 270)' }}>
+                      <div className="font-semibold text-sm" style={{ color: 'var(--foreground)' }}>
                         {t(labelKey as any)}
                       </div>
                       <div className="text-xs text-muted-foreground mt-0.5">
@@ -548,7 +548,7 @@ export default function Onboarding() {
                 onClick={() => setStep(2)}
                 disabled={!userType}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40"
-                style={{ background: 'oklch(0.35 0.2 270)' }}
+                style={{ background: 'var(--primary)' }}
               >
                 {t('next')}
                 {isRTL ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -561,7 +561,7 @@ export default function Onboarding() {
         {step === 2 && userType && (
           <div>
             <div className="mb-6">
-              <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'oklch(0.35 0.2 270)' }}>
+              <h1 className="text-3xl font-bold mb-2" style={{ fontFamily, color: 'var(--foreground)' }}>
                 {t('kycStep2')}
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -572,7 +572,7 @@ export default function Onboarding() {
             </div>
 
             {mutationError && (
-              <div className="mb-4 p-3.5 rounded-xl text-sm" style={{ background: 'oklch(0.97 0.02 30)', border: '1px solid oklch(0.85 0.06 30)', color: 'oklch(0.45 0.12 30)' }}>
+              <div className="mb-4 p-3.5 rounded-xl text-sm" style={{ background: 'var(--background)', border: '1.5px solid var(--border)', color: 'var(--primary)' }}>
                 {mutationError.message}
               </div>
             )}
@@ -617,7 +617,7 @@ export default function Onboarding() {
                   onClick={handleSubmit}
                   disabled={isPending}
                   className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-60"
-                  style={{ background: 'oklch(0.35 0.2 270)' }}
+                  style={{ background: 'var(--primary)' }}
                 >
                   {isPending ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> {t('submitting')}</>

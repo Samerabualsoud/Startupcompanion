@@ -337,23 +337,23 @@ You can manage cookie preferences through your browser settings. Please note tha
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="min-h-screen flex flex-col bg-background text-foreground"
       dir={isRTL ? 'rtl' : 'ltr'}
-      style={{ background: 'oklch(0.99 0.005 60)', color: 'oklch(0.18 0.03 30)', fontFamily: "'DM Sans', sans-serif" }}
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
       {/* Header */}
-      <header className="border-b sticky top-0 z-40 backdrop-blur-sm" style={{ borderColor: 'oklch(0.91 0.015 60)', background: 'rgba(255,252,248,0.95)' }}>
+      <header className="border-b border-border sticky top-0 z-40 backdrop-blur-sm bg-background/95">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/">
             <div className="flex items-center gap-2.5 cursor-pointer">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, oklch(0.62 0.22 30), oklch(0.60 0.24 290))' }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary">
                 <TrendingUp className="w-4 h-4 text-white" />
               </div>
               <span className="font-extrabold text-sm" style={{ fontFamily: "'Nunito', sans-serif" }}>Polaris Arabia</span>
             </div>
           </Link>
           <Link href="/">
-            <button className="flex items-center gap-1.5 text-sm font-medium transition-colors hover:opacity-70" style={{ color: 'oklch(0.50 0.05 240)' }}>
+            <button className="flex items-center gap-1.5 text-sm font-medium transition-colors hover:opacity-70 text-muted-foreground">
               <BackArrow className="w-4 h-4" />
               {isRTL ? 'العودة' : 'Back'}
             </button>
@@ -362,28 +362,28 @@ You can manage cookie preferences through your browser settings. Please note tha
       </header>
 
       {/* Hero */}
-      <div className="border-b" style={{ borderColor: 'oklch(0.91 0.015 60)', background: 'oklch(0.96 0.02 250)' }}>
+      <div className="border-b border-border bg-secondary/20">
         <div className="max-w-4xl mx-auto px-6 py-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.50 0.22 250)', color: 'white' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-primary text-primary-foreground">
               <Shield className="w-5 h-5" />
             </div>
             <div>
               <h1 className="text-2xl font-extrabold" style={{ fontFamily: "'Nunito', sans-serif" }}>
                 {isRTL ? 'سياسة الخصوصية' : 'Privacy Policy'}
               </h1>
-              <p className="text-sm" style={{ color: 'oklch(0.55 0.03 240)' }}>
+              <p className="text-sm text-muted-foreground">
                 {isRTL ? `آخر تحديث: ${LAST_UPDATED_AR}` : `Last updated: ${LAST_UPDATED}`}
               </p>
             </div>
           </div>
-          <p className="text-sm leading-relaxed max-w-2xl" style={{ color: 'oklch(0.45 0.03 60)' }}>
+          <p className="text-sm leading-relaxed max-w-2xl text-muted-foreground">
             {isRTL
               ? 'تلتزم بولاريس أرابيا بحماية خصوصيتك وفق نظام حماية البيانات الشخصية السعودي (PDPL). توضح هذه السياسة كيفية جمع بياناتك الشخصية واستخدامها وحمايتها.'
               : 'Polaris Arabia is committed to protecting your privacy in accordance with the Saudi Personal Data Protection Law (PDPL). This Policy explains how your personal data is collected, used, and protected.'}
           </p>
           {/* PDPL compliance badge */}
-          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'oklch(0.92 0.05 150)', color: 'oklch(0.35 0.15 150)' }}>
+          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
             <Shield className="w-3.5 h-3.5" />
             {isRTL ? 'متوافق مع نظام PDPL السعودي' : 'Compliant with Saudi PDPL'}
           </div>
@@ -391,9 +391,9 @@ You can manage cookie preferences through your browser settings. Please note tha
       </div>
 
       {/* Table of Contents */}
-      <div className="border-b" style={{ borderColor: 'oklch(0.91 0.015 60)' }}>
+      <div className="border-b border-border">
         <div className="max-w-4xl mx-auto px-6 py-6">
-          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'oklch(0.50 0.22 250)' }}>
+          <p className="text-xs font-bold uppercase tracking-widest mb-3 text-primary">
             {isRTL ? 'المحتويات' : 'Contents'}
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -401,8 +401,7 @@ You can manage cookie preferences through your browser settings. Please note tha
               <a
                 key={s.id}
                 href={`#${s.id}`}
-                className="text-xs px-3 py-2 rounded-lg transition-colors hover:opacity-80"
-                style={{ background: 'oklch(0.95 0.02 250)', color: 'oklch(0.40 0.05 250)' }}
+                className="text-xs px-3 py-2 rounded-lg transition-colors hover:opacity-80 bg-secondary text-secondary-foreground"
               >
                 {s.title}
               </a>
@@ -417,7 +416,7 @@ You can manage cookie preferences through your browser settings. Please note tha
           {sections.map(({ id, icon: Icon, title, content }) => (
             <section key={id} id={id} className="scroll-mt-20">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'oklch(0.94 0.04 250)', color: 'oklch(0.50 0.22 250)' }}>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-primary/10 text-primary">
                   <Icon className="w-4 h-4" />
                 </div>
                 <h2 className="text-lg font-bold" style={{ fontFamily: "'Nunito', sans-serif" }}>{title}</h2>
@@ -425,26 +424,26 @@ You can manage cookie preferences through your browser settings. Please note tha
               <div>
                 {content.split('\n').map((para, i) => (
                   para.trim() ? (
-                    <p key={i} className="text-sm leading-relaxed mb-3" style={{ color: 'oklch(0.35 0.03 60)' }}>
+                    <p key={i} className="text-sm leading-relaxed mb-3 text-foreground">
                       {para}
                     </p>
                   ) : <div key={i} className="h-1" />
                 ))}
               </div>
-              <div className="mt-6 border-b" style={{ borderColor: 'oklch(0.93 0.01 60)' }} />
+              <div className="mt-6 border-b border-border" />
             </section>
           ))}
         </div>
 
         {/* SDAIA notice */}
-        <div className="mt-10 p-5 rounded-xl border" style={{ background: 'oklch(0.96 0.04 250)', borderColor: 'oklch(0.88 0.06 250)' }}>
+        <div className="mt-10 p-5 rounded-xl border border-primary/20 bg-primary/5">
           <div className="flex items-start gap-3">
-            <Shield className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'oklch(0.50 0.22 250)' }} />
+            <Shield className="w-5 h-5 shrink-0 mt-0.5 text-primary" />
             <div>
-              <p className="text-sm font-semibold mb-1" style={{ color: 'oklch(0.30 0.12 250)' }}>
+              <p className="text-sm font-semibold mb-1 text-foreground">
                 {isRTL ? 'الهيئة السعودية للبيانات والذكاء الاصطناعي (SDAIA)' : 'Saudi Data & AI Authority (SDAIA)'}
               </p>
-              <p className="text-xs leading-relaxed" style={{ color: 'oklch(0.45 0.08 250)' }}>
+              <p className="text-xs leading-relaxed text-muted-foreground">
                 {isRTL
                   ? 'هذه السياسة متوافقة مع نظام حماية البيانات الشخصية السعودي (PDPL) الصادر بالمرسوم الملكي م/١٩ ولوائحه التنفيذية الصادرة عن هيئة SDAIA. لمزيد من المعلومات حول حقوقك، يُرجى زيارة sdaia.gov.sa'
                   : 'This Policy is compliant with the Saudi Personal Data Protection Law (PDPL) issued by Royal Decree M/19 and its implementing regulations issued by SDAIA. For more information about your rights, please visit sdaia.gov.sa'}
