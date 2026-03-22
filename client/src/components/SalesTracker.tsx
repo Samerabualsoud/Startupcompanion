@@ -437,6 +437,9 @@ export default function SalesTracker() {
   const [cacInput, setCacInput] = useState(0);
   const [churnRatePct, setChurnRatePct] = useState(5);
   const [grossMarginPct, setGrossMarginPct] = useState(70);
+  // Procurement-specific unit econ inputs
+  const [takeRatePct, setTakeRatePct] = useState(2.5);
+  const [buyerRetentionPct, setBuyerRetentionPct] = useState(80);
 
   const cfg = MODEL_CONFIGS[businessModel];
 
@@ -935,32 +938,64 @@ export default function SalesTracker() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pb-4">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <Label className="text-xs">{isRTL ? cfg.unitEconLabels.cacAr : cfg.unitEconLabels.cac} ({currency})</Label>
-                  <Input type="number" min={0} value={cacInput || ''} onChange={e => setCacInput(parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
-                  <p className="text-[10px] text-muted-foreground mt-1">{isRTL ? 'إجمالي الإنفاق على التسويق والمبيعات ÷ عدد العملاء الجدد' : 'Total sales & marketing spend ÷ new customers'}</p>
+              {businessModel === 'procurement' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <Label className="text-xs">{isRTL ? 'تكلفة اكتساب المشترٍ (CAC)' : 'Buyer CAC'} ({currency})</Label>
+                    <Input type="number" min={0} value={cacInput || ''} onChange={e => setCacInput(parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
+                    <p className="text-[10px] text-muted-foreground mt-1">{isRTL ? 'إجمالي الإنفاق على المبيعات والتسويق ÷ عدد المشترين الجدد' : 'Total sales & marketing spend ÷ new buyers acquired'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs">{isRTL ? 'معدل الاحتفاظ السنوي بالمشترين (%)' : 'Annual Buyer Retention (%)'}</Label>
+                    <Input type="number" min={0} max={100} step={1} value={buyerRetentionPct || ''} onChange={e => setBuyerRetentionPct(parseFloat(e.target.value) || 0)} placeholder="80" className="mt-1" />
+                    <p className="text-[10px] text-muted-foreground mt-1">{isRTL ? '% المشترين الذين يعودون للشراء سنوياً' : '% of buyers who repeat purchase annually'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs">{isRTL ? 'معدل الأخذ / رسوم الخدمة (%)' : 'Take Rate / Service Fee (%)'}</Label>
+                    <Input type="number" min={0} max={100} step={0.1} value={takeRatePct || ''} onChange={e => setTakeRatePct(parseFloat(e.target.value) || 0)} placeholder="2.5" className="mt-1" />
+                    <p className="text-[10px] text-muted-foreground mt-1">{isRTL ? '% من حجم المشتريات الإجمالي كإيراد' : '% of total procurement volume taken as revenue'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs">{isRTL ? 'هامش الربح الإجمالي (%)' : 'Gross Margin (%)'}</Label>
+                    <Input type="number" min={0} max={100} step={1} value={grossMarginPct || ''} onChange={e => setGrossMarginPct(parseFloat(e.target.value) || 0)} placeholder="35" className="mt-1" />
+                    <p className="text-[10px] text-muted-foreground mt-1">{isRTL ? 'بعد تكاليف التشغيل والمصادر' : 'After sourcing and operational costs'}</p>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-xs">{isRTL ? 'معدل التراجع الشهري (%)' : 'Monthly Churn Rate (%)'}</Label>
-                  <Input type="number" min={0} max={100} step={0.1} value={churnRatePct || ''} onChange={e => setChurnRatePct(parseFloat(e.target.value) || 0)} placeholder="5" className="mt-1" />
-                  <p className="text-[10px] text-muted-foreground mt-1">{isRTL ? 'نسبة العملاء الذين يتوقفون شهرياً' : '% of customers who stop each month'}</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <Label className="text-xs">{isRTL ? cfg.unitEconLabels.cacAr : cfg.unitEconLabels.cac} ({currency})</Label>
+                    <Input type="number" min={0} value={cacInput || ''} onChange={e => setCacInput(parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1" />
+                    <p className="text-[10px] text-muted-foreground mt-1">{isRTL ? 'إجمالي الإنفاق على التسويق والمبيعات ÷ عدد العملاء الجدد' : 'Total sales & marketing spend ÷ new customers'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs">{isRTL ? 'معدل التراجع الشهري (%)' : 'Monthly Churn Rate (%)'}</Label>
+                    <Input type="number" min={0} max={100} step={0.1} value={churnRatePct || ''} onChange={e => setChurnRatePct(parseFloat(e.target.value) || 0)} placeholder="5" className="mt-1" />
+                    <p className="text-[10px] text-muted-foreground mt-1">{isRTL ? 'نسبة العملاء الذين يتوقفون شهرياً' : '% of customers who stop each month'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs">{isRTL ? 'هامش الربح الإجمالي (%)' : 'Gross Margin (%)'}</Label>
+                    <Input type="number" min={0} max={100} step={1} value={grossMarginPct || ''} onChange={e => setGrossMarginPct(parseFloat(e.target.value) || 0)} placeholder="70" className="mt-1" />
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-xs">{isRTL ? 'هامش الربح الإجمالي (%)' : 'Gross Margin (%)'}</Label>
-                  <Input type="number" min={0} max={100} step={1} value={grossMarginPct || ''} onChange={e => setGrossMarginPct(parseFloat(e.target.value) || 0)} placeholder="70" className="mt-1" />
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 w-full min-w-0">
-            {[
+            {(businessModel === 'procurement' ? [
+              // Procurement KPI cards
+              { label: isRTL ? 'إجمالي حجم المشتريات (PVF)' : 'Total Procurement Volume (PVF)', value: fmt(kpis.totalRevenue, currency), sub: isRTL ? `من ${kpis.wonCount} طلب مُنجز` : `from ${kpis.wonCount} fulfilled orders`, icon: DollarSign, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/30', accent: 'border-l-4 border-l-emerald-500' },
+              { label: isRTL ? 'إيراد رسوم الخدمة' : 'Service Fee Revenue', value: takeRatePct > 0 ? fmt(kpis.totalRevenue * takeRatePct / 100, currency) : '—', sub: isRTL ? `بمعدل أخذ ${takeRatePct}%` : `at ${takeRatePct}% take rate`, icon: TrendingUp, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30', accent: 'border-l-4 border-l-blue-500' },
+              { label: isRTL ? 'القيمة الدائمة للمشترٍ (LTV)' : 'Buyer LTV', value: (() => { const aov = unitEcon.arpc; const retentionRate = buyerRetentionPct / 100; const churnRate = 1 - retentionRate; const ltv = churnRate > 0 ? aov / churnRate : 0; return ltv > 0 ? fmt(ltv, currency) : '—'; })(), sub: isRTL ? `بمعدل احتفاظ ${buyerRetentionPct}%` : `at ${buyerRetentionPct}% retention`, icon: Repeat, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-900/30', accent: 'border-l-4 border-l-violet-500' },
+              { label: isRTL ? 'نسبة LTV/CAC' : 'LTV / CAC Ratio', value: (() => { const aov = unitEcon.arpc; const retentionRate = buyerRetentionPct / 100; const churnRate = 1 - retentionRate; const ltv = churnRate > 0 ? aov / churnRate : 0; const ratio = cacInput > 0 ? ltv / cacInput : 0; return cacInput > 0 ? `${ratio.toFixed(1)}x` : '—'; })(), sub: (() => { const aov = unitEcon.arpc; const retentionRate = buyerRetentionPct / 100; const churnRate = 1 - retentionRate; const ltv = churnRate > 0 ? aov / churnRate : 0; const ratio = cacInput > 0 ? ltv / cacInput : 0; return ratio >= 3 ? (isRTL ? '✓ ممتاز (≥ 3x)' : '✓ Excellent (≥ 3x)') : ratio >= 1 ? (isRTL ? '⚠ مقبول (1–3x)' : '⚠ Acceptable (1–3x)') : (isRTL ? 'أدخل CAC للحساب' : 'Enter CAC to compute'); })(), icon: Activity, color: (() => { const aov = unitEcon.arpc; const retentionRate = buyerRetentionPct / 100; const churnRate = 1 - retentionRate; const ltv = churnRate > 0 ? aov / churnRate : 0; const ratio = cacInput > 0 ? ltv / cacInput : 0; return ratio >= 3 ? 'text-emerald-600 dark:text-emerald-400' : ratio >= 1 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-500'; })(), bg: (() => { const aov = unitEcon.arpc; const retentionRate = buyerRetentionPct / 100; const churnRate = 1 - retentionRate; const ltv = churnRate > 0 ? aov / churnRate : 0; const ratio = cacInput > 0 ? ltv / cacInput : 0; return ratio >= 3 ? 'bg-emerald-100 dark:bg-emerald-900/30' : ratio >= 1 ? 'bg-yellow-100 dark:bg-yellow-900/30' : 'bg-red-100 dark:bg-red-900/30'; })(), accent: (() => { const aov = unitEcon.arpc; const retentionRate = buyerRetentionPct / 100; const churnRate = 1 - retentionRate; const ltv = churnRate > 0 ? aov / churnRate : 0; const ratio = cacInput > 0 ? ltv / cacInput : 0; return ratio >= 3 ? 'border-l-4 border-l-emerald-500' : ratio >= 1 ? 'border-l-4 border-l-yellow-400' : 'border-l-4 border-l-red-400'; })() },
+            ] : [
+              // Standard KPI cards
               { label: isRTL ? cfg.unitEconLabels.arpcAr : cfg.unitEconLabels.arpc, value: fmt(unitEcon.arpc, currency), sub: isRTL ? `من ${kpis.wonCount} ${cfg.dealLabelAr} مُغلق` : `from ${kpis.wonCount} closed ${cfg.dealLabel}s`, icon: DollarSign, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/30', accent: 'border-l-4 border-l-emerald-500' },
               { label: isRTL ? cfg.unitEconLabels.ltvAr : cfg.unitEconLabels.ltv, value: unitEcon.ltv > 0 ? fmt(unitEcon.ltv, currency) : '—', sub: isRTL ? `عند ${churnRatePct}% معدل تراجع` : `at ${churnRatePct}% churn`, icon: Repeat, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30', accent: 'border-l-4 border-l-blue-500' },
               { label: isRTL ? 'نسبة LTV/CAC' : 'LTV / CAC Ratio', value: cacInput > 0 ? `${unitEcon.ltvCacRatio.toFixed(1)}x` : '—', sub: unitEcon.ltvCacRatio >= 3 ? (isRTL ? '✓ ممتاز (≥ 3x)' : '✓ Excellent (≥ 3x)') : unitEcon.ltvCacRatio >= 1 ? (isRTL ? '⚠ مقبول (1–3x)' : '⚠ Acceptable (1–3x)') : (isRTL ? '✗ تحت الهدف' : '✗ Below target'), icon: Activity, color: unitEcon.ltvCacRatio >= 3 ? 'text-emerald-600 dark:text-emerald-400' : unitEcon.ltvCacRatio >= 1 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-500', bg: unitEcon.ltvCacRatio >= 3 ? 'bg-emerald-100 dark:bg-emerald-900/30' : unitEcon.ltvCacRatio >= 1 ? 'bg-yellow-100 dark:bg-yellow-900/30' : 'bg-red-100 dark:bg-red-900/30', accent: unitEcon.ltvCacRatio >= 3 ? 'border-l-4 border-l-emerald-500' : unitEcon.ltvCacRatio >= 1 ? 'border-l-4 border-l-yellow-400' : 'border-l-4 border-l-red-400' },
               { label: isRTL ? cfg.unitEconLabels.paybackAr : cfg.unitEconLabels.payback, value: cacInput > 0 && unitEcon.paybackMonths > 0 ? `${unitEcon.paybackMonths.toFixed(1)} ${isRTL ? 'شهر' : 'mo'}` : '—', sub: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? (isRTL ? '✓ جيد (≤ 12 شهر)' : '✓ Good (≤ 12 mo)') : unitEcon.paybackMonths > 12 ? (isRTL ? '⚠ طويل (> 12 شهر)' : '⚠ Long (> 12 mo)') : (isRTL ? 'أدخل CAC للحساب' : 'Enter CAC to compute'), icon: Clock, color: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'text-emerald-600 dark:text-emerald-400' : 'text-orange-500', bg: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-orange-100 dark:bg-orange-900/30', accent: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-orange-400' },
-            ].map(card => (
+            ]).map(card => (
               <div key={card.label} className={`rounded-xl bg-card border border-border shadow-sm p-3 flex flex-col gap-2 min-w-0 overflow-hidden ${card.accent}`}>
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{card.label}</p>
@@ -1039,11 +1074,39 @@ export default function SalesTracker() {
                   <tbody>
                     {cfg.benchmarks.map(row => {
                       let yourValue = '—';
-                      if (row.metric === 'LTV/CAC' || row.metricAr === 'نسبة LTV/CAC') yourValue = cacInput > 0 ? `${unitEcon.ltvCacRatio.toFixed(1)}x` : '—';
-                      else if (row.metric.includes('Win Rate') || row.metricAr.includes('الفوز')) yourValue = `${kpis.winRate.toFixed(1)}%`;
-                      else if (row.metric.includes('Gross Margin') || row.metricAr.includes('هامش الربح الإجمالي')) yourValue = `${grossMarginPct}%`;
-                      else if (row.metric.includes('Payback') || row.metricAr.includes('الاسترداد')) yourValue = cacInput > 0 && unitEcon.paybackMonths > 0 ? `${unitEcon.paybackMonths.toFixed(1)} mo` : '—';
-                      else if (row.metric.includes('AOV') || row.metric.includes('Avg Order') || row.metricAr.includes('متوسط قيمة')) yourValue = fmt(unitEcon.arpc, currency);
+                      if (row.metric === 'LTV/CAC' || row.metricAr === 'نسبة LTV/CAC') {
+                        yourValue = cacInput > 0 ? `${unitEcon.ltvCacRatio.toFixed(1)}x` : '—';
+                      } else if (row.metric.includes('Win Rate') || row.metric.includes('Conversion Rate') || row.metricAr.includes('الفوز') || row.metricAr.includes('التحويل')) {
+                        yourValue = `${kpis.winRate.toFixed(1)}%`;
+                      } else if (row.metric.includes('Gross Margin') || row.metricAr.includes('هامش الربح الإجمالي')) {
+                        yourValue = `${grossMarginPct}%`;
+                      } else if (row.metric.includes('Payback') || row.metricAr.includes('الاسترداد')) {
+                        yourValue = cacInput > 0 && unitEcon.paybackMonths > 0 ? `${unitEcon.paybackMonths.toFixed(1)} mo` : '—';
+                      } else if (row.metric.includes('AOV') || row.metric.includes('Avg Order') || row.metricAr.includes('متوسط قيمة')) {
+                        yourValue = fmt(unitEcon.arpc, currency);
+                      } else if (row.metric.includes('Take Rate') || row.metricAr.includes('معدل الأخذ')) {
+                        yourValue = takeRatePct > 0 ? `${takeRatePct}%` : '—';
+                      } else if (row.metric.includes('Buyer Retention') || row.metricAr.includes('الاحتفاظ بالمشترين')) {
+                        yourValue = buyerRetentionPct > 0 ? `${buyerRetentionPct}%` : '—';
+                      } else if (row.metric.includes('Savings vs Market') || row.metricAr.includes('التوفير مقارنة')) {
+                        // Average savings % from fulfilled orders' savingsPct stored in notes JSON prefix
+                        const fulfilledOrders = entries.filter(d => d.dealStage === cfg.wonStage);
+                        const savingsValues = fulfilledOrders.reduce<number[]>((acc, d) => {
+                          try {
+                            const notesStr = d.notes ?? '';
+                            const jsonMatch = notesStr.match(/^\{.*?\}/);
+                            if (jsonMatch) {
+                              const parsed = JSON.parse(jsonMatch[0]);
+                              if (parsed.savingsPct) acc.push(parseFloat(parsed.savingsPct) || 0);
+                            }
+                          } catch {}
+                          return acc;
+                        }, []);
+                        const avgSavings = savingsValues.length > 0
+                          ? savingsValues.reduce((s, v) => s + v, 0) / savingsValues.length
+                          : 0;
+                        yourValue = avgSavings > 0 ? `${avgSavings.toFixed(1)}%` : '—';
+                      }
                       return (
                         <tr key={row.metric} className="border-b border-border/50 last:border-0">
                           <td className="py-2 font-medium text-foreground">{isRTL ? row.metricAr : row.metric}</td>
