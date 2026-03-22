@@ -615,12 +615,12 @@ export default function COGSCalculator() {
                 </div>
               )}
               {directCosts.map(cost => (
-                <div key={cost.id} className="grid grid-cols-12 gap-2 items-end p-3 rounded-lg border border-border bg-muted/20">
-                  <div className="col-span-12 sm:col-span-4">
+                <div key={cost.id} className="flex flex-wrap gap-2 items-end p-3 rounded-lg border border-border bg-muted/20 w-full">
+                  <div className="w-full sm:w-auto sm:flex-[2] min-w-[140px]">
                     <Label className="text-xs">Cost Name</Label>
                     <Input value={cost.name} onChange={e => updateDirectCost(cost.id, 'name', e.target.value)} placeholder="e.g. AWS hosting" className="mt-1 h-8 text-sm" />
                   </div>
-                  <div className="col-span-6 sm:col-span-2">
+                  <div className="flex-1 min-w-[120px]">
                     <Label className="text-xs">Category</Label>
                     <Select value={cost.category} onValueChange={v => updateDirectCost(cost.id, 'category', v as DirectCategory)}>
                       <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
@@ -629,7 +629,7 @@ export default function COGSCalculator() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="col-span-6 sm:col-span-2">
+                  <div className="flex-1 min-w-[110px]">
                     <Label className="text-xs">Type</Label>
                     <Select value={cost.type} onValueChange={v => updateDirectCost(cost.id, 'type', v as CostType)}>
                       <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
@@ -641,7 +641,7 @@ export default function COGSCalculator() {
                     </Select>
                   </div>
                   {/* Fee Type toggle: fixed amount vs % of revenue */}
-                  <div className="col-span-6 sm:col-span-2">
+                  <div className="flex-1 min-w-[110px]">
                     <Label className="text-xs">Fee Type</Label>
                     <Select value={cost.feeType ?? 'fixed'} onValueChange={v => updateDirectCost(cost.id, 'feeType', v as 'fixed' | 'pct')}>
                       <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
@@ -652,7 +652,7 @@ export default function COGSCalculator() {
                     </Select>
                   </div>
                   {cost.feeType === 'pct' ? (
-                    <div className="col-span-5 sm:col-span-2">
+                    <div className="flex-1 min-w-[90px]">
                       <Label className="text-xs">Rate (%)</Label>
                       <div className="relative mt-1">
                         <Input type="number" min={0} max={100} step={0.1} value={cost.amount || ''} onChange={e => updateDirectCost(cost.id, 'amount', parseFloat(e.target.value) || 0)} placeholder="e.g. 2.9" className="h-8 text-sm pr-7" />
@@ -664,23 +664,23 @@ export default function COGSCalculator() {
                     </div>
                   ) : cost.type === 'semi-variable' ? (
                     <>
-                      <div className="col-span-5 sm:col-span-1">
+                      <div className="flex-1 min-w-[90px]">
                         <Label className="text-xs">Fixed ({currency})</Label>
                         <Input type="number" min={0} value={cost.fixedPortion ?? ''} onChange={e => updateDirectCost(cost.id, 'fixedPortion', parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1 h-8 text-sm" />
                       </div>
-                      <div className="col-span-5 sm:col-span-1">
+                      <div className="flex-1 min-w-[90px]">
                         <Label className="text-xs">Var/Unit ({currency})</Label>
                         <Input type="number" min={0} value={cost.variablePortion ?? ''} onChange={e => updateDirectCost(cost.id, 'variablePortion', parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1 h-8 text-sm" />
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="col-span-5 sm:col-span-2">
+                        <div className="flex-1 min-w-[90px]">
                         <Label className="text-xs">{cost.type === 'variable' && cost.perUnit ? `Per Unit (${currency})` : `Monthly (${currency})`}</Label>
                         <Input type="number" min={0} value={cost.amount || ''} onChange={e => updateDirectCost(cost.id, 'amount', parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1 h-8 text-sm" />
                       </div>
                       {cost.type === 'variable' && (
-                        <div className="col-span-5 sm:col-span-1 flex items-center pb-1">
+                        <div className="flex items-center pb-1">
                           <label className="flex items-center gap-1.5 text-xs cursor-pointer">
                             <input type="checkbox" checked={cost.perUnit} onChange={e => updateDirectCost(cost.id, 'perUnit', e.target.checked)} className="rounded" />
                             Per unit
@@ -689,7 +689,7 @@ export default function COGSCalculator() {
                       )}
                     </>
                   )}
-                  <div className="col-span-2 sm:col-span-1 flex items-center pb-1">
+                  <div className="flex items-center pb-1 shrink-0">
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => removeDirectCost(cost.id)}>
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -724,12 +724,12 @@ export default function COGSCalculator() {
                 <p className="text-sm text-muted-foreground text-center py-4">No operating expenses yet.</p>
               )}
               {indirectCosts.map(cost => (
-                <div key={cost.id} className="grid grid-cols-12 gap-2 items-end p-3 rounded-lg border border-border bg-muted/20">
-                  <div className="col-span-12 sm:col-span-5">
+                <div key={cost.id} className="flex flex-wrap gap-2 items-end p-3 rounded-lg border border-border bg-muted/20 w-full">
+                  <div className="w-full sm:w-auto sm:flex-[2] min-w-[140px]">
                     <Label className="text-xs">Expense Name</Label>
                     <Input value={cost.name} onChange={e => updateIndirectCost(cost.id, 'name', e.target.value)} placeholder="e.g. Google Ads" className="mt-1 h-8 text-sm" />
                   </div>
-                  <div className="col-span-6 sm:col-span-3">
+                  <div className="flex-1 min-w-[120px]">
                     <Label className="text-xs">Category</Label>
                     <Select value={cost.category} onValueChange={v => updateIndirectCost(cost.id, 'category', v as IndirectCategory)}>
                       <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
@@ -738,11 +738,11 @@ export default function COGSCalculator() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="col-span-5 sm:col-span-3">
+                  <div className="flex-1 min-w-[100px]">
                     <Label className="text-xs">Monthly ({currency})</Label>
                     <Input type="number" min={0} value={cost.amount || ''} onChange={e => updateIndirectCost(cost.id, 'amount', parseFloat(e.target.value) || 0)} placeholder="0" className="mt-1 h-8 text-sm" />
                   </div>
-                  <div className="col-span-1 flex items-center pb-1">
+                  <div className="flex items-center pb-1 shrink-0">
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => removeIndirectCost(cost.id)}>
                       <Trash2 className="w-4 h-4" />
                     </Button>

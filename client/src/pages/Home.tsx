@@ -10,13 +10,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, Sparkles, Rocket, Users, GitBranch, Target,
   BookOpen, BarChart3, DollarSign, Menu, X, ChevronRight,
-  Gauge, Layers, FileDown, Link2, Check, Building2, MessageCircle,
+  Gauge, Layers, FileDown, Link2, Check, Sun, Moon, Building2, MessageCircle,
   Mail, FileText, Users2, ClipboardCheck, Calendar, Globe,
   UserCircle, LogOut, LogIn, Home as HomeIcon, ShoppingCart, FolderOpen, Shield
 } from 'lucide-react';
 import { useLocation } from 'wouter';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { getLoginUrl } from '@/const';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
@@ -183,6 +183,7 @@ function HomeInner() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [, navigate] = useLocation();
   const { t, isRTL } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
 
   // Persist active tool across refreshes using localStorage + URL hash
   const VALID_TOOL_IDS: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator', 'oqal-notes', 'zest-equity'];
@@ -356,31 +357,31 @@ function HomeInner() {
             )}
           </div>
         );
-      case 'accelerators':    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><AcceleratorRecommender /></div>;
-      case 'equity-split':    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><CoFounderEquitySplit /></div>;
-      case 'dilution':        return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><AdvancedDilutionSimulator /></div>;
-      case 'vesting':         return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><VestingScheduleBuilder /></div>;
-      case 'free-zones':      return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><FreeZones /></div>;
-      case 'readiness':       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><FundraisingReadiness /></div>;
-      case 'pitch-deck':      return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><PitchDeckScorecard /></div>;
-      case 'runway':          return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><RunwayOptimizer /></div>;
-      case 'term-sheet':      return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><TermSheetGlossary /></div>;
-      case 'investor-crm':    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><InvestorCRM /></div>;
+      case 'accelerators':    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><AcceleratorRecommender /></div>;
+      case 'equity-split':    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><CoFounderEquitySplit /></div>;
+      case 'dilution':        return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><AdvancedDilutionSimulator /></div>;
+      case 'vesting':         return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><VestingScheduleBuilder /></div>;
+      case 'free-zones':      return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><FreeZones /></div>;
+      case 'readiness':       return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><FundraisingReadiness /></div>;
+      case 'pitch-deck':      return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><PitchDeckScorecard /></div>;
+      case 'runway':          return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><RunwayOptimizer /></div>;
+      case 'term-sheet':      return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><TermSheetGlossary /></div>;
+      case 'investor-crm':    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><InvestorCRM /></div>;
       case 'profile':         return <StartupProfile />;
-      case 'resources':       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ResourceDatabase /></div>;
-      case 'matching':        return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><InvestorMatcher /></div>;
-      case 'admin':                    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><AdminDashboard /></div>;
+      case 'resources':       return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><ResourceDatabase /></div>;
+      case 'matching':        return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><InvestorMatcher /></div>;
+      case 'admin':                    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><AdminDashboard /></div>;
       case 'ai-market-research':        return <AIMarketResearch />;
       case 'ai-due-diligence':          return <AIDueDiligence />;
       case 'ai-investor-email':         return <AIInvestorEmail />;
       case 'ai-term-sheet':             return <AITermSheetAnalyzer />;
       case 'ai-cofounder-agreement':    return <AICofounderAgreement />;
       case 'ai-fundraising-advisor':    return <AIFundraisingAdvisor />;
-      case 'safe-note':                  return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><SAFENoteBuilder /></div>;
-      case 'nda':                        return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><NDAGenerator /></div>;
-      case 'esop':                       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ESOPPlanner /></div>;
-      case 'startup-directory':          return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><StartupDirectory /></div>;
-      case 'valuation-timeline':         return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ValuationTimeline /></div>;
+      case 'safe-note':                  return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><SAFENoteBuilder /></div>;
+      case 'nda':                        return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><NDAGenerator /></div>;
+      case 'esop':                       return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><ESOPPlanner /></div>;
+      case 'startup-directory':          return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><StartupDirectory /></div>;
+      case 'valuation-timeline':         return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><ValuationTimeline /></div>;
       case 'dashboard':                  return <FounderDashboard onNavigate={(id) => {
         // Map profile sub-section IDs back to the profile page
         const profileSections = ['problem', 'business-model', 'financials', 'traction'];
@@ -390,14 +391,14 @@ function HomeInner() {
           setActiveTool(id as ToolId);
         }
       }} />;
-      case 'cogs':                       return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><COGSCalculator /></div>;
+      case 'cogs':                       return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><COGSCalculator /></div>;
       case 'sales':                      return <SalesTracker />;
       case 'data-room':                  return <DataRoom />;
-      case 'term-sheet-builder':           return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><TermSheetBuilder /></div>;
-      case 'cap-table':                    return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><CapTableManager /></div>;
-      case 'oqal-notes':                   return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><OQALNotes /></div>;
-      case 'zest-equity':                  return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><ZestEquity /></div>;
-      case 'idea-validator':               return <div className="flex-1 overflow-y-auto p-5 lg:p-6"><IdeaValidator /></div>;
+      case 'term-sheet-builder':           return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><TermSheetBuilder /></div>;
+      case 'cap-table':                    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><CapTableManager /></div>;
+      case 'oqal-notes':                   return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><OQALNotes /></div>;
+      case 'zest-equity':                  return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><ZestEquity /></div>;
+      case 'idea-validator':               return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><IdeaValidator /></div>;
       default: return null;
     }
   };
@@ -451,7 +452,6 @@ function HomeInner() {
             <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
             35 tools · Free
           </div>
-          <LanguageSwitcher />
           {chatComplete && chatAnswers && (
             <button
               onClick={handleShare}
@@ -463,6 +463,14 @@ function HomeInner() {
               <span className="hidden sm:inline">{linkCopied ? 'Copied!' : 'Share'}</span>
             </button>
           )}
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-1.5 rounded-lg transition-all hover:bg-secondary/60 text-muted-foreground"
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
           {/* User menu */}
           <div className="relative">
             <button
@@ -625,7 +633,7 @@ function HomeInner() {
                         onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = ''; }}
                       >
                         <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: isActive ? gc.activeIcon : undefined }} />
-                        <span className={`text-xs flex-1 truncate ${isRTL ? 'text-right' : 'text-left'}`}>{item.navKey ? t(item.navKey as any) : item.shortLabel}</span>
+                        <span className="text-xs flex-1 truncate text-left">{item.shortLabel}</span>
                         {effectiveBadge && !isActive && (
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
                             effectiveBadge === 'AI'
@@ -662,11 +670,9 @@ function HomeInner() {
           </div>
         </aside>
 
-        {/* ── Main Content ── */}
-        <main className="flex flex-col flex-1 overflow-hidden">
-          {/* Tool header bar removed — each tool has its own ToolGuide header */}
-
-          <div className="flex flex-1 overflow-hidden">
+         {/* ── Main Content ── */}
+        <main className="flex flex-col flex-1 min-w-0 overflow-hidden">
+          <div className="flex flex-1 min-w-0 overflow-hidden">
             {renderTool()}
           </div>
         </main>

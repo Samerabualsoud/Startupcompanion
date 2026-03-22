@@ -9,7 +9,6 @@ import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 import {
   TrendingUp, Sparkles, Users, GitBranch, Target, BookOpen,
   BarChart3, Rocket, Gauge, Layers, Building2,
@@ -87,8 +86,8 @@ export default function LandingPage() {
 
   return (
     <div
-      className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`}
-      dir={isRTL ? 'rtl' : 'ltr'}
+      className="min-h-screen ltr"
+      dir="ltr"
       style={{ background: BG, color: TEXT_HI, fontFamily: "'Inter', -apple-system, sans-serif" }}
     >
 
@@ -126,7 +125,6 @@ export default function LandingPage() {
                 {link.label}
               </a>
             ))}
-            <LanguageSwitcher />
             {isAuthenticated ? (
               <Link href={APP_PATH}>
                 <button className="text-sm font-semibold px-4 py-2 rounded-md text-white transition-all hover:opacity-90 active:scale-95" style={{ background: BLUE }}>
@@ -166,8 +164,7 @@ export default function LandingPage() {
             <a href="#how" className="block text-sm font-medium py-2" style={{ color: TEXT_MED }} onClick={() => setMobileMenuOpen(false)}>{isRTL ? 'كيف يعمل' : 'How It Works'}</a>
             <a href="#testimonials" className="block text-sm font-medium py-2" style={{ color: TEXT_MED }} onClick={() => setMobileMenuOpen(false)}>{isRTL ? 'آراء المستخدمين' : 'Reviews'}</a>
             <div className="pt-2 flex flex-col gap-2">
-              <LanguageSwitcher />
-              <Link href={ctaPath}>
+                <Link href={ctaPath}>
                 <button className="w-full text-sm font-semibold px-4 py-3 rounded-md text-white" style={{ background: BLUE }} onClick={() => setMobileMenuOpen(false)}>
                   {isRTL ? 'ابدأ مجاناً' : 'Get started free'}
                 </button>

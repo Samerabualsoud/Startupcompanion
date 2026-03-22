@@ -644,3 +644,18 @@
 - [ ] Full Arabic translation coverage for all tool screens
 - [ ] Unit Economics tab in Sales Pipeline Tracker
 - [ ] Visible.vc dark theme applied to all screens
+
+## Round 30 — English Only, Dark/Light Toggle, Admin Panel, Footer, Legal Pages
+- [ ] Remove Arabic language entirely (strip LanguageContext, i18n.ts, language switcher, all isRTL/lang==='ar' code)
+- [ ] Add light/dark theme toggle button to app header and landing page nav
+- [ ] Build full admin panel (/admin): user management, KYC review, resource submissions, platform analytics, content management, audit log
+- [ ] Build adminRouter.ts: getStats, getUsers, updateUserRole, banUser, getAuditLog, getToolUsage, getKYCSubmissions, approveRejectResource
+- [ ] Build site footer component (SiteFooter.tsx) with links to legal pages, social, copyright
+- [ ] Build Terms & Conditions page (/terms) — Saudi PDPL compliant
+- [ ] Build Privacy Policy page (/privacy) — Saudi PDPL compliant
+- [ ] Wire footer into LandingPage, Login, Register, T&C, Privacy pages
+- [ ] Register /terms, /privacy, /admin routes in App.tsx
+- [ ] Fix nav labels showing raw IDs (navZestEquity, navOQALNotes)
+- [ ] Wire AcceleratorRecommender, FundraisingReadiness, PitchDeckScorecard, InvestorCRM, DataRoom → startup profile
+- [ ] 0 TypeScript errors, 31 tests passing
+- [ ] Save checkpoint

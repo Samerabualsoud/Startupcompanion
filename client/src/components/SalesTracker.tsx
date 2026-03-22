@@ -623,7 +623,7 @@ export default function SalesTracker() {
 
   // ── Render ─────────────────────────────────────────────────────────────
   return (
-    <div className={`space-y-5 ${isRTL ? 'rtl' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="space-y-4 w-full min-w-0">
 
       {/* ── Model Selector ── */}
       <div className="flex flex-wrap items-center gap-3 p-4 rounded-xl border border-border bg-card">
@@ -700,14 +700,14 @@ export default function SalesTracker() {
       </div>
 
       {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 w-full min-w-0">
         {[
           { label: isRTL ? cfg.kpiLabels.revenueAr : cfg.kpiLabels.revenue, value: fmt(kpis.totalRevenue, currency), sub: isRTL ? `${kpis.wonCount} ${cfg.dealLabelAr} مُغلق` : `${kpis.wonCount} ${cfg.dealLabel}s closed`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-100', accent: 'border-l-4 border-l-emerald-500' },
           { label: isRTL ? cfg.kpiLabels.pipelineAr : cfg.kpiLabels.pipeline, value: fmt(kpis.pipeline, currency), sub: isRTL ? `${kpis.activeCount} نشط` : `${kpis.activeCount} active`, icon: GitMerge, color: 'text-blue-600', bg: 'bg-blue-100', accent: 'border-l-4 border-l-blue-500' },
           { label: isRTL ? cfg.kpiLabels.weightedAr : cfg.kpiLabels.weighted, value: fmt(kpis.weighted, currency), sub: isRTL ? 'مُعدَّل حسب الاحتمالية' : 'probability-adjusted', icon: BarChart3, color: 'text-violet-600', bg: 'bg-violet-100', accent: 'border-l-4 border-l-violet-500' },
           { label: isRTL ? cfg.kpiLabels.winRateAr : cfg.kpiLabels.winRate, value: `${kpis.winRate.toFixed(1)}%`, sub: isRTL ? `متوسط الصفقة: ${fmt(kpis.avgDealSize, currency)}` : `Avg deal: ${fmt(kpis.avgDealSize, currency)}`, icon: TrendingUp, color: kpis.winRate >= 25 ? 'text-emerald-600' : 'text-orange-500', bg: kpis.winRate >= 25 ? 'bg-emerald-100' : 'bg-orange-100', accent: kpis.winRate >= 25 ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-orange-400' },
         ].map(card => (
-          <div key={card.label} className={`rounded-xl bg-card border border-border shadow-sm p-4 flex flex-col gap-3 ${card.accent}`}>
+          <div key={card.label} className={`rounded-xl bg-card border border-border shadow-sm p-3 flex flex-col gap-2 min-w-0 overflow-hidden ${card.accent}`}>
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{card.label}</p>
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${card.bg}`}>
@@ -715,7 +715,7 @@ export default function SalesTracker() {
               </div>
             </div>
             <div>
-              <p className={`text-2xl font-bold tracking-tight ${card.color}`}>{card.value}</p>
+              <p className={`text-lg font-bold tracking-tight truncate ${card.color}`}>{card.value}</p>
               <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
             </div>
           </div>
@@ -724,7 +724,7 @@ export default function SalesTracker() {
 
       {/* ── Tabs ── */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full justify-start overflow-x-auto">
+        <TabsList className="w-full flex-wrap gap-1 h-auto p-1">
           <TabsTrigger value="pipeline">{isRTL ? 'خط الأنابيب' : 'Pipeline'}</TabsTrigger>
           <TabsTrigger value="list">{isRTL ? `قائمة ${cfg.dealLabelAr}` : `${cfg.dealLabel} List`}</TabsTrigger>
           <TabsTrigger value="revenue">{isRTL ? 'الإيرادات' : 'Revenue'}</TabsTrigger>
@@ -906,20 +906,20 @@ export default function SalesTracker() {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 w-full min-w-0">
             {[
               { label: isRTL ? cfg.unitEconLabels.arpcAr : cfg.unitEconLabels.arpc, value: fmt(unitEcon.arpc, currency), sub: isRTL ? `من ${kpis.wonCount} ${cfg.dealLabelAr} مُغلق` : `from ${kpis.wonCount} closed ${cfg.dealLabel}s`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-100', accent: 'border-l-4 border-l-emerald-500' },
               { label: isRTL ? cfg.unitEconLabels.ltvAr : cfg.unitEconLabels.ltv, value: unitEcon.ltv > 0 ? fmt(unitEcon.ltv, currency) : '—', sub: isRTL ? `عند ${churnRatePct}% معدل تراجع` : `at ${churnRatePct}% churn`, icon: Repeat, color: 'text-blue-600', bg: 'bg-blue-100', accent: 'border-l-4 border-l-blue-500' },
               { label: isRTL ? 'نسبة LTV/CAC' : 'LTV / CAC Ratio', value: cacInput > 0 ? `${unitEcon.ltvCacRatio.toFixed(1)}x` : '—', sub: unitEcon.ltvCacRatio >= 3 ? (isRTL ? '✓ ممتاز (≥ 3x)' : '✓ Excellent (≥ 3x)') : unitEcon.ltvCacRatio >= 1 ? (isRTL ? '⚠ مقبول (1–3x)' : '⚠ Acceptable (1–3x)') : (isRTL ? '✗ تحت الهدف' : '✗ Below target'), icon: Activity, color: unitEcon.ltvCacRatio >= 3 ? 'text-emerald-600' : unitEcon.ltvCacRatio >= 1 ? 'text-yellow-600' : 'text-red-500', bg: unitEcon.ltvCacRatio >= 3 ? 'bg-emerald-100' : unitEcon.ltvCacRatio >= 1 ? 'bg-yellow-100' : 'bg-red-100', accent: unitEcon.ltvCacRatio >= 3 ? 'border-l-4 border-l-emerald-500' : unitEcon.ltvCacRatio >= 1 ? 'border-l-4 border-l-yellow-400' : 'border-l-4 border-l-red-400' },
               { label: isRTL ? cfg.unitEconLabels.paybackAr : cfg.unitEconLabels.payback, value: cacInput > 0 && unitEcon.paybackMonths > 0 ? `${unitEcon.paybackMonths.toFixed(1)} ${isRTL ? 'شهر' : 'mo'}` : '—', sub: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? (isRTL ? '✓ جيد (≤ 12 شهر)' : '✓ Good (≤ 12 mo)') : unitEcon.paybackMonths > 12 ? (isRTL ? '⚠ طويل (> 12 شهر)' : '⚠ Long (> 12 mo)') : (isRTL ? 'أدخل CAC للحساب' : 'Enter CAC to compute'), icon: Clock, color: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'text-emerald-600' : 'text-orange-500', bg: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'bg-emerald-100' : 'bg-orange-100', accent: unitEcon.paybackMonths > 0 && unitEcon.paybackMonths <= 12 ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-orange-400' },
             ].map(card => (
-              <div key={card.label} className={`rounded-xl bg-card border border-border shadow-sm p-4 flex flex-col gap-3 ${card.accent}`}>
+              <div key={card.label} className={`rounded-xl bg-card border border-border shadow-sm p-3 flex flex-col gap-2 min-w-0 overflow-hidden ${card.accent}`}>
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{card.label}</p>
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${card.bg}`}><card.icon className={`w-4 h-4 ${card.color}`} /></div>
                 </div>
                 <div>
-                  <p className={`text-2xl font-bold tracking-tight ${card.color}`}>{card.value}</p>
+                  <p className={`text-lg font-bold tracking-tight truncate ${card.color}`}>{card.value}</p>
                   <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
                 </div>
               </div>

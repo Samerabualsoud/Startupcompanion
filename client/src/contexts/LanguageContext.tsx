@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+/**
+ * LanguageContext — English-only runtime.
+ * Arabic support has been removed from the UI. The hook API and types are
+ * preserved so existing components compile without modification.
+ * All runtime values are fixed to English / LTR.
+ */
+import React, { createContext, useContext, useEffect } from "react";
 import { translations, type Lang, type TranslationKey } from "@/lib/i18n";
 
 interface LanguageContextValue {
@@ -10,43 +16,28 @@ interface LanguageContextValue {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-const STORAGE_KEY = "ai-startup-lang";
-
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "ar" || stored === "en") return stored;
-    // Auto-detect Arabic browser language
-    const browserLang = navigator.language.toLowerCase();
-    if (browserLang.startsWith("ar")) return "ar";
-    return "en";
-  });
-
-  const isRTL = lang === "ar";
-
-  const setLang = (l: Lang) => {
-    setLangState(l);
-    localStorage.setItem(STORAGE_KEY, l);
-  };
-
-  // Apply dir and font to <html>
+  // Always English, always LTR — language switching is disabled
   useEffect(() => {
     const html = document.documentElement;
-    html.setAttribute("dir", isRTL ? "rtl" : "ltr");
-    html.setAttribute("lang", lang);
-    if (isRTL) {
-      html.classList.add("font-arabic");
-    } else {
-      html.classList.remove("font-arabic");
-    }
-  }, [lang, isRTL]);
+    html.setAttribute("dir", "ltr");
+    html.setAttribute("lang", "en");
+    html.classList.remove("font-arabic");
+  }, []);
 
   const t = (key: TranslationKey): string => {
-    return (translations[lang] as Record<string, string>)[key] ?? (translations.en as Record<string, string>)[key] ?? key;
+    return (translations.en as Record<string, string>)[key] ?? key;
+  };
+
+  const value: LanguageContextValue = {
+    lang: "en" as Lang,
+    setLang: () => {}, // no-op — language switching disabled
+    t,
+    isRTL: false,
   };
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t, isRTL }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );

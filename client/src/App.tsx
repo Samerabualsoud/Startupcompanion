@@ -49,7 +49,7 @@ function App() {
       <WouterRouter>
         <ThemeProvider
           defaultTheme="dark"
-          // switchable
+          switchable
         >
           <TooltipProvider>
             <ReportProvider>

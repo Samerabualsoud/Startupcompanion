@@ -366,8 +366,8 @@ export default function AdminDashboard() {
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap relative"
               style={isActive
-                ? { background: 'white', color: 'oklch(0.35 0.2 270)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }
-                : { color: 'oklch(0.5 0.03 240)' }}>
+                ? { background: 'oklch(0.25 0.05 270)', color: 'oklch(0.85 0.1 270)', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }
+                : { color: 'oklch(0.55 0.03 240)' }}>
               <Icon className="w-3.5 h-3.5" />
               {tab.label}
               {tab.badge != null && tab.badge > 0 && (
@@ -480,14 +480,15 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-center h-32"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
           ) : (
             <div className="rounded-xl border border-border overflow-hidden">
-              <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto_auto] gap-0 border-b border-border bg-secondary/30 px-4 py-2.5">
+              <div className="overflow-x-auto">
+              <div className="grid grid-cols-[minmax(160px,1fr)_80px_60px_70px_80px_70px_90px_120px] gap-0 border-b border-border bg-secondary/30 px-4 py-2.5 min-w-[800px]">
                 {['User', 'Type', 'KYC', 'Role', 'Plan', 'Status', 'Joined', 'Actions'].map(h => (
                   <div key={h} className="text-xs font-semibold text-muted-foreground px-2">{h}</div>
                 ))}
               </div>
-              <div className="divide-y divide-border">
+              <div className="divide-y divide-border min-w-[800px]">
                 {filteredUsers.map(u => (
-                  <div key={u.id} className={`grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto_auto] gap-0 px-4 py-3 hover:bg-secondary/20 transition-colors items-center ${u.isBanned ? 'opacity-60 bg-red-50/30' : ''}`}>
+                  <div key={u.id} className={`grid grid-cols-[minmax(160px,1fr)_80px_60px_70px_80px_70px_90px_120px] gap-0 px-4 py-3 hover:bg-secondary/20 transition-colors items-center ${u.isBanned ? 'opacity-60' : ''}`}>
                     <div className="flex items-center gap-3 min-w-0 px-2">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
                         style={{ background: u.isBanned ? '#EF4444' : u.role === 'admin' ? 'oklch(0.45 0.2 270)' : 'oklch(0.35 0.2 270)' }}>
@@ -566,6 +567,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 ))}
+              </div>
               </div>
               <div className="px-4 py-2.5 border-t border-border bg-secondary/10">
                 <p className="text-xs text-muted-foreground">{filteredUsers.length} of {users?.length ?? 0} users</p>
@@ -1196,9 +1198,9 @@ export default function AdminDashboard() {
           </div>
 
           {/* Settings Info */}
-          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 flex gap-3">
-            <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-            <div className="text-xs text-blue-700 leading-relaxed">
+          <div className="rounded-xl border border-border bg-secondary/30 p-4 flex gap-3">
+            <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+            <div className="text-xs text-muted-foreground leading-relaxed">
               <strong>Note: </strong>Settings are saved to the database and take effect immediately. To manage individual resource entries (VCs, angels, grants, lawyers), use the <strong>Database</strong> panel in the Management UI sidebar.
               {platformSettings?.updatedAt && (
                 <span className="block mt-1 text-blue-600">Last updated: {new Date(platformSettings.updatedAt).toLocaleString()}</span>
