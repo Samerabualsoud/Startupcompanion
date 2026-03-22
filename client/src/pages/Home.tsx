@@ -63,7 +63,8 @@ import OQALNotes from '@/components/OQALNotes';
 import ZestEquity from '@/components/ZestEquity';
 import IdeaValidator from '@/components/IdeaValidator';
 import FinancialProjection from '@/components/FinancialProjection';
-type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator' | 'oqal-notes' | 'zest-equity' | 'financial-projection';
+import ProfileSettings from './ProfileSettings';
+type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'profile-settings' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator' | 'oqal-notes' | 'zest-equity' | 'financial-projection';
 
 interface NavItem {
   id: ToolId;
@@ -89,6 +90,7 @@ const NAV_ITEMS: NavItem[] = [
   // Overview
   { id: 'dashboard', tier: 'free',     label: 'Command Center',     shortLabel: 'Overview',   navKey: 'navDashboard',   icon: Gauge,       group: 'My Company',   badge: undefined },
   { id: 'profile', tier: 'free',       label: 'Company Profile',    shortLabel: 'Profile',     navKey: 'navMyStartup',   icon: Building2,   group: 'My Company' },
+  { id: 'profile-settings', tier: 'free', label: 'Public Profile Settings', shortLabel: 'Publish', navKey: 'navProfileSettings', icon: Globe, group: 'My Company', newUntil: '2026-04-01' },
   { id: 'cogs', tier: 'free',          label: 'Unit Economics',        shortLabel: 'Unit Econ.',        navKey: 'navCOGS',        icon: DollarSign,  group: 'My Company',   newUntil: '2026-04-01' },
   { id: 'sales', tier: 'free',         label: 'Revenue Intelligence',          shortLabel: 'Revenue',       navKey: 'navSales',       icon: ShoppingCart, group: 'My Company',  newUntil: '2026-04-01' },
   { id: 'financial-projection', tier: 'free', label: 'Financial Projection', shortLabel: 'Projection', navKey: 'navFinancialProjection', icon: TrendingUp, group: 'My Company', newUntil: '2026-07-01' },
@@ -209,7 +211,7 @@ function HomeInner() {
     methodText:   'var(--muted-foreground)',
   };
   // Persist active tool across refreshes using localStorage + URL hash
-  const VALID_TOOL_IDS: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator', 'oqal-notes', 'zest-equity', 'financial-projection'];
+  const VALID_TOOL_IDS: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'profile-settings', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator', 'oqal-notes', 'zest-equity', 'financial-projection'];
   const getInitialTool = (): ToolId => {
     // 1. Check URL hash first (e.g. /app#equity-split)
     const hash = window.location.hash.replace('#', '') as ToolId;
@@ -392,6 +394,7 @@ function HomeInner() {
       case 'term-sheet':      return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><TermSheetGlossary /></div>;
       case 'investor-crm':    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><InvestorCRM /></div>;
       case 'profile':         return <StartupProfile />;
+      case 'profile-settings': return <ProfileSettings />;
       case 'resources':       return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><ResourceDatabase /></div>;
       case 'matching':        return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><InvestorMatcher /></div>;
       case 'admin':                    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><AdminDashboard /></div>;
