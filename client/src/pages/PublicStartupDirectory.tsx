@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { Link } from "wouter";
-import { Loader2, Search, TrendingUp, DollarSign, ArrowLeft, Bookmark } from "lucide-react";
+import { useLocation } from "wouter";
+import { Loader2, Search, TrendingUp, DollarSign, ArrowLeft, Bookmark, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-
 export default function PublicStartupDirectory() {
+  const [, navigate] = useLocation();
   const [page, setPage] = useState(1);
   const [sector, setSector] = useState<string>("");
   const [stage, setStage] = useState<string>("");
@@ -53,23 +53,22 @@ export default function PublicStartupDirectory() {
   ];
   const countries = ["Saudi Arabia", "UAE", "Egypt", "Kuwait", "Qatar", "Bahrain", "Oman"];
 
-  // Filter profiles by search term
-  const filteredProfiles = directory?.profiles.filter((p) =>
+  // Filter profiles by search term (client-side for instant feedback)
+  const filteredProfiles = (directory?.profiles || []).filter((p) =>
+    !search ||
     p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.tagline?.toLowerCase().includes(search.toLowerCase())
-  ) || [];
+    (p.tagline?.toLowerCase().includes(search.toLowerCase()))
+  );
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-card border-b border-border sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              Back to Home
-            </Button>
-          </Link>
+          <Button variant="ghost" size="sm" className="gap-2" onClick={() => navigate("/")}>
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home
+          </Button>
           <div className="text-right">
             <h1 className="text-2xl font-bold">Startup Directory</h1>
             <p className="text-sm text-muted-foreground">
@@ -82,81 +81,52 @@ export default function PublicStartupDirectory() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Description */}
-        <div className="mb-8">
-          <p className="text-muted-foreground mb-6">
-            Discover startups building on Polaris Arabia — searchable by sector, stage, and country.
-            Make your profile public from the Startup Profile page to appear here.
-          </p>
+        <p className="text-muted-foreground mb-6">
+          Discover startups building on Polaris Arabia — searchable by sector, stage, and country.
+          Make your profile public from the <strong>Startup Profile</strong> page to appear here.
+        </p>
 
-          {/* Search */}
-          <div className="mb-6">
-            <Input
-              placeholder="Search startups by name, tagline, or description..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full"
-            />
-          </div>
+        {/* Search */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search startups by name or tagline..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 w-full"
+          />
+        </div>
 
-          {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div>
-              <label className="block text-sm font-medium mb-2">Sector</label>
-              <select
-                value={sector}
-                onChange={(e) => {
-                  setSector(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
-              >
-                <option value="">All Sectors</option>
-                {sectors.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </div>
+        {/* Filters */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <select
+            value={sector}
+            onChange={(e) => { setSector(e.target.value); setPage(1); }}
+            className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm"
+          >
+            <option value="">All Sectors</option>
+            {sectors.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Stage</label>
-              <select
-                value={stage}
-                onChange={(e) => {
-                  setStage(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
-              >
-                <option value="">All Stages</option>
-                {stages.map((s) => (
-                  <option key={s} value={s}>
-                    {s.charAt(0).toUpperCase() + s.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <select
+            value={stage}
+            onChange={(e) => { setStage(e.target.value); setPage(1); }}
+            className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm"
+          >
+            <option value="">All Stages</option>
+            {stages.map((s) => (
+              <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+            ))}
+          </select>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Country</label>
-              <select
-                value={country}
-                onChange={(e) => {
-                  setCountry(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
-              >
-                <option value="">All Countries</option>
-                {countries.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+          <select
+            value={country}
+            onChange={(e) => { setCountry(e.target.value); setPage(1); }}
+            className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm"
+          >
+            <option value="">All Countries</option>
+            {countries.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
         </div>
 
         {/* Results */}
@@ -164,127 +134,119 @@ export default function PublicStartupDirectory() {
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin" />
           </div>
-        ) : !filteredProfiles || filteredProfiles.length === 0 ? (
+        ) : filteredProfiles.length === 0 ? (
           <div className="text-center py-20">
             <h3 className="text-lg font-semibold mb-2">No startups found</h3>
-            <p className="text-muted-foreground">Try adjusting your filters</p>
+            <p className="text-muted-foreground">Try adjusting your filters or search term</p>
           </div>
         ) : (
           <>
+            <p className="text-sm text-muted-foreground mb-4">
+              Showing {filteredProfiles.length} startup{filteredProfiles.length !== 1 ? "s" : ""}
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
               {filteredProfiles.map((startup) => (
-                <Link key={startup.id} href={`/startup/${startup.slug}`}>
-                  <Card className="p-6 hover:shadow-lg transition-shadow h-full flex flex-col relative">
-                    {/* Bookmark Button */}
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (savedIds.has(startup.id)) {
-                          unsaveProfile({ startupProfileId: startup.id });
-                        } else {
-                          saveProfile({ startupProfileId: startup.id });
-                        }
-                      }}
-                      className="absolute top-4 right-4 p-2 rounded-lg hover:bg-secondary transition-colors"
-                      title={savedIds.has(startup.id) ? "Remove from watchlist" : "Add to watchlist"}
-                    >
-                      <Bookmark
-                        className="w-5 h-5"
-                        fill={savedIds.has(startup.id) ? "currentColor" : "none"}
-                        color={savedIds.has(startup.id) ? "#3b82f6" : "currentColor"}
+                <Card
+                  key={startup.id}
+                  className="p-6 hover:shadow-lg transition-shadow flex flex-col relative cursor-pointer"
+                  onClick={() => navigate(`/startup/${startup.slug}`)}
+                >
+                  {/* Bookmark Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (savedIds.has(startup.id)) {
+                        unsaveProfile({ startupProfileId: startup.id });
+                      } else {
+                        saveProfile({ startupProfileId: startup.id });
+                      }
+                    }}
+                    className="absolute top-4 right-4 p-2 rounded-lg hover:bg-secondary transition-colors z-10"
+                    title={savedIds.has(startup.id) ? "Remove from watchlist" : "Save to watchlist"}
+                  >
+                    <Bookmark
+                      className="w-5 h-5"
+                      fill={savedIds.has(startup.id) ? "currentColor" : "none"}
+                      color={savedIds.has(startup.id) ? "#3b82f6" : "currentColor"}
+                    />
+                  </button>
+
+                  {/* Logo & Name */}
+                  <div className="flex items-center gap-3 mb-3 pr-8">
+                    {startup.logoUrl ? (
+                      <img
+                        src={startup.logoUrl}
+                        alt={startup.name}
+                        className="w-12 h-12 rounded-lg object-contain bg-secondary flex-shrink-0"
                       />
-                    </button>
-
-                    {/* Logo & Header */}
-                    <div className="flex items-start gap-4 mb-4 cursor-pointer">
-                      <Link href={`/startup/${startup.slug}`} className="flex items-start gap-4 flex-1">
-                      {startup.logoUrl ? (
-                        <img
-                          src={startup.logoUrl}
-                          alt={startup.name}
-                          className="w-16 h-16 rounded-lg object-contain bg-secondary"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 rounded-lg bg-secondary flex items-center justify-center">
-                          <span className="text-xl font-bold text-muted-foreground">
-                            {startup.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                      )}
-                        <div className="flex-1">
-                          <h3 className="font-bold text-lg mb-1">{startup.name}</h3>
-                          {startup.verified && (
-                            <span className="inline-block px-2 py-0.5 bg-green-100 text-green-800 text-xs font-semibold rounded">
-                              Verified
-                            </span>
-                          )}
-                        </div>
-                      </Link>
-                    </div>
-
-                    <Link href={`/startup/${startup.slug}`}>
-                      {/* Tagline */}
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                        <span className="text-lg font-bold text-muted-foreground">
+                          {startup.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-base truncate">{startup.name}</h3>
                       {startup.tagline && (
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                          {startup.tagline}
-                        </p>
+                        <p className="text-xs text-muted-foreground truncate">{startup.tagline}</p>
                       )}
+                    </div>
+                  </div>
 
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {startup.stage && (
-                          <span className="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded">
-                            {startup.stage}
-                          </span>
-                        )}
-                        {startup.sector && (
-                          <span className="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded">
-                            {startup.sector}
-                          </span>
-                        )}
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {startup.stage && (
+                      <span className="px-2 py-0.5 bg-secondary text-secondary-foreground text-xs rounded-full">
+                        {startup.stage}
+                      </span>
+                    )}
+                    {startup.sector && (
+                      <span className="px-2 py-0.5 bg-secondary text-secondary-foreground text-xs rounded-full">
+                        {startup.sector}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Location */}
+                  {(startup.city || startup.country) && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
+                      <MapPin className="w-3 h-3" />
+                      <span>{[startup.city, startup.country].filter(Boolean).join(", ")}</span>
+                    </div>
+                  )}
+
+                  {/* Metrics */}
+                  <div className="flex-1 space-y-1.5">
+                    {startup.targetRaise && (
+                      <div className="flex items-center gap-2 text-xs font-medium text-green-600">
+                        <DollarSign className="w-3 h-3" />
+                        <span>Raising ${(startup.targetRaise / 1000).toFixed(0)}K</span>
                       </div>
-
-                      {/* Metrics */}
-                      <div className="flex-1 space-y-2 mb-4">
-                        {startup.totalRaised && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <DollarSign className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">
-                              Raised: ${(startup.totalRaised / 1000000).toFixed(1)}M
-                            </span>
-                          </div>
-                        )}
-                        {startup.currentARR && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <TrendingUp className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">
-                              ARR: ${(startup.currentARR / 1000000).toFixed(1)}M
-                            </span>
-                          </div>
-                        )}
+                    )}
+                    {startup.currentARR && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <TrendingUp className="w-3 h-3" />
+                        <span>ARR: ${(startup.currentARR / 1000).toFixed(0)}K</span>
                       </div>
+                    )}
+                  </div>
 
-                      {/* AI Score */}
-                      {startup.aiScore && (
-                        <div className="flex items-center justify-between pt-4 border-t border-border">
-                          <span className="text-sm text-muted-foreground">AI Score</span>
-                          <span className="text-lg font-bold text-accent">{startup.aiScore}/100</span>
-                        </div>
-                      )}
-                    </Link>
-                  </Card>
-                </Link>
+                  {/* AI Score */}
+                  {startup.aiScore && (
+                    <div className="flex items-center justify-between pt-3 mt-3 border-t border-border">
+                      <span className="text-xs text-muted-foreground">AI Score</span>
+                      <span className="text-sm font-bold text-primary">{startup.aiScore}/100</span>
+                    </div>
+                  )}
+                </Card>
               ))}
             </div>
 
             {/* Pagination */}
             {directory?.pagination && directory.pagination.totalPages > 1 && (
               <div className="flex items-center justify-center gap-2">
-                <Button
-                  variant="outline"
-                  disabled={page === 1}
-                  onClick={() => setPage(page - 1)}
-                >
+                <Button variant="outline" disabled={page === 1} onClick={() => setPage(page - 1)}>
                   Previous
                 </Button>
                 <span className="text-sm text-muted-foreground">
