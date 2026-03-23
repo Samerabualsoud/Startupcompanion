@@ -12,7 +12,7 @@ import {
   BookOpen, BarChart3, DollarSign, Menu, X, ChevronRight,
   Gauge, Layers, FileDown, Link2, Check, Sun, Moon, Monitor, Building2, MessageCircle,
   Mail, FileText, Users2, ClipboardCheck, Calendar, Globe,
-  UserCircle, LogOut, LogIn, Home as HomeIcon, ShoppingCart, FolderOpen, Shield
+  UserCircle, LogOut, LogIn, Home as HomeIcon, ShoppingCart, FolderOpen, Shield, Heart
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useLanguage } from '@/contexts/LanguageContext';
