@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { APP_PATH, REGISTER_PATH, LOGIN_PATH } from '@/const';
 import SiteFooter from '@/components/SiteFooter';
+import FeaturedStartups from '@/components/FeaturedStartups';
 
 // ── Design tokens (Visible.vc dark) ──────────────────────────────────────────
 const BG        = 'oklch(0.165 0 0)';       // #202020
@@ -424,6 +425,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Featured Startups ── */}
+      <FeaturedStartups />
 
       {/* ── CTA ── */}
       <section className="py-20 px-5" style={{ background: BG }}>

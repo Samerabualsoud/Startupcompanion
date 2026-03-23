@@ -339,6 +339,35 @@ export const publicProfileRouter = router({
     }),
 
   /**
+   * Get featured profiles for landing page (top 6 by view count)
+   */
+  getFeaturedProfiles: publicProcedure.query(async () => {
+    const database = await getDb();
+    if (!database) throw new Error("Database not available");
+
+    const profiles = await database.select().from(startupProfiles).where(
+      eq(startupProfiles.isPublicProfilePublished, true)
+    ).limit(6);
+
+    return profiles.map((p: any) => ({
+      id: p.id,
+      slug: p.publicProfileSlug,
+      name: p.name,
+      tagline: p.tagline,
+      description: p.description,
+      logoUrl: p.publicProfileLogoUrl || p.logoUrl,
+      stage: p.stage,
+      sector: p.sector,
+      country: p.country,
+      city: p.city,
+      targetRaise: p.targetRaise,
+      totalRaised: p.totalRaised,
+      viewCount: p.publicProfileViewCount ?? 0,
+      verified: p.publicProfileVerified ?? false,
+    }));
+  }),
+
+  /**
    * Get directory stats
    */
   getDirectoryStats: publicProcedure.query(async () => {

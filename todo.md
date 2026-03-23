@@ -758,3 +758,9 @@
 - [x] Fix StartupProfile.tsx: Add file upload handler for logo (same as ProfileSettings)
 - [x] Fix LandingPage.tsx: Add "Startup Directory" link to navigation menu
 - [ ] Fix LandingPage.tsx: Add "Startup Directory" to tools grid or features section
+
+## Round 27 — Featured Startups on Landing Page
+- [ ] Add public API endpoint to fetch top 6 featured/published profiles
+- [ ] Build FeaturedStartups section component with cards
+- [ ] Integrate section into LandingPage.tsx between hero and features sections
+- [ ] Add "View All Startups" CTA linking to /startups directory
