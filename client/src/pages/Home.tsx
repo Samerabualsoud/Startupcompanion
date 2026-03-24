@@ -193,17 +193,17 @@ function HomeInner() {
   const isDark = theme === 'dark';
   // Theme-aware color tokens for inline styles (using CSS variables)
   const C = {
-    sidebarBg:    'var(--card)',
-    sidebarBorder:'1px solid var(--border)',
-    headerBg:     'var(--background)',
+    sidebarBg:    'var(--sidebar)',
+    sidebarBorder:'1px solid var(--sidebar-border)',
+    headerBg:     'var(--card)',
     headerBorder: 'var(--border)',
     contentBg:    'var(--background)',
     navText:      'var(--muted-foreground)',
-    navHover:     'var(--secondary)',
-    groupHeader:  'var(--muted-foreground)',
-    activeBg:     'color-mix(in srgb, var(--primary) 12%, transparent)',
-    activeText:   'var(--primary)',
-    activeIcon:   'var(--primary)',
+    navHover:     isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+    groupHeader:  isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)',
+    activeBg:     isDark ? 'rgba(79,110,247,0.15)' : 'rgba(37,99,235,0.08)',
+    activeText:   isDark ? '#7B93FF' : '#1D4ED8',
+    activeIcon:   isDark ? '#7B93FF' : '#2563EB',
     chatPanelBg:  'var(--background)',
     chatHeaderBg: 'var(--card)',
     chatHeaderText:'var(--foreground)',
@@ -636,7 +636,7 @@ function HomeInner() {
               const gc = groupColors[group] ?? groupColors['Overview'];
               return (
                 <div key={group} className="mb-3">
-                  <div className="text-[9px] font-extrabold uppercase tracking-widest px-3 mb-1.5 flex items-center gap-1.5" style={{ color: gc.header }}>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.08em] px-3 mb-1.5 flex items-center gap-1.5 opacity-60" style={{ color: gc.header }}>
                     <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: gc.header }} />
                     {groupLabel[group] || group}
                   </div>
@@ -648,13 +648,16 @@ function HomeInner() {
                       <button
                         key={item.id}
                         onClick={() => { setActiveTool(item.id); setSidebarOpen(false); }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl mb-0.5 transition-all ${isRTL ? 'flex-row-reverse' : ''}`}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg mb-0.5 transition-all ${isRTL ? 'flex-row-reverse' : ''}`}
                         style={isActive ? {
                           background: gc.activeBg,
                           color: gc.activeText,
                           fontWeight: 600,
+                          borderLeft: "2.5px solid " + gc.activeIcon,
+                          paddingLeft: '10px',
                         } : {
                           color: C.navText,
+                          borderLeft: '2px solid transparent',
                         }}
                         onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = C.navHover; }}
                         onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = ''; }}
