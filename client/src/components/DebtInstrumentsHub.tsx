@@ -4,10 +4,9 @@
  */
 
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Shield, TrendingUp, DollarSign } from 'lucide-react';
+import { FileText, Shield, TrendingUp, DollarSign, ArrowRight } from 'lucide-react';
 import SAFENoteBuilder from './SAFENoteBuilder';
 import OQALNotes from './OQALNotes';
 import ZestEquity from './ZestEquity';
@@ -21,6 +20,8 @@ export default function DebtInstrumentsHub() {
       label: 'SAFE & Convertible',
       icon: FileText,
       color: '#7C3AED',
+      bgColor: '#7C3AED15',
+      borderColor: '#7C3AED40',
       description: 'Simple Agreements for Future Equity',
       badge: 'Standard',
       component: <SAFENoteBuilder />,
@@ -30,6 +31,8 @@ export default function DebtInstrumentsHub() {
       label: 'OQAL Notes',
       icon: Shield,
       color: '#10B981',
+      bgColor: '#10B98115',
+      borderColor: '#10B98140',
       description: 'Shariah-compliant financing',
       badge: 'Shariah',
       component: <OQALNotes />,
@@ -39,88 +42,139 @@ export default function DebtInstrumentsHub() {
       label: 'Zest Equity',
       icon: TrendingUp,
       color: '#4F6EF7',
+      bgColor: '#4F6EF715',
+      borderColor: '#4F6EF740',
       description: 'Cap table & equity tracking',
       badge: 'Equity',
       component: <ZestEquity />,
     },
   ];
 
+  const activeInstrument = instruments.find(i => i.id === activeTab);
+
   return (
-    <div className="flex flex-col h-full w-full min-h-0 gap-4 p-4 lg:p-6 overflow-hidden">
-      {/* Header - Compact */}
+    <div className="flex flex-col h-full w-full min-h-0 gap-5 p-4 lg:p-6 overflow-hidden">
+      {/* Header */}
       <div className="shrink-0">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Debt & Equity</h1>
-        <p className="text-sm text-muted-foreground">Manage financing instruments in one place</p>
+        <h1 className="text-3xl font-bold text-foreground mb-2">Debt Instruments & Equity</h1>
+        <p className="text-sm text-muted-foreground">Manage all your financing instruments in one unified hub</p>
       </div>
 
-      {/* Quick Overview Cards - Horizontal Scroll on Mobile */}
-      <div className="shrink-0 overflow-x-auto">
-        <div className="flex gap-3 pb-2">
-          {instruments.map((instrument) => {
-            const Icon = instrument.icon;
-            return (
-              <button
-                key={instrument.id}
-                onClick={() => setActiveTab(instrument.id)}
-                className={`flex-shrink-0 p-3 rounded-lg border transition-all ${
-                  activeTab === instrument.id
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
-                style={{ minWidth: '140px' }}
-              >
-                <div className="flex items-center gap-2 mb-1">
+      {/* Navigation Cards - Grid Layout */}
+      <div className="shrink-0 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {instruments.map((instrument) => {
+          const Icon = instrument.icon;
+          const isActive = activeTab === instrument.id;
+          return (
+            <button
+              key={instrument.id}
+              onClick={() => setActiveTab(instrument.id)}
+              className={`relative p-4 rounded-xl border-2 transition-all duration-200 text-left group overflow-hidden ${
+                isActive
+                  ? `border-[${instrument.borderColor}] bg-[${instrument.bgColor}]`
+                  : 'border-border hover:border-primary/50 bg-card hover:bg-accent/5'
+              }`}
+              style={{
+                borderColor: isActive ? instrument.borderColor : undefined,
+                backgroundColor: isActive ? instrument.bgColor : undefined,
+              }}
+            >
+              {/* Background gradient on hover */}
+              <div
+                className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
+                style={{ backgroundColor: instrument.color }}
+              />
+
+              {/* Content */}
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-3">
                   <div
-                    className="p-1.5 rounded"
+                    className="p-2.5 rounded-lg"
                     style={{ backgroundColor: `${instrument.color}20` }}
                   >
-                    <Icon className="w-4 h-4" style={{ color: instrument.color }} />
+                    <Icon className="w-5 h-5" style={{ color: instrument.color }} />
                   </div>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge
+                    variant={isActive ? 'default' : 'secondary'}
+                    className="text-xs"
+                    style={isActive ? { backgroundColor: instrument.color } : {}}
+                  >
                     {instrument.badge}
                   </Badge>
                 </div>
-                <p className="text-xs font-medium text-foreground">{instrument.label}</p>
-              </button>
-            );
-          })}
+
+                <h3 className="font-semibold text-foreground mb-1">{instrument.label}</h3>
+                <p className="text-xs text-muted-foreground mb-3">{instrument.description}</p>
+
+                {/* Active indicator */}
+                {isActive && (
+                  <div className="flex items-center gap-1 text-xs font-medium" style={{ color: instrument.color }}>
+                    Active <ArrowRight className="w-3 h-3" />
+                  </div>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Content Area - Scrollable */}
+      <div className="flex-1 min-h-0 overflow-hidden rounded-lg border border-border bg-card">
+        {/* Active Instrument Header */}
+        <div className="shrink-0 px-4 lg:px-6 py-4 border-b border-border bg-gradient-to-r" style={{
+          backgroundImage: `linear-gradient(135deg, ${activeInstrument?.bgColor || '#f5f5f5'}, transparent)`
+        }}>
+          <div className="flex items-center gap-3">
+            {activeInstrument && (
+              <>
+                <div
+                  className="p-2.5 rounded-lg"
+                  style={{ backgroundColor: `${activeInstrument.color}20` }}
+                >
+                  {(() => {
+                    const Icon = activeInstrument.icon;
+                    return <Icon className="w-5 h-5" style={{ color: activeInstrument.color }} />;
+                  })()}
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-foreground">{activeInstrument.label}</h2>
+                  <p className="text-xs text-muted-foreground">{activeInstrument.description}</p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Content Scroll Area */}
+        <div className="h-full overflow-y-auto">
+          {instruments.map((instrument) => (
+            <div
+              key={instrument.id}
+              className={activeTab === instrument.id ? 'block' : 'hidden'}
+            >
+              {instrument.component}
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Tabs Content - Flex 1 with proper constraints */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        <TabsList className="grid w-full grid-cols-3 shrink-0 mb-3">
-          {instruments.map((instrument) => (
-            <TabsTrigger key={instrument.id} value={instrument.id} className="text-xs sm:text-sm">
-              {instrument.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {/* Tab Content - Scrollable */}
-        <div className="flex-1 min-h-0 overflow-hidden">
-          {instruments.map((instrument) => (
-            <TabsContent
-              key={instrument.id}
-              value={instrument.id}
-              className="h-full overflow-y-auto m-0 p-0"
-            >
-              <div className="h-full overflow-y-auto">
-                {instrument.component}
-              </div>
-            </TabsContent>
-          ))}
-        </div>
-      </Tabs>
-
-      {/* Info Section - Compact */}
-      <div className="shrink-0 text-xs bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg p-3">
-        <div className="flex gap-2 items-start">
-          <DollarSign className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <p><strong>SAFE & Convertible:</strong> Debt instruments that convert to equity</p>
-            <p><strong>OQAL Notes:</strong> Shariah-compliant financing for Islamic markets</p>
-            <p><strong>Zest Equity:</strong> Cap table and equity management</p>
+      {/* Info Footer */}
+      <div className="shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-900/50 rounded-lg p-4">
+        <div className="flex gap-3 items-start">
+          <DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+          <div className="space-y-1.5 text-sm">
+            <div>
+              <strong className="text-foreground">SAFE & Convertible:</strong>
+              <p className="text-xs text-muted-foreground">Flexible debt instruments that convert to equity at future funding rounds</p>
+            </div>
+            <div>
+              <strong className="text-foreground">OQAL Notes:</strong>
+              <p className="text-xs text-muted-foreground">Shariah-compliant financing for Islamic markets and investors</p>
+            </div>
+            <div>
+              <strong className="text-foreground">Zest Equity:</strong>
+              <p className="text-xs text-muted-foreground">Comprehensive cap table and equity management tool</p>
+            </div>
           </div>
         </div>
       </div>
