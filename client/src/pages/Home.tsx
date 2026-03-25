@@ -138,11 +138,9 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'ai-term-sheet', tier: 'enterprise',          label: 'Term Sheet Intelligence', shortLabel: 'Term Intel',   navKey: 'navAITermAnalyzer', icon: FileText,      group: 'AI Advisory', badge: 'AI' },
   { id: 'ai-cofounder-agreement', tier: 'pro', label: 'Co-founder Agreement Drafter',shortLabel: 'Co-founder',   navKey: 'navAICofounder', icon: Users2,        group: 'AI Advisory', badge: 'AI' },
   { id: 'ai-due-diligence', tier: 'enterprise',       label: 'Due Diligence Analyzer',       shortLabel: 'Due Diligence',   navKey: 'navAIDueDiligence', icon: ClipboardCheck,group: 'AI Advisory', badge: 'AI' },
-  // Financing Instruments
-
 ];
 
-const GROUPS = ['My Company', 'Valuation', 'Equity & Ownership', 'Capital Raising', 'Legal & Compliance', 'Market Intelligence', 'Ecosystem Network', 'AI Advisory', 'Admin'];
+const GROUPS = ['My Company', 'Valuation', 'Equity & Ownership', 'Capital Raising', 'Fundraising', 'Legal & Compliance', 'Market Intelligence', 'Ecosystem Network', 'AI Advisory', 'Admin'];
 const TOOL_COLORS: Record<ToolId, string> = {
   dashboard: '#0F1B2D',
   cogs: '#059669',
@@ -179,6 +177,8 @@ const TOOL_COLORS: Record<ToolId, string> = {
 
   'idea-validator': '#EC4899',
   'financial-projection': '#10B981',
+  'profile-settings': '#2D4A6B',
+  'saved-startups': '#10B981',
 };
 
 function HomeInner() {
