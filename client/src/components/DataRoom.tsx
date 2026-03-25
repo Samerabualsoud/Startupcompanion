@@ -237,29 +237,29 @@ export default function DataRoom() {
   return (
     <div className={`flex h-full ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
       {/* ── Left Panel: Room List ── */}
-      <div className="w-64 shrink-0 border-r border-border flex flex-col bg-card">
+      <div className="w-72 shrink-0 border-r border-border flex flex-col bg-gradient-to-b from-background to-muted/10">
         {/* Sidebar Header */}
-        <div className="px-4 pt-4 pb-3 border-b border-border">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                <FolderOpen className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+        <div className="px-5 pt-5 pb-4 border-b border-border/50">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-sm">
+                <FolderOpen className="w-4 h-4 text-white" />
               </div>
-              <h2 className="text-sm font-bold text-foreground">Data Rooms</h2>
+              <div>
+                <h2 className="text-sm font-bold text-foreground">Data Rooms</h2>
+                <p className="text-[10px] text-muted-foreground">Secure sharing & tracking</p>
+              </div>
             </div>
             <Button
               size="sm"
               variant="ghost"
-              className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
               onClick={() => setShowCreateRoom(true)}
               title="New data room"
             >
               <Plus className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-[10px] text-muted-foreground leading-relaxed">
-            Secure document sharing with viewer tracking
-          </p>
         </div>
 
         {/* Room List */}
