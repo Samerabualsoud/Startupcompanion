@@ -334,7 +334,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
       </div>
 
       {/* ── Tab Content ── */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         {activeTab === 'report' && (
           <div className="p-5 space-y-6 max-w-full">
             {/* Bar Chart */}
@@ -343,7 +343,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
                 <h3 className="text-sm font-semibold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{isRTL ? 'التقييم حسب الطريقة' : 'Valuation by Method'}</h3>
                 <span className="text-[10px] text-muted-foreground font-mono">{isRTL ? 'القيم بالمليون $' : 'Values in $M'}</span>
               </div>
-              <div className="w-full" style={{ height: '220px', overflow: 'hidden' }}>
+              <div className="w-full" style={{ height: '220px', maxHeight: '220px', overflow: 'hidden' }}>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 55 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -424,7 +424,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
             {/* Scorecard Radar */}
             <div className="border border-border rounded-lg p-4 bg-card">
               <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{isRTL ? 'بطاقة أداء الفريق والمنتج' : 'Team & Product Scorecard'}</h3>
-              <div className="w-full" style={{ height: '200px', overflow: 'hidden' }}>
+              <div className="w-full" style={{ height: '200px', maxHeight: '200px', overflow: 'hidden' }}>
               <ResponsiveContainer width="100%" height={200}>
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="var(--border)" />
