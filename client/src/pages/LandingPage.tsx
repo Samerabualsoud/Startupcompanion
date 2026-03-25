@@ -124,10 +124,8 @@ export default function LandingPage() {
               { href: '/startups', label: isRTL ? 'دليل الشركات الناشئة' : 'Startup Directory', isLink: true },
             ].map(link => (
               (link as any).isLink ? (
-                <Link key={link.href} href={link.href}>
-                  <a className="text-sm font-medium transition-colors hover:opacity-80" style={{ color: TEXT_MED }}>
-                    {link.label}
-                  </a>
+                <Link key={link.href} href={link.href} className="text-sm font-medium transition-colors hover:opacity-80" style={{ color: TEXT_MED }}>
+                  {link.label}
                 </Link>
               ) : (
                 <a key={link.href} href={link.href} className="text-sm font-medium transition-colors hover:opacity-80" style={{ color: TEXT_MED }}>
@@ -136,22 +134,16 @@ export default function LandingPage() {
               )
             ))}
             {isAuthenticated ? (
-              <Link href={APP_PATH}>
-                <button className="text-sm font-semibold px-4 py-2 rounded-md text-white transition-all hover:opacity-90 active:scale-95" style={{ background: BLUE }}>
-                  {isRTL ? 'فتح التطبيق' : 'Open App'}
-                </button>
+              <Link href={APP_PATH} className="text-sm font-semibold px-4 py-2 rounded-md text-white transition-all hover:opacity-90 active:scale-95" style={{ background: BLUE }}>
+                {isRTL ? 'فتح التطبيق' : 'Open App'}
               </Link>
             ) : (
               <div className="flex items-center gap-2">
-                <Link href={LOGIN_PATH}>
-                  <button className="text-sm font-medium px-3 py-2 rounded-md transition-colors hover:bg-white/5" style={{ color: TEXT_MED }}>
-                    {isRTL ? 'تسجيل الدخول' : 'Sign in'}
-                  </button>
+                <Link href={LOGIN_PATH} className="text-sm font-medium px-3 py-2 rounded-md transition-colors hover:bg-white/5" style={{ color: TEXT_MED }}>
+                  {isRTL ? 'تسجيل الدخول' : 'Sign in'}
                 </Link>
-                <Link href={REGISTER_PATH}>
-                  <button className="text-sm font-semibold px-4 py-2 rounded-md text-white transition-all hover:opacity-90 active:scale-95" style={{ background: BLUE }}>
-                    {isRTL ? 'ابدأ مجاناً' : 'Get started free'}
-                  </button>
+                <Link href={REGISTER_PATH} className="text-sm font-semibold px-4 py-2 rounded-md text-white transition-all hover:opacity-90 active:scale-95" style={{ background: BLUE }}>
+                  {isRTL ? 'ابدأ مجاناً' : 'Get started free'}
                 </Link>
               </div>
             )}
@@ -173,15 +165,13 @@ export default function LandingPage() {
               <a href="#tools" className="block text-sm font-medium py-2" style={{ color: TEXT_MED }} onClick={() => setMobileMenuOpen(false)}>{isRTL ? 'الأدوات' : 'Tools'}</a>
               <a href="#how" className="block text-sm font-medium py-2" style={{ color: TEXT_MED }} onClick={() => setMobileMenuOpen(false)}>{isRTL ? 'كيف يعمل' : 'How It Works'}</a>
               <a href="#testimonials" className="block text-sm font-medium py-2" style={{ color: TEXT_MED }} onClick={() => setMobileMenuOpen(false)}>{isRTL ? 'آراء المستخدمين' : 'Reviews'}</a>
-              <Link href="/startups">
-                <a className="block text-sm font-medium py-2" style={{ color: TEXT_MED }} onClick={() => setMobileMenuOpen(false)}>{isRTL ? 'دليل الشركات الناشئة' : 'Startup Directory'}</a>
+              <Link href="/startups" className="block text-sm font-medium py-2" style={{ color: TEXT_MED }} onClick={() => setMobileMenuOpen(false)}>
+                {isRTL ? 'دليل الشركات الناشئة' : 'Startup Directory'}
               </Link>
             <div className="pt-2 flex flex-col gap-2">
-                <Link href={ctaPath}>
-                <button className="w-full text-sm font-semibold px-4 py-3 rounded-md text-white" style={{ background: BLUE }} onClick={() => setMobileMenuOpen(false)}>
+                <Link href={ctaPath} className="w-full text-sm font-semibold px-4 py-3 rounded-md text-white" style={{ background: BLUE }} onClick={() => setMobileMenuOpen(false)}>
                   {isRTL ? 'ابدأ مجاناً' : 'Get started free'}
-                </button>
-              </Link>
+                </Link>
             </div>
           </div>
         )}
