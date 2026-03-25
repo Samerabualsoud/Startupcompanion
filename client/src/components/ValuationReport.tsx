@@ -251,7 +251,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full w-full overflow-hidden" style={{ maxHeight: '100vh', height: '100%' }}>
       {/* ── Valuation Hero ── */}
       <div className="shrink-0 p-5 bg-primary">
         <div className="flex items-start justify-between gap-4">
@@ -334,9 +334,9 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
       </div>
 
       {/* ── Tab Content ── */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="flex-1 overflow-hidden min-h-0 w-full" style={{ overflowY: 'auto', overscrollBehavior: 'contain' }}>
         {activeTab === 'report' && (
-          <div className="p-5 space-y-6 max-w-full">
+          <div className="p-5 space-y-6 max-w-full h-fit">
             {/* Bar Chart */}
             <div>
               <div className="flex items-center justify-between mb-3">
