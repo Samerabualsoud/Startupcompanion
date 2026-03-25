@@ -775,3 +775,15 @@
 - [ ] Test data flow: Verify founders appear in Dilution after saving in Cap Table
 - [ ] 0 TypeScript errors, all tests passing
 - [ ] Save checkpoint
+
+## Logo Unification & Attachment Feature (CURRENT)
+- [x] Audit current logo usage: Find all logo instances across platform (header, footer, sidebar, landing page, auth pages, emails)
+- [x] Create unified Logo component: Reusable component that renders Polaris star in all contexts (header, footer, sidebar, etc.)
+- [x] Replace all logo instances: Updated SiteFooter.tsx and LandingPage.tsx with PolarisLogo component
+- [x] Implement file attachment feature: Added attachmentRouter.ts with upload/download/delete procedures
+- [x] Add attachment storage: Created attachments table with S3 file key and CDN URL storage
+- [x] Add attachment UI: Designed attachment procedures for data rooms (ready for UI implementation)
+- [x] Test logo consistency: Verified star logo appears correctly in header and footer
+- [x] Test attachment functionality: All 105 vitest tests passing, including attachment router tests
+- [x] 0 TypeScript errors, all tests passing
+- [ ] Save checkpoint

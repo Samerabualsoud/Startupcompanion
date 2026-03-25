@@ -673,3 +673,19 @@ export const savedProfiles = mysqlTable("saved_profiles", {
 
 export type SavedProfile = typeof savedProfiles.$inferSelect;
 export type InsertSavedProfile = typeof savedProfiles.$inferInsert;
+
+// ── Attachments (File Uploads) ─────────────────────────────────────────────
+export const attachments = mysqlTable('attachments', {
+  id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => `att_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`),
+  userId: int('userId').notNull(),
+  dataRoomId: varchar('dataRoomId', { length: 256 }).notNull(),
+  fileName: varchar('fileName', { length: 255 }).notNull(),
+  fileType: varchar('fileType', { length: 100 }).notNull(),
+  fileSize: int('fileSize').notNull(), // in bytes
+  fileKey: varchar('fileKey', { length: 512 }).notNull(), // S3 key
+  downloadUrl: text('downloadUrl').notNull(), // CDN URL
+  uploadedAt: timestamp('uploadedAt').defaultNow().notNull(),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+});
+export type Attachment = typeof attachments.$inferSelect;
+export type InsertAttachment = typeof attachments.$inferInsert;

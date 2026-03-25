@@ -9,10 +9,11 @@ import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PolarisLogoCompact } from '@/components/PolarisLogo';
 import {
   TrendingUp, Sparkles, Users, GitBranch, Target, BookOpen,
   BarChart3, Rocket, Gauge, Layers, Building2,
-  ArrowRight, Star, Zap, Brain, CheckCircle,
+  ArrowRight, Zap, Brain, CheckCircle, Star,
   DollarSign, FileText, PieChart, BarChart2, Menu, X,
   Briefcase, LineChart, Calculator, Database, Search, Lightbulb,
   ChevronRight, Shield, Globe
@@ -103,17 +104,7 @@ export default function LandingPage() {
       >
         <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: BLUE }}
-            >
-              <Star className="w-4 h-4 text-white fill-white" />
-            </div>
-            <span className="font-bold text-base tracking-tight" style={{ color: TEXT_HI, fontFamily: "'Inter', sans-serif" }}>
-              Polaris Arabia
-            </span>
-          </div>
+          <PolarisLogoCompact />
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-6">
@@ -389,7 +380,7 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-4 uppercase tracking-widest border"
               style={{ background: `${AMBER}15`, borderColor: `${AMBER}35`, color: AMBER }}
             >
-              <Star className="w-3 h-3" />
+              <CheckCircle className="w-3 h-3" />
               {isRTL ? 'آراء المستخدمين' : 'Reviews'}
             </div>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: TEXT_HI }}>
