@@ -25,9 +25,9 @@ export default function TermNegotiationAdvisor() {
   const [preMoneyVal, setPreMoneyVal] = useState('');
   const [result, setResult] = useState<any | null>(null);
 
-  const mutation = trpc.ai.termNegotiationAdvisor.useMutation({
-    onSuccess: (data) => { setResult(data); toast.success(isRTL ? 'تم تحليل صحيفة الشروط!' : 'Term sheet analyzed!'); },
-    onError: (err) => { toast.error('Failed: ' + err.message); },
+  const mutation = trpc.ai.termSheetAnalyzer.useMutation({
+    onSuccess: (data: any) => { setResult(data); toast.success(isRTL ? 'تم تحليل صحيفة الشروط!' : 'Term sheet analyzed!'); },
+    onError: (err: any) => { toast.error('Failed: ' + err.message); },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -73,7 +73,7 @@ export default function TermNegotiationAdvisor() {
                     <Label style={{ fontSize: 11 }}>{isRTL ? 'المرحلة' : 'Stage'}</Label>
                     <Select value={stage} onValueChange={setStage}>
                       <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                      <SelectContent>{FUNDING_STAGES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
+                      <SelectContent>{FUNDING_STAGES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1.5">
