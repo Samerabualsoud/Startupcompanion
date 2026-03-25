@@ -764,3 +764,14 @@
 - [ ] Build FeaturedStartups section component with cards
 - [ ] Integrate section into LandingPage.tsx between hero and features sections
 - [ ] Add "View All Startups" CTA linking to /startups directory
+
+## Phase 1 — Quick Data Sync Fixes (CURRENT)
+- [ ] Debug Cap Table data flow: Add logging to useCapTable hook to see if founders array is populated
+- [ ] Fix Dilution Simulator: Ensure DEFAULT_CAP_TABLE founders are properly initialized in toolStates
+- [ ] Create unified data API: Build getToolState tRPC procedure that reads from toolStates table
+- [ ] Add sync indicators: Show visual badge on tools that are synced vs out-of-sync
+- [ ] Fix Cap Table → Dilution sync: Dilution should read shareholders from Cap Table
+- [ ] Fix Valuation → Dilution sync: Dilution should read pre-money valuation from Valuation tool
+- [ ] Test data flow: Verify founders appear in Dilution after saving in Cap Table
+- [ ] 0 TypeScript errors, all tests passing
+- [ ] Save checkpoint

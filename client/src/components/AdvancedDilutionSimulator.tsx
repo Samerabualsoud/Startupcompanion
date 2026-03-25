@@ -13,6 +13,7 @@ import {
 import { useReport } from '@/contexts/ReportContext';
 import { useToolState } from '@/hooks/useToolState';
 import { useCapTable } from '@/hooks/useCapTable';
+import { trpc } from '@/lib/trpc';
 import ToolGuide from '@/components/ToolGuide';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -66,6 +67,29 @@ export default function AdvancedDilutionSimulator() {
   const { state: capState, isLoading, computed } = useCapTable();
   const { state: roundsState, setState: setRoundsState } = useToolState<RoundsState>('dilution_rounds', DEFAULT_ROUNDS_STATE);
   const { setDilution } = useReport();
+
+  // Fetch sync status from unified data API
+  const { data: syncData } = trpc.dataSync.getCapTableWithSync.useQuery();
+  const { mutate: forceSync } = trpc.dataSync.forceFullSync.useMutation();
+
+  // Auto-sync on mount if not synced
+  useEffect(() => {
+    if (syncData && !syncData.syncStatus.isSyncedWithDilution && capState?.shareholders?.length) {
+      console.log('[Dilution] Auto-syncing cap table to dilution...');
+      forceSync();
+    }
+  }, [syncData, capState, forceSync]);
+
+  // Debug: Log cap table state
+  useEffect(() => {
+    if (capState) {
+      console.log('[Dilution] Cap Table State:', {
+        shareholders: capState.shareholders,
+        shareholderCount: capState.shareholders?.length,
+        founders: capState.shareholders?.filter((s: any) => s.type === 'founder'),
+      });
+    }
+  }, [capState]);
 
   const rounds = roundsState.rounds;
   const initialValuation = roundsState.initialValuation;
@@ -222,9 +246,26 @@ export default function AdvancedDilutionSimulator() {
             {lang === 'ar' ? 'يُقرأ المؤسسون ومجموعة ESOP من جدول الملكية. حدّد نسبة التخفيف لكل جولة لترى كيف تتطور الملكية من ما قبل البذرة حتى السلسلة هـ.' : 'Founders and ESOP pool are read from the Cap Table. Set dilution per round to see how ownership evolves from Pre-Seed through Series E.'}
           </p>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 px-2 py-1 rounded-full shrink-0">
+        <div className={`flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-full shrink-0 border ${
+          syncData?.syncStatus.isSyncedWithDilution
+            ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800'
+            : 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800'
+        }`}>
           <Link2 className="w-3 h-3" />
-          <span>{lang === 'ar' ? 'متزامن مع جدول الملكية' : 'Synced with Cap Table'}</span>
+          <span>
+            {syncData?.syncStatus.isSyncedWithDilution
+              ? (lang === 'ar' ? 'متزامن مع جدول الملكية' : 'Synced with Cap Table')
+              : (lang === 'ar' ? 'غير متزامن' : 'Out of sync')}
+          </span>
+          {!syncData?.syncStatus.isSyncedWithDilution && (
+            <button
+              onClick={() => forceSync()}
+              className="ml-1 underline hover:opacity-70 cursor-pointer"
+              title={lang === 'ar' ? 'مزامنة الآن' : 'Sync now'}
+            >
+              {lang === 'ar' ? 'مزامنة' : 'Sync'}
+            </button>
+          )}
         </div>
       </div>
 

@@ -24,6 +24,7 @@ import { equityRouter } from './routers/equityRouter';
 import { projectionRouter } from './projectionRouter';
 import { publicProfileRouter } from './publicProfileRouter';
 import { watchlistRouter } from './watchlistRouter';
+import { dataSyncRouter } from './routers/dataSyncRouter';
 
 export const appRouter = router({
   system: systemRouter,
@@ -51,6 +52,7 @@ export const appRouter = router({
   projection: projectionRouter,
   publicProfile: publicProfileRouter,
   watchlist: watchlistRouter,
+  dataSync: dataSyncRouter,
 });
 
 export type AppRouter = typeof appRouter;

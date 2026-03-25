@@ -6,7 +6,7 @@
 import { z } from 'zod';
 import { protectedProcedure, router } from '../_core/trpc';
 import { getDb } from '../db';
-import { toolStates } from '../../drizzle/schema';
+import { toolStates, startupProfiles, teamMembers } from '../../drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 import type { CapTableState } from '../../shared/equity';
 import { DEFAULT_CAP_TABLE } from '../../shared/equity';
@@ -54,6 +54,52 @@ export const equityRouter = router({
           state: input.state,
         });
       }
+
+      // SYNC: Update team_members table with founders from cap table
+      try {
+        const startup = await db
+          .select({ id: startupProfiles.id })
+          .from(startupProfiles)
+          .where(eq(startupProfiles.userId, ctx.user.id))
+          .limit(1);
+
+        if (startup.length && input.state?.shareholders) {
+          const startupId = startup[0].id;
+          const capTableShareholders = input.state.shareholders;
+
+          // Get existing team members
+          const existingMembers = await db
+            .select()
+            .from(teamMembers)
+            .where(eq(teamMembers.startupId, startupId));
+
+          // Sync founders from cap table to team_members
+          for (const shareholder of capTableShareholders) {
+            if (shareholder.type === 'founder') {
+              const existing = existingMembers.find((m: any) => m.name === shareholder.name && m.isFounder);
+              if (existing) {
+                // Update existing founder
+                await db
+                  .update(teamMembers)
+                  .set({ equityPercent: shareholder.equityPercent || 0 })
+                  .where(eq(teamMembers.id, existing.id));
+              } else {
+                // Add new founder
+                await db.insert(teamMembers).values({
+                  startupId,
+                  name: shareholder.name,
+                  role: 'Founder',
+                  equityPercent: shareholder.equityPercent || 0,
+                  isFounder: true,
+                });
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[DataSync] Failed to sync cap table to team_members:', err);
+      }
+
       return { ok: true };
     }),
 
