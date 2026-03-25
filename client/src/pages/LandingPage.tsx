@@ -108,7 +108,7 @@ export default function LandingPage() {
               className="w-8 h-8 rounded-lg flex items-center justify-center"
               style={{ background: BLUE }}
             >
-              <TrendingUp className="w-4 h-4 text-white" />
+              <Star className="w-4 h-4 text-white fill-white" />
             </div>
             <span className="font-bold text-base tracking-tight" style={{ color: TEXT_HI, fontFamily: "'Inter', sans-serif" }}>
               Polaris Arabia
