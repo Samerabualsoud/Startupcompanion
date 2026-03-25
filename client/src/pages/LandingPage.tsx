@@ -19,8 +19,6 @@ import {
 } from 'lucide-react';
 import { APP_PATH, REGISTER_PATH, LOGIN_PATH } from '@/const';
 import SiteFooter from '@/components/SiteFooter';
-import FeaturedStartups from '@/components/FeaturedStartups';
-import EcosystemSection from '@/components/EcosystemSection';
 
 // ── Design tokens (Light mode - Professional) ──────────────────────────────────────────
 const BG        = 'oklch(0.98 0.002 80)';    // #FAFAF8 - off-white
@@ -416,12 +414,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* ── Ecosystem Section: Jurisdictions & Accelerators ── */}
-      <EcosystemSection BG={BG} BG_CARD={BG_CARD} BG_CARD2={BG_CARD2} BORDER={BORDER} TEXT_HI={TEXT_HI} TEXT_MED={TEXT_MED} TEXT_LOW={TEXT_LOW} BLUE={BLUE} GREEN={GREEN} VIOLET={VIOLET} isRTL={isRTL} />
-
-      {/* ── Featured Startups ── */}
-      <FeaturedStartups />
 
       {/* ── CTA ── */}
       <section className="py-20 px-5" style={{ background: BG }}>

@@ -65,8 +65,9 @@ import IdeaValidator from '@/components/IdeaValidator';
 import FinancialProjection from '@/components/FinancialProjection';
 import CompetitorIntelligence from '@/components/CompetitorIntelligence';
 import TermNegotiationAdvisor from '@/components/TermNegotiationAdvisor';
+import EcosystemSection from '@/components/EcosystemSection';
 import ProfileSettings from './ProfileSettings';
-type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'profile-settings' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'saved-startups' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator' | 'oqal-notes' | 'zest-equity' | 'financial-projection' | 'competitor-intelligence' | 'term-negotiation';
+type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'profile-settings' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'saved-startups' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator' | 'oqal-notes' | 'zest-equity' | 'financial-projection' | 'competitor-intelligence' | 'term-negotiation' | 'jurisdictions';
 
 interface NavItem {
   id: ToolId;
@@ -109,12 +110,13 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'pitch-deck', tier: 'free',    label: 'Pitch Deck Evaluator',  shortLabel: 'Pitch Deck',   navKey: 'navPitchDeck', icon: Layers,      group: 'Capital Raising' },
   { id: 'investor-crm', tier: 'pro',  label: 'Investor Pipeline CRM',          shortLabel: 'Pipeline',   navKey: 'navInvestorCRM',  icon: Target,      group: 'Capital Raising' },
   // Resources
-  { id: 'accelerators', tier: 'free',  label: 'Accelerator & Incubator Finder',    shortLabel: 'Accelerators',   navKey: 'navAccelerators', icon: Rocket,    group: 'Market Intelligence',    newUntil: '2026-04-01' },
+  { id: 'accelerators', tier: 'free',  label: 'Accelerator & Incubator Finder',    shortLabel: 'Accelerators',   navKey: 'navAccelerators', icon: Rocket,    group: 'Ecosystem',    newUntil: '2026-04-01' },
+  { id: 'jurisdictions', tier: 'free', label: 'Global Jurisdictions & Free Zones', shortLabel: 'Jurisdictions', navKey: 'navJurisdictions', icon: Globe, group: 'Ecosystem', newUntil: '2026-04-01' },
   { id: 'runway', tier: 'free',        label: 'Cash Runway Planner',      shortLabel: 'Runway',   navKey: 'navRunway',     icon: BarChart3,   group: 'Market Intelligence' },
   { id: 'term-sheet', tier: 'free',    label: 'Investment Terms Glossary',   shortLabel: 'Glossary',   navKey: 'navTermSheet', icon: BookOpen,    group: 'Market Intelligence',    badge: '75 terms' },
   // My Startup
   // Legal & Jurisdictions
-  { id: 'free-zones', tier: 'free',    label: 'Jurisdiction & Free Zone Guide', shortLabel: 'Jurisdictions', navKey: 'navFreeZones', icon: Globe,        group: 'Market Intelligence',    newUntil: '2026-04-01' },
+  { id: 'free-zones', tier: 'free',    label: 'Jurisdiction & Free Zone Guide', shortLabel: 'Free Zones', navKey: 'navFreeZones', icon: Globe,        group: 'Market Intelligence',    newUntil: '2026-04-01' },
   // Database
   { id: 'resources', tier: 'free',     label: 'Investor Intelligence Database',     shortLabel: 'Ecosystem',   navKey: 'navDatabase',   icon: Building2,   group: 'Ecosystem Network',     newUntil: '2026-04-01' },
   { id: 'matching', tier: 'pro',      label: 'AI Investor Matching',     shortLabel: 'Matching',   navKey: 'navMatching',   icon: Target,      group: 'Ecosystem Network',     badge: 'AI' },
@@ -144,7 +146,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'zest-equity', tier: 'pro',  label: 'Zest Equity & Cap Table',      shortLabel: 'Zest Equity',   navKey: 'navZestEquity',  icon: TrendingUp,  group: 'Equity & Ownership', newUntil: '2026-07-01', badge: 'New' },
 ];
 
-const GROUPS = ['My Company', 'Valuation', 'Equity & Ownership', 'Capital Raising', 'Legal & Compliance', 'Market Intelligence', 'Ecosystem Network', 'AI Advisory', 'Admin'];
+const GROUPS = ['My Company', 'Valuation', 'Equity & Ownership', 'Capital Raising', 'Legal & Compliance', 'Market Intelligence', 'Ecosystem', 'Ecosystem Network', 'AI Advisory', 'Admin'];
 const TOOL_COLORS: Record<ToolId, string> = {
   dashboard: '#0F1B2D',
   cogs: '#059669',
@@ -158,6 +160,7 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'investor-crm': '#C4614A',
   runway: '#059669',
   profile: '#2D4A6B',
+  'profile-settings': '#2D4A6B',
   resources: '#10B981',
   matching: '#C4614A',
   admin: '#8B4A38',
@@ -173,6 +176,7 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'nda': '#0284C7',
   'esop': '#059669',
   'startup-directory': '#C4614A',
+  'saved-startups': '#EC4899',
   'valuation-timeline': '#2D4A6B',
   'sales': '#F59E0B',
   'data-room': '#2D4A6B',
@@ -184,6 +188,9 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'financial-projection': '#10B981',
   'competitor-intelligence': '#10B981',
   'term-negotiation': '#10B981',
+  'jurisdictions': '#0284C7',
+  'profile-settings': '#2D4A6B',
+  'saved-startups': '#EC4899',
 };
 
 function HomeInner() {
@@ -389,6 +396,7 @@ function HomeInner() {
           </div>
         );
       case 'accelerators':    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><AcceleratorRecommender /></div>;
+      case 'jurisdictions':    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><EcosystemSection BG={C.contentBg} BG_CARD={C.cardBg} BG_CARD2={C.cardBg} BORDER={C.border} TEXT_HI={C.textHi} TEXT_MED={C.textMed} TEXT_LOW={C.textLow} BLUE="#0F52DE" GREEN="#10B981" VIOLET="#7C3AED" isRTL={isRTL} /></div>;
       case 'equity-split':    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><CoFounderEquitySplit /></div>;
       case 'dilution':        return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><AdvancedDilutionSimulator /></div>;
       case 'vesting':         return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><VestingScheduleBuilder /></div>;

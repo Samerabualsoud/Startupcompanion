@@ -141,8 +141,9 @@ export default function EcosystemSection({
                 background: BG_CARD,
                 borderColor: BORDER,
                 color: TEXT_HI,
-                focusRingColor: BLUE,
               }}
+              onFocus={(e) => (e.currentTarget.style.boxShadow = `0 0 0 2px ${BLUE}`)}
+              onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
             />
           </div>
 
@@ -211,16 +212,16 @@ export default function EcosystemSection({
                   {item.name}
                 </h3>
                 <div className="space-y-1 text-sm" style={{ color: TEXT_MED }}>
-                  {activeTab === 'jurisdictions' ? (
+                  {activeTab === 'jurisdictions' && 'supportLevel' in item ? (
                     <>
                       <p>{isRTL ? 'مستوى الدعم' : 'Support Level'}: {item.supportLevel}</p>
                     </>
-                  ) : (
+                  ) : activeTab === 'accelerators' && 'stage' in item ? (
                     <>
                       <p>{isRTL ? 'المرحلة' : 'Stage'}: {item.stage}</p>
                       <p>{isRTL ? 'الموقع' : 'Location'}: {item.location}</p>
                     </>
-                  )}
+                  ) : null}
                 </div>
               </div>
             ))
