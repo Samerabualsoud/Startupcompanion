@@ -3,36 +3,11 @@
  * Single source of truth for sectors, stages, jurisdictions, countries, check sizes
  */
 
-export const SECTORS = [
-  "Artificial Intelligence / ML",
-  "FinTech",
-  "HealthTech / MedTech",
-  "EdTech",
-  "E-commerce / Retail Tech",
-  "SaaS / B2B Software",
-  "CleanTech / GreenTech",
-  "AgriTech",
-  "PropTech / Real Estate Tech",
-  "LegalTech",
-  "HRTech / Future of Work",
-  "Cybersecurity",
-  "Logistics / Supply Chain",
-  "FoodTech",
-  "TravelTech / Hospitality",
-  "InsurTech",
-  "RegTech",
-  "BioTech / Life Sciences",
-  "SpaceTech",
-  "Gaming / Esports",
-  "Media / Content Tech",
-  "Social Impact / NGO Tech",
-  "Web3 / Blockchain / Crypto",
-  "IoT / Hardware",
-  "Marketplace",
-  "Consumer Apps",
-  "Deep Tech",
-  "Other",
-] as const;
+// Import standardized industries from industries.ts
+// Import and re-export standardized industries as SECTORS for backward compatibility
+// INDUSTRIES provides 150+ industries organized by 22 categories
+import { INDUSTRIES } from './industries';
+export const SECTORS = INDUSTRIES;
 
 export const STARTUP_STAGES = [
   "Idea / Pre-product",
