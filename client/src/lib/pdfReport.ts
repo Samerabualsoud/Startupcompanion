@@ -1,63 +1,109 @@
 /**
- * PDF Report Generator — Polaris Arabia
- * Uses browser's print-to-PDF via a hidden iframe with styled HTML
- * Design: "Venture Capital Clarity" — Editorial Finance
+ * Enhanced PDF Report Generator — Polaris Arabia
+ * Includes charts, AI insights, sensitivity analysis, and custom branding
+ * Uses html2canvas + jsPDF for professional multi-page reports
  */
 
 import { formatCurrency, type StartupInputs, type ValuationSummary } from './valuation';
 
-export function generatePDFReport(inputs: StartupInputs, summary: ValuationSummary): void {
-  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+export async function generatePDFReport(inputs: StartupInputs, summary: ValuationSummary, aiNarrative?: string): Promise<void> {
+  try {
+    // Dynamically import html2canvas and jsPDF
+    const html2canvas = (await import('html2canvas')).default;
+    const jsPDF = (await import('jspdf')).jsPDF;
 
-  const methodRows = summary.results.map(r => `
-    <tr>
-      <td>${r.method}</td>
-      <td class="num">${formatCurrency(r.value, true)}</td>
-      <td class="num">${formatCurrency(r.low, true)}</td>
-      <td class="num">${formatCurrency(r.high, true)}</td>
-      <td class="num">${r.confidence}%</td>
-      <td class="num">${r.applicability}%</td>
-    </tr>
-  `).join('');
+    const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-  const breakdownSections = summary.results.map(r => `
-    <div class="method-section">
-      <h3>${r.method}</h3>
-      <p class="desc">${r.description}</p>
-      <table class="breakdown-table">
-        <tbody>
-          ${Object.entries(r.breakdown).map(([k, v]) => `
-            <tr>
-              <td class="key">${k}</td>
-              <td class="val">${typeof v === 'number' ? formatCurrency(v, true) : v}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-  `).join('');
+    // Create container for PDF content
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.width = '1200px';
+    container.style.backgroundColor = '#ffffff';
+    container.style.padding = '40px';
+    container.style.fontFamily = "'DM Sans', sans-serif";
+    document.body.appendChild(container);
 
-  const riskRows = [
-    ['Management Team', inputs.riskManagement],
-    ['Stage of Business', inputs.riskStage],
-    ['Legislation / Political', inputs.riskLegislation],
-    ['Manufacturing', inputs.riskManufacturing],
-    ['Sales & Marketing', inputs.riskSalesMarketing],
-    ['Funding / Capital', inputs.riskFunding],
-    ['Competition', inputs.riskCompetition],
-    ['Technology', inputs.riskTechnology],
-    ['Litigation', inputs.riskLitigation],
-    ['International', inputs.riskInternational],
-    ['Reputation', inputs.riskReputation],
-    ['Lucrative Exit Potential', inputs.riskPotentialLucrative],
-  ].map(([label, val]) => `
-    <tr>
-      <td>${label}</td>
-      <td class="num" style="color: ${Number(val) > 0 ? '#2d6a4f' : Number(val) < 0 ? '#c4614a' : '#555'}">${Number(val) > 0 ? '+' : ''}${val}</td>
-    </tr>
-  `).join('');
+    // Build HTML content
+    const methodRows = summary.results.map(r => `
+      <tr>
+        <td>${r.method}</td>
+        <td class="num">${formatCurrency(r.value, true)}</td>
+        <td class="num">${formatCurrency(r.low, true)}</td>
+        <td class="num">${formatCurrency(r.high, true)}</td>
+        <td class="num">${r.confidence}%</td>
+        <td class="num">${r.applicability}%</td>
+      </tr>
+    `).join('');
 
-  const html = `<!DOCTYPE html>
+    const breakdownSections = summary.results.map(r => `
+      <div class="method-section">
+        <h3>${r.method}</h3>
+        <p class="desc">${r.description}</p>
+        <table class="breakdown-table">
+          <tbody>
+            ${Object.entries(r.breakdown).map(([k, v]) => `
+              <tr>
+                <td class="key">${k}</td>
+                <td class="val">${typeof v === 'number' ? formatCurrency(v, true) : v}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `).join('');
+
+    const riskRows = [
+      ['Management Team', inputs.riskManagement],
+      ['Stage of Business', inputs.riskStage],
+      ['Legislation / Political', inputs.riskLegislation],
+      ['Manufacturing', inputs.riskManufacturing],
+      ['Sales & Marketing', inputs.riskSalesMarketing],
+      ['Funding / Capital', inputs.riskFunding],
+      ['Competition', inputs.riskCompetition],
+      ['Technology', inputs.riskTechnology],
+      ['Litigation', inputs.riskLitigation],
+      ['International', inputs.riskInternational],
+      ['Reputation', inputs.riskReputation],
+      ['Lucrative Exit Potential', inputs.riskPotentialLucrative],
+    ].map(([label, val]) => `
+      <tr>
+        <td>${label}</td>
+        <td class="num" style="color: ${Number(val) > 0 ? '#2d6a4f' : Number(val) < 0 ? '#c4614a' : '#555'}">${Number(val) > 0 ? '+' : ''}${val}</td>
+      </tr>
+    `).join('');
+
+    const sensitivityHTML = `
+      <div class="sensitivity-section">
+        <h4>Revenue Growth Sensitivity</h4>
+        <div class="sensitivity-grid">
+          ${[-30, -15, 0, +15, +30].map(delta => {
+            const adjustedGrowth = Math.max(0, inputs.revenueGrowthRate + delta);
+            const scaleFactor = adjustedGrowth / Math.max(1, inputs.revenueGrowthRate);
+            const adjustedVal = summary.blended * (0.6 + scaleFactor * 0.4);
+            const isBase = delta === 0;
+            return `
+              <div class="sensitivity-item ${isBase ? 'base' : ''}">
+                <div class="label">${delta === 0 ? 'Base' : `${delta > 0 ? '+' : ''}${delta}%`}</div>
+                <div class="value">${formatCurrency(adjustedVal, true)}</div>
+                <div class="bar" style="width: ${Math.min(100, (adjustedVal / (summary.blended * 1.6)) * 100)}%"></div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+
+    const aiInsightsHTML = aiNarrative ? `
+      <div class="ai-insights">
+        <h3>AI Analyst Insights</h3>
+        <div class="insights-content">
+          ${aiNarrative.split('\n').map(p => `<p>${p.trim()}</p>`).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -65,69 +111,95 @@ export function generatePDFReport(inputs: StartupInputs, summary: ValuationSumma
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; color: #1a2a3a; background: #fff; font-size: 11px; line-height: 1.5; }
-  .page { max-width: 800px; margin: 0 auto; padding: 40px 48px; }
+  body { font-family: 'DM Sans', sans-serif; color: #1a2a3a; background: #fff; font-size: 12px; line-height: 1.6; }
+  
+  .page { page-break-after: always; padding: 40px; background: #fff; }
+  .page:last-child { page-break-after: avoid; }
   
   /* Header */
-  .report-header { background: #0F1B2D; color: #FAF6EF; padding: 32px 40px; margin: -40px -48px 32px; }
-  .report-header .label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: #C4614A; margin-bottom: 6px; }
-  .report-header h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 4px; }
-  .report-header .meta { font-size: 11px; color: rgba(250,246,239,0.6); }
-  .valuation-badge { display: inline-block; margin-top: 16px; background: rgba(196,97,74,0.15); border: 1px solid #C4614A; border-radius: 6px; padding: 12px 20px; }
-  .valuation-badge .badge-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #C4614A; }
-  .valuation-badge .badge-value { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; color: #FAF6EF; }
-  .valuation-badge .badge-range { font-size: 10px; color: rgba(250,246,239,0.5); margin-top: 2px; }
+  .report-header { background: linear-gradient(135deg, #0F1B2D 0%, #1a3a52 100%); color: #FAF6EF; padding: 40px; margin: -40px -40px 32px; border-radius: 8px; }
+  .report-header .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #C4614A; margin-bottom: 8px; }
+  .report-header h1 { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; margin-bottom: 8px; }
+  .report-header .meta { font-size: 12px; color: rgba(250,246,239,0.7); }
+  .report-header .logo { display: inline-block; width: 40px; height: 40px; background: #C4614A; border-radius: 6px; margin-bottom: 16px; }
+  
+  .valuation-badge { display: inline-block; margin-top: 20px; background: rgba(196,97,74,0.2); border: 2px solid #C4614A; border-radius: 8px; padding: 16px 24px; }
+  .valuation-badge .badge-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #C4614A; }
+  .valuation-badge .badge-value { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: #FAF6EF; margin-top: 4px; }
+  .valuation-badge .badge-range { font-size: 11px; color: rgba(250,246,239,0.6); margin-top: 4px; }
 
   /* Section */
-  .section { margin-bottom: 28px; }
-  .section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 600; color: #0F1B2D; border-bottom: 2px solid #C4614A; padding-bottom: 6px; margin-bottom: 14px; }
-  .section-stamp { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #C4614A; margin-right: 8px; }
+  .section { margin-bottom: 32px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: #0F1B2D; border-bottom: 3px solid #C4614A; padding-bottom: 8px; margin-bottom: 16px; }
+  .section-stamp { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #C4614A; margin-right: 10px; }
 
   /* Metrics grid */
-  .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
-  .metric-card { background: #f8f5f0; border: 1px solid #e8e0d5; border-radius: 6px; padding: 10px 12px; }
-  .metric-label { font-size: 8px; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-bottom: 3px; }
-  .metric-value { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: #0F1B2D; }
-  .metric-sub { font-size: 9px; color: #aaa; margin-top: 2px; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  .metric-card { background: linear-gradient(135deg, #f8f5f0 0%, #faf7f3 100%); border: 1px solid #e8e0d5; border-radius: 8px; padding: 14px 16px; }
+  .metric-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-bottom: 4px; font-weight: 600; }
+  .metric-value { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: #0F1B2D; }
+  .metric-sub { font-size: 10px; color: #aaa; margin-top: 3px; }
 
   /* Tables */
-  table { width: 100%; border-collapse: collapse; font-size: 10px; }
-  th { background: #0F1B2D; color: #FAF6EF; padding: 7px 10px; text-align: left; font-weight: 600; font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; }
-  td { padding: 7px 10px; border-bottom: 1px solid #ede8e0; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 16px; }
+  th { background: #0F1B2D; color: #FAF6EF; padding: 10px 12px; text-align: left; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 9px 12px; border-bottom: 1px solid #ede8e0; }
   tr:last-child td { border-bottom: none; }
   tr:nth-child(even) { background: #faf7f3; }
   .num { text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
 
   /* Method sections */
-  .method-section { margin-bottom: 18px; padding: 14px 16px; background: #faf7f3; border: 1px solid #ede8e0; border-radius: 6px; border-left: 3px solid #C4614A; }
-  .method-section h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 600; margin-bottom: 5px; color: #0F1B2D; }
-  .method-section .desc { font-size: 10px; color: #666; margin-bottom: 10px; line-height: 1.5; }
+  .method-section { margin-bottom: 20px; padding: 16px 18px; background: #faf7f3; border: 1px solid #ede8e0; border-radius: 6px; border-left: 4px solid #C4614A; }
+  .method-section h3 { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #0F1B2D; }
+  .method-section .desc { font-size: 11px; color: #666; margin-bottom: 12px; line-height: 1.6; }
   .breakdown-table td.key { color: #888; width: 55%; }
   .breakdown-table td.val { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #0F1B2D; text-align: right; }
-  .breakdown-table td { padding: 4px 6px; border-bottom: 1px solid #ede8e0; font-size: 10px; }
+  .breakdown-table td { padding: 5px 8px; border-bottom: 1px solid #ede8e0; font-size: 10px; }
+
+  /* Sensitivity */
+  .sensitivity-section { margin-bottom: 24px; }
+  .sensitivity-section h4 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: #0F1B2D; }
+  .sensitivity-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .sensitivity-item { background: #f8f5f0; border: 1px solid #e8e0d5; border-radius: 6px; padding: 10px; text-align: center; }
+  .sensitivity-item.base { background: #e8f5e9; border-color: #10B981; }
+  .sensitivity-item .label { font-size: 10px; font-weight: 600; color: #666; margin-bottom: 4px; }
+  .sensitivity-item .value { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: #0F1B2D; margin-bottom: 6px; }
+  .sensitivity-item .bar { height: 4px; background: #C4614A; border-radius: 2px; margin: 0 auto; }
+
+  /* AI Insights */
+  .ai-insights { background: linear-gradient(135deg, rgba(196,97,74,0.05) 0%, rgba(196,97,74,0.02) 100%); border: 2px solid #C4614A; border-radius: 8px; padding: 20px; margin: 24px 0; }
+  .ai-insights h3 { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: #0F1B2D; margin-bottom: 12px; }
+  .insights-content { font-size: 11px; line-height: 1.8; color: #333; }
+  .insights-content p { margin-bottom: 10px; }
+  .insights-content strong { color: #0F1B2D; font-weight: 600; }
 
   /* Two-col layout */
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
   /* Disclaimer */
-  .disclaimer { background: #f0ede8; border: 1px solid #ddd8d0; border-radius: 6px; padding: 12px 16px; font-size: 9px; color: #888; line-height: 1.6; margin-top: 24px; }
+  .disclaimer { background: #f0ede8; border: 1px solid #ddd8d0; border-radius: 6px; padding: 14px 18px; font-size: 10px; color: #888; line-height: 1.7; margin-top: 28px; }
   .disclaimer strong { color: #555; }
 
-  /* Footer */
-  .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #ede8e0; display: flex; justify-content: space-between; font-size: 9px; color: #aaa; font-family: 'JetBrains Mono', monospace; }
+  /* Header/Footer */
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #ede8e0; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-logo { width: 32px; height: 32px; background: #C4614A; border-radius: 4px; }
+  .header-text { font-size: 10px; color: #666; }
+  .header-text .company { font-weight: 600; color: #0F1B2D; }
+  .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #ede8e0; display: flex; justify-content: space-between; font-size: 10px; color: #aaa; font-family: 'JetBrains Mono', monospace; }
 
   @media print {
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .page { padding: 0; }
-    .report-header { margin: 0 0 32px; }
+    .page { margin: 0; padding: 40px; }
   }
 </style>
 </head>
 <body>
-<div class="page">
 
-  <!-- Header -->
+<!-- Page 1: Cover & Executive Summary -->
+<div class="page">
   <div class="report-header">
+    <div class="logo"></div>
     <div class="label">Confidential Valuation Report</div>
     <h1>${inputs.companyName}</h1>
     <div class="meta">Generated ${date} · ${summary.stage} Stage · ${inputs.sector.toUpperCase()} Sector</div>
@@ -138,9 +210,8 @@ export function generatePDFReport(inputs: StartupInputs, summary: ValuationSumma
     </div>
   </div>
 
-  <!-- Operational Metrics -->
   <div class="section">
-    <div class="section-title"><span class="section-stamp">01</span>Operational Metrics</div>
+    <div class="section-title"><span class="section-stamp">01</span>Executive Summary</div>
     <div class="metrics-grid">
       <div class="metric-card">
         <div class="metric-label">Current ARR</div>
@@ -176,13 +247,12 @@ export function generatePDFReport(inputs: StartupInputs, summary: ValuationSumma
       </div>
       <div class="metric-card">
         <div class="metric-label">Risk Level</div>
-        <div class="metric-value" style="font-size:13px">${summary.riskLevel}</div>
+        <div class="metric-value" style="font-size:16px">${summary.riskLevel}</div>
         <div class="metric-sub">burn-based</div>
       </div>
     </div>
   </div>
 
-  <!-- Valuation Summary Table -->
   <div class="section">
     <div class="section-title"><span class="section-stamp">02</span>Valuation Summary — All Methods</div>
     <table>
@@ -200,7 +270,7 @@ export function generatePDFReport(inputs: StartupInputs, summary: ValuationSumma
         ${methodRows}
         <tr style="background:#0F1B2D; color:#FAF6EF; font-weight:700">
           <td style="color:#FAF6EF">Blended (Weighted)</td>
-          <td class="num" style="color:#C4614A; font-size:12px">${formatCurrency(summary.blended, true)}</td>
+          <td class="num" style="color:#C4614A; font-size:13px">${formatCurrency(summary.blended, true)}</td>
           <td class="num" style="color:#FAF6EF">${formatCurrency(summary.weightedLow, true)}</td>
           <td class="num" style="color:#FAF6EF">${formatCurrency(summary.weightedHigh, true)}</td>
           <td class="num" style="color:#FAF6EF">${summary.confidenceScore}%</td>
@@ -210,15 +280,58 @@ export function generatePDFReport(inputs: StartupInputs, summary: ValuationSumma
     </table>
   </div>
 
-  <!-- Method Breakdowns -->
+  <div class="footer">
+    <span>Polaris Arabia</span>
+    <span>${inputs.companyName} · ${date}</span>
+    <span>Page 1 of 4 · CONFIDENTIAL</span>
+  </div>
+</div>
+
+<!-- Page 2: Method Breakdowns & Sensitivity -->
+<div class="page">
+  <div class="header">
+    <div class="header-left">
+      <div class="header-logo"></div>
+      <div class="header-text">
+        <div class="company">${inputs.companyName}</div>
+        <div>Valuation Methods</div>
+      </div>
+    </div>
+    <div style="font-size:10px; color:#aaa;">Page 2</div>
+  </div>
+
   <div class="section">
     <div class="section-title"><span class="section-stamp">03</span>Method Breakdowns</div>
     ${breakdownSections}
   </div>
 
-  <!-- Scorecard & Risk -->
   <div class="section">
-    <div class="section-title"><span class="section-stamp">04</span>Scorecard & Risk Factors</div>
+    <div class="section-title"><span class="section-stamp">04</span>Sensitivity Analysis</div>
+    ${sensitivityHTML}
+  </div>
+
+  <div class="footer">
+    <span>Polaris Arabia</span>
+    <span>${inputs.companyName} · ${date}</span>
+    <span>Page 2 of 4 · CONFIDENTIAL</span>
+  </div>
+</div>
+
+<!-- Page 3: Scorecard, Risk & AI Insights -->
+<div class="page">
+  <div class="header">
+    <div class="header-left">
+      <div class="header-logo"></div>
+      <div class="header-text">
+        <div class="company">${inputs.companyName}</div>
+        <div>Risk & AI Analysis</div>
+      </div>
+    </div>
+    <div style="font-size:10px; color:#aaa;">Page 3</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="section-stamp">05</span>Scorecard & Risk Factors</div>
     <div class="two-col">
       <div>
         <table>
@@ -243,9 +356,30 @@ export function generatePDFReport(inputs: StartupInputs, summary: ValuationSumma
     </div>
   </div>
 
-  <!-- Scenarios -->
+  ${aiInsightsHTML}
+
+  <div class="footer">
+    <span>Polaris Arabia</span>
+    <span>${inputs.companyName} · ${date}</span>
+    <span>Page 3 of 4 · CONFIDENTIAL</span>
+  </div>
+</div>
+
+<!-- Page 4: Scenarios & Disclaimer -->
+<div class="page">
+  <div class="header">
+    <div class="header-left">
+      <div class="header-logo"></div>
+      <div class="header-text">
+        <div class="company">${inputs.companyName}</div>
+        <div>Scenarios & Disclaimer</div>
+      </div>
+    </div>
+    <div style="font-size:10px; color:#aaa;">Page 4</div>
+  </div>
+
   <div class="section">
-    <div class="section-title"><span class="section-stamp">05</span>First Chicago Scenarios</div>
+    <div class="section-title"><span class="section-stamp">06</span>First Chicago Scenarios</div>
     <table>
       <thead>
         <tr>
@@ -263,32 +397,65 @@ export function generatePDFReport(inputs: StartupInputs, summary: ValuationSumma
     </table>
   </div>
 
-  <!-- Disclaimer -->
-  <div class="disclaimer">
-    <strong>Disclaimer:</strong> This valuation report is generated for informational and planning purposes only. The estimates presented are based on user-provided inputs and standard financial models. Actual valuations depend on negotiation, prevailing market conditions, investor thesis, due diligence findings, and other factors not captured in this model. This report does not constitute financial advice. Consult a qualified financial advisor, investment banker, or legal counsel before making any investment decisions.
+  <div class="section">
+    <div class="disclaimer">
+      <strong>Disclaimer:</strong> This valuation report is generated for informational and planning purposes only. The estimates presented are based on user-provided inputs and standard financial models. Actual valuations depend on negotiation, prevailing market conditions, investor thesis, due diligence findings, and other factors not captured in this model. This report does not constitute financial advice. Consult a qualified financial advisor, investment banker, or legal counsel before making any investment decisions.
+    </div>
   </div>
 
-  <!-- Footer -->
   <div class="footer">
     <span>Polaris Arabia</span>
     <span>${inputs.companyName} · ${date}</span>
-    <span>CONFIDENTIAL</span>
+    <span>Page 4 of 4 · CONFIDENTIAL</span>
   </div>
-
 </div>
+
 </body>
 </html>`;
 
-  // Open in new window and trigger print
-  const win = window.open('', '_blank', 'width=900,height=700');
-  if (!win) {
-    alert('Please allow pop-ups to generate the PDF report.');
-    return;
+    container.innerHTML = html;
+
+    // Convert to canvas and PDF
+    const canvas = await html2canvas(container, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#ffffff',
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // Add images to PDF
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    // Download PDF
+    pdf.save(`${inputs.companyName}-Valuation-Report-${date.replace(/\s/g, '-')}.pdf`);
+
+    // Cleanup
+    document.body.removeChild(container);
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    alert('Error generating PDF. Please try again.');
   }
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  setTimeout(() => {
-    win.print();
-  }, 800);
 }

@@ -290,9 +290,9 @@ function HomeInner() {
     switch (activeTool) {
       case 'valuation':
         return (
-          <div className="flex flex-1 overflow-hidden h-full">
+          <div className="flex flex-1 overflow-hidden h-full" style={{ scrollBehavior: 'auto' }}>
             {/* Chat Panel */}
-            <div className={`flex flex-col border-r border-border transition-all duration-500 bg-background ${chatComplete ? 'w-full lg:w-[400px]' : 'w-full'}`}>
+            <div className={`flex flex-col border-r border-border transition-all duration-500 bg-background ${chatComplete ? 'w-full lg:w-[400px]' : 'w-full'}`} style={{ overscrollBehavior: 'none' }}>
               <div className="shrink-0 px-5 py-3.5 border-b border-border flex items-center gap-2.5 bg-card">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center bg-primary">
                   <Sparkles className="w-3.5 h-3.5 text-white" />
@@ -305,7 +305,7 @@ function HomeInner() {
                   </div>
                 </div>
               </div>
-              <div className="flex-1 overflow-hidden">
+              <div className="flex-1 overflow-hidden" style={{ overscrollBehavior: 'contain' }}>
                 <ChatInterface key={chatKey} onComplete={handleChatComplete} />
               </div>
             </div>
