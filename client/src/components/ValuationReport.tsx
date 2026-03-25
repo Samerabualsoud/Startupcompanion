@@ -336,13 +336,14 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
       {/* ── Tab Content ── */}
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'report' && (
-          <div className="p-5 space-y-6">
+          <div className="p-5 space-y-6 max-w-full">
             {/* Bar Chart */}
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{isRTL ? 'التقييم حسب الطريقة' : 'Valuation by Method'}</h3>
                 <span className="text-[10px] text-muted-foreground font-mono">{isRTL ? 'القيم بالمليون $' : 'Values in $M'}</span>
               </div>
+              <div className="w-full" style={{ height: '220px', overflow: 'hidden' }}>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 55 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -356,6 +357,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+              </div>
             </div>
 
             {/* Method Cards */}
@@ -422,6 +424,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
             {/* Scorecard Radar */}
             <div className="border border-border rounded-lg p-4 bg-card">
               <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{isRTL ? 'بطاقة أداء الفريق والمنتج' : 'Team & Product Scorecard'}</h3>
+              <div className="w-full" style={{ height: '200px', overflow: 'hidden' }}>
               <ResponsiveContainer width="100%" height={200}>
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="var(--border)" />
@@ -430,6 +433,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
                   <Radar name="Score" dataKey="score" stroke="#C4614A" fill="#C4614A" fillOpacity={0.25} strokeWidth={2} />
                 </RadarChart>
               </ResponsiveContainer>
+              </div>
             </div>
 
             {/* Analyst Summary */}
@@ -498,7 +502,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
         )}
 
         {activeTab === 'ai-analyst' && (
-          <div className="p-5 space-y-5">
+          <div className="p-5 space-y-5 max-w-full">
             {/* AI Analyst Panel */}
             <div className="rounded-xl overflow-hidden border border-border">
               <div className="px-4 py-3 flex items-center justify-between bg-primary/10 border-b border-border">
@@ -520,7 +524,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
                   </button>
                 )}
               </div>
-              <div className="p-4 bg-card">
+              <div className="p-4 bg-card max-h-96 overflow-y-auto">
                 {!isAuthenticated ? (
                   <div className="text-center py-6">
                     <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-amber-500" />
@@ -717,6 +721,29 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
                       );
                     })}
                   </div>
+                </div>
+              </div>
+
+              {/* AI Insights Panel */}
+              <div className="mt-6 rounded-xl border border-primary/30 bg-primary/5 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <h4 className="text-sm font-semibold text-foreground">{isRTL ? 'توصيات ذكية' : 'AI Insights'}</h4>
+                </div>
+                <div className="space-y-2.5 text-xs text-foreground leading-relaxed">
+                  {isRTL ? (
+                    <>
+                      <p><strong>الفرصة الأكبر:</strong> {inputs.revenueGrowthRate > 100 ? 'نموك السريع هو أكبر محرك للقيمة. ركّز على الحفاظ على معدل النمو هذا لتحقيق أقصى تقييم.' : inputs.revenueGrowthRate > 50 ? 'تسريع نمو الإيرادات بنسبة 20% إضافية يمكن أن يزيد تقييمك بمقدار 15-20%.' : 'تحسين نمو الإيرادات هو الأولوية الأولى. كل 10% إضافية من النمو تضيف قيمة كبيرة.'}</p>
+                      <p><strong>تحسين الكفاءة:</strong> {summary.burnMultiple > 2 ? 'معدل حرقك مرتفع. تقليل الحرق بنسبة 20% يمكن أن يحسّن تقييمك بنسبة 10% ويطيل مدة بقاءك.' : summary.burnMultiple > 1 ? 'كفاءتك جيدة. التركيز على تحسينها أكثر سيرسل إشارة قوية للمستثمرين.' : 'كفاءتك ممتازة. استمر في هذا المسار.'}</p>
+                      <p><strong>استراتيجية التفاوض:</strong> استهدف النصف الأعلى من نطاق التقييم ({formatCurrency(summary.weightedLow + (summary.weightedHigh - summary.weightedLow) / 4, true)} — {formatCurrency(summary.weightedHigh, true)}) بناءً على قوتك النسبية.</p>
+                    </>
+                  ) : (
+                    <>
+                      <p><strong>Biggest Opportunity:</strong> {inputs.revenueGrowthRate > 100 ? 'Your rapid growth is the primary value driver. Focus on maintaining this trajectory to maximize valuation.' : inputs.revenueGrowthRate > 50 ? 'Accelerating revenue growth by an additional 20% could increase your valuation by 15-20%.' : 'Improving revenue growth is the top priority. Every 10% additional growth adds significant value.'}</p>
+                      <p><strong>Efficiency Gains:</strong> {summary.burnMultiple > 2 ? 'Your burn rate is high. Reducing burn by 20% could improve your valuation by 10% and extend your runway.' : summary.burnMultiple > 1 ? 'Your efficiency is good. Further improvements will send a strong signal to investors.' : 'Your efficiency is excellent. Keep this trajectory.'}</p>
+                      <p><strong>Negotiation Strategy:</strong> Target the upper half of your valuation range ({formatCurrency(summary.weightedLow + (summary.weightedHigh - summary.weightedLow) / 4, true)} — {formatCurrency(summary.weightedHigh, true)}) based on your relative strength.</p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
