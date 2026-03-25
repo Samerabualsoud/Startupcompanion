@@ -6,7 +6,7 @@
 import { Link } from 'wouter';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
-  TrendingUp, Twitter, Linkedin, Instagram, Mail,
+  Star, Twitter, Linkedin, Instagram, Mail,
   Shield, FileText, HelpCircle, ExternalLink
 } from 'lucide-react';
 
@@ -67,7 +67,7 @@ export default function SiteFooter() {
               className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
               style={{ background: 'linear-gradient(135deg, oklch(0.62 0.22 30), oklch(0.60 0.24 290))' }}
             >
-              <TrendingUp className="w-4 h-4 text-white" />
+              <Star className="w-4 h-4 text-white fill-white" />
             </div>
             <span className="font-extrabold text-white text-base" style={{ fontFamily: "'Nunito', sans-serif" }}>
               Polaris Arabia

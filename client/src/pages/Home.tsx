@@ -444,7 +444,7 @@ function HomeInner() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background overflow-hidden" style={{ height: '100vh', overflow: 'hidden' }}>
 
       {/* ── Top Bar ── */}
       <header className={`shrink-0 border-b border-border px-4 py-3 flex items-center justify-between z-40 relative ${isRTL ? 'flex-row-reverse' : ''}`} style={{ background: C.headerBg, boxShadow: `0 1px 0 ${C.headerBorder}` }}>
