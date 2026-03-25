@@ -286,8 +286,21 @@ export default function FinancialProjection() {
   const profileQuery = trpc.profile.get.useQuery();
   const profileBusinessModel = profileQuery.data?.businessModel;
 
+  // Map profile business model to internal model ID
+  const getModelFromProfile = () => {
+    if (!profileBusinessModel) return 'saas';
+    const modelMap: Record<string, BusinessModel> = {
+      'saas': 'saas', 'freemium': 'freemium', 'usage_based': 'usage_based',
+      'ecommerce': 'ecommerce', 'd2c': 'd2c', 'marketplace': 'marketplace',
+      'advertising': 'advertising', 'edtech': 'edtech', 'subscription': 'subscription',
+      'agency': 'agency', 'on_demand': 'on_demand', 'hardware': 'hardware',
+      'fintech': 'fintech', 'procurement': 'procurement', 'proptech': 'proptech',
+    };
+    return modelMap[profileBusinessModel.toLowerCase()] || 'saas';
+  };
+
   // ── State ──────────────────────────────────────────────────────────────────
-  const [selectedModel, setSelectedModel] = useState<BusinessModel>('saas');
+  const [selectedModel, setSelectedModel] = useState<BusinessModel>(() => getModelFromProfile());
   const [modelSyncedFromProfile, setModelSyncedFromProfile] = useState(false);
   const [scenario, setScenario] = useState<Scenario>('base');
   const [yearHorizon, setYearHorizon] = useState<YearHorizon>(3);
@@ -300,26 +313,21 @@ export default function FinancialProjection() {
   const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
 
   const [modelInputs, setModelInputs] = useState<FinancialModelInputs>(
-    () => DEFAULT_MODEL_INPUTS('saas', 3)
+    () => DEFAULT_MODEL_INPUTS(getModelFromProfile(), 3)
   );
 
-  // ── Sync Business Model from Profile ────────────────────────────────────
+  //  // ── Sync Business Model from Profile ────────────────────────────────
   useEffect(() => {
     if (profileBusinessModel && !modelSyncedFromProfile) {
-      const modelMap: Record<string, BusinessModel> = {
-        'saas': 'saas', 'freemium': 'freemium', 'usage_based': 'usage_based',
-        'ecommerce': 'ecommerce', 'd2c': 'd2c', 'marketplace': 'marketplace',
-        'advertising': 'advertising', 'edtech': 'edtech', 'subscription': 'subscription',
-        'agency': 'agency', 'on_demand': 'on_demand', 'hardware': 'hardware',
-        'fintech': 'fintech', 'procurement': 'procurement', 'proptech': 'proptech',
-      };
-      const mappedModel = modelMap[profileBusinessModel.toLowerCase()] || 'saas';
+      const mappedModel = getModelFromProfile();
       setSelectedModel(mappedModel);
-      setModelInputs(DEFAULT_MODEL_INPUTS(mappedModel, 3));
+      setModelInputs(DEFAULT_MODEL_INPUTS(mappedModel, yearHorizon));
       setModelSyncedFromProfile(true);
-      toast.success(`Business model synced from profile: ${profileBusinessModel}`);
+      toast.success(`Business model synced from profile: ${profileBusinessModel}`, {
+        description: 'You can change it anytime',
+      });
     }
-  }, [profileBusinessModel, modelSyncedFromProfile]);
+  }, [profileBusinessModel, modelSyncedFromProfile, yearHorizon]);
 
   // ── COGS Integration ───────────────────────────────────────────────────────
   const cogsQuery = trpc.cogs.list.useQuery(undefined, { retry: false });

@@ -13,6 +13,7 @@ import {
 import { useReport } from '@/contexts/ReportContext';
 import { useToolState } from '@/hooks/useToolState';
 import { useCapTable } from '@/hooks/useCapTable';
+import { useCapTableSync, useDilutionSync } from '@/hooks/useCapTableSync';
 import ToolGuide from '@/components/ToolGuide';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -66,6 +67,9 @@ export default function AdvancedDilutionSimulator() {
   const { state: capState, isLoading, computed } = useCapTable();
   const { state: roundsState, setState: setRoundsState } = useToolState<RoundsState>('dilution_rounds', DEFAULT_ROUNDS_STATE);
   const { setDilution } = useReport();
+
+  useCapTableSync();
+  useDilutionSync();
 
   const rounds = roundsState.rounds;
   const initialValuation = roundsState.initialValuation;
