@@ -282,8 +282,13 @@ export default function FinancialProjection() {
   const { lang, isRTL } = useLanguage();
   const isAr = isRTL;
 
+  // Fetch profile to sync business model
+  const profileQuery = trpc.profile.get.useQuery();
+  const profileBusinessModel = profileQuery.data?.businessModel;
+
   // ── State ──────────────────────────────────────────────────────────────────
   const [selectedModel, setSelectedModel] = useState<BusinessModel>('saas');
+  const [modelSyncedFromProfile, setModelSyncedFromProfile] = useState(false);
   const [scenario, setScenario] = useState<Scenario>('base');
   const [yearHorizon, setYearHorizon] = useState<YearHorizon>(3);
   const [currency, setCurrency] = useState('USD');
@@ -297,6 +302,24 @@ export default function FinancialProjection() {
   const [modelInputs, setModelInputs] = useState<FinancialModelInputs>(
     () => DEFAULT_MODEL_INPUTS('saas', 3)
   );
+
+  // ── Sync Business Model from Profile ────────────────────────────────────
+  useEffect(() => {
+    if (profileBusinessModel && !modelSyncedFromProfile) {
+      const modelMap: Record<string, BusinessModel> = {
+        'saas': 'saas', 'freemium': 'freemium', 'usage_based': 'usage_based',
+        'ecommerce': 'ecommerce', 'd2c': 'd2c', 'marketplace': 'marketplace',
+        'advertising': 'advertising', 'edtech': 'edtech', 'subscription': 'subscription',
+        'agency': 'agency', 'on_demand': 'on_demand', 'hardware': 'hardware',
+        'fintech': 'fintech', 'procurement': 'procurement', 'proptech': 'proptech',
+      };
+      const mappedModel = modelMap[profileBusinessModel.toLowerCase()] || 'saas';
+      setSelectedModel(mappedModel);
+      setModelInputs(DEFAULT_MODEL_INPUTS(mappedModel, 3));
+      setModelSyncedFromProfile(true);
+      toast.success(`Business model synced from profile: ${profileBusinessModel}`);
+    }
+  }, [profileBusinessModel, modelSyncedFromProfile]);
 
   // ── COGS Integration ───────────────────────────────────────────────────────
   const cogsQuery = trpc.cogs.list.useQuery(undefined, { retry: false });
