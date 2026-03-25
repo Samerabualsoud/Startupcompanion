@@ -21,21 +21,21 @@ import { APP_PATH, REGISTER_PATH, LOGIN_PATH } from '@/const';
 import SiteFooter from '@/components/SiteFooter';
 import FeaturedStartups from '@/components/FeaturedStartups';
 
-// ── Design tokens (Visible.vc dark) ──────────────────────────────────────────
-const BG        = 'oklch(0.165 0 0)';       // #202020
-const BG_CARD   = 'oklch(0.20 0 0)';        // #2a2a2a
-const BG_CARD2  = 'oklch(0.22 0 0)';        // slightly lighter card
-const BG_HOVER  = 'oklch(0.24 0 0)';
-const BORDER    = 'oklch(0.28 0 0)';
-const BORDER_HI = 'oklch(0.38 0 0)';
-const TEXT_HI   = 'oklch(0.97 0 0)';        // near-white
-const TEXT_MED  = 'oklch(0.75 0 0)';        // secondary text
-const TEXT_LOW  = 'oklch(0.55 0 0)';        // muted
+// ── Design tokens (Light mode) ──────────────────────────────────────────
+const BG        = 'oklch(0.98 0.001 80)';   // near-white
+const BG_CARD   = 'oklch(1 0 0)';           // white
+const BG_CARD2  = 'oklch(0.97 0.001 80)';   // light gray
+const BG_HOVER  = 'oklch(0.95 0.001 80)';
+const BORDER    = 'oklch(0.90 0.001 80)';
+const BORDER_HI = 'oklch(0.85 0.001 80)';
+const TEXT_HI   = 'oklch(0.15 0 0)';        // near-black
+const TEXT_MED  = 'oklch(0.50 0 0)';        // gray
+const TEXT_LOW  = 'oklch(0.65 0 0)';        // light gray
 const BLUE      = 'oklch(0.50 0.22 264)';   // #0F52DE
-const BLUE_DIM  = 'oklch(0.44 0.22 264)';
-const GREEN     = 'oklch(0.72 0.19 155)';
-const AMBER     = 'oklch(0.75 0.18 55)';
-const VIOLET    = 'oklch(0.65 0.20 290)';
+const BLUE_DIM  = 'oklch(0.58 0.18 264)';
+const GREEN     = 'oklch(0.65 0.19 155)';
+const AMBER     = 'oklch(0.68 0.18 55)';
+const VIOLET    = 'oklch(0.58 0.20 290)';
 
 export default function LandingPage() {
   const { isAuthenticated } = useAuth();

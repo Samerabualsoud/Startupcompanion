@@ -23,7 +23,7 @@ function StartupCard({ startup }: { startup: any }) {
   const stageClass = STAGE_COLORS[startup.stage] || "bg-gray-100 text-gray-700";
 
   return (
-    <Link href={`/startups/${startup.slug}`}>
+    <Link href={`/startup/${startup.slug}`}>
       <div className="group relative bg-white rounded-2xl border border-gray-100 p-6 hover:border-blue-200 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col">
         {/* Verified badge */}
         {startup.verified && (
