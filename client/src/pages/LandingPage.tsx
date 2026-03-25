@@ -20,22 +20,23 @@ import {
 import { APP_PATH, REGISTER_PATH, LOGIN_PATH } from '@/const';
 import SiteFooter from '@/components/SiteFooter';
 import FeaturedStartups from '@/components/FeaturedStartups';
+import EcosystemSection from '@/components/EcosystemSection';
 
-// ── Design tokens (Visible.vc dark) ──────────────────────────────────────────
-const BG        = 'oklch(0.165 0 0)';       // #202020
-const BG_CARD   = 'oklch(0.20 0 0)';        // #2a2a2a
-const BG_CARD2  = 'oklch(0.22 0 0)';        // slightly lighter card
-const BG_HOVER  = 'oklch(0.24 0 0)';
-const BORDER    = 'oklch(0.28 0 0)';
-const BORDER_HI = 'oklch(0.38 0 0)';
-const TEXT_HI   = 'oklch(0.97 0 0)';        // near-white
-const TEXT_MED  = 'oklch(0.75 0 0)';        // secondary text
-const TEXT_LOW  = 'oklch(0.55 0 0)';        // muted
-const BLUE      = 'oklch(0.50 0.22 264)';   // #0F52DE
-const BLUE_DIM  = 'oklch(0.44 0.22 264)';
-const GREEN     = 'oklch(0.72 0.19 155)';
-const AMBER     = 'oklch(0.75 0.18 55)';
-const VIOLET    = 'oklch(0.65 0.20 290)';
+// ── Design tokens (Light mode - Professional) ──────────────────────────────────────────
+const BG        = 'oklch(0.98 0.002 80)';    // #FAFAF8 - off-white
+const BG_CARD   = 'oklch(1 0 0)';            // #FFFFFF - white
+const BG_CARD2  = 'oklch(0.97 0.001 80)';    // #F5F5F3 - light gray
+const BG_HOVER  = 'oklch(0.95 0.001 80)';    // #F0F0ED
+const BORDER    = 'oklch(0.92 0.002 80)';    // #EBEBEB
+const BORDER_HI = 'oklch(0.88 0.003 80)';    // #E0E0DC
+const TEXT_HI   = 'oklch(0.15 0.01 240)';    // #1A1A1A - near-black
+const TEXT_MED  = 'oklch(0.45 0.01 240)';    // #6B6B6B - medium gray
+const TEXT_LOW  = 'oklch(0.65 0.01 240)';    // #A8A8A8 - light gray
+const BLUE      = 'oklch(0.50 0.22 264)';    // #0F52DE - vivid blue (unchanged)
+const BLUE_DIM  = 'oklch(0.60 0.18 264)';    // lighter blue for hover
+const GREEN     = 'oklch(0.55 0.19 155)';    // darker green for light mode
+const AMBER     = 'oklch(0.60 0.18 55)';     // darker amber for light mode
+const VIOLET    = 'oklch(0.55 0.20 290)';    // darker violet for light mode
 
 export default function LandingPage() {
   const { isAuthenticated } = useAuth();
@@ -415,6 +416,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Ecosystem Section: Jurisdictions & Accelerators ── */}
+      <EcosystemSection BG={BG} BG_CARD={BG_CARD} BG_CARD2={BG_CARD2} BORDER={BORDER} TEXT_HI={TEXT_HI} TEXT_MED={TEXT_MED} TEXT_LOW={TEXT_LOW} BLUE={BLUE} GREEN={GREEN} VIOLET={VIOLET} isRTL={isRTL} />
 
       {/* ── Featured Startups ── */}
       <FeaturedStartups />
