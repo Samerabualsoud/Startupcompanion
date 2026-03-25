@@ -64,7 +64,8 @@ import ZestEquity from '@/components/ZestEquity';
 import IdeaValidator from '@/components/IdeaValidator';
 import FinancialProjection from '@/components/FinancialProjection';
 import ProfileSettings from './ProfileSettings';
-type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'profile-settings' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'saved-startups' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator' | 'oqal-notes' | 'zest-equity' | 'financial-projection';
+import DebtInstrumentsHub from '@/components/DebtInstrumentsHub';
+type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'profile-settings' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'debt-instruments' | 'nda' | 'esop' | 'startup-directory' | 'saved-startups' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator' | 'financial-projection';
 
 interface NavItem {
   id: ToolId;
@@ -119,7 +120,7 @@ const NAV_ITEMS: NavItem[] = [
   // Admin
   { id: 'admin', tier: 'enterprise',         label: 'Platform Administration',       shortLabel: 'Admin',      icon: Gauge,       group: 'Admin' },
   // Legal & Documents
-  { id: 'safe-note', tier: 'pro',         label: 'SAFE & Convertible Note Builder', shortLabel: 'SAFE / Note',    navKey: 'navSAFENote',       icon: FileText,    group: 'Legal & Compliance', newUntil: '2026-04-01' },
+  { id: 'debt-instruments', tier: 'pro',  label: 'Debt Instruments & Equity', shortLabel: 'Debt & Equity', navKey: 'navDebtInstruments', icon: FileText,    group: 'Fundraising', newUntil: '2026-07-01', badge: 'Unified' },
   { id: 'nda', tier: 'pro',               label: 'Non-Disclosure Agreement',           shortLabel: 'NDA',            navKey: 'navNDA',            icon: ClipboardCheck, group: 'Legal & Compliance', newUntil: '2026-04-01' },
   { id: 'term-sheet-builder', tier: 'enterprise', label: 'Term Sheet Architect',     shortLabel: 'Glossary',     navKey: 'navTermSheetBuilder', icon: FileText,   group: 'Legal & Compliance', newUntil: '2026-04-01' },
   // ESOP moved to My Startup group above
@@ -138,8 +139,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'ai-cofounder-agreement', tier: 'pro', label: 'Co-founder Agreement Drafter',shortLabel: 'Co-founder',   navKey: 'navAICofounder', icon: Users2,        group: 'AI Advisory', badge: 'AI' },
   { id: 'ai-due-diligence', tier: 'enterprise',       label: 'Due Diligence Analyzer',       shortLabel: 'Due Diligence',   navKey: 'navAIDueDiligence', icon: ClipboardCheck,group: 'AI Advisory', badge: 'AI' },
   // Financing Instruments
-  { id: 'oqal-notes', tier: 'pro',   label: 'OQAL Notes (Shariah)',         shortLabel: 'OQAL Notes',    navKey: 'navOQALNotes',   icon: Shield,      group: 'Legal & Compliance', newUntil: '2026-07-01', badge: 'New' },
-  { id: 'zest-equity', tier: 'pro',  label: 'Zest Equity & Cap Table',      shortLabel: 'Zest Equity',   navKey: 'navZestEquity',  icon: TrendingUp,  group: 'Equity & Ownership', newUntil: '2026-07-01', badge: 'New' },
+
 ];
 
 const GROUPS = ['My Company', 'Valuation', 'Equity & Ownership', 'Capital Raising', 'Legal & Compliance', 'Market Intelligence', 'Ecosystem Network', 'AI Advisory', 'Admin'];
@@ -167,7 +167,7 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'ai-cofounder-agreement': '#14B8A6',
   'ai-fundraising-advisor': '#C4614A',
   'free-zones': '#0284C7',
-  'safe-note': '#7C3AED',
+  'debt-instruments': '#7C3AED',
   'nda': '#0284C7',
   'esop': '#059669',
   'startup-directory': '#C4614A',
@@ -176,8 +176,7 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'data-room': '#2D4A6B',
   'term-sheet-builder': '#7C3AED',
   'cap-table': '#0EA5E9',
-  'oqal-notes': '#10B981',
-  'zest-equity': '#4F6EF7',
+
   'idea-validator': '#EC4899',
   'financial-projection': '#10B981',
 };
@@ -212,7 +211,19 @@ function HomeInner() {
     methodText:   'var(--muted-foreground)',
   };
   // Persist active tool across refreshes using localStorage + URL hash
-  const VALID_TOOL_IDS: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'profile-settings', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator', 'oqal-notes', 'zest-equity', 'financial-projection'];
+  // Filter tools based on KYC completion
+  const getAvailableTools = (): ToolId[] => {
+    const baseTools: ToolId[] = ['dashboard', 'profile', 'profile-settings', 'startup-directory', 'saved-startups', 'resources', 'matching'];
+    const kycRequiredTools: ToolId[] = ['cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'debt-instruments', 'nda', 'esop', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator', 'financial-projection'];
+    const adminTools: ToolId[] = ['admin'];
+    
+    let available = [...baseTools];
+    if (user?.kycCompleted) available.push(...kycRequiredTools);
+    if (user?.role === 'admin') available.push(...adminTools);
+    return available;
+  };
+  
+  const VALID_TOOL_IDS: ToolId[] = getAvailableTools();
   const getInitialTool = (): ToolId => {
     // 1. Check URL hash first (e.g. /app#equity-split)
     const hash = window.location.hash.replace('#', '') as ToolId;
@@ -405,7 +416,7 @@ function HomeInner() {
       case 'ai-term-sheet':             return <AITermSheetAnalyzer />;
       case 'ai-cofounder-agreement':    return <AICofounderAgreement />;
       case 'ai-fundraising-advisor':    return <AIFundraisingAdvisor />;
-      case 'safe-note':                  return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><SAFENoteBuilder /></div>;
+      case 'debt-instruments':            return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><DebtInstrumentsHub /></div>;
       case 'nda':                        return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><NDAGenerator /></div>;
       case 'esop':                       return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><ESOPPlanner /></div>;
       case 'startup-directory':          return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><StartupDirectory /></div>;
@@ -425,8 +436,7 @@ function HomeInner() {
       case 'data-room':                  return <DataRoom />;
       case 'term-sheet-builder':           return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><TermSheetBuilder /></div>;
       case 'cap-table':                    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><CapTableManager /></div>;
-      case 'oqal-notes':                   return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><OQALNotes /></div>;
-      case 'zest-equity':                  return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><ZestEquity /></div>;
+
       case 'idea-validator':               return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><IdeaValidator /></div>;
       case 'financial-projection':           return <FinancialProjection />;
       default: return null;
