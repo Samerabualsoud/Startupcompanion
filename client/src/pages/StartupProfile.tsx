@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useAuth } from '@/_core/hooks/useAuth';
-import { INDUSTRIES } from '@shared/industries';
 import { getLoginUrl } from '@/const';
 import { Link } from 'wouter';
 import { toast } from 'sonner';
@@ -22,18 +21,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { COUNTRIES } from '@shared/dropdowns';
-
-const SECTOR_OPTIONS = INDUSTRIES.map(ind => ({ value: ind, label: ind }));
+import { SECTORS, COUNTRIES } from '@shared/dropdowns';
 
 const STAGE_OPTIONS = [
+  { value: 'idea', label: 'Idea / Pre-launch' },
   { value: 'pre-seed', label: 'Pre-Seed' },
   { value: 'seed', label: 'Seed' },
   { value: 'series-a', label: 'Series A' },
   { value: 'series-b', label: 'Series B' },
-  { value: 'series-c', label: 'Series C' },
   { value: 'growth', label: 'Growth' },
-  { value: 'exit', label: 'Exit' },
 ];
 
 const PRODUCT_STATUS_OPTIONS = [
@@ -360,8 +356,8 @@ export default function StartupProfile() {
             </h1>
             <p className="text-xs text-muted-foreground">{form.tagline || 'Add a tagline below'}</p>
             {form.stage && (
-              <span className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full text-white"
-                style={{ background: 'var(--primary)' }}>
+              <span className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                style={{ background: 'var(--primary)', color: 'var(--primary)' }}>
                 {STAGE_OPTIONS.find(s => s.value === form.stage)?.label || form.stage}
               </span>
             )}
@@ -434,9 +430,9 @@ export default function StartupProfile() {
           </Field>
           <Field label="Sector">
             <Select value={form.sector} onValueChange={v => set('sector', v)}>
-              <SelectTrigger><SelectValue placeholder="Select sector" /></SelectTrigger>
-              <SelectContent>
-                {SECTOR_OPTIONS.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+              <SelectTrigger><SelectValue placeholder="Select sector…" /></SelectTrigger>
+              <SelectContent className="max-h-64 overflow-y-auto">
+                {SECTORS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
           </Field>

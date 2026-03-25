@@ -5,9 +5,8 @@
  */
 import { Link } from 'wouter';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { PolarisLogoFooter } from '@/components/PolarisLogo';
 import {
-  Twitter, Linkedin, Instagram, Mail,
+  TrendingUp, Twitter, Linkedin, Instagram, Mail,
   Shield, FileText, HelpCircle, ExternalLink
 } from 'lucide-react';
 
@@ -63,7 +62,17 @@ export default function SiteFooter() {
 
         {/* Brand column */}
         <div className="lg:col-span-1 flex flex-col gap-4">
-          <PolarisLogoFooter />
+          <div className="flex items-center gap-2.5">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+              style={{ background: 'linear-gradient(135deg, oklch(0.62 0.22 30), oklch(0.60 0.24 290))' }}
+            >
+              <TrendingUp className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-extrabold text-white text-base" style={{ fontFamily: "'Nunito', sans-serif" }}>
+              Polaris Arabia
+            </span>
+          </div>
           <p className="text-sm leading-relaxed" style={{ color: 'oklch(0.65 0.03 240)' }}>
             {t.tagline}
           </p>

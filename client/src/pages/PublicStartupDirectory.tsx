@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-
 export default function PublicStartupDirectory() {
   const [, navigate] = useLocation();
   const [page, setPage] = useState(1);

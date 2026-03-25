@@ -58,7 +58,7 @@ function App() {
     <ErrorBoundary>
       <WouterRouter>
         <ThemeProvider
-          defaultTheme="dark"
+          defaultTheme="light"
           switchable
         >
           <TooltipProvider>

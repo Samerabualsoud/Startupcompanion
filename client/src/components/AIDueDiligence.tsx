@@ -37,14 +37,15 @@ export default function AIDueDiligence() {
   const { t, isRTL, lang } = useLanguage();
   const [form, setForm] = useState({ companyName: '', sector: '', stage: 'Seed', description: '' });
   useEffect(() => {
-    if (!snapshot.companyName && !snapshot.sector && !snapshot.stage) return;
     setForm(prev => ({
+      ...prev,
       companyName: prev.companyName || snapshot.companyName || '',
       sector: prev.sector || snapshot.sector || '',
-      stage: prev.stage || (snapshot.stage ? snapshot.stage.charAt(0).toUpperCase() + snapshot.stage.slice(1).replace('-', ' ') : 'Seed'),
+      stage: prev.stage !== 'Seed' ? prev.stage : (snapshot.stage ? snapshot.stage.charAt(0).toUpperCase() + snapshot.stage.slice(1).replace('-', ' ') : 'Seed'),
       description: prev.description || (snapshot.problem && snapshot.solution ? `${snapshot.problem} ${snapshot.solution}` : ''),
     }));
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot.companyName, snapshot.sector, snapshot.stage, snapshot.problem, snapshot.solution]);
   const [result, setResult] = useState<DDResult | null>(null);
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
@@ -203,7 +204,7 @@ export default function AIDueDiligence() {
                   <span className="text-xs font-bold text-red-700 dark:text-red-400">Top Red Flags to Investigate</span>
                 </div>
                 <ul className="space-y-1">
-                  {result.topRedFlags.map((f, i) => <li key={`flag-${i}`} className="text-xs text-red-700 dark:text-red-400 flex gap-2"><span className="shrink-0">⚠</span>{f}</li>)}
+                  {result.topRedFlags.map((f, i) => <li key={i} className="text-xs text-red-700 dark:text-red-400 flex gap-2"><span className="shrink-0">⚠</span>{f}</li>)}
                 </ul>
               </div>
             )}
@@ -216,16 +217,15 @@ export default function AIDueDiligence() {
                   <span className="text-xs font-bold text-green-700 dark:text-green-400">Quick Positive Signals</span>
                 </div>
                 <ul className="space-y-1">
-                  {result.quickWins.map((w, i) => <li key={`win-${i}`} className="text-xs text-green-700 dark:text-green-400 flex gap-2"><span className="shrink-0">✓</span>{w}</li>)}
+                  {result.quickWins.map((w, i) => <li key={i} className="text-xs text-green-700 dark:text-green-400 flex gap-2"><span className="shrink-0">✓</span>{w}</li>)}
                 </ul>
               </div>
             )}
 
             {/* Categories */}
-            {result.categories.map((cat, catIdx) => (
-              <div key={`cat-${catIdx}`} className="border border-border rounded-xl overflow-hidden">
+            {result.categories.map((cat) => (
+              <div key={cat.category} className="border border-border rounded-xl overflow-hidden">
                 <button
-                  type="button"
                   onClick={() => toggleCat(cat.category)}
                   className="w-full flex items-center justify-between px-4 py-3 bg-card hover:bg-secondary/30 transition-colors"
                 >
@@ -240,8 +240,8 @@ export default function AIDueDiligence() {
                   {expandedCats.has(cat.category) && (
                     <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
                       <div className="border-t border-border divide-y divide-border">
-                        {cat.items.map((item, itemIdx) => {
-                          const key = `${catIdx}-${itemIdx}`;
+                        {cat.items.map((item) => {
+                          const key = `${cat.category}-${item.item}`;
                           const checked = checkedItems.has(key);
                           return (
                             <div key={key} className={`flex gap-3 px-4 py-3 cursor-pointer hover:bg-secondary/20 transition-colors ${checked ? 'opacity-60' : ''}`} onClick={() => toggleItem(key)}>

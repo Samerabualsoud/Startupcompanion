@@ -1,4 +1,4 @@
-import { systemRouter } from "./_core/systemRouter";
+import { systemRouter } from './_core/systemRouter';
 import { router } from "./_core/trpc";
 import { authRouter } from './authRouter';
 import { subscriptionRouter } from './subscriptionRouter';
@@ -25,6 +25,7 @@ import { projectionRouter } from './projectionRouter';
 import { publicProfileRouter } from './publicProfileRouter';
 import { watchlistRouter } from './watchlistRouter';
 import { dataSyncRouter } from './routers/dataSyncRouter';
+import { attachmentRouter } from './routers/attachmentRouter';
 
 export const appRouter = router({
   system: systemRouter,
@@ -53,6 +54,7 @@ export const appRouter = router({
   publicProfile: publicProfileRouter,
   watchlist: watchlistRouter,
   dataSync: dataSyncRouter,
+  attachments: attachmentRouter,
 });
 
 export type AppRouter = typeof appRouter;

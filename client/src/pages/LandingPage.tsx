@@ -9,11 +9,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { PolarisLogoCompact } from '@/components/PolarisLogo';
 import {
   TrendingUp, Sparkles, Users, GitBranch, Target, BookOpen,
   BarChart3, Rocket, Gauge, Layers, Building2,
-  ArrowRight, Zap, Brain, CheckCircle, Star,
+  ArrowRight, Star, Zap, Brain, CheckCircle,
   DollarSign, FileText, PieChart, BarChart2, Menu, X,
   Briefcase, LineChart, Calculator, Database, Search, Lightbulb,
   ChevronRight, Shield, Globe
@@ -22,21 +21,21 @@ import { APP_PATH, REGISTER_PATH, LOGIN_PATH } from '@/const';
 import SiteFooter from '@/components/SiteFooter';
 import FeaturedStartups from '@/components/FeaturedStartups';
 
-// ── Design tokens (Light mode) ──────────────────────────────────────────
-const BG        = 'oklch(0.98 0.001 80)';   // near-white
-const BG_CARD   = 'oklch(1 0 0)';           // white
-const BG_CARD2  = 'oklch(0.97 0.001 80)';   // light gray
-const BG_HOVER  = 'oklch(0.95 0.001 80)';
-const BORDER    = 'oklch(0.90 0.001 80)';
-const BORDER_HI = 'oklch(0.85 0.001 80)';
-const TEXT_HI   = 'oklch(0.15 0 0)';        // near-black
-const TEXT_MED  = 'oklch(0.50 0 0)';        // gray
-const TEXT_LOW  = 'oklch(0.65 0 0)';        // light gray
+// ── Design tokens (Visible.vc dark) ──────────────────────────────────────────
+const BG        = 'oklch(0.165 0 0)';       // #202020
+const BG_CARD   = 'oklch(0.20 0 0)';        // #2a2a2a
+const BG_CARD2  = 'oklch(0.22 0 0)';        // slightly lighter card
+const BG_HOVER  = 'oklch(0.24 0 0)';
+const BORDER    = 'oklch(0.28 0 0)';
+const BORDER_HI = 'oklch(0.38 0 0)';
+const TEXT_HI   = 'oklch(0.97 0 0)';        // near-white
+const TEXT_MED  = 'oklch(0.75 0 0)';        // secondary text
+const TEXT_LOW  = 'oklch(0.55 0 0)';        // muted
 const BLUE      = 'oklch(0.50 0.22 264)';   // #0F52DE
-const BLUE_DIM  = 'oklch(0.58 0.18 264)';
-const GREEN     = 'oklch(0.65 0.19 155)';
-const AMBER     = 'oklch(0.68 0.18 55)';
-const VIOLET    = 'oklch(0.58 0.20 290)';
+const BLUE_DIM  = 'oklch(0.44 0.22 264)';
+const GREEN     = 'oklch(0.72 0.19 155)';
+const AMBER     = 'oklch(0.75 0.18 55)';
+const VIOLET    = 'oklch(0.65 0.20 290)';
 
 export default function LandingPage() {
   const { isAuthenticated } = useAuth();
@@ -104,7 +103,17 @@ export default function LandingPage() {
       >
         <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
           {/* Logo */}
-          <PolarisLogoCompact />
+          <div className="flex items-center gap-2.5">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: BLUE }}
+            >
+              <TrendingUp className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-bold text-base tracking-tight" style={{ color: TEXT_HI, fontFamily: "'Inter', sans-serif" }}>
+              Polaris Arabia
+            </span>
+          </div>
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-6">
@@ -115,8 +124,10 @@ export default function LandingPage() {
               { href: '/startups', label: isRTL ? 'دليل الشركات الناشئة' : 'Startup Directory', isLink: true },
             ].map(link => (
               (link as any).isLink ? (
-                <Link key={link.href} href={link.href} className="text-sm font-medium transition-colors hover:opacity-80" style={{ color: TEXT_MED }}>
-                  {link.label}
+                <Link key={link.href} href={link.href}>
+                  <a className="text-sm font-medium transition-colors hover:opacity-80" style={{ color: TEXT_MED }}>
+                    {link.label}
+                  </a>
                 </Link>
               ) : (
                 <a key={link.href} href={link.href} className="text-sm font-medium transition-colors hover:opacity-80" style={{ color: TEXT_MED }}>
@@ -125,16 +136,22 @@ export default function LandingPage() {
               )
             ))}
             {isAuthenticated ? (
-              <Link href={APP_PATH} className="text-sm font-semibold px-4 py-2 rounded-md text-white transition-all hover:opacity-90 active:scale-95" style={{ background: BLUE, display: 'inline-block' }}>
-                {isRTL ? 'فتح التطبيق' : 'Open App'}
+              <Link href={APP_PATH}>
+                <button className="text-sm font-semibold px-4 py-2 rounded-md text-white transition-all hover:opacity-90 active:scale-95" style={{ background: BLUE }}>
+                  {isRTL ? 'فتح التطبيق' : 'Open App'}
+                </button>
               </Link>
             ) : (
               <div className="flex items-center gap-2">
-                <Link href={LOGIN_PATH} className="text-sm font-medium px-3 py-2 rounded-md transition-colors hover:bg-white/5" style={{ color: TEXT_MED, display: 'inline-block' }}>
-                  {isRTL ? 'تسجيل الدخول' : 'Sign in'}
+                <Link href={LOGIN_PATH}>
+                  <button className="text-sm font-medium px-3 py-2 rounded-md transition-colors hover:bg-white/5" style={{ color: TEXT_MED }}>
+                    {isRTL ? 'تسجيل الدخول' : 'Sign in'}
+                  </button>
                 </Link>
-                <Link href={REGISTER_PATH} className="text-sm font-semibold px-4 py-2 rounded-md text-white transition-all hover:opacity-90 active:scale-95" style={{ background: BLUE, display: 'inline-block' }}>
-                  {isRTL ? 'ابدأ مجاناً' : 'Get started free'}
+                <Link href={REGISTER_PATH}>
+                  <button className="text-sm font-semibold px-4 py-2 rounded-md text-white transition-all hover:opacity-90 active:scale-95" style={{ background: BLUE }}>
+                    {isRTL ? 'ابدأ مجاناً' : 'Get started free'}
+                  </button>
                 </Link>
               </div>
             )}
@@ -156,13 +173,15 @@ export default function LandingPage() {
               <a href="#tools" className="block text-sm font-medium py-2" style={{ color: TEXT_MED }} onClick={() => setMobileMenuOpen(false)}>{isRTL ? 'الأدوات' : 'Tools'}</a>
               <a href="#how" className="block text-sm font-medium py-2" style={{ color: TEXT_MED }} onClick={() => setMobileMenuOpen(false)}>{isRTL ? 'كيف يعمل' : 'How It Works'}</a>
               <a href="#testimonials" className="block text-sm font-medium py-2" style={{ color: TEXT_MED }} onClick={() => setMobileMenuOpen(false)}>{isRTL ? 'آراء المستخدمين' : 'Reviews'}</a>
-              <Link href="/startups" className="block text-sm font-medium py-2" style={{ color: TEXT_MED }} onClick={() => setMobileMenuOpen(false)}>
-                {isRTL ? 'دليل الشركات الناشئة' : 'Startup Directory'}
+              <Link href="/startups">
+                <a className="block text-sm font-medium py-2" style={{ color: TEXT_MED }} onClick={() => setMobileMenuOpen(false)}>{isRTL ? 'دليل الشركات الناشئة' : 'Startup Directory'}</a>
               </Link>
             <div className="pt-2 flex flex-col gap-2">
-                <Link href={ctaPath} className="w-full text-sm font-semibold px-4 py-3 rounded-md text-white" style={{ background: BLUE }} onClick={() => setMobileMenuOpen(false)}>
+                <Link href={ctaPath}>
+                <button className="w-full text-sm font-semibold px-4 py-3 rounded-md text-white" style={{ background: BLUE }} onClick={() => setMobileMenuOpen(false)}>
                   {isRTL ? 'ابدأ مجاناً' : 'Get started free'}
-                </Link>
+                </button>
+              </Link>
             </div>
           </div>
         )}
@@ -380,7 +399,7 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-4 uppercase tracking-widest border"
               style={{ background: `${AMBER}15`, borderColor: `${AMBER}35`, color: AMBER }}
             >
-              <CheckCircle className="w-3 h-3" />
+              <Star className="w-3 h-3" />
               {isRTL ? 'آراء المستخدمين' : 'Reviews'}
             </div>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: TEXT_HI }}>

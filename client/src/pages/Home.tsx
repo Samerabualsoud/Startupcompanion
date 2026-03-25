@@ -63,9 +63,10 @@ import OQALNotes from '@/components/OQALNotes';
 import ZestEquity from '@/components/ZestEquity';
 import IdeaValidator from '@/components/IdeaValidator';
 import FinancialProjection from '@/components/FinancialProjection';
+import CompetitorIntelligence from '@/components/CompetitorIntelligence';
+import TermNegotiationAdvisor from '@/components/TermNegotiationAdvisor';
 import ProfileSettings from './ProfileSettings';
-import DebtInstrumentsHub from '@/components/DebtInstrumentsHub';
-type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'profile-settings' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'debt-instruments' | 'nda' | 'esop' | 'startup-directory' | 'saved-startups' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator' | 'financial-projection';
+type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'profile-settings' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'saved-startups' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator' | 'oqal-notes' | 'zest-equity' | 'financial-projection' | 'competitor-intelligence' | 'term-negotiation';
 
 interface NavItem {
   id: ToolId;
@@ -94,7 +95,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'profile-settings', tier: 'free', label: 'Public Profile Settings', shortLabel: 'Publish', navKey: 'navProfileSettings', icon: Globe, group: 'My Company', newUntil: '2026-04-01' },
   { id: 'cogs', tier: 'free',          label: 'Unit Economics',        shortLabel: 'Unit Econ.',        navKey: 'navCOGS',        icon: DollarSign,  group: 'My Company',   newUntil: '2026-04-01' },
   { id: 'sales', tier: 'free',         label: 'Revenue Intelligence',          shortLabel: 'Revenue',       navKey: 'navSales',       icon: ShoppingCart, group: 'My Company',  newUntil: '2026-04-01' },
-  { id: 'financial-projection', tier: 'free', label: 'Financial Projection', shortLabel: 'Projection', navKey: 'navFinancialProjection', icon: TrendingUp, group: 'My Company', newUntil: '2026-07-01' },
+  { id: 'financial-projection' | 'competitor-intelligence' | 'term-negotiation', tier: 'free', label: 'Financial Projection', shortLabel: 'Projection', navKey: 'navFinancialProjection', icon: TrendingUp, group: 'My Company', newUntil: '2026-07-01' },
   { id: 'data-room', tier: 'pro',     label: 'Virtual Data Room',              shortLabel: 'Data Room',   navKey: 'navDataRoom',    icon: FolderOpen,  group: 'My Company',   newUntil: '2026-04-01' },
   { id: 'cap-table', tier: 'pro',     label: 'Capitalization Table',      shortLabel: 'Cap Table',   navKey: 'navCapTable',    icon: Users,       group: 'My Company',   newUntil: '2026-04-01' },
   // Valuation
@@ -120,7 +121,7 @@ const NAV_ITEMS: NavItem[] = [
   // Admin
   { id: 'admin', tier: 'enterprise',         label: 'Platform Administration',       shortLabel: 'Admin',      icon: Gauge,       group: 'Admin' },
   // Legal & Documents
-  { id: 'debt-instruments', tier: 'pro',  label: 'Debt Instruments & Equity', shortLabel: 'Debt & Equity', navKey: 'navDebtInstruments', icon: FileText,    group: 'Fundraising', newUntil: '2026-07-01', badge: 'Unified' },
+  { id: 'safe-note', tier: 'pro',         label: 'SAFE & Convertible Note Builder', shortLabel: 'SAFE / Note',    navKey: 'navSAFENote',       icon: FileText,    group: 'Legal & Compliance', newUntil: '2026-04-01' },
   { id: 'nda', tier: 'pro',               label: 'Non-Disclosure Agreement',           shortLabel: 'NDA',            navKey: 'navNDA',            icon: ClipboardCheck, group: 'Legal & Compliance', newUntil: '2026-04-01' },
   { id: 'term-sheet-builder', tier: 'enterprise', label: 'Term Sheet Architect',     shortLabel: 'Glossary',     navKey: 'navTermSheetBuilder', icon: FileText,   group: 'Legal & Compliance', newUntil: '2026-04-01' },
   // ESOP moved to My Startup group above
@@ -138,9 +139,12 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'ai-term-sheet', tier: 'enterprise',          label: 'Term Sheet Intelligence', shortLabel: 'Term Intel',   navKey: 'navAITermAnalyzer', icon: FileText,      group: 'AI Advisory', badge: 'AI' },
   { id: 'ai-cofounder-agreement', tier: 'pro', label: 'Co-founder Agreement Drafter',shortLabel: 'Co-founder',   navKey: 'navAICofounder', icon: Users2,        group: 'AI Advisory', badge: 'AI' },
   { id: 'ai-due-diligence', tier: 'enterprise',       label: 'Due Diligence Analyzer',       shortLabel: 'Due Diligence',   navKey: 'navAIDueDiligence', icon: ClipboardCheck,group: 'AI Advisory', badge: 'AI' },
+  // Financing Instruments
+  { id: 'oqal-notes', tier: 'pro',   label: 'OQAL Notes (Shariah)',         shortLabel: 'OQAL Notes',    navKey: 'navOQALNotes',   icon: Shield,      group: 'Legal & Compliance', newUntil: '2026-07-01', badge: 'New' },
+  { id: 'zest-equity', tier: 'pro',  label: 'Zest Equity & Cap Table',      shortLabel: 'Zest Equity',   navKey: 'navZestEquity',  icon: TrendingUp,  group: 'Equity & Ownership', newUntil: '2026-07-01', badge: 'New' },
 ];
 
-const GROUPS = ['My Company', 'Valuation', 'Equity & Ownership', 'Capital Raising', 'Fundraising', 'Legal & Compliance', 'Market Intelligence', 'Ecosystem Network', 'AI Advisory', 'Admin'];
+const GROUPS = ['My Company', 'Valuation', 'Equity & Ownership', 'Capital Raising', 'Legal & Compliance', 'Market Intelligence', 'Ecosystem Network', 'AI Advisory', 'Admin'];
 const TOOL_COLORS: Record<ToolId, string> = {
   dashboard: '#0F1B2D',
   cogs: '#059669',
@@ -165,7 +169,7 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'ai-cofounder-agreement': '#14B8A6',
   'ai-fundraising-advisor': '#C4614A',
   'free-zones': '#0284C7',
-  'debt-instruments': '#7C3AED',
+  'safe-note': '#7C3AED',
   'nda': '#0284C7',
   'esop': '#059669',
   'startup-directory': '#C4614A',
@@ -174,11 +178,12 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'data-room': '#2D4A6B',
   'term-sheet-builder': '#7C3AED',
   'cap-table': '#0EA5E9',
-
+  'oqal-notes': '#10B981',
+  'zest-equity': '#4F6EF7',
   'idea-validator': '#EC4899',
   'financial-projection': '#10B981',
-  'profile-settings': '#2D4A6B',
-  'saved-startups': '#10B981',
+  'competitor-intelligence': '#10B981',
+  'term-negotiation': '#10B981',
 };
 
 function HomeInner() {
@@ -192,17 +197,17 @@ function HomeInner() {
   const isDark = theme === 'dark';
   // Theme-aware color tokens for inline styles (using CSS variables)
   const C = {
-    sidebarBg:    'var(--sidebar)',
-    sidebarBorder:'1px solid var(--sidebar-border)',
-    headerBg:     'var(--card)',
+    sidebarBg:    'var(--card)',
+    sidebarBorder:'1px solid var(--border)',
+    headerBg:     'var(--background)',
     headerBorder: 'var(--border)',
     contentBg:    'var(--background)',
     navText:      'var(--muted-foreground)',
-    navHover:     isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-    groupHeader:  isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)',
-    activeBg:     isDark ? 'rgba(79,110,247,0.15)' : 'rgba(37,99,235,0.08)',
-    activeText:   isDark ? '#7B93FF' : '#1D4ED8',
-    activeIcon:   isDark ? '#7B93FF' : '#2563EB',
+    navHover:     'var(--secondary)',
+    groupHeader:  'var(--muted-foreground)',
+    activeBg:     'color-mix(in srgb, var(--primary) 12%, transparent)',
+    activeText:   'var(--primary)',
+    activeIcon:   'var(--primary)',
     chatPanelBg:  'var(--background)',
     chatHeaderBg: 'var(--card)',
     chatHeaderText:'var(--foreground)',
@@ -211,19 +216,7 @@ function HomeInner() {
     methodText:   'var(--muted-foreground)',
   };
   // Persist active tool across refreshes using localStorage + URL hash
-  // Filter tools based on KYC completion
-  const getAvailableTools = (): ToolId[] => {
-    const baseTools: ToolId[] = ['dashboard', 'profile', 'profile-settings', 'startup-directory', 'saved-startups', 'resources', 'matching'];
-    const kycRequiredTools: ToolId[] = ['cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'debt-instruments', 'nda', 'esop', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator', 'financial-projection'];
-    const adminTools: ToolId[] = ['admin'];
-    
-    let available = [...baseTools];
-    if (user?.kycCompleted) available.push(...kycRequiredTools);
-    if (user?.role === 'admin') available.push(...adminTools);
-    return available;
-  };
-  
-  const VALID_TOOL_IDS: ToolId[] = getAvailableTools();
+  const VALID_TOOL_IDS: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'profile-settings', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator', 'oqal-notes', 'zest-equity', 'financial-projection' | 'competitor-intelligence' | 'term-negotiation'];
   const getInitialTool = (): ToolId => {
     // 1. Check URL hash first (e.g. /app#equity-split)
     const hash = window.location.hash.replace('#', '') as ToolId;
@@ -301,9 +294,9 @@ function HomeInner() {
     switch (activeTool) {
       case 'valuation':
         return (
-          <div className="flex flex-1 overflow-hidden h-full w-full" style={{ scrollBehavior: 'auto', overflowY: 'hidden', overflowX: 'hidden' }}>
+          <div className="flex flex-1 overflow-hidden h-full">
             {/* Chat Panel */}
-            <div className={`flex flex-col border-r border-border transition-all duration-500 bg-background overflow-hidden ${chatComplete ? 'w-full lg:w-[400px]' : 'w-full'}`} style={{ overscrollBehavior: 'none', overflow: 'hidden' }}>
+            <div className={`flex flex-col border-r border-border transition-all duration-500 bg-background ${chatComplete ? 'w-full lg:w-[400px]' : 'w-full'}`}>
               <div className="shrink-0 px-5 py-3.5 border-b border-border flex items-center gap-2.5 bg-card">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center bg-primary">
                   <Sparkles className="w-3.5 h-3.5 text-white" />
@@ -316,7 +309,7 @@ function HomeInner() {
                   </div>
                 </div>
               </div>
-              <div className="flex-1 overflow-hidden" style={{ overscrollBehavior: 'contain' }}>
+              <div className="flex-1 overflow-hidden">
                 <ChatInterface key={chatKey} onComplete={handleChatComplete} />
               </div>
             </div>
@@ -416,7 +409,7 @@ function HomeInner() {
       case 'ai-term-sheet':             return <AITermSheetAnalyzer />;
       case 'ai-cofounder-agreement':    return <AICofounderAgreement />;
       case 'ai-fundraising-advisor':    return <AIFundraisingAdvisor />;
-      case 'debt-instruments':            return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><DebtInstrumentsHub /></div>;
+      case 'safe-note':                  return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><SAFENoteBuilder /></div>;
       case 'nda':                        return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><NDAGenerator /></div>;
       case 'esop':                       return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><ESOPPlanner /></div>;
       case 'startup-directory':          return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><StartupDirectory /></div>;
@@ -436,15 +429,16 @@ function HomeInner() {
       case 'data-room':                  return <DataRoom />;
       case 'term-sheet-builder':           return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><TermSheetBuilder /></div>;
       case 'cap-table':                    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><CapTableManager /></div>;
-
+      case 'oqal-notes':                   return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><OQALNotes /></div>;
+      case 'zest-equity':                  return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><ZestEquity /></div>;
       case 'idea-validator':               return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><IdeaValidator /></div>;
-      case 'financial-projection':           return <FinancialProjection />;
+      case 'financial-projection' | 'competitor-intelligence' | 'term-negotiation':           return <FinancialProjection />;
       default: return null;
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background overflow-hidden" style={{ height: '100vh', overflow: 'hidden' }}>
+    <div className="min-h-screen flex flex-col bg-background">
 
       {/* ── Top Bar ── */}
       <header className={`shrink-0 border-b border-border px-4 py-3 flex items-center justify-between z-40 relative ${isRTL ? 'flex-row-reverse' : ''}`} style={{ background: C.headerBg, boxShadow: `0 1px 0 ${C.headerBorder}` }}>
@@ -646,7 +640,7 @@ function HomeInner() {
               const gc = groupColors[group] ?? groupColors['Overview'];
               return (
                 <div key={group} className="mb-3">
-                  <div className="text-[10px] font-bold uppercase tracking-[0.08em] px-3 mb-1.5 flex items-center gap-1.5 opacity-60" style={{ color: gc.header }}>
+                  <div className="text-[9px] font-extrabold uppercase tracking-widest px-3 mb-1.5 flex items-center gap-1.5" style={{ color: gc.header }}>
                     <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: gc.header }} />
                     {groupLabel[group] || group}
                   </div>
@@ -658,16 +652,13 @@ function HomeInner() {
                       <button
                         key={item.id}
                         onClick={() => { setActiveTool(item.id); setSidebarOpen(false); }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg mb-0.5 transition-all ${isRTL ? 'flex-row-reverse' : ''}`}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl mb-0.5 transition-all ${isRTL ? 'flex-row-reverse' : ''}`}
                         style={isActive ? {
                           background: gc.activeBg,
                           color: gc.activeText,
                           fontWeight: 600,
-                          borderLeft: "2.5px solid " + gc.activeIcon,
-                          paddingLeft: '10px',
                         } : {
                           color: C.navText,
-                          borderLeft: '2px solid transparent',
                         }}
                         onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = C.navHover; }}
                         onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = ''; }}

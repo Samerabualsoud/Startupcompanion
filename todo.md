@@ -787,3 +787,16 @@
 - [x] Test attachment functionality: All 105 vitest tests passing, including attachment router tests
 - [x] 0 TypeScript errors, all tests passing
 - [ ] Save checkpoint
+
+## Attachment UI Component (IN PROGRESS)
+- [ ] Design AttachmentUploader component with drag-and-drop zone
+- [ ] Implement file input and drag-and-drop event handlers
+- [ ] Add upload progress indicators with percentage display
+- [ ] Build file list display with file metadata (name, size, upload time)
+- [ ] Implement delete functionality with confirmation
+- [ ] Add file type validation and size limits
+- [ ] Add error handling and user feedback (toasts)
+- [ ] Integrate with attachmentRouter tRPC procedures
+- [ ] Write component tests
+- [ ] 0 TypeScript errors, all tests passing
+- [ ] Save checkpoint

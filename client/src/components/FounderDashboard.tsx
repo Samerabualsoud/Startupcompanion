@@ -160,7 +160,7 @@ export default function FounderDashboard({ onNavigate }: FounderDashboardProps) 
       <div className="px-6 py-5 border-b border-border bg-card">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold font-display text-foreground">
+            <h1 className="text-2xl font-bold text-foreground">
               {hasProfile ? snapshot.companyName : t('dashboardTitle')}
             </h1>
             <p className="text-sm mt-0.5 text-muted-foreground">

@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { FileDown, BookmarkPlus, ChevronDown, ChevronRight, RotateCcw, PieChart, BarChart2, Layers, Cloud, CloudOff, Sparkles, TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react';
+import { FileDown, BookmarkPlus, ChevronDown, ChevronRight, RotateCcw, PieChart, BarChart2, Layers, Cloud, CloudOff, Sparkles, TrendingUp, TrendingDown, Minus, AlertTriangle, Zap, Users, Target, ArrowUpRight, Brain, MessageSquare } from 'lucide-react';
 import { Streamdown } from 'streamdown';
 import { formatCurrency, type StartupInputs, type ValuationSummary, type SavedScenario } from '@/lib/valuation';
 import { generatePDFReport } from '@/lib/pdfReport';
@@ -164,6 +164,11 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
   const [scenarioName, setScenarioName] = useState('');
   const [aiNarrative, setAiNarrative] = useState<string | null>(null);
   const [aiNarrativeLoading, setAiNarrativeLoading] = useState(false);
+  const [deepAnalysis, setDeepAnalysis] = useState<any | null>(null);
+  const [deepAnalysisLoading, setDeepAnalysisLoading] = useState(false);
+  const [talkingPoints, setTalkingPoints] = useState<any | null>(null);
+  const [talkingPointsLoading, setTalkingPointsLoading] = useState(false);
+  const [activeAIPanel, setActiveAIPanel] = useState<'narrative' | 'deep' | 'talking'>('narrative');
   const { isAuthenticated } = useAuth();
   const { isRTL } = useLanguage();
   const TABS = isRTL ? TABS_AR : TABS_EN;
@@ -179,6 +184,52 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
       toast.error('Failed to generate AI analysis. Please try again.');
     },
   });
+
+  const deepAnalysisMutation = trpc.ai.valuationDeepAnalysis.useMutation({
+    onSuccess: (data) => { setDeepAnalysis(data); setDeepAnalysisLoading(false); },
+    onError: () => { setDeepAnalysisLoading(false); toast.error('Deep analysis failed. Please try again.'); },
+  });
+
+  const talkingPointsMutation = trpc.ai.investorTalkingPoints.useMutation({
+    onSuccess: (data) => { setTalkingPoints(data); setTalkingPointsLoading(false); },
+    onError: () => { setTalkingPointsLoading(false); toast.error('Failed to generate talking points.'); },
+  });
+
+  const handleDeepAnalysis = () => {
+    if (deepAnalysis) return;
+    setDeepAnalysisLoading(true);
+    deepAnalysisMutation.mutate({
+      companyName: inputs.companyName || 'Your Startup',
+      sector: inputs.sector,
+      stage: inputs.stage,
+      blendedValuation: summary.blended,
+      valuationLow: summary.weightedLow,
+      valuationHigh: summary.weightedHigh,
+      confidenceScore: summary.confidenceScore,
+      currentARR: inputs.currentARR,
+      revenueGrowthRate: inputs.revenueGrowthRate,
+      grossMargin: inputs.grossMargin,
+      burnRate: inputs.burnRate,
+      runway: summary.runway,
+      tam: inputs.totalAddressableMarket,
+      methods: summary.results.map(r => ({ method: r.method, value: r.value, applicability: r.applicability })),
+    });
+  };
+
+  const handleTalkingPoints = () => {
+    if (talkingPoints) return;
+    setTalkingPointsLoading(true);
+    talkingPointsMutation.mutate({
+      companyName: inputs.companyName || 'Your Startup',
+      sector: inputs.sector,
+      stage: inputs.stage,
+      blendedValuation: summary.blended,
+      currentARR: inputs.currentARR,
+      revenueGrowthRate: inputs.revenueGrowthRate,
+      grossMargin: inputs.grossMargin,
+      topMethods: summary.results.slice(0,3).map(r => ({ method: r.method, value: r.value })),
+    });
+  };
 
   const handleGenerateNarrative = () => {
     if (aiNarrative) return;
@@ -251,7 +302,7 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
   };
 
   return (
-    <div className="flex flex-col h-full w-full overflow-hidden" style={{ maxHeight: '100vh', height: '100%' }}>
+    <div className="flex flex-col h-full overflow-hidden">
       {/* ── Valuation Hero ── */}
       <div className="shrink-0 p-5 bg-primary">
         <div className="flex items-start justify-between gap-4">
@@ -334,16 +385,15 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
       </div>
 
       {/* ── Tab Content ── */}
-      <div className="flex-1 overflow-hidden min-h-0 w-full" style={{ overflowY: 'auto', overscrollBehavior: 'contain' }}>
+      <div className="flex-1 overflow-y-auto">
         {activeTab === 'report' && (
-          <div className="p-5 space-y-6 max-w-full h-fit">
+          <div className="p-5 space-y-6">
             {/* Bar Chart */}
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold text-foreground" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{isRTL ? 'التقييم حسب الطريقة' : 'Valuation by Method'}</h3>
                 <span className="text-[10px] text-muted-foreground font-mono">{isRTL ? 'القيم بالمليون $' : 'Values in $M'}</span>
               </div>
-              <div className="w-full" style={{ height: '220px', maxHeight: '220px', overflow: 'hidden' }}>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 55 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -357,7 +407,6 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-              </div>
             </div>
 
             {/* Method Cards */}
@@ -424,7 +473,6 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
             {/* Scorecard Radar */}
             <div className="border border-border rounded-lg p-4 bg-card">
               <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{isRTL ? 'بطاقة أداء الفريق والمنتج' : 'Team & Product Scorecard'}</h3>
-              <div className="w-full" style={{ height: '200px', maxHeight: '200px', overflow: 'hidden' }}>
               <ResponsiveContainer width="100%" height={200}>
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="var(--border)" />
@@ -433,7 +481,6 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
                   <Radar name="Score" dataKey="score" stroke="#C4614A" fill="#C4614A" fillOpacity={0.25} strokeWidth={2} />
                 </RadarChart>
               </ResponsiveContainer>
-              </div>
             </div>
 
             {/* Analyst Summary */}
@@ -502,48 +549,181 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
         )}
 
         {activeTab === 'ai-analyst' && (
-          <div className="p-5 space-y-5 max-w-full">
-            {/* AI Analyst Panel */}
-            <div className="rounded-xl overflow-hidden border border-border">
-              <div className="px-4 py-3 flex items-center justify-between bg-primary/10 border-b border-border">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-semibold text-foreground">AI Analyst Narrative</span>
-                </div>
-                {!aiNarrative && (
-                  <button
-                    onClick={() => { handleGenerateNarrative(); }}
-                    disabled={aiNarrativeLoading || !isAuthenticated}
-                    className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md transition-all disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    {aiNarrativeLoading ? (
-                      <><span className="animate-spin inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />{isRTL ? 'جارٍ التحليل...' : 'Analyzing...'}</>
-                    ) : (
-                      <><Sparkles className="w-3 h-3" />{isRTL ? 'توليد التحليل' : 'Generate Analysis'}</>
-                    )}
-                  </button>
-                )}
-              </div>
-              <div className="p-4 bg-card max-h-96 overflow-y-auto">
-                {!isAuthenticated ? (
-                  <div className="text-center py-6">
-                    <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-amber-500" />
-                    <p className="text-sm font-medium text-foreground mb-1">{isRTL ? 'تسجيل الدخول مطلوب' : 'Login Required'}</p>
-                    <p className="text-xs text-muted-foreground">{isRTL ? 'سجّل دخولك للحصول على تحليل AI مخصص لتقييمك.' : 'Sign in to get a personalized AI analysis of your valuation.'}</p>
+          <div className="p-5 space-y-4">
+
+            {/* AI Panel Selector */}
+            <div className="flex gap-2 p-1 bg-secondary/50 rounded-lg">
+              {[
+                { id: 'narrative' as const, icon: Sparkles, label: isRTL ? 'السرد' : 'Narrative' },
+                { id: 'deep' as const, icon: Brain, label: isRTL ? 'التحليل العميق' : 'Deep Analysis' },
+                { id: 'talking' as const, icon: MessageSquare, label: isRTL ? 'نقاط المناقشة' : 'Talking Points' },
+              ].map(panel => (
+                <button
+                  key={panel.id}
+                  onClick={() => setActiveAIPanel(panel.id)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 text-xs font-medium py-2 rounded-md transition-all ${activeAIPanel === panel.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  <panel.icon className="w-3 h-3" />
+                  {panel.label}
+                </button>
+              ))}
+            </div>
+
+            {/* ── NARRATIVE PANEL ── */}
+            {activeAIPanel === 'narrative' && (
+              <div className="rounded-xl overflow-hidden border border-border">
+                <div className="px-4 py-3 flex items-center justify-between bg-primary/10 border-b border-border">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">{isRTL ? 'تحليل المحلل الذكي' : 'AI Analyst Narrative'}</span>
                   </div>
-                ) : aiNarrative ? (
-                  <div className="text-sm text-foreground leading-relaxed prose prose-sm max-w-none">
-                    <Streamdown>{aiNarrative}</Streamdown>
+                  {!aiNarrative && (
+                    <button onClick={handleGenerateNarrative} disabled={aiNarrativeLoading || !isAuthenticated}
+                      className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md transition-all disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90">
+                      {aiNarrativeLoading ? <><span className="animate-spin inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />{isRTL ? 'جارٍ...' : 'Analyzing...'}</> : <><Sparkles className="w-3 h-3" />{isRTL ? 'توليد' : 'Generate'}</>}
+                    </button>
+                  )}
+                </div>
+                <div className="p-4 bg-card">
+                  {!isAuthenticated ? (
+                    <div className="text-center py-6"><AlertTriangle className="w-8 h-8 mx-auto mb-2 text-amber-500" /><p className="text-sm font-medium">{isRTL ? 'تسجيل الدخول مطلوب' : 'Login required'}</p></div>
+                  ) : aiNarrative ? (
+                    <div className="text-sm text-foreground leading-relaxed prose prose-sm max-w-none"><Streamdown>{aiNarrative}</Streamdown></div>
+                  ) : (
+                    <div className="text-center py-8"><Sparkles className="w-10 h-10 mx-auto mb-3 text-primary opacity-40" /><p className="text-sm font-medium text-foreground mb-1">{isRTL ? 'سرد تحليلي عميق' : 'Deep analyst narrative'}</p><p className="text-xs text-muted-foreground max-w-xs mx-auto">{isRTL ? 'تفسير احترافي، نقاط قوة ومخاطر، وخطوات للـ٩٠ يوماً القادمة.' : 'Professional interpretation, key strengths & risks, and 90-day action steps.'}</p></div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── DEEP ANALYSIS PANEL ── */}
+            {activeAIPanel === 'deep' && (
+              <div className="space-y-4">
+                {!deepAnalysis ? (
+                  <div className="rounded-xl border border-border overflow-hidden">
+                    <div className="px-4 py-3 flex items-center justify-between bg-violet-500/10 border-b border-border">
+                      <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-violet-500" /><span className="text-sm font-semibold text-foreground">{isRTL ? 'التحليل العميق بالذكاء الاصطناعي' : 'AI Deep Analysis'}</span></div>
+                      <button onClick={handleDeepAnalysis} disabled={deepAnalysisLoading || !isAuthenticated}
+                        className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50 transition-all">
+                        {deepAnalysisLoading ? <><span className="animate-spin inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />{isRTL ? 'جارٍ...' : 'Analyzing...'}</> : <><Brain className="w-3 h-3" />{isRTL ? 'تشغيل التحليل العميق' : 'Run deep analysis'}</>}
+                      </button>
+                    </div>
+                    <div className="p-8 text-center bg-card">
+                      <Brain className="w-12 h-12 mx-auto mb-3 text-violet-400 opacity-40" />
+                      <p className="text-sm font-medium text-foreground mb-1">{isRTL ? 'تحليل عميق مع مقارنات السوق' : 'Deep analysis with market comparables'}</p>
+                      <p className="text-xs text-muted-foreground max-w-sm mx-auto">{isRTL ? 'مقارنة بشركات مماثلة، تحليل نقاط القوة والمخاطر، ورافعات محددة لزيادة التقييم.' : 'Comparable company benchmarking, strength/risk analysis, specific levers to increase your valuation, and fundraising strategy.'}</p>
+                    </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <Sparkles className="w-10 h-10 mx-auto mb-3 text-primary" />
-                    <p className="text-sm font-medium text-foreground mb-1">{isRTL ? 'تحليل ذكاء اصطناعي عميق' : 'Deep AI Analysis'}</p>
-                    <p className="text-xs text-muted-foreground max-w-xs mx-auto">{isRTL ? 'احصل على تفسير احترافي لنتائج التقييم، ونقاط القوة والمخاطر، وخطوات عملية للأشهر التسعين القادمة.' : 'Get a professional interpretation of your valuation results, key strengths and risks, and concrete action steps for the next 90 days.'}</p>
+                  <>
+                    {/* Verdict */}
+                    <div className="rounded-xl border border-border p-4 bg-card">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0"><Sparkles className="w-4 h-4 text-primary" /></div>
+                        <div><div className="text-xs font-bold text-primary uppercase tracking-wide mb-1">{isRTL ? 'حكم المحلل' : 'Analyst Verdict'}</div><div className="text-sm text-foreground leading-relaxed">{deepAnalysis.verdict}</div></div>
+                      </div>
+                    </div>
+
+                    {/* Comparable Companies */}
+                    {deepAnalysis.comparableCompanies?.length > 0 && (
+                      <div className="rounded-xl border border-border overflow-hidden bg-card">
+                        <div className="px-4 py-3 border-b border-border"><div className="flex items-center gap-2"><Users className="w-4 h-4 text-foreground" /><span className="text-sm font-semibold text-foreground">{isRTL ? 'الشركات المماثلة' : 'Comparable Companies'}</span></div></div>
+                        <div className="divide-y divide-border">
+                          {deepAnalysis.comparableCompanies.slice(0,4).map((c: any, i: number) => (
+                            <div key={i} className="flex items-center gap-3 px-4 py-3">
+                              <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-foreground shrink-0">{c.name.slice(0,2).toUpperCase()}</div>
+                              <div className="flex-1"><div className="text-xs font-semibold text-foreground">{c.name}</div><div className="text-[10px] text-muted-foreground">{c.relevance}</div></div>
+                              <div className="text-right shrink-0"><div className="text-xs font-bold text-foreground">{c.valuation}</div><div className="text-[10px] text-muted-foreground">{c.multiple}</div></div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Strengths & Risks */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl border border-emerald-200 dark:border-emerald-900 overflow-hidden bg-card">
+                        <div className="px-3 py-2.5 border-b border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/30"><span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">{isRTL ? '✦ نقاط القوة' : '✦ Key Strengths'}</span></div>
+                        <div className="p-3 space-y-2.5">
+                          {deepAnalysis.keyStrengths?.slice(0,3).map((s: any, i: number) => (
+                            <div key={i}><div className="text-xs font-semibold text-foreground">{s.strength}</div><div className="text-[10px] text-emerald-600 dark:text-emerald-400">{s.impact}</div></div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-red-200 dark:border-red-900 overflow-hidden bg-card">
+                        <div className="px-3 py-2.5 border-b border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30"><span className="text-xs font-bold text-red-700 dark:text-red-400">{isRTL ? '⚠ المخاطر الرئيسية' : '⚠ Key Risks'}</span></div>
+                        <div className="p-3 space-y-2.5">
+                          {deepAnalysis.keyRisks?.slice(0,3).map((r: any, i: number) => (
+                            <div key={i}><div className="text-xs font-semibold text-foreground">{r.risk}</div><div className="text-[10px] text-red-600 dark:text-red-400">{r.mitigation}</div></div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Valuation Levers */}
+                    {deepAnalysis.valuationLevers?.length > 0 && (
+                      <div className="rounded-xl border border-border overflow-hidden bg-card">
+                        <div className="px-4 py-3 border-b border-border"><div className="flex items-center gap-2"><Zap className="w-4 h-4 text-amber-500" /><span className="text-sm font-semibold text-foreground">{isRTL ? 'رافعات التقييم' : 'Valuation Levers'}</span><span className="text-[10px] text-muted-foreground ml-1">{isRTL ? 'خطوات محددة لزيادة تقييمك' : 'Specific actions to increase your valuation'}</span></div></div>
+                        <div className="divide-y divide-border">
+                          {deepAnalysis.valuationLevers.slice(0,4).map((lev: any, i: number) => (
+                            <div key={i} className="flex items-start gap-3 px-4 py-3">
+                              <div className="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-[10px] font-bold text-amber-700 dark:text-amber-400 shrink-0 mt-0.5">{i+1}</div>
+                              <div className="flex-1"><div className="text-xs font-semibold text-foreground">{lev.lever}</div><div className="text-[10px] text-muted-foreground mt-0.5">{lev.timeframe} · {lev.difficulty}</div></div>
+                              <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 shrink-0">{lev.potentialUplift}</div>
+                            </div>
+                          ))}
+                        </div>
+                        {deepAnalysis.fundraisingAdvice && (
+                          <div className="px-4 py-3 border-t border-border bg-blue-50/50 dark:bg-blue-950/20"><p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">💡 {deepAnalysis.fundraisingAdvice}</p></div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* ── TALKING POINTS PANEL ── */}
+            {activeAIPanel === 'talking' && (
+              <div className="rounded-xl border border-border overflow-hidden">
+                <div className="px-4 py-3 flex items-center justify-between bg-emerald-500/10 border-b border-border">
+                  <div className="flex items-center gap-2"><MessageSquare className="w-4 h-4 text-emerald-600" /><span className="text-sm font-semibold text-foreground">{isRTL ? 'نقاط المناقشة مع المستثمرين' : 'Investor Talking Points'}</span></div>
+                  {!talkingPoints && (
+                    <button onClick={handleTalkingPoints} disabled={talkingPointsLoading || !isAuthenticated}
+                      className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-all">
+                      {talkingPointsLoading ? <><span className="animate-spin inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />{isRTL ? 'جارٍ...' : 'Generating...'}</> : <><MessageSquare className="w-3 h-3" />{isRTL ? 'توليد النقاط' : 'Generate'}</>}
+                    </button>
+                  )}
+                </div>
+                {!talkingPoints ? (
+                  <div className="p-8 text-center bg-card"><MessageSquare className="w-12 h-12 mx-auto mb-3 text-emerald-400 opacity-40" /><p className="text-sm font-medium text-foreground mb-1">{isRTL ? 'نقاط مناقشة جاهزة للمستثمرين' : 'Ready-to-use investor talking points'}</p><p className="text-xs text-muted-foreground max-w-xs mx-auto">{isRTL ? 'جمل كاملة ومصقولة لاستخدامها في اجتماعات المستثمرين بناءً على نتائج تقييمك.' : 'Complete, polished sentences to use in investor meetings, based on your valuation results.'}</p></div>
+                ) : (
+                  <div className="p-4 space-y-4 bg-card">
+                    {[
+                      { key: 'openingStatement', label: isRTL ? 'الافتتاحية' : 'Opening Statement', color: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900', tc: 'text-blue-700 dark:text-blue-300' },
+                      { key: 'valuationJustification', label: isRTL ? 'مبرر التقييم' : 'Valuation Justification', color: 'bg-violet-50 dark:bg-violet-950/20 border-violet-200 dark:border-violet-900', tc: 'text-violet-700 dark:text-violet-300' },
+                      { key: 'useOfFunds', label: isRTL ? 'استخدام الأموال' : 'Use of Funds', color: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900', tc: 'text-amber-700 dark:text-amber-300' },
+                      { key: 'closingAsk', label: isRTL ? 'الختام والطلب' : 'Closing Ask', color: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900', tc: 'text-emerald-700 dark:text-emerald-300' },
+                    ].map(({key, label, color, tc}) => talkingPoints[key] && (
+                      <div key={key} className={`rounded-lg border p-3 ${color}`}>
+                        <div className={`text-[10px] font-bold uppercase tracking-wide mb-1.5 ${tc}`}>{label}</div>
+                        <p className="text-sm text-foreground leading-relaxed">"{talkingPoints[key]}"</p>
+                      </div>
+                    ))}
+                    {talkingPoints.tractionPoints?.length > 0 && (
+                      <div className="rounded-lg border border-border p-3 bg-secondary/30">
+                        <div className="text-[10px] font-bold uppercase tracking-wide mb-2 text-muted-foreground">{isRTL ? 'نقاط الجذب' : 'Traction Points'}</div>
+                        <div className="space-y-1.5">
+                          {talkingPoints.tractionPoints.map((pt: string, i: number) => (
+                            <div key={i} className="flex items-start gap-2"><div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-[9px] font-bold text-primary shrink-0 mt-0.5">{i+1}</div><p className="text-xs text-foreground">{pt}</p></div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            </div>
+            )}
 
             {/* Peer Benchmarks */}
             <div className="rounded-xl border border-border overflow-hidden bg-card">
@@ -721,29 +901,6 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
                       );
                     })}
                   </div>
-                </div>
-              </div>
-
-              {/* AI Insights Panel */}
-              <div className="mt-6 rounded-xl border border-primary/30 bg-primary/5 p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  <h4 className="text-sm font-semibold text-foreground">{isRTL ? 'توصيات ذكية' : 'AI Insights'}</h4>
-                </div>
-                <div className="space-y-2.5 text-xs text-foreground leading-relaxed">
-                  {isRTL ? (
-                    <>
-                      <p><strong>الفرصة الأكبر:</strong> {inputs.revenueGrowthRate > 100 ? 'نموك السريع هو أكبر محرك للقيمة. ركّز على الحفاظ على معدل النمو هذا لتحقيق أقصى تقييم.' : inputs.revenueGrowthRate > 50 ? 'تسريع نمو الإيرادات بنسبة 20% إضافية يمكن أن يزيد تقييمك بمقدار 15-20%.' : 'تحسين نمو الإيرادات هو الأولوية الأولى. كل 10% إضافية من النمو تضيف قيمة كبيرة.'}</p>
-                      <p><strong>تحسين الكفاءة:</strong> {summary.burnMultiple > 2 ? 'معدل حرقك مرتفع. تقليل الحرق بنسبة 20% يمكن أن يحسّن تقييمك بنسبة 10% ويطيل مدة بقاءك.' : summary.burnMultiple > 1 ? 'كفاءتك جيدة. التركيز على تحسينها أكثر سيرسل إشارة قوية للمستثمرين.' : 'كفاءتك ممتازة. استمر في هذا المسار.'}</p>
-                      <p><strong>استراتيجية التفاوض:</strong> استهدف النصف الأعلى من نطاق التقييم ({formatCurrency(summary.weightedLow + (summary.weightedHigh - summary.weightedLow) / 4, true)} — {formatCurrency(summary.weightedHigh, true)}) بناءً على قوتك النسبية.</p>
-                    </>
-                  ) : (
-                    <>
-                      <p><strong>Biggest Opportunity:</strong> {inputs.revenueGrowthRate > 100 ? 'Your rapid growth is the primary value driver. Focus on maintaining this trajectory to maximize valuation.' : inputs.revenueGrowthRate > 50 ? 'Accelerating revenue growth by an additional 20% could increase your valuation by 15-20%.' : 'Improving revenue growth is the top priority. Every 10% additional growth adds significant value.'}</p>
-                      <p><strong>Efficiency Gains:</strong> {summary.burnMultiple > 2 ? 'Your burn rate is high. Reducing burn by 20% could improve your valuation by 10% and extend your runway.' : summary.burnMultiple > 1 ? 'Your efficiency is good. Further improvements will send a strong signal to investors.' : 'Your efficiency is excellent. Keep this trajectory.'}</p>
-                      <p><strong>Negotiation Strategy:</strong> Target the upper half of your valuation range ({formatCurrency(summary.weightedLow + (summary.weightedHigh - summary.weightedLow) / 4, true)} — {formatCurrency(summary.weightedHigh, true)}) based on your relative strength.</p>
-                    </>
-                  )}
                 </div>
               </div>
             </div>
