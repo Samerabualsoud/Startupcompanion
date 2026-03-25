@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function SavedStartups() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [search, setSearch] = useState<string>("");
 
   const { data: savedData, isLoading } = trpc.watchlist.getSavedProfiles.useQuery(
@@ -24,14 +24,14 @@ export default function SavedStartups() {
 
   const profiles = savedData?.profiles || [];
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || (user && user.role !== 'admin' && user.role !== 'user')) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Sign in to view your watchlist</h2>
-          <p className="text-muted-foreground mb-6">You need to be logged in to save and manage startup profiles.</p>
-          <Link href="/login">
-            <Button>Sign In</Button>
+          <h2 className="text-2xl font-bold mb-4">Investor Feature</h2>
+          <p className="text-muted-foreground mb-6">The watchlist is only available for investors. Please sign in with an investor account or contact support to upgrade.</p>
+          <Link href="/">
+            <Button>Back to Home</Button>
           </Link>
         </div>
       </div>
