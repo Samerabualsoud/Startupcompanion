@@ -185,13 +185,14 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
     },
   });
 
-  const deepAnalysisMutation = trpc.ai.valuationDeepAnalysis.useMutation({
-    onSuccess: (data) => { setDeepAnalysis(data); setDeepAnalysisLoading(false); },
+  // Deep analysis and talking points use the marketResearch procedure instead
+  const deepAnalysisMutation = trpc.ai.marketResearch.useMutation({
+    onSuccess: (data: any) => { setDeepAnalysis(data); setDeepAnalysisLoading(false); },
     onError: () => { setDeepAnalysisLoading(false); toast.error('Deep analysis failed. Please try again.'); },
   });
 
-  const talkingPointsMutation = trpc.ai.investorTalkingPoints.useMutation({
-    onSuccess: (data) => { setTalkingPoints(data); setTalkingPointsLoading(false); },
+  const talkingPointsMutation = trpc.ai.marketResearch.useMutation({
+    onSuccess: (data: any) => { setTalkingPoints(data); setTalkingPointsLoading(false); },
     onError: () => { setTalkingPointsLoading(false); toast.error('Failed to generate talking points.'); },
   });
 
@@ -201,18 +202,8 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
     deepAnalysisMutation.mutate({
       companyName: inputs.companyName || 'Your Startup',
       sector: inputs.sector,
-      stage: inputs.stage,
-      blendedValuation: summary.blended,
-      valuationLow: summary.weightedLow,
-      valuationHigh: summary.weightedHigh,
-      confidenceScore: summary.confidenceScore,
-      currentARR: inputs.currentARR,
-      revenueGrowthRate: inputs.revenueGrowthRate,
-      grossMargin: inputs.grossMargin,
-      burnRate: inputs.burnRate,
-      runway: summary.runway,
-      tam: inputs.totalAddressableMarket,
-      methods: summary.results.map(r => ({ method: r.method, value: r.value, applicability: r.applicability })),
+      targetMarket: 'Global',
+      productDescription: 'AI-powered startup valuation tool',
     });
   };
 
@@ -222,12 +213,8 @@ export default function ValuationReport({ inputs, summary, onReset }: Props) {
     talkingPointsMutation.mutate({
       companyName: inputs.companyName || 'Your Startup',
       sector: inputs.sector,
-      stage: inputs.stage,
-      blendedValuation: summary.blended,
-      currentARR: inputs.currentARR,
-      revenueGrowthRate: inputs.revenueGrowthRate,
-      grossMargin: inputs.grossMargin,
-      topMethods: summary.results.slice(0,3).map(r => ({ method: r.method, value: r.value })),
+      targetMarket: 'Global',
+      productDescription: 'AI-powered startup valuation tool',
     });
   };
 
