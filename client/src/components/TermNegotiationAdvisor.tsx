@@ -33,12 +33,11 @@ export default function TermNegotiationAdvisor() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!termSheetText.trim() || termSheetText.length < 50) { toast.error(isRTL ? 'يرجى الصق محتوى صحيفة الشروط' : 'Please paste the term sheet content'); return; }
+    if (!stage) { toast.error(isRTL ? 'يرجى تحديد المرحلة' : 'Please select a stage'); return; }
     mutation.mutate({
-      companyName: snapshot.companyName || 'My Startup',
-      stage: stage || 'seed',
       termSheetText,
-      raiseAmount: parseFloat(raiseAmount) * 1e6 || 1e6,
-      preMoneyValuation: parseFloat(preMoneyVal) * 1e6 || 5e6,
+      companyStage: stage || 'Seed',
+      founderExperience: 'experienced',
       language: lang === 'ar' ? 'arabic' : 'english',
     });
   };
