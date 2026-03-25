@@ -112,14 +112,15 @@ const NAV_ITEMS: NavItem[] = [
   // Resources
   { id: 'accelerators', tier: 'free',  label: 'Accelerator & Incubator Finder',    shortLabel: 'Accelerators',   navKey: 'navAccelerators', icon: Rocket,    group: 'Ecosystem',    newUntil: '2026-04-01' },
   { id: 'jurisdictions', tier: 'free', label: 'Global Jurisdictions & Free Zones', shortLabel: 'Jurisdictions', navKey: 'navJurisdictions', icon: Globe, group: 'Ecosystem', newUntil: '2026-04-01' },
+  { id: 'resources', tier: 'free',     label: 'Investor Intelligence Database',     shortLabel: 'Database',   navKey: 'navDatabase',   icon: Building2,   group: 'Ecosystem',     newUntil: '2026-04-01' },
+  { id: 'matching', tier: 'pro',      label: 'AI Investor Matching',     shortLabel: 'Matching',   navKey: 'navMatching',   icon: Target,      group: 'Ecosystem',     badge: 'AI' },
+  { id: 'startup-directory', tier: 'free', label: 'Startup Directory',       shortLabel: 'Directory',      navKey: 'navStartupDir',     icon: Globe,       group: 'Ecosystem',           newUntil: '2026-04-01' },
+  { id: 'saved-startups', tier: 'free',    label: 'Saved Startups',             shortLabel: 'Watchlist',      navKey: 'navSavedStartups',  icon: Heart,       group: 'Ecosystem',           newUntil: '2026-04-01' },
   { id: 'runway', tier: 'free',        label: 'Cash Runway Planner',      shortLabel: 'Runway',   navKey: 'navRunway',     icon: BarChart3,   group: 'Market Intelligence' },
   { id: 'term-sheet', tier: 'free',    label: 'Investment Terms Glossary',   shortLabel: 'Glossary',   navKey: 'navTermSheet', icon: BookOpen,    group: 'Market Intelligence',    badge: '75 terms' },
   // My Startup
   // Legal & Jurisdictions
   { id: 'free-zones', tier: 'free',    label: 'Jurisdiction & Free Zone Guide', shortLabel: 'Free Zones', navKey: 'navFreeZones', icon: Globe,        group: 'Market Intelligence',    newUntil: '2026-04-01' },
-  // Database
-  { id: 'resources', tier: 'free',     label: 'Investor Intelligence Database',     shortLabel: 'Ecosystem',   navKey: 'navDatabase',   icon: Building2,   group: 'Ecosystem Network',     newUntil: '2026-04-01' },
-  { id: 'matching', tier: 'pro',      label: 'AI Investor Matching',     shortLabel: 'Matching',   navKey: 'navMatching',   icon: Target,      group: 'Ecosystem Network',     badge: 'AI' },
   // Admin
   { id: 'admin', tier: 'enterprise',         label: 'Platform Administration',       shortLabel: 'Admin',      icon: Gauge,       group: 'Admin' },
   // Legal & Documents
@@ -127,9 +128,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'nda', tier: 'pro',               label: 'Non-Disclosure Agreement',           shortLabel: 'NDA',            navKey: 'navNDA',            icon: ClipboardCheck, group: 'Legal & Compliance', newUntil: '2026-04-01' },
   { id: 'term-sheet-builder', tier: 'enterprise', label: 'Term Sheet Architect',     shortLabel: 'Glossary',     navKey: 'navTermSheetBuilder', icon: FileText,   group: 'Legal & Compliance', newUntil: '2026-04-01' },
   // ESOP moved to My Startup group above
-  // Community
-  { id: 'startup-directory', tier: 'free', label: 'Startup Directory',       shortLabel: 'Directory',      navKey: 'navStartupDir',     icon: Globe,       group: 'Ecosystem Network',           newUntil: '2026-04-01' },
-  { id: 'saved-startups', tier: 'free',    label: 'Saved Startups',             shortLabel: 'Watchlist',      navKey: 'navSavedStartups',  icon: Heart,       group: 'Ecosystem Network',           newUntil: '2026-04-01' },
+  // Community (merged into Ecosystem)
   { id: 'valuation-timeline', tier: 'pro',label: 'Valuation History & 409A',shortLabel: '409A History',   navKey: 'navValuationTimeline', icon: BarChart3, group: 'My Company',         newUntil: '2026-04-01' },
   // Equity & Cap Table
   { id: 'esop', tier: 'pro',              label: 'ESOP & Option Pool Manager',      shortLabel: 'ESOP',           navKey: 'navESOP',           icon: Users2,      group: 'My Company',         newUntil: '2026-04-01' },
@@ -146,7 +145,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'zest-equity', tier: 'pro',  label: 'Zest Equity & Cap Table',      shortLabel: 'Zest Equity',   navKey: 'navZestEquity',  icon: TrendingUp,  group: 'Equity & Ownership', newUntil: '2026-07-01', badge: 'New' },
 ];
 
-const GROUPS = ['My Company', 'Valuation', 'Equity & Ownership', 'Capital Raising', 'Legal & Compliance', 'Market Intelligence', 'Ecosystem', 'Ecosystem Network', 'AI Advisory', 'Admin'];
+const GROUPS = ['My Company', 'Valuation', 'Equity & Ownership', 'Capital Raising', 'Legal & Compliance', 'Market Intelligence', 'Ecosystem', 'AI Advisory', 'Admin'];
 const TOOL_COLORS: Record<ToolId, string> = {
   dashboard: '#0F1B2D',
   cogs: '#059669',
