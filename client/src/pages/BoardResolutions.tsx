@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, Globe } from 'lucide-react';
+import { Download, Globe, FileText } from 'lucide-react';
 import jsPDF from 'jspdf';
+import { saveAs } from 'file-saver';
 
 type Language = 'en' | 'ar';
 type ResolutionType = 'equity-grant' | 'financing' | 'officer-appointment' | 'stock-split' | 'dividend' | 'acquisition' | 'merger' | 'amendment' | 'option-pool' | 'esop';
@@ -210,6 +211,40 @@ export default function BoardResolutions() {
 
   const handleFieldChange = (key: string, value: string) => {
     setFieldValues(prev => ({ ...prev, [key]: value }));
+  };
+
+  const generateWord = () => {
+    if (!selectedTemplate || !companyName) {
+      alert(language === 'en' ? 'Please fill in all required fields' : 'يرجى ملء جميع الحقول المطلوبة');
+      return;
+    }
+
+    let content = '';
+    content += `${language === 'en' ? 'BOARD RESOLUTION' : 'قرار مجلس الإدارة'}\n\n`;
+    content += `${language === 'en' ? 'Company: ' : 'الشركة: '}${companyName}\n`;
+    content += `${language === 'en' ? 'Date: ' : 'التاريخ: '}${new Date().toISOString().split('T')[0]}\n\n`;
+
+    const template = templates.find(t => t.id === selectedTemplate);
+    if (template) {
+      content += `${language === 'en' ? 'RESOLUTION: ' : 'القرار: '}${language === 'en' ? template.nameEn : template.nameAr}\n\n`;
+      content += `${language === 'en' ? template.descriptionEn : template.descriptionAr}\n\n`;
+
+      template.fields.forEach(field => {
+        const value = fieldValues[field.key] || '';
+        const label = language === 'en' ? field.labelEn : field.labelAr;
+        content += `${label}: ${value}\n`;
+      });
+    }
+
+    content += `\n\n${language === 'en' ? 'BOARD APPROVAL' : 'موافقة مجلس الإدارة'}\n\n`;
+    content += `${language === 'en' ? 'This resolution is hereby adopted by the Board of Directors.' : 'يتم بموجب هذا اعتماد هذا القرار من قبل مجلس الإدارة.'}\n\n`;
+    content += `${language === 'en' ? 'SIGNATURES' : 'التوقيعات'}\n\n`;
+    content += `${language === 'en' ? 'Board Member 1' : 'عضو مجلس الإدارة 1'}: _____________________\n`;
+    content += `${language === 'en' ? 'Board Member 2' : 'عضو مجلس الإدارة 2'}: _____________________\n`;
+    content += `${language === 'en' ? 'Board Member 3' : 'عضو مجلس الإدارة 3'}: _____________________\n`;
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    saveAs(blob, `${companyName.replace(/\s+/g, '_')}_BoardResolution.txt`);
   };
 
   const generatePDF = () => {
@@ -527,15 +562,22 @@ export default function BoardResolutions() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-4 pt-8 border-t">
-                <Button
-                  onClick={generatePDF}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg"
-                >
-                  <Download className="w-5 h-5 mr-2" />
-                  {t.downloadPDF}
-                </Button>
-              </div>
+            <div className="flex gap-4 pt-8 border-t">
+              <Button
+                onClick={generatePDF}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg"
+              >
+                <Download className="w-5 h-5 mr-2" />
+                {language === 'en' ? 'Download PDF' : 'تحميل PDF'}
+              </Button>
+              <Button
+                onClick={generateWord}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg"
+              >
+                <FileText className="w-5 h-5 mr-2" />
+                {language === 'en' ? 'Download Word' : 'تحميل Word'}
+              </Button>
+            </div>
 
               {/* Info Box */}
               <div className="mt-8 p-4 bg-purple-50 border border-purple-200 rounded-lg">

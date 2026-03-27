@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, Plus, Trash2, Globe } from 'lucide-react';
+import { Download, Plus, Trash2, Globe, FileText } from 'lucide-react';
 import jsPDF from 'jspdf';
+import { saveAs } from 'file-saver';
 
 interface Founder {
   id: string;
@@ -40,7 +41,8 @@ const translations = {
     roleTitle: 'Role/Title',
     responsibilities: 'Responsibilities',
     addFounder: 'Add Another Founder',
-    downloadPDF: 'Download PDF Agreement',
+    downloadPDF: 'Download PDF',
+    downloadWord: 'Download Word',
     fillRequired: 'Please fill in all required fields',
     totalEquity: 'Total equity must equal 100%',
     important: 'Important:',
@@ -72,7 +74,8 @@ const translations = {
     roleTitle: 'المسمى الوظيفي',
     responsibilities: 'المسؤوليات',
     addFounder: 'إضافة مؤسس آخر',
-    downloadPDF: 'تحميل اتفاقية PDF',
+    downloadPDF: 'تحميل PDF',
+    downloadWord: 'تحميل Word',
     fillRequired: 'يرجى ملء جميع الحقول المطلوبة',
     totalEquity: 'يجب أن تساوي إجمالي الملكية 100٪',
     important: 'مهم:',
@@ -119,6 +122,95 @@ export default function CofounderAgreement() {
     setFounders(founders.map(f => f.id === id ? { ...f, [field]: value } : f));
   };
 
+  const generateWordContent = () => {
+    if (!companyName || founders.some(f => !f.name || f.equity === 0)) {
+      alert(t.fillRequired);
+      return '';
+    }
+
+    const totalEquity = founders.reduce((sum, f) => sum + f.equity, 0);
+    if (Math.abs(totalEquity - 100) > 0.01) {
+      alert(t.totalEquity);
+      return '';
+    }
+
+    let content = '';
+
+    // Title
+    content += `${language === 'en' ? 'CO-FOUNDER AGREEMENT' : 'اتفاقية المؤسسين المشاركين'}\n\n`;
+
+    // Header
+    content += `${language === 'en' ? `This Co-Founder Agreement is entered into as of ${agreementDate}` : `تم إبرام اتفاقية المؤسسين المشاركين هذه بتاريخ ${agreementDate}`}\n\n`;
+
+    // Founders
+    founders.forEach((founder, index) => {
+      const founderLabel = language === 'en' ? `Founder ${index + 1}` : `المؤسس ${index + 1}`;
+      content += `${founder.name}, ${language === 'en' ? 'residing at' : 'يقيم في'} ${founder.address} ("${founderLabel}")\n`;
+    });
+
+    content += `\n${language === 'en' ? 'Collectively referred to as the "Founders" and the "Company".' : 'يشار إليهم بشكل جماعي باسم "المؤسسين" و"الشركة".'}\n\n`;
+
+    // Section 1
+    content += `${language === 'en' ? '1. FORMATION AND PURPOSE' : '1. التكوين والغرض'}\n\n`;
+    content += `${language === 'en' ? `The Founders agree to form a company for the purpose of ${businessDescription}. The Founders intend to work together as equal partners in building this venture and agree to be bound by the terms and conditions set forth in this Agreement.` : `يوافق المؤسسون على تشكيل شركة لغرض ${businessDescription}. ينوي المؤسسون العمل معاً كشركاء متساويين في بناء هذا المشروع ويوافقون على الالتزام بالشروط والأحكام المنصوص عليها في هذه الاتفاقية.`}\n\n`;
+
+    // Section 2
+    content += `${language === 'en' ? '2. EQUITY OWNERSHIP AND VESTING' : '2. ملكية الأسهم والاستحقاق'}\n\n`;
+    content += `${language === 'en' ? '2.1 Initial Equity Allocation' : '2.1 تخصيص الأسهم الأولي'}\n\n`;
+
+    founders.forEach(founder => {
+      content += `${founder.name}: ${founder.equity}%\n`;
+    });
+
+    content += `\n${language === 'en' ? '2.2 Vesting Schedule' : '2.2 جدول الاستحقاق'}\n\n`;
+    content += `${language === 'en' ? `All equity is subject to a ${vestingYears}-year vesting schedule with a ${cliffMonths}-month cliff. Upon the 1-year anniversary, 25% of equity vests. The remaining 75% vests monthly over the following ${parseInt(vestingYears) - 1} years.` : `جميع الأسهم تخضع لجدول استحقاق مدته ${vestingYears} سنة مع فترة انتظار ${cliffMonths} شهراً. عند الذكرى السنوية الأولى، يتم استحقاق 25٪ من الأسهم. يتم استحقاق الـ 75٪ المتبقية شهرياً على مدى السنوات الـ ${parseInt(vestingYears) - 1} التالية.`}\n\n`;
+
+    // Section 3
+    content += `${language === 'en' ? '3. ROLES AND RESPONSIBILITIES' : '3. الأدوار والمسؤوليات'}\n\n`;
+    founders.forEach((founder, index) => {
+      const founderLabel = language === 'en' ? `Founder ${index + 1}` : `المؤسس ${index + 1}`;
+      content += `${founderLabel}: ${founder.role}\n`;
+      content += `${language === 'en' ? 'Responsibilities' : 'المسؤوليات'}: ${founder.responsibilities}\n\n`;
+    });
+
+    // Section 4
+    content += `${language === 'en' ? '4. DECISION-MAKING AND GOVERNANCE' : '4. صنع القرار والحوكمة'}\n\n`;
+    content += `${language === 'en' ? 'Each Founder has equal voting rights. Major decisions including admission of new equity holders, sale/merger of the Company, hiring C-level executives, and amendments to this Agreement require unanimous written consent.' : 'لكل مؤسس حقوق تصويت متساوية. القرارات الرئيسية بما في ذلك قبول مالكي أسهم جدد، بيع/دمج الشركة، توظيف المديرين التنفيذيين، والتعديلات على هذه الاتفاقية تتطلب موافقة كتابية إجماعية.'}\n\n`;
+
+    // Section 5
+    content += `${language === 'en' ? '5. INTELLECTUAL PROPERTY' : '5. الملكية الفكرية'}\n\n`;
+    content += `${language === 'en' ? 'All intellectual property created by any Founder in connection with the Company\'s business shall be the exclusive property of the Company.' : 'جميع الملكية الفكرية التي ينشئها أي مؤسس فيما يتعلق بنشاط الشركة تكون ملكاً حصرياً للشركة.'}\n\n`;
+
+    // Section 6
+    content += `${language === 'en' ? '6. COMPENSATION AND DISTRIBUTIONS' : '6. التعويض والتوزيعات'}\n\n`;
+    content += `${language === 'en' ? `During the Company's early stage, Founders agree to work at a salary of $${salaryPerMonth} per month.` : `خلال المرحلة الأولى من الشركة، يوافق المؤسسون على العمل براتب ${salaryPerMonth} دولار شهرياً.`}\n\n`;
+
+    // Section 7
+    content += `${language === 'en' ? '7. CONFIDENTIALITY AND NON-COMPETE' : '7. السرية وعدم المنافسة'}\n\n`;
+    content += `${language === 'en' ? `Each Founder agrees to maintain strict confidentiality. For ${nonCompeteMonths} months after departure, Founders shall not engage in competing businesses.` : `يوافق كل مؤسس على الحفاظ على السرية الصارمة. لمدة ${nonCompeteMonths} شهراً بعد المغادرة، لا يجوز للمؤسسين الانخراط في أعمال تنافسية.`}\n\n`;
+
+    // Signatures
+    content += `${language === 'en' ? 'SIGNATURES' : 'التوقيعات'}\n\n`;
+
+    founders.forEach((founder, index) => {
+      const founderLabel = language === 'en' ? `FOUNDER ${index + 1}` : `المؤسس ${index + 1}`;
+      content += `${founderLabel}\n`;
+      content += `${language === 'en' ? 'Name' : 'الاسم'}: ${founder.name}\n`;
+      content += `${language === 'en' ? 'Signature' : 'التوقيع'}: _____________________\n`;
+      content += `${language === 'en' ? 'Date' : 'التاريخ'}: _____________________\n\n`;
+    });
+
+    return content;
+  };
+
+  const generateWord = () => {
+    const content = generateWordContent();
+    if (!content) return;
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    saveAs(blob, `${companyName.replace(/\s+/g, '_')}_CofounderAgreement.txt`);
+  };
+
   const generatePDF = () => {
     if (!companyName || founders.some(f => !f.name || f.equity === 0)) {
       alert(t.fillRequired);
@@ -138,7 +230,6 @@ export default function CofounderAgreement() {
     const margin = 15;
     const maxWidth = pageWidth - 2 * margin;
 
-    // Set RTL for Arabic
     if (isRTL) {
       doc.setR2L(true);
     }
@@ -600,6 +691,13 @@ export default function CofounderAgreement() {
               >
                 <Download className="w-5 h-5 mr-2" />
                 {t.downloadPDF}
+              </Button>
+              <Button
+                onClick={generateWord}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg"
+              >
+                <FileText className="w-5 h-5 mr-2" />
+                {t.downloadWord}
               </Button>
             </div>
 
