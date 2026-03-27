@@ -5,199 +5,166 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, Globe, FileText, AlertCircle, CheckCircle2, Zap } from 'lucide-react';
+import { Download, FileText, Globe, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { saveAs } from 'file-saver';
 
 type Language = 'en' | 'ar';
-type ResolutionType = 'equity-grant' | 'financing' | 'officer-appointment' | 'stock-split' | 'dividend' | 'acquisition' | 'merger' | 'amendment' | 'option-pool' | 'esop';
+type ResolutionType = 
+  | 'equity-grant'
+  | 'financing'
+  | 'officer-appointment'
+  | 'stock-split'
+  | 'dividend'
+  | 'acquisition'
+  | 'merger'
+  | 'nda-approval'
+  | 'budget-approval'
+  | 'director-removal';
 
 interface ResolutionTemplate {
   id: ResolutionType;
-  nameEn: string;
-  nameAr: string;
+  titleEn: string;
+  titleAr: string;
   descriptionEn: string;
   descriptionAr: string;
-  icon: string;
-  fields: {
-    key: string;
-    labelEn: string;
-    labelAr: string;
-    type: 'text' | 'number' | 'date' | 'textarea';
-    placeholder?: string;
-  }[];
+  fieldsEn: string[];
+  fieldsAr: string[];
 }
 
 const templates: ResolutionTemplate[] = [
   {
     id: 'equity-grant',
-    nameEn: 'Equity Grant',
-    nameAr: 'منح الأسهم',
+    titleEn: 'Equity Grant Resolution',
+    titleAr: 'قرار منح الأسهم',
     descriptionEn: 'Grant equity to employees or advisors',
     descriptionAr: 'منح أسهم للموظفين أو المستشارين',
-    icon: '📊',
-    fields: [
-      { key: 'grantee_name', labelEn: 'Grantee Name', labelAr: 'اسم المستقبل', type: 'text' },
-      { key: 'equity_percentage', labelEn: 'Equity %', labelAr: 'نسبة الأسهم %', type: 'number' },
-      { key: 'vesting_period', labelEn: 'Vesting Period (Years)', labelAr: 'فترة الاستحقاق (سنوات)', type: 'number' },
-      { key: 'cliff_period', labelEn: 'Cliff Period (Months)', labelAr: 'فترة الانتظار (أشهر)', type: 'number' },
-    ],
+    fieldsEn: ['Recipient Name', 'Number of Shares', 'Vesting Period (Years)', 'Strike Price (USD)', 'Grant Date'],
+    fieldsAr: ['اسم المستقبل', 'عدد الأسهم', 'فترة الاستحقاق (سنوات)', 'سعر الممارسة (دولار أمريكي)', 'تاريخ المنح'],
   },
   {
     id: 'financing',
-    nameEn: 'Financing Round',
-    nameAr: 'جولة تمويل',
-    descriptionEn: 'Approve a financing round',
-    descriptionAr: 'الموافقة على جولة تمويل',
-    icon: '💰',
-    fields: [
-      { key: 'investment_amount', labelEn: 'Investment Amount (USD)', labelAr: 'مبلغ الاستثمار (دولار)', type: 'number' },
-      { key: 'investor_name', labelEn: 'Investor Name', labelAr: 'اسم المستثمر', type: 'text' },
-      { key: 'valuation', labelEn: 'Valuation (USD)', labelAr: 'التقييم (دولار)', type: 'number' },
-      { key: 'terms', labelEn: 'Key Terms', labelAr: 'الشروط الرئيسية', type: 'textarea' },
-    ],
+    titleEn: 'Financing Round Approval',
+    titleAr: 'موافقة جولة التمويل',
+    descriptionEn: 'Approve a new financing round',
+    descriptionAr: 'الموافقة على جولة تمويل جديدة',
+    fieldsEn: ['Round Type', 'Total Amount (USD)', 'Valuation (USD)', 'Lead Investor', 'Terms Summary'],
+    fieldsAr: ['نوع الجولة', 'المبلغ الإجمالي (دولار أمريكي)', 'التقييم (دولار أمريكي)', 'المستثمر الرئيسي', 'ملخص الشروط'],
   },
   {
     id: 'officer-appointment',
-    nameEn: 'Officer Appointment',
-    nameAr: 'تعيين مسؤول',
-    descriptionEn: 'Appoint a new officer/executive',
-    descriptionAr: 'تعيين مسؤول/تنفيذي جديد',
-    icon: '👔',
-    fields: [
-      { key: 'officer_name', labelEn: 'Officer Name', labelAr: 'اسم المسؤول', type: 'text' },
-      { key: 'position', labelEn: 'Position', labelAr: 'المنصب', type: 'text' },
-      { key: 'start_date', labelEn: 'Start Date', labelAr: 'تاريخ البدء', type: 'date' },
-      { key: 'compensation', labelEn: 'Annual Compensation (USD)', labelAr: 'التعويض السنوي (دولار)', type: 'number' },
-    ],
+    titleEn: 'Officer Appointment',
+    titleAr: 'تعيين الضابط',
+    descriptionEn: 'Appoint a new officer or director',
+    descriptionAr: 'تعيين ضابط أو مدير جديد',
+    fieldsEn: ['Officer Name', 'Position', 'Effective Date', 'Compensation (Annual USD)', 'Responsibilities'],
+    fieldsAr: ['اسم الضابط', 'المنصب', 'تاريخ السريان', 'التعويض (سنوي بالدولار الأمريكي)', 'المسؤوليات'],
   },
   {
     id: 'stock-split',
-    nameEn: 'Stock Split',
-    nameAr: 'تقسيم الأسهم',
+    titleEn: 'Stock Split Resolution',
+    titleAr: 'قرار تقسيم الأسهم',
     descriptionEn: 'Approve a stock split',
     descriptionAr: 'الموافقة على تقسيم الأسهم',
-    icon: '🔀',
-    fields: [
-      { key: 'split_ratio', labelEn: 'Split Ratio (e.g., 2:1)', labelAr: 'نسبة التقسيم (مثال: 2:1)', type: 'text' },
-      { key: 'effective_date', labelEn: 'Effective Date', labelAr: 'التاريخ الفعلي', type: 'date' },
-      { key: 'reason', labelEn: 'Reason for Split', labelAr: 'سبب التقسيم', type: 'textarea' },
-    ],
+    fieldsEn: ['Split Ratio', 'Current Shares Outstanding', 'New Shares Outstanding', 'Effective Date', 'Reason'],
+    fieldsAr: ['نسبة التقسيم', 'الأسهم المصدرة الحالية', 'الأسهم المصدرة الجديدة', 'تاريخ السريان', 'السبب'],
   },
   {
     id: 'dividend',
-    nameEn: 'Dividend Declaration',
-    nameAr: 'إعلان توزيع أرباح',
+    titleEn: 'Dividend Declaration',
+    titleAr: 'إعلان توزيع الأرباح',
     descriptionEn: 'Declare a dividend payment',
-    descriptionAr: 'إعلان دفع أرباح',
-    icon: '💵',
-    fields: [
-      { key: 'dividend_per_share', labelEn: 'Dividend per Share (USD)', labelAr: 'الأرباح لكل سهم (دولار)', type: 'number' },
-      { key: 'record_date', labelEn: 'Record Date', labelAr: 'تاريخ السجل', type: 'date' },
-      { key: 'payment_date', labelEn: 'Payment Date', labelAr: 'تاريخ الدفع', type: 'date' },
-      { key: 'total_amount', labelEn: 'Total Amount (USD)', labelAr: 'المبلغ الإجمالي (دولار)', type: 'number' },
-    ],
+    descriptionAr: 'إعلان دفع توزيع الأرباح',
+    fieldsEn: ['Dividend Per Share (USD)', 'Record Date', 'Payment Date', 'Total Amount (USD)', 'Shareholder Classes'],
+    fieldsAr: ['الأرباح لكل سهم (دولار أمريكي)', 'تاريخ السجل', 'تاريخ الدفع', 'المبلغ الإجمالي (دولار أمريكي)', 'فئات المساهمين'],
   },
   {
     id: 'acquisition',
-    nameEn: 'Acquisition',
-    nameAr: 'استحواذ',
-    descriptionEn: 'Approve an acquisition',
-    descriptionAr: 'الموافقة على استحواذ',
-    icon: '🤝',
-    fields: [
-      { key: 'target_company', labelEn: 'Target Company', labelAr: 'الشركة المستهدفة', type: 'text' },
-      { key: 'acquisition_price', labelEn: 'Acquisition Price (USD)', labelAr: 'سعر الاستحواذ (دولار)', type: 'number' },
-      { key: 'terms_and_conditions', labelEn: 'Terms & Conditions', labelAr: 'الشروط والأحكام', type: 'textarea' },
-    ],
+    titleEn: 'Acquisition Approval',
+    titleAr: 'موافقة الاستحواذ',
+    descriptionEn: 'Approve acquisition of another company',
+    descriptionAr: 'الموافقة على الاستحواذ على شركة أخرى',
+    fieldsEn: ['Target Company Name', 'Purchase Price (USD)', 'Payment Terms', 'Closing Date', 'Key Terms'],
+    fieldsAr: ['اسم الشركة المستهدفة', 'سعر الشراء (دولار أمريكي)', 'شروط الدفع', 'تاريخ الإغلاق', 'الشروط الرئيسية'],
   },
   {
     id: 'merger',
-    nameEn: 'Merger',
-    nameAr: 'دمج',
-    descriptionEn: 'Approve a merger',
-    descriptionAr: 'الموافقة على دمج',
-    icon: '🔗',
-    fields: [
-      { key: 'merger_partner', labelEn: 'Merger Partner', labelAr: 'شريك الدمج', type: 'text' },
-      { key: 'merger_ratio', labelEn: 'Merger Ratio', labelAr: 'نسبة الدمج', type: 'text' },
-      { key: 'merger_terms', labelEn: 'Merger Terms', labelAr: 'شروط الدمج', type: 'textarea' },
-    ],
+    titleEn: 'Merger Resolution',
+    titleAr: 'قرار الدمج',
+    descriptionEn: 'Approve merger with another entity',
+    descriptionAr: 'الموافقة على الدمج مع كيان آخر',
+    fieldsEn: ['Merger Partner Name', 'Merger Structure', 'Exchange Ratio', 'Effective Date', 'Consideration'],
+    fieldsAr: ['اسم شريك الدمج', 'هيكل الدمج', 'نسبة الصرف', 'تاريخ السريان', 'المقابل'],
   },
   {
-    id: 'amendment',
-    nameEn: 'Bylaw Amendment',
-    nameAr: 'تعديل النظام الأساسي',
-    descriptionEn: 'Amend company bylaws',
-    descriptionAr: 'تعديل النظام الأساسي للشركة',
-    icon: '📝',
-    fields: [
-      { key: 'amendment_description', labelEn: 'Amendment Description', labelAr: 'وصف التعديل', type: 'textarea' },
-      { key: 'effective_date', labelEn: 'Effective Date', labelAr: 'التاريخ الفعلي', type: 'date' },
-    ],
+    id: 'nda-approval',
+    titleEn: 'NDA Approval',
+    titleAr: 'موافقة اتفاقية السرية',
+    descriptionEn: 'Approve NDA with third party',
+    descriptionAr: 'الموافقة على اتفاقية السرية مع طرف ثالث',
+    fieldsEn: ['Third Party Name', 'Purpose', 'Confidentiality Period (Years)', 'Approved By', 'Effective Date'],
+    fieldsAr: ['اسم الطرف الثالث', 'الغرض', 'فترة السرية (سنوات)', 'وافق عليه', 'تاريخ السريان'],
   },
   {
-    id: 'option-pool',
-    nameEn: 'Option Pool',
-    nameAr: 'مجموعة الخيارات',
-    descriptionEn: 'Establish an option pool',
-    descriptionAr: 'إنشاء مجموعة خيارات',
-    icon: '📈',
-    fields: [
-      { key: 'pool_size', labelEn: 'Pool Size (%)', labelAr: 'حجم المجموعة (%)', type: 'number' },
-      { key: 'exercise_price', labelEn: 'Exercise Price (USD)', labelAr: 'سعر التمرين (دولار)', type: 'number' },
-      { key: 'vesting_schedule', labelEn: 'Vesting Schedule', labelAr: 'جدول الاستحقاق', type: 'text' },
-    ],
+    id: 'budget-approval',
+    titleEn: 'Budget Approval',
+    titleAr: 'موافقة الميزانية',
+    descriptionEn: 'Approve annual or quarterly budget',
+    descriptionAr: 'الموافقة على الميزانية السنوية أو الفصلية',
+    fieldsEn: ['Budget Period', 'Total Budget (USD)', 'Department Budgets', 'Prepared By', 'Effective Date'],
+    fieldsAr: ['فترة الميزانية', 'إجمالي الميزانية (دولار أمريكي)', 'ميزانيات الأقسام', 'أعده', 'تاريخ السريان'],
   },
   {
-    id: 'esop',
-    nameEn: 'ESOP',
-    nameAr: 'خطة ملكية الموظفين',
-    descriptionEn: 'Establish an ESOP',
-    descriptionAr: 'إنشاء خطة ملكية الموظفين',
-    icon: '👥',
-    fields: [
-      { key: 'esop_percentage', labelEn: 'ESOP Percentage (%)', labelAr: 'نسبة ESOP (%)', type: 'number' },
-      { key: 'eligible_employees', labelEn: 'Eligible Employees', labelAr: 'الموظفون المؤهلون', type: 'number' },
-      { key: 'terms', labelEn: 'ESOP Terms', labelAr: 'شروط ESOP', type: 'textarea' },
-    ],
+    id: 'director-removal',
+    titleEn: 'Director Removal',
+    titleAr: 'إزالة المدير',
+    descriptionEn: 'Remove a director from the board',
+    descriptionAr: 'إزالة مدير من المجلس',
+    fieldsEn: ['Director Name', 'Reason for Removal', 'Effective Date', 'Successor Director', 'Severance Details'],
+    fieldsAr: ['اسم المدير', 'سبب الإزالة', 'تاريخ السريان', 'مدير الخلف', 'تفاصيل التسوية'],
   },
 ];
 
 const translations = {
   en: {
-    title: 'Board Resolution',
-    subtitle: 'Generate professional board resolutions in minutes',
+    title: 'Board Resolutions',
+    subtitle: 'Generate professional board resolutions',
     selectTemplate: 'Select Resolution Type',
-    selectTemplateDesc: 'Choose the type of board resolution you need',
     companyName: 'Company Name',
-    meetingDate: 'Meeting Date',
-    boardMembers: 'Board Members (comma-separated)',
-    fillRequired: 'Please fill in all required fields',
+    boardMeetingDate: 'Board Meeting Date',
+    boardMembers: 'Board Members Present',
+    resolutionDetails: 'Resolution Details',
     downloadPDF: 'Download PDF',
     downloadWord: 'Download Word',
+    fillRequired: 'Please fill in all required fields',
     important: 'Important:',
     disclaimer: 'This tool generates a template resolution. Before adoption, have a qualified lawyer review this resolution. This is not legal advice.',
-    requiredField: 'Required',
     step: 'Step',
     of: 'of',
+    selectResolutionType: 'Select a resolution type to begin',
+    nextStep: 'Continue',
+    backStep: 'Back',
+    requiredField: 'Required',
   },
   ar: {
-    title: 'قرار مجلس الإدارة',
-    subtitle: 'قم بإنشاء قرارات مجلس إدارة احترافية في دقائق',
+    title: 'قرارات المجلس',
+    subtitle: 'قم بإنشاء قرارات مجلس احترافية',
     selectTemplate: 'اختر نوع القرار',
-    selectTemplateDesc: 'اختر نوع قرار مجلس الإدارة الذي تحتاجه',
     companyName: 'اسم الشركة',
-    meetingDate: 'تاريخ الاجتماع',
-    boardMembers: 'أعضاء مجلس الإدارة (مفصولة بفواصل)',
-    fillRequired: 'يرجى ملء جميع الحقول المطلوبة',
+    boardMeetingDate: 'تاريخ اجتماع المجلس',
+    boardMembers: 'أعضاء المجلس الحاضرون',
+    resolutionDetails: 'تفاصيل القرار',
     downloadPDF: 'تحميل PDF',
     downloadWord: 'تحميل Word',
+    fillRequired: 'يرجى ملء جميع الحقول المطلوبة',
     important: 'مهم:',
-    disclaimer: 'تنشئ هذه الأداة قرار نموذجي. قبل الاعتماد، اطلب من محام مؤهل مراجعة هذا القرار. هذا ليس استشارة قانونية.',
-    requiredField: 'مطلوب',
+    disclaimer: 'تنشئ هذه الأداة قرار نموذجي. قبل الموافقة عليه، اطلب من محام مؤهل مراجعة هذا القرار. هذا ليس استشارة قانونية.',
     step: 'الخطوة',
     of: 'من',
+    selectResolutionType: 'اختر نوع القرار للبدء',
+    nextStep: 'متابعة',
+    backStep: 'رجوع',
+    requiredField: 'مطلوب',
   },
 };
 
@@ -206,53 +173,83 @@ export default function BoardResolutions() {
   const t = translations[language];
   const isRTL = language === 'ar';
 
+  const [step, setStep] = useState<'select' | 'details'>(isRTL ? 'select' : 'select');
   const [selectedTemplate, setSelectedTemplate] = useState<ResolutionType | null>(null);
   const [companyName, setCompanyName] = useState('');
-  const [meetingDate, setMeetingDate] = useState(new Date().toISOString().split('T')[0]);
+  const [boardMeetingDate, setBoardMeetingDate] = useState(new Date().toISOString().split('T')[0]);
   const [boardMembers, setBoardMembers] = useState('');
-  const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
+  const [resolutionValues, setResolutionValues] = useState<Record<string, string>>({});
 
   const template = templates.find(t => t.id === selectedTemplate);
 
-  const handleFieldChange = (key: string, value: string) => {
-    setFieldValues(prev => ({ ...prev, [key]: value }));
+  const handleTemplateSelect = (templateId: ResolutionType) => {
+    setSelectedTemplate(templateId);
+    setStep('details');
+    setResolutionValues({});
+  };
+
+  const handleValueChange = (field: string, value: string) => {
+    setResolutionValues(prev => ({ ...prev, [field]: value }));
+  };
+
+  const generateWordContent = () => {
+    if (!companyName || !template || !boardMembers) {
+      alert(t.fillRequired);
+      return '';
+    }
+
+    const fields = language === 'en' ? template.fieldsEn : template.fieldsAr;
+    const allFieldsFilled = fields.every(field => resolutionValues[field]);
+    if (!allFieldsFilled) {
+      alert(t.fillRequired);
+      return '';
+    }
+
+    let content = '';
+    const templateTitle = language === 'en' ? template.titleEn : template.titleAr;
+    content += `${templateTitle}\n\n`;
+    content += `${language === 'en' ? 'BOARD RESOLUTION' : 'قرار المجلس'}\n\n`;
+    content += `${language === 'en' ? `Company: ${companyName}` : `الشركة: ${companyName}`}\n`;
+    content += `${language === 'en' ? `Date: ${boardMeetingDate}` : `التاريخ: ${boardMeetingDate}`}\n`;
+    content += `${language === 'en' ? `Board Members Present: ${boardMembers}` : `أعضاء المجلس الحاضرون: ${boardMembers}`}\n\n`;
+
+    content += `${language === 'en' ? 'WHEREAS' : 'حيث'}\n\n`;
+    content += `${language === 'en' ? `The Board of Directors of ${companyName} convened on ${boardMeetingDate} to consider the following matter.` : `انعقد مجلس إدارة ${companyName} في ${boardMeetingDate} للنظر في المسألة التالية.`}\n\n`;
+
+    content += `${language === 'en' ? 'NOW, THEREFORE, BE IT RESOLVED' : 'والآن، لذا يتم قرار ما يلي'}\n\n`;
+
+    fields.forEach(field => {
+      const value = resolutionValues[field];
+      content += `${field}: ${value}\n`;
+    });
+
+    content += `\n${language === 'en' ? 'IN WITNESS WHEREOF' : 'شهادة على ذلك'}\n\n`;
+    content += `${language === 'en' ? 'The undersigned, being the Secretary of the Board, certifies that the foregoing resolution was duly adopted by the Board of Directors.' : 'يشهد الموقع أدناه، بصفته أمين المجلس، بأن القرار أعلاه تم اعتماده بشكل صحيح من قبل مجلس الإدارة.'}\n\n`;
+    content += `${language === 'en' ? 'Secretary of the Board' : 'أمين المجلس'}\n`;
+    content += `${language === 'en' ? 'Signature: _____________________' : 'التوقيع: _____________________'}\n`;
+    content += `${language === 'en' ? 'Date: _____________________' : 'التاريخ: _____________________'}\n`;
+
+    return content;
   };
 
   const generateWord = () => {
-    if (!selectedTemplate || !companyName) {
+    const content = generateWordContent();
+    if (!content) return;
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const templateTitle = language === 'en' ? template?.titleEn : template?.titleAr;
+    saveAs(blob, `${companyName.replace(/\s+/g, '_')}_${templateTitle?.replace(/\s+/g, '_')}.txt`);
+  };
+
+  const generatePDF = () => {
+    if (!companyName || !template || !boardMembers) {
       alert(t.fillRequired);
       return;
     }
 
-    let content = '';
-    content += `${language === 'en' ? 'BOARD RESOLUTION' : 'قرار مجلس الإدارة'}\n\n`;
-    content += `${language === 'en' ? 'Company: ' : 'الشركة: '}${companyName}\n`;
-    content += `${language === 'en' ? 'Date: ' : 'التاريخ: '}${meetingDate}\n\n`;
-
-    if (template) {
-      content += `${language === 'en' ? 'RESOLUTION: ' : 'القرار: '}${language === 'en' ? template.nameEn : template.nameAr}\n\n`;
-      content += `${language === 'en' ? template.descriptionEn : template.descriptionAr}\n\n`;
-
-      template.fields.forEach(field => {
-        const value = fieldValues[field.key] || '';
-        const label = language === 'en' ? field.labelEn : field.labelAr;
-        content += `${label}: ${value}\n`;
-      });
-    }
-
-    content += `\n\n${language === 'en' ? 'BOARD APPROVAL' : 'موافقة مجلس الإدارة'}\n\n`;
-    content += `${language === 'en' ? 'This resolution is hereby adopted by the Board of Directors.' : 'يتم بموجب هذا اعتماد هذا القرار من قبل مجلس الإدارة.'}\n\n`;
-    content += `${language === 'en' ? 'SIGNATURES' : 'التوقيعات'}\n\n`;
-    content += `${language === 'en' ? 'Board Member 1' : 'عضو مجلس الإدارة 1'}: _____________________\n`;
-    content += `${language === 'en' ? 'Board Member 2' : 'عضو مجلس الإدارة 2'}: _____________________\n`;
-    content += `${language === 'en' ? 'Board Member 3' : 'عضو مجلس الإدارة 3'}: _____________________\n`;
-
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    saveAs(blob, `${companyName.replace(/\s+/g, '_')}_BoardResolution.txt`);
-  };
-
-  const generatePDF = () => {
-    if (!companyName || !selectedTemplate || !template || !meetingDate || !boardMembers) {
+    const fields = language === 'en' ? template.fieldsEn : template.fieldsAr;
+    const allFieldsFilled = fields.every(field => resolutionValues[field]);
+    if (!allFieldsFilled) {
       alert(t.fillRequired);
       return;
     }
@@ -288,77 +285,84 @@ export default function BoardResolutions() {
       });
     };
 
-    addText(language === 'en' ? 'BOARD RESOLUTION' : 'قرار مجلس الإدارة', 16, true, 8);
+    const templateTitle = language === 'en' ? template.titleEn : template.titleAr;
+    addText(templateTitle, 16, true, 8);
+    yPosition += 5;
+
+    addText(language === 'en' ? 'BOARD RESOLUTION' : 'قرار المجلس', 14, true, 7);
     yPosition += 5;
 
     addText(`${language === 'en' ? 'Company: ' : 'الشركة: '}${companyName}`, 11, false, 5);
-    addText(`${language === 'en' ? 'Date: ' : 'التاريخ: '}${meetingDate}`, 11, false, 5);
-    addText(`${language === 'en' ? 'Board Members: ' : 'أعضاء مجلس الإدارة: '}${boardMembers}`, 11, false, 8);
-
-    addText(language === 'en' ? 'RESOLUTION' : 'القرار', 12, true, 6);
-    addText(language === 'en' ? template.nameEn : template.nameAr, 11, true, 5);
-    addText(language === 'en' ? template.descriptionEn : template.descriptionAr, 11, false, 6);
+    addText(`${language === 'en' ? 'Date: ' : 'التاريخ: '}${boardMeetingDate}`, 11, false, 5);
+    addText(`${language === 'en' ? 'Board Members Present: ' : 'أعضاء المجلس الحاضرون: '}${boardMembers}`, 11, false, 6);
     yPosition += 5;
 
-    template.fields.forEach(field => {
-      const value = fieldValues[field.key] || '';
-      const label = language === 'en' ? field.labelEn : field.labelAr;
-      addText(`${label}: ${value}`, 11, false, 4);
-    });
-
-    yPosition += 10;
-
-    addText(language === 'en' ? 'BOARD APPROVAL' : 'موافقة مجلس الإدارة', 12, true, 6);
+    addText(language === 'en' ? 'WHEREAS' : 'حيث', 12, true, 6);
     addText(
       language === 'en'
-        ? 'This resolution is hereby adopted by the Board of Directors.'
-        : 'يتم بموجب هذا اعتماد هذا القرار من قبل مجلس الإدارة.',
+        ? `The Board of Directors of ${companyName} convened on ${boardMeetingDate} to consider the following matter.`
+        : `انعقد مجلس إدارة ${companyName} في ${boardMeetingDate} للنظر في المسألة التالية.`,
       11,
       false,
       6
     );
-    yPosition += 10;
-
-    addText(language === 'en' ? 'SIGNATURES' : 'التوقيعات', 12, true, 6);
     yPosition += 5;
 
-    const members = boardMembers.split(',').map(m => m.trim());
-    members.slice(0, 3).forEach((member, index) => {
-      addText(`${language === 'en' ? 'Board Member ' : 'عضو مجلس الإدارة '}${index + 1}: ${member}`, 11, false, 4);
-      addText('_____________________', 11, false, 6);
-      yPosition += 2;
+    addText(language === 'en' ? 'NOW, THEREFORE, BE IT RESOLVED' : 'والآن، لذا يتم قرار ما يلي', 12, true, 6);
+    yPosition += 3;
+
+    fields.forEach(field => {
+      const value = resolutionValues[field];
+      addText(`${field}: ${value}`, 11, false, 5);
     });
+
+    yPosition += 5;
+    addText(language === 'en' ? 'IN WITNESS WHEREOF' : 'شهادة على ذلك', 12, true, 6);
+    addText(
+      language === 'en'
+        ? 'The undersigned, being the Secretary of the Board, certifies that the foregoing resolution was duly adopted by the Board of Directors.'
+        : 'يشهد الموقع أدناه، بصفته أمين المجلس، بأن القرار أعلاه تم اعتماده بشكل صحيح من قبل مجلس الإدارة.',
+      11,
+      false,
+      6
+    );
+    yPosition += 5;
+
+    addText(language === 'en' ? 'Secretary of the Board' : 'أمين المجلس', 11, true, 4);
+    addText(`${language === 'en' ? 'Signature: ' : 'التوقيع: '}_____________________`, 11, false, 4);
+    addText(`${language === 'en' ? 'Date: ' : 'التاريخ: '}_____________________`, 11, false, 6);
 
     doc.setFontSize(9);
     doc.setTextColor(100);
     const footerText =
       language === 'en'
         ? 'This resolution was generated using Polaris Arabia Legal Tools. Consult a lawyer before adoption.'
-        : 'تم إنشاء هذا القرار باستخدام أدوات Polaris Arabia القانونية. استشر محامياً قبل الاعتماد.';
+        : 'تم إنشاء هذا القرار باستخدام أدوات Polaris Arabia القانونية. استشر محامياً قبل الموافقة عليه.';
     doc.text(footerText, isRTL ? pageWidth - margin : margin, pageHeight - 10, { align: isRTL ? 'right' : 'left' });
 
-    doc.save(`${companyName.replace(/\s+/g, '_')}_BoardResolution.pdf`);
+    const templateFileName = templateTitle?.replace(/\s+/g, '_');
+    doc.save(`${companyName.replace(/\s+/g, '_')}_${templateFileName}.pdf`);
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-100 p-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="max-w-6xl mx-auto">
+    <div className={`min-h-screen p-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-10 flex justify-between items-start">
+        <div className="mb-8 flex justify-between items-start">
           <div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-3xl font-bold text-foreground mb-1">
               {t.title}
             </h1>
-            <p className="text-lg text-gray-600">{t.subtitle}</p>
+            <p className="text-sm text-muted-foreground">{t.subtitle}</p>
           </div>
 
           {/* Language Toggle */}
-          <div className="flex gap-2 bg-white rounded-full p-1 shadow-md border border-gray-200">
+          <div className="flex gap-1 bg-secondary rounded-md p-1 border border-border">
             <Button
               variant={language === 'en' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setLanguage('en')}
-              className="rounded-full"
+              className="rounded"
             >
               EN
             </Button>
@@ -366,7 +370,7 @@ export default function BoardResolutions() {
               variant={language === 'ar' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setLanguage('ar')}
-              className="rounded-full"
+              className="rounded"
             >
               AR
             </Button>
@@ -375,46 +379,43 @@ export default function BoardResolutions() {
 
         {/* Progress Indicator */}
         <div className="mb-8">
-          <span className="text-sm font-semibold text-gray-700">
-            {t.step} {selectedTemplate ? '2' : '1'} {t.of} 2
-          </span>
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+          <div className="text-xs font-medium text-muted-foreground mb-2">
+            {t.step} {step === 'select' ? '1' : '2'} {t.of} 2
+          </div>
+          <div className="w-full bg-secondary rounded-full h-1.5">
             <div 
-              className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-purple-500 to-pink-500"
-              style={{ width: `${selectedTemplate ? '100' : '50'}%` }}
+              className="h-1.5 rounded-full bg-primary transition-all duration-300"
+              style={{ width: step === 'select' ? '50%' : '100%' }}
             />
           </div>
         </div>
 
-        {!selectedTemplate ? (
-          // Template Selection
+        {/* Step 1: Select Template */}
+        {step === 'select' && (
           <div className="space-y-6">
-            <Card className="shadow-lg border-0">
-              <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg pb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                    <Zap className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-white">{t.selectTemplate}</CardTitle>
-                    <CardDescription className="text-purple-100">{t.selectTemplateDesc}</CardDescription>
-                  </div>
-                </div>
+            <Card className="border-border">
+              <CardHeader className="border-b border-border pb-4">
+                <CardTitle className="text-lg">{t.selectTemplate}</CardTitle>
+                <CardDescription className="text-xs">
+                  {language === 'en' ? `Choose from ${templates.length} resolution types` : `اختر من ${templates.length} نوع قرار`}
+                </CardDescription>
               </CardHeader>
 
-              <CardContent className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {templates.map(tmpl => (
                     <button
                       key={tmpl.id}
-                      onClick={() => setSelectedTemplate(tmpl.id)}
-                      className="p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all group text-left"
+                      onClick={() => handleTemplateSelect(tmpl.id)}
+                      className="p-4 border border-border rounded-md hover:bg-secondary hover:border-primary transition-colors text-left group"
                     >
-                      <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">{tmpl.icon}</div>
-                      <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-purple-600 transition-colors">
-                        {language === 'en' ? tmpl.nameEn : tmpl.nameAr}
-                      </h3>
-                      <p className="text-sm text-gray-600">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">
+                          {language === 'en' ? tmpl.titleEn : tmpl.titleAr}
+                        </h3>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
                         {language === 'en' ? tmpl.descriptionEn : tmpl.descriptionAr}
                       </p>
                     </button>
@@ -422,154 +423,135 @@ export default function BoardResolutions() {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        ) : (
-          // Resolution Details
-          <div className="space-y-6">
-            {/* Back Button */}
-            <Button
-              onClick={() => {
-                setSelectedTemplate(null);
-                setFieldValues({});
-              }}
-              variant="outline"
-              className="mb-4"
-            >
-              ← {language === 'en' ? 'Back' : 'رجوع'}
-            </Button>
 
-            {/* Company Info */}
-            <Card className="shadow-lg border-0">
-              <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg pb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                    <span className="text-lg font-bold">1</span>
-                  </div>
-                  <div>
-                    <CardTitle className="text-white">{language === 'en' ? 'Company Details' : 'تفاصيل الشركة'}</CardTitle>
-                  </div>
-                </div>
+            {/* Info Box */}
+            <div className="p-3 bg-secondary border border-border rounded-md flex gap-3">
+              <AlertCircle className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-sm text-foreground mb-1">{t.important}</p>
+                <p className="text-xs text-muted-foreground">{t.disclaimer}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Resolution Details */}
+        {step === 'details' && template && (
+          <div className="space-y-6">
+            <Card className="border-border">
+              <CardHeader className="border-b border-border pb-4">
+                <CardTitle className="text-lg">
+                  {language === 'en' ? template.titleEn : template.titleAr}
+                </CardTitle>
               </CardHeader>
 
-              <CardContent className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <Label className="text-gray-700 font-semibold flex items-center gap-2">
-                      {t.companyName}
-                      <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      placeholder={language === 'en' ? 'Company name' : 'اسم الشركة'}
-                      className="mt-2 border-gray-300"
-                      dir={isRTL ? 'rtl' : 'ltr'}
-                    />
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  {/* Company Info */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="company-name" className="text-sm font-medium flex items-center gap-2">
+                        {t.companyName}
+                        <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="company-name"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        placeholder={language === 'en' ? 'e.g., Tech Startup Inc.' : 'مثال: شركة تقنية'}
+                        className="mt-2"
+                        dir={isRTL ? 'rtl' : 'ltr'}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="board-date" className="text-sm font-medium flex items-center gap-2">
+                        {t.boardMeetingDate}
+                        <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="board-date"
+                        type="date"
+                        value={boardMeetingDate}
+                        onChange={(e) => setBoardMeetingDate(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
                   </div>
 
                   <div>
-                    <Label className="text-gray-700 font-semibold flex items-center gap-2">
-                      {t.meetingDate}
-                      <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      type="date"
-                      value={meetingDate}
-                      onChange={(e) => setMeetingDate(e.target.value)}
-                      className="mt-2 border-gray-300"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="text-gray-700 font-semibold flex items-center gap-2">
+                    <Label htmlFor="board-members" className="text-sm font-medium flex items-center gap-2">
                       {t.boardMembers}
-                      <span className="text-red-500">*</span>
+                      <span className="text-destructive">*</span>
                     </Label>
-                    <Input
+                    <Textarea
+                      id="board-members"
                       value={boardMembers}
                       onChange={(e) => setBoardMembers(e.target.value)}
-                      placeholder={language === 'en' ? 'John Doe, Jane Smith' : 'أحمد محمد، فاطمة علي'}
-                      className="mt-2 border-gray-300"
+                      placeholder={language === 'en' ? 'List board members present (comma-separated)' : 'قائمة أعضاء المجلس الحاضرين (مفصولة بفواصل)'}
+                      className="mt-2 min-h-16"
                       dir={isRTL ? 'rtl' : 'ltr'}
                     />
+                  </div>
+
+                  {/* Dynamic Fields */}
+                  <div className="border-t border-border pt-4 mt-4">
+                    <h3 className="text-sm font-medium text-foreground mb-4">{t.resolutionDetails}</h3>
+                    <div className="space-y-3">
+                      {(language === 'en' ? template.fieldsEn : template.fieldsAr).map((field, index) => (
+                        <div key={index}>
+                          <Label htmlFor={`field-${index}`} className="text-xs font-medium flex items-center gap-2">
+                            {field}
+                            <span className="text-destructive">*</span>
+                          </Label>
+                          <Input
+                            id={`field-${index}`}
+                            value={resolutionValues[field] || ''}
+                            onChange={(e) => handleValueChange(field, e.target.value)}
+                            placeholder={language === 'en' ? `Enter ${field.toLowerCase()}` : `أدخل ${field}`}
+                            className="mt-1 h-8 text-sm"
+                            dir={isRTL ? 'rtl' : 'ltr'}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Resolution Template */}
-            {template && (
-              <Card className="shadow-lg border-0">
-                <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg pb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="text-4xl">{template.icon}</div>
-                    <div>
-                      <CardTitle className="text-white">
-                        {language === 'en' ? template.nameEn : template.nameAr}
-                      </CardTitle>
-                      <CardDescription className="text-purple-100">
-                        {language === 'en' ? template.descriptionEn : template.descriptionAr}
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="p-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {template.fields.map(field => (
-                      <div key={field.key} className={field.type === 'textarea' ? 'md:col-span-2' : ''}>
-                        <Label className="text-gray-700 font-semibold">
-                          {language === 'en' ? field.labelEn : field.labelAr}
-                        </Label>
-                        {field.type === 'textarea' ? (
-                          <Textarea
-                            value={fieldValues[field.key] || ''}
-                            onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                            placeholder={field.placeholder}
-                            className="mt-2 min-h-24 border-gray-300"
-                            dir={isRTL ? 'rtl' : 'ltr'}
-                          />
-                        ) : (
-                          <Input
-                            type={field.type}
-                            value={fieldValues[field.key] || ''}
-                            onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                            placeholder={field.placeholder}
-                            className="mt-2 border-gray-300"
-                            dir={isRTL ? 'rtl' : 'ltr'}
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Action Buttons */}
-            <div className="flex gap-4">
+            <div className="flex gap-3">
+              <Button
+                onClick={() => setStep('select')}
+                variant="outline"
+                className="h-10 text-sm"
+              >
+                {t.backStep}
+              </Button>
               <Button
                 onClick={generatePDF}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-6 text-lg rounded-lg shadow-lg"
+                className="flex-1 h-10 text-sm"
               >
-                <Download className="w-5 h-5 mr-2" />
+                <Download className="w-4 h-4 mr-2" />
                 {t.downloadPDF}
               </Button>
               <Button
                 onClick={generateWord}
-                className="flex-1 bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-700 hover:to-pink-800 text-white py-6 text-lg rounded-lg shadow-lg"
+                variant="outline"
+                className="flex-1 h-10 text-sm"
               >
-                <FileText className="w-5 h-5 mr-2" />
+                <FileText className="w-4 h-4 mr-2" />
                 {t.downloadWord}
               </Button>
             </div>
 
             {/* Info Box */}
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="p-3 bg-secondary border border-border rounded-md flex gap-3">
+              <AlertCircle className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-amber-900 mb-1">{t.important}</p>
-                <p className="text-sm text-amber-800">{t.disclaimer}</p>
+                <p className="font-medium text-sm text-foreground mb-1">{t.important}</p>
+                <p className="text-xs text-muted-foreground">{t.disclaimer}</p>
               </div>
             </div>
           </div>

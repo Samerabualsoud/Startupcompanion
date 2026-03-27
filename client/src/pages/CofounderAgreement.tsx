@@ -23,7 +23,7 @@ type Language = 'en' | 'ar';
 const translations = {
   en: {
     title: 'Co-Founder Agreement',
-    subtitle: 'Create a professional co-founder agreement in minutes',
+    subtitle: 'Generate professional co-founder agreements',
     companyInfo: 'Company Information',
     companyName: 'Company Name',
     businessDescription: 'Business Description',
@@ -60,7 +60,7 @@ const translations = {
   },
   ar: {
     title: 'اتفاقية المؤسسين المشاركين',
-    subtitle: 'قم بإنشاء اتفاقية مؤسسين احترافية في دقائق',
+    subtitle: 'قم بإنشاء اتفاقية مؤسسين احترافية',
     companyInfo: 'معلومات الشركة',
     companyName: 'اسم الشركة',
     businessDescription: 'وصف النشاط التجاري',
@@ -394,24 +394,24 @@ export default function CofounderAgreement() {
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="max-w-5xl mx-auto">
+    <div className={`min-h-screen p-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-10 flex justify-between items-start">
+        <div className="mb-8 flex justify-between items-start">
           <div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-3xl font-bold text-foreground mb-1">
               {t.title}
             </h1>
-            <p className="text-lg text-gray-600">{t.subtitle}</p>
+            <p className="text-sm text-muted-foreground">{t.subtitle}</p>
           </div>
 
           {/* Language Toggle */}
-          <div className="flex gap-2 bg-white rounded-full p-1 shadow-md border border-gray-200">
+          <div className="flex gap-1 bg-secondary rounded-md p-1 border border-border">
             <Button
               variant={language === 'en' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setLanguage('en')}
-              className="rounded-full"
+              className="rounded"
             >
               EN
             </Button>
@@ -419,7 +419,7 @@ export default function CofounderAgreement() {
               variant={language === 'ar' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setLanguage('ar')}
-              className="rounded-full"
+              className="rounded"
             >
               AR
             </Button>
@@ -429,16 +429,13 @@ export default function CofounderAgreement() {
         {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold text-gray-700">
-              {t.step} 1 {t.of} 2
-            </span>
-            <span className={`text-sm font-semibold ${isEquityValid ? 'text-green-600' : 'text-orange-600'}`}>
+            <span className="text-xs font-medium text-muted-foreground">
               {t.equityTotal}: {totalEquity.toFixed(1)}%
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-secondary rounded-full h-1.5">
             <div 
-              className={`h-2 rounded-full transition-all duration-300 ${isEquityValid ? 'bg-green-500' : 'bg-orange-500'}`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${isEquityValid ? 'bg-primary' : 'bg-destructive'}`}
               style={{ width: `${Math.min(totalEquity, 100)}%` }}
             />
           </div>
@@ -447,75 +444,65 @@ export default function CofounderAgreement() {
         {/* Main Content */}
         <div className="space-y-6">
           {/* Company Information Section */}
-          <Card className="shadow-lg border-0">
-            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg pb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                  <span className="text-lg font-bold">1</span>
-                </div>
-                <div>
-                  <CardTitle className="text-white">{t.companyInfo}</CardTitle>
-                  <CardDescription className="text-blue-100">
-                    {language === 'en' ? 'Basic details about your company' : 'التفاصيل الأساسية عن شركتك'}
-                  </CardDescription>
-                </div>
-              </div>
+          <Card className="border-border">
+            <CardHeader className="border-b border-border pb-4">
+              <CardTitle className="text-lg">{t.companyInfo}</CardTitle>
             </CardHeader>
 
-            <CardContent className="p-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="company-name" className="text-gray-700 font-semibold flex items-center gap-2">
+                  <Label htmlFor="company-name" className="text-sm font-medium flex items-center gap-2">
                     {t.companyName}
-                    <span className="text-red-500">*</span>
+                    <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="company-name"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     placeholder={language === 'en' ? 'e.g., Tech Startup Inc.' : 'مثال: شركة تقنية'}
-                    className="mt-2 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    className="mt-2"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="agreement-date" className="text-gray-700 font-semibold flex items-center gap-2">
+                  <Label htmlFor="agreement-date" className="text-sm font-medium flex items-center gap-2">
                     {t.agreementDate}
-                    <span className="text-red-500">*</span>
+                    <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="agreement-date"
                     type="date"
                     value={agreementDate}
                     onChange={(e) => setAgreementDate(e.target.value)}
-                    className="mt-2 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    className="mt-2"
                   />
                 </div>
               </div>
 
-              <div className="mt-6">
-                <Label htmlFor="business-description" className="text-gray-700 font-semibold flex items-center gap-2">
+              <div className="mt-4">
+                <Label htmlFor="business-description" className="text-sm font-medium flex items-center gap-2">
                   {t.businessDescription}
-                  <span className="text-red-500">*</span>
+                  <span className="text-destructive">*</span>
                 </Label>
                 <Textarea
                   id="business-description"
                   value={businessDescription}
                   onChange={(e) => setBusinessDescription(e.target.value)}
                   placeholder={language === 'en' ? 'Describe your company\'s business purpose...' : 'صف غرض عمل شركتك...'}
-                  className="mt-2 min-h-24 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-2 min-h-20"
                   dir={isRTL ? 'rtl' : 'ltr'}
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
                 <div>
-                  <Label htmlFor="jurisdiction" className="text-gray-700 font-semibold text-sm">
+                  <Label htmlFor="jurisdiction" className="text-xs font-medium">
                     {t.jurisdiction}
                   </Label>
                   <Select value={jurisdiction} onValueChange={setJurisdiction}>
-                    <SelectTrigger className="mt-2 border-gray-300">
+                    <SelectTrigger className="mt-1 h-9 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -528,11 +515,11 @@ export default function CofounderAgreement() {
                 </div>
 
                 <div>
-                  <Label htmlFor="vesting-years" className="text-gray-700 font-semibold text-sm">
+                  <Label htmlFor="vesting-years" className="text-xs font-medium">
                     {t.vestingPeriod}
                   </Label>
                   <Select value={vestingYears} onValueChange={setVestingYears}>
-                    <SelectTrigger className="mt-2 border-gray-300">
+                    <SelectTrigger className="mt-1 h-9 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -544,11 +531,11 @@ export default function CofounderAgreement() {
                 </div>
 
                 <div>
-                  <Label htmlFor="cliff-months" className="text-gray-700 font-semibold text-sm">
+                  <Label htmlFor="cliff-months" className="text-xs font-medium">
                     {t.cliffPeriod}
                   </Label>
                   <Select value={cliffMonths} onValueChange={setCliffMonths}>
-                    <SelectTrigger className="mt-2 border-gray-300">
+                    <SelectTrigger className="mt-1 h-9 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -560,11 +547,11 @@ export default function CofounderAgreement() {
                 </div>
 
                 <div>
-                  <Label htmlFor="non-compete" className="text-gray-700 font-semibold text-sm">
+                  <Label htmlFor="non-compete" className="text-xs font-medium">
                     {t.nonCompete}
                   </Label>
                   <Select value={nonCompeteMonths} onValueChange={setNonCompeteMonths}>
-                    <SelectTrigger className="mt-2 border-gray-300">
+                    <SelectTrigger className="mt-1 h-9 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -577,84 +564,75 @@ export default function CofounderAgreement() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div>
-                  <Label htmlFor="salary" className="text-gray-700 font-semibold text-sm">
-                    {t.monthlySalary}
-                  </Label>
-                  <Input
-                    id="salary"
-                    type="number"
-                    value={salaryPerMonth}
-                    onChange={(e) => setSalaryPerMonth(e.target.value)}
-                    placeholder="0"
-                    className="mt-2 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+              <div className="mt-3">
+                <Label htmlFor="salary" className="text-xs font-medium">
+                  {t.monthlySalary}
+                </Label>
+                <Input
+                  id="salary"
+                  type="number"
+                  value={salaryPerMonth}
+                  onChange={(e) => setSalaryPerMonth(e.target.value)}
+                  placeholder="0"
+                  className="mt-1 h-9 text-sm"
+                />
               </div>
             </CardContent>
           </Card>
 
           {/* Founders Section */}
-          <Card className="shadow-lg border-0">
-            <CardHeader className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-t-lg pb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                  <span className="text-lg font-bold">2</span>
-                </div>
-                <div>
-                  <CardTitle className="text-white">{t.founders}</CardTitle>
-                  <CardDescription className="text-indigo-100">
-                    {language === 'en' ? `${founders.length} founders added` : `تم إضافة ${founders.length} مؤسسين`}
-                  </CardDescription>
-                </div>
-              </div>
+          <Card className="border-border">
+            <CardHeader className="border-b border-border pb-4">
+              <CardTitle className="text-lg">{t.founders}</CardTitle>
+              <CardDescription className="text-xs">
+                {language === 'en' ? `${founders.length} founders added` : `تم إضافة ${founders.length} مؤسسين`}
+              </CardDescription>
             </CardHeader>
 
-            <CardContent className="p-8">
-              <div className="space-y-4">
+            <CardContent className="pt-6">
+              <div className="space-y-2">
                 {founders.map((founder, index) => (
-                  <div key={founder.id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                  <div key={founder.id} className="border border-border rounded-md overflow-hidden">
                     <button
                       onClick={() => setExpandedFounder(expandedFounder === founder.id ? null : founder.id)}
-                      className="w-full px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-150 flex items-center justify-between transition-colors"
+                      className="w-full px-4 py-3 bg-secondary hover:bg-secondary/80 flex items-center justify-between transition-colors text-sm"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-semibold text-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-primary/20 rounded flex items-center justify-center text-primary font-semibold text-xs">
                           {index + 1}
                         </div>
                         <div className="text-left">
-                          <p className="font-semibold text-gray-900">{founder.name || `${t.founder} ${index + 1}`}</p>
-                          <p className="text-sm text-gray-600">{founder.equity}% {language === 'en' ? 'equity' : 'ملكية'}</p>
+                          <p className="font-medium text-foreground">{founder.name || `${t.founder} ${index + 1}`}</p>
+                          <p className="text-xs text-muted-foreground">{founder.equity}% {language === 'en' ? 'equity' : 'ملكية'}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {founder.equity > 0 && <CheckCircle2 className="w-5 h-5 text-green-500" />}
-                        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${expandedFounder === founder.id ? 'rotate-180' : ''}`} />
+                        {founder.equity > 0 && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${expandedFounder === founder.id ? 'rotate-180' : ''}`} />
                       </div>
                     </button>
 
                     {expandedFounder === founder.id && (
-                      <div className="p-6 bg-white border-t border-gray-200 space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 bg-background border-t border-border space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div>
-                            <Label className="text-gray-700 font-semibold text-sm flex items-center gap-2">
+                            <Label className="text-xs font-medium flex items-center gap-2">
                               {t.fullName}
-                              <span className="text-red-500">*</span>
+                              <span className="text-destructive">*</span>
                             </Label>
                             <Input
                               value={founder.name}
                               onChange={(e) => updateFounder(founder.id, 'name', e.target.value)}
                               placeholder={language === 'en' ? 'Full name' : 'الاسم الكامل'}
-                              className="mt-2 border-gray-300"
+                              className="mt-1 h-8 text-sm"
                               dir={isRTL ? 'rtl' : 'ltr'}
                             />
                           </div>
 
                           <div>
-                            <Label className="text-gray-700 font-semibold text-sm flex items-center gap-2">
+                            <Label className="text-xs font-medium flex items-center gap-2">
                               {t.equity}
-                              <span className="text-red-500">*</span>
+                              <span className="text-destructive">*</span>
                             </Label>
                             <Input
                               type="number"
@@ -663,46 +641,46 @@ export default function CofounderAgreement() {
                               placeholder="0"
                               min="0"
                               max="100"
-                              className="mt-2 border-gray-300"
+                              className="mt-1 h-8 text-sm"
                             />
                           </div>
 
                           <div className="md:col-span-2">
-                            <Label className="text-gray-700 font-semibold text-sm">
+                            <Label className="text-xs font-medium">
                               {t.address}
                             </Label>
                             <Input
                               value={founder.address}
                               onChange={(e) => updateFounder(founder.id, 'address', e.target.value)}
                               placeholder={language === 'en' ? 'Full address' : 'العنوان الكامل'}
-                              className="mt-2 border-gray-300"
+                              className="mt-1 h-8 text-sm"
                               dir={isRTL ? 'rtl' : 'ltr'}
                             />
                           </div>
 
                           <div>
-                            <Label className="text-gray-700 font-semibold text-sm flex items-center gap-2">
+                            <Label className="text-xs font-medium flex items-center gap-2">
                               {t.roleTitle}
-                              <span className="text-red-500">*</span>
+                              <span className="text-destructive">*</span>
                             </Label>
                             <Input
                               value={founder.role}
                               onChange={(e) => updateFounder(founder.id, 'role', e.target.value)}
                               placeholder={language === 'en' ? 'e.g., CEO, CTO' : 'مثال: الرئيس التنفيذي'}
-                              className="mt-2 border-gray-300"
+                              className="mt-1 h-8 text-sm"
                               dir={isRTL ? 'rtl' : 'ltr'}
                             />
                           </div>
 
                           <div className="md:col-span-2">
-                            <Label className="text-gray-700 font-semibold text-sm">
+                            <Label className="text-xs font-medium">
                               {t.responsibilities}
                             </Label>
                             <Textarea
                               value={founder.responsibilities}
                               onChange={(e) => updateFounder(founder.id, 'responsibilities', e.target.value)}
                               placeholder={language === 'en' ? 'Key responsibilities...' : 'المسؤوليات الرئيسية...'}
-                              className="mt-2 min-h-20 border-gray-300"
+                              className="mt-1 min-h-16 text-sm"
                               dir={isRTL ? 'rtl' : 'ltr'}
                             />
                           </div>
@@ -713,9 +691,9 @@ export default function CofounderAgreement() {
                             onClick={() => removeFounder(founder.id)}
                             variant="destructive"
                             size="sm"
-                            className="w-full"
+                            className="w-full h-8 text-xs"
                           >
-                            <Trash2 className="w-4 h-4 mr-2" />
+                            <Trash2 className="w-3 h-3 mr-1" />
                             {language === 'en' ? 'Remove Founder' : 'إزالة المؤسس'}
                           </Button>
                         )}
@@ -728,38 +706,39 @@ export default function CofounderAgreement() {
               <Button
                 onClick={addFounder}
                 variant="outline"
-                className="w-full mt-6 border-dashed border-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 py-6"
+                className="w-full mt-3 h-9 text-sm"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-3 h-3 mr-1" />
                 {t.addFounder}
               </Button>
             </CardContent>
           </Card>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 pt-4">
+          <div className="flex gap-3">
             <Button
               onClick={generatePDF}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-6 text-lg rounded-lg shadow-lg"
+              className="flex-1 h-10 text-sm"
             >
-              <Download className="w-5 h-5 mr-2" />
+              <Download className="w-4 h-4 mr-2" />
               {t.downloadPDF}
             </Button>
             <Button
               onClick={generateWord}
-              className="flex-1 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white py-6 text-lg rounded-lg shadow-lg"
+              variant="outline"
+              className="flex-1 h-10 text-sm"
             >
-              <FileText className="w-5 h-5 mr-2" />
+              <FileText className="w-4 h-4 mr-2" />
               {t.downloadWord}
             </Button>
           </div>
 
           {/* Info Box */}
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="p-3 bg-secondary border border-border rounded-md flex gap-3">
+            <AlertCircle className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-amber-900 mb-1">{t.important}</p>
-              <p className="text-sm text-amber-800">{t.disclaimer}</p>
+              <p className="font-medium text-sm text-foreground mb-1">{t.important}</p>
+              <p className="text-xs text-muted-foreground">{t.disclaimer}</p>
             </div>
           </div>
         </div>
