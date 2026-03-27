@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, Plus, Trash2, Globe, FileText } from 'lucide-react';
+import { Download, Plus, Trash2, Globe, FileText, ChevronDown, AlertCircle, CheckCircle2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { saveAs } from 'file-saver';
 
@@ -22,7 +22,7 @@ type Language = 'en' | 'ar';
 
 const translations = {
   en: {
-    title: 'Co-Founder Agreement Generator',
+    title: 'Co-Founder Agreement',
     subtitle: 'Create a professional co-founder agreement in minutes',
     companyInfo: 'Company Information',
     companyName: 'Company Name',
@@ -53,9 +53,13 @@ const translations = {
     uae: 'UAE',
     delaware: 'Delaware (US)',
     california: 'California (US)',
+    step: 'Step',
+    of: 'of',
+    equityTotal: 'Total Equity',
+    requiredField: 'Required',
   },
   ar: {
-    title: 'منشئ اتفاقية المؤسسين المشاركين',
+    title: 'اتفاقية المؤسسين المشاركين',
     subtitle: 'قم بإنشاء اتفاقية مؤسسين احترافية في دقائق',
     companyInfo: 'معلومات الشركة',
     companyName: 'اسم الشركة',
@@ -86,6 +90,10 @@ const translations = {
     uae: 'الإمارات العربية المتحدة',
     delaware: 'ديلاوير (الولايات المتحدة)',
     california: 'كاليفورنيا (الولايات المتحدة)',
+    step: 'الخطوة',
+    of: 'من',
+    equityTotal: 'إجمالي الملكية',
+    requiredField: 'مطلوب',
   },
 };
 
@@ -106,6 +114,10 @@ export default function CofounderAgreement() {
   const [nonCompeteMonths, setNonCompeteMonths] = useState('12');
   const [salaryPerMonth, setSalaryPerMonth] = useState('0');
   const [agreementDate, setAgreementDate] = useState(new Date().toISOString().split('T')[0]);
+  const [expandedFounder, setExpandedFounder] = useState<string | null>('1');
+
+  const totalEquity = founders.reduce((sum, f) => sum + f.equity, 0);
+  const isEquityValid = Math.abs(totalEquity - 100) < 0.01;
 
   const addFounder = () => {
     const newId = String(Math.max(...founders.map(f => parseInt(f.id)), 0) + 1);
@@ -128,33 +140,23 @@ export default function CofounderAgreement() {
       return '';
     }
 
-    const totalEquity = founders.reduce((sum, f) => sum + f.equity, 0);
-    if (Math.abs(totalEquity - 100) > 0.01) {
+    if (!isEquityValid) {
       alert(t.totalEquity);
       return '';
     }
 
     let content = '';
-
-    // Title
     content += `${language === 'en' ? 'CO-FOUNDER AGREEMENT' : 'اتفاقية المؤسسين المشاركين'}\n\n`;
-
-    // Header
     content += `${language === 'en' ? `This Co-Founder Agreement is entered into as of ${agreementDate}` : `تم إبرام اتفاقية المؤسسين المشاركين هذه بتاريخ ${agreementDate}`}\n\n`;
 
-    // Founders
     founders.forEach((founder, index) => {
       const founderLabel = language === 'en' ? `Founder ${index + 1}` : `المؤسس ${index + 1}`;
       content += `${founder.name}, ${language === 'en' ? 'residing at' : 'يقيم في'} ${founder.address} ("${founderLabel}")\n`;
     });
 
     content += `\n${language === 'en' ? 'Collectively referred to as the "Founders" and the "Company".' : 'يشار إليهم بشكل جماعي باسم "المؤسسين" و"الشركة".'}\n\n`;
-
-    // Section 1
     content += `${language === 'en' ? '1. FORMATION AND PURPOSE' : '1. التكوين والغرض'}\n\n`;
     content += `${language === 'en' ? `The Founders agree to form a company for the purpose of ${businessDescription}. The Founders intend to work together as equal partners in building this venture and agree to be bound by the terms and conditions set forth in this Agreement.` : `يوافق المؤسسون على تشكيل شركة لغرض ${businessDescription}. ينوي المؤسسون العمل معاً كشركاء متساويين في بناء هذا المشروع ويوافقون على الالتزام بالشروط والأحكام المنصوص عليها في هذه الاتفاقية.`}\n\n`;
-
-    // Section 2
     content += `${language === 'en' ? '2. EQUITY OWNERSHIP AND VESTING' : '2. ملكية الأسهم والاستحقاق'}\n\n`;
     content += `${language === 'en' ? '2.1 Initial Equity Allocation' : '2.1 تخصيص الأسهم الأولي'}\n\n`;
 
@@ -165,7 +167,6 @@ export default function CofounderAgreement() {
     content += `\n${language === 'en' ? '2.2 Vesting Schedule' : '2.2 جدول الاستحقاق'}\n\n`;
     content += `${language === 'en' ? `All equity is subject to a ${vestingYears}-year vesting schedule with a ${cliffMonths}-month cliff. Upon the 1-year anniversary, 25% of equity vests. The remaining 75% vests monthly over the following ${parseInt(vestingYears) - 1} years.` : `جميع الأسهم تخضع لجدول استحقاق مدته ${vestingYears} سنة مع فترة انتظار ${cliffMonths} شهراً. عند الذكرى السنوية الأولى، يتم استحقاق 25٪ من الأسهم. يتم استحقاق الـ 75٪ المتبقية شهرياً على مدى السنوات الـ ${parseInt(vestingYears) - 1} التالية.`}\n\n`;
 
-    // Section 3
     content += `${language === 'en' ? '3. ROLES AND RESPONSIBILITIES' : '3. الأدوار والمسؤوليات'}\n\n`;
     founders.forEach((founder, index) => {
       const founderLabel = language === 'en' ? `Founder ${index + 1}` : `المؤسس ${index + 1}`;
@@ -173,23 +174,18 @@ export default function CofounderAgreement() {
       content += `${language === 'en' ? 'Responsibilities' : 'المسؤوليات'}: ${founder.responsibilities}\n\n`;
     });
 
-    // Section 4
     content += `${language === 'en' ? '4. DECISION-MAKING AND GOVERNANCE' : '4. صنع القرار والحوكمة'}\n\n`;
     content += `${language === 'en' ? 'Each Founder has equal voting rights. Major decisions including admission of new equity holders, sale/merger of the Company, hiring C-level executives, and amendments to this Agreement require unanimous written consent.' : 'لكل مؤسس حقوق تصويت متساوية. القرارات الرئيسية بما في ذلك قبول مالكي أسهم جدد، بيع/دمج الشركة، توظيف المديرين التنفيذيين، والتعديلات على هذه الاتفاقية تتطلب موافقة كتابية إجماعية.'}\n\n`;
 
-    // Section 5
     content += `${language === 'en' ? '5. INTELLECTUAL PROPERTY' : '5. الملكية الفكرية'}\n\n`;
     content += `${language === 'en' ? 'All intellectual property created by any Founder in connection with the Company\'s business shall be the exclusive property of the Company.' : 'جميع الملكية الفكرية التي ينشئها أي مؤسس فيما يتعلق بنشاط الشركة تكون ملكاً حصرياً للشركة.'}\n\n`;
 
-    // Section 6
     content += `${language === 'en' ? '6. COMPENSATION AND DISTRIBUTIONS' : '6. التعويض والتوزيعات'}\n\n`;
     content += `${language === 'en' ? `During the Company's early stage, Founders agree to work at a salary of $${salaryPerMonth} per month.` : `خلال المرحلة الأولى من الشركة، يوافق المؤسسون على العمل براتب ${salaryPerMonth} دولار شهرياً.`}\n\n`;
 
-    // Section 7
     content += `${language === 'en' ? '7. CONFIDENTIALITY AND NON-COMPETE' : '7. السرية وعدم المنافسة'}\n\n`;
     content += `${language === 'en' ? `Each Founder agrees to maintain strict confidentiality. For ${nonCompeteMonths} months after departure, Founders shall not engage in competing businesses.` : `يوافق كل مؤسس على الحفاظ على السرية الصارمة. لمدة ${nonCompeteMonths} شهراً بعد المغادرة، لا يجوز للمؤسسين الانخراط في أعمال تنافسية.`}\n\n`;
 
-    // Signatures
     content += `${language === 'en' ? 'SIGNATURES' : 'التوقيعات'}\n\n`;
 
     founders.forEach((founder, index) => {
@@ -217,8 +213,7 @@ export default function CofounderAgreement() {
       return;
     }
 
-    const totalEquity = founders.reduce((sum, f) => sum + f.equity, 0);
-    if (Math.abs(totalEquity - 100) > 0.01) {
+    if (!isEquityValid) {
       alert(t.totalEquity);
       return;
     }
@@ -254,11 +249,9 @@ export default function CofounderAgreement() {
       });
     };
 
-    // Title
     addText(language === 'en' ? 'CO-FOUNDER AGREEMENT' : 'اتفاقية المؤسسين المشاركين', 16, true, 8);
     yPosition += 5;
 
-    // Header info
     addText(
       language === 'en'
         ? `This Co-Founder Agreement is entered into as of ${agreementDate}`
@@ -285,7 +278,6 @@ export default function CofounderAgreement() {
     );
     yPosition += 8;
 
-    // Section 1
     addText(language === 'en' ? '1. FORMATION AND PURPOSE' : '1. التكوين والغرض', 12, true, 6);
     addText(
       language === 'en'
@@ -297,7 +289,6 @@ export default function CofounderAgreement() {
     );
     yPosition += 5;
 
-    // Section 2
     addText(language === 'en' ? '2. EQUITY OWNERSHIP AND VESTING' : '2. ملكية الأسهم والاستحقاق', 12, true, 6);
     addText(language === 'en' ? '2.1 Initial Equity Allocation' : '2.1 تخصيص الأسهم الأولي', 11, true, 5);
     yPosition += 3;
@@ -318,7 +309,6 @@ export default function CofounderAgreement() {
     );
     yPosition += 5;
 
-    // Section 3
     addText(language === 'en' ? '3. ROLES AND RESPONSIBILITIES' : '3. الأدوار والمسؤوليات', 12, true, 6);
     founders.forEach((founder, index) => {
       const founderLabel = language === 'en' ? `Founder ${index + 1}` : `المؤسس ${index + 1}`;
@@ -336,7 +326,6 @@ export default function CofounderAgreement() {
 
     yPosition += 5;
 
-    // Section 4
     addText(language === 'en' ? '4. DECISION-MAKING AND GOVERNANCE' : '4. صنع القرار والحوكمة', 12, true, 6);
     addText(
       language === 'en'
@@ -348,7 +337,6 @@ export default function CofounderAgreement() {
     );
     yPosition += 5;
 
-    // Section 5
     addText(language === 'en' ? '5. INTELLECTUAL PROPERTY' : '5. الملكية الفكرية', 12, true, 6);
     addText(
       language === 'en'
@@ -360,7 +348,6 @@ export default function CofounderAgreement() {
     );
     yPosition += 5;
 
-    // Section 6
     addText(language === 'en' ? '6. COMPENSATION AND DISTRIBUTIONS' : '6. التعويض والتوزيعات', 12, true, 6);
     addText(
       language === 'en'
@@ -372,7 +359,6 @@ export default function CofounderAgreement() {
     );
     yPosition += 5;
 
-    // Section 7
     addText(language === 'en' ? '7. CONFIDENTIALITY AND NON-COMPETE' : '7. السرية وعدم المنافسة', 12, true, 6);
     addText(
       language === 'en'
@@ -384,7 +370,6 @@ export default function CofounderAgreement() {
     );
     yPosition += 10;
 
-    // Signatures
     addText(language === 'en' ? 'SIGNATURES' : 'التوقيعات', 12, true, 6);
     yPosition += 5;
 
@@ -397,7 +382,6 @@ export default function CofounderAgreement() {
       yPosition += 3;
     });
 
-    // Footer
     doc.setFontSize(9);
     doc.setTextColor(100);
     const footerText =
@@ -410,104 +394,128 @@ export default function CofounderAgreement() {
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="max-w-4xl mx-auto">
-        {/* Language Toggle */}
-        <div className="flex justify-end mb-6">
-          <div className="flex gap-2 bg-white rounded-lg p-1 shadow-sm border border-gray-200">
+    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="mb-10 flex justify-between items-start">
+          <div>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+              {t.title}
+            </h1>
+            <p className="text-lg text-gray-600">{t.subtitle}</p>
+          </div>
+
+          {/* Language Toggle */}
+          <div className="flex gap-2 bg-white rounded-full p-1 shadow-md border border-gray-200">
             <Button
               variant={language === 'en' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setLanguage('en')}
-              className="gap-2"
+              className="rounded-full"
             >
-              <Globe className="w-4 h-4" />
-              English
+              EN
             </Button>
             <Button
               variant={language === 'ar' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setLanguage('ar')}
-              className="gap-2"
+              className="rounded-full"
             >
-              <Globe className="w-4 h-4" />
-              العربية
+              AR
             </Button>
           </div>
         </div>
 
-        {/* Header */}
+        {/* Progress Indicator */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">{t.title}</h1>
-          <p className="text-lg text-gray-600">{t.subtitle}</p>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-semibold text-gray-700">
+              {t.step} 1 {t.of} 2
+            </span>
+            <span className={`text-sm font-semibold ${isEquityValid ? 'text-green-600' : 'text-orange-600'}`}>
+              {t.equityTotal}: {totalEquity.toFixed(1)}%
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className={`h-2 rounded-full transition-all duration-300 ${isEquityValid ? 'bg-green-500' : 'bg-orange-500'}`}
+              style={{ width: `${Math.min(totalEquity, 100)}%` }}
+            />
+          </div>
         </div>
 
-        {/* Main Card */}
-        <Card className="shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
-            <CardTitle>{t.companyInfo}</CardTitle>
-            <CardDescription className="text-blue-100">
-              {language === 'en'
-                ? 'Fill in your company and founder information to generate a customized agreement'
-                : 'أدخل معلومات شركتك والمؤسسين لإنشاء اتفاقية مخصصة'}
-            </CardDescription>
-          </CardHeader>
+        {/* Main Content */}
+        <div className="space-y-6">
+          {/* Company Information Section */}
+          <Card className="shadow-lg border-0">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg pb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                  <span className="text-lg font-bold">1</span>
+                </div>
+                <div>
+                  <CardTitle className="text-white">{t.companyInfo}</CardTitle>
+                  <CardDescription className="text-blue-100">
+                    {language === 'en' ? 'Basic details about your company' : 'التفاصيل الأساسية عن شركتك'}
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
 
-          <CardContent className="p-8">
-            {/* Company Information */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.companyInfo}</h2>
-
+            <CardContent className="p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label htmlFor="company-name" className="text-gray-700 font-semibold">
-                    {t.companyName} *
+                  <Label htmlFor="company-name" className="text-gray-700 font-semibold flex items-center gap-2">
+                    {t.companyName}
+                    <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="company-name"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     placeholder={language === 'en' ? 'e.g., Tech Startup Inc.' : 'مثال: شركة تقنية'}
-                    className="mt-2"
+                    className="mt-2 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="agreement-date" className="text-gray-700 font-semibold">
-                    {t.agreementDate} *
+                  <Label htmlFor="agreement-date" className="text-gray-700 font-semibold flex items-center gap-2">
+                    {t.agreementDate}
+                    <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="agreement-date"
                     type="date"
                     value={agreementDate}
                     onChange={(e) => setAgreementDate(e.target.value)}
-                    className="mt-2"
+                    className="mt-2 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               <div className="mt-6">
-                <Label htmlFor="business-description" className="text-gray-700 font-semibold">
-                  {t.businessDescription} *
+                <Label htmlFor="business-description" className="text-gray-700 font-semibold flex items-center gap-2">
+                  {t.businessDescription}
+                  <span className="text-red-500">*</span>
                 </Label>
                 <Textarea
                   id="business-description"
                   value={businessDescription}
                   onChange={(e) => setBusinessDescription(e.target.value)}
                   placeholder={language === 'en' ? 'Describe your company\'s business purpose...' : 'صف غرض عمل شركتك...'}
-                  className="mt-2 min-h-24"
+                  className="mt-2 min-h-24 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                   dir={isRTL ? 'rtl' : 'ltr'}
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
                 <div>
-                  <Label htmlFor="jurisdiction" className="text-gray-700 font-semibold">
+                  <Label htmlFor="jurisdiction" className="text-gray-700 font-semibold text-sm">
                     {t.jurisdiction}
                   </Label>
                   <Select value={jurisdiction} onValueChange={setJurisdiction}>
-                    <SelectTrigger className="mt-2">
+                    <SelectTrigger className="mt-2 border-gray-300">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -520,11 +528,11 @@ export default function CofounderAgreement() {
                 </div>
 
                 <div>
-                  <Label htmlFor="vesting-years" className="text-gray-700 font-semibold">
+                  <Label htmlFor="vesting-years" className="text-gray-700 font-semibold text-sm">
                     {t.vestingPeriod}
                   </Label>
                   <Select value={vestingYears} onValueChange={setVestingYears}>
-                    <SelectTrigger className="mt-2">
+                    <SelectTrigger className="mt-2 border-gray-300">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -536,11 +544,11 @@ export default function CofounderAgreement() {
                 </div>
 
                 <div>
-                  <Label htmlFor="cliff-months" className="text-gray-700 font-semibold">
+                  <Label htmlFor="cliff-months" className="text-gray-700 font-semibold text-sm">
                     {t.cliffPeriod}
                   </Label>
                   <Select value={cliffMonths} onValueChange={setCliffMonths}>
-                    <SelectTrigger className="mt-2">
+                    <SelectTrigger className="mt-2 border-gray-300">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -550,29 +558,13 @@ export default function CofounderAgreement() {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <div>
-                  <Label htmlFor="salary" className="text-gray-700 font-semibold">
-                    {t.monthlySalary}
-                  </Label>
-                  <Input
-                    id="salary"
-                    type="number"
-                    value={salaryPerMonth}
-                    onChange={(e) => setSalaryPerMonth(e.target.value)}
-                    placeholder="0"
-                    className="mt-2"
-                  />
-                </div>
 
                 <div>
-                  <Label htmlFor="non-compete" className="text-gray-700 font-semibold">
+                  <Label htmlFor="non-compete" className="text-gray-700 font-semibold text-sm">
                     {t.nonCompete}
                   </Label>
                   <Select value={nonCompeteMonths} onValueChange={setNonCompeteMonths}>
-                    <SelectTrigger className="mt-2">
+                    <SelectTrigger className="mt-2 border-gray-300">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -584,131 +576,193 @@ export default function CofounderAgreement() {
                   </Select>
                 </div>
               </div>
-            </div>
 
-            {/* Founders Section */}
-            <div className="mb-8 border-t pt-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.founders}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <Label htmlFor="salary" className="text-gray-700 font-semibold text-sm">
+                    {t.monthlySalary}
+                  </Label>
+                  <Input
+                    id="salary"
+                    type="number"
+                    value={salaryPerMonth}
+                    onChange={(e) => setSalaryPerMonth(e.target.value)}
+                    placeholder="0"
+                    className="mt-2 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-              <div className="space-y-6">
+          {/* Founders Section */}
+          <Card className="shadow-lg border-0">
+            <CardHeader className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-t-lg pb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                  <span className="text-lg font-bold">2</span>
+                </div>
+                <div>
+                  <CardTitle className="text-white">{t.founders}</CardTitle>
+                  <CardDescription className="text-indigo-100">
+                    {language === 'en' ? `${founders.length} founders added` : `تم إضافة ${founders.length} مؤسسين`}
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+
+            <CardContent className="p-8">
+              <div className="space-y-4">
                 {founders.map((founder, index) => (
-                  <Card key={founder.id} className="bg-gray-50 border border-gray-200">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {t.founder} {index + 1}
-                        </h3>
+                  <div key={founder.id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                    <button
+                      onClick={() => setExpandedFounder(expandedFounder === founder.id ? null : founder.id)}
+                      className="w-full px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-150 flex items-center justify-between transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-semibold text-sm">
+                          {index + 1}
+                        </div>
+                        <div className="text-left">
+                          <p className="font-semibold text-gray-900">{founder.name || `${t.founder} ${index + 1}`}</p>
+                          <p className="text-sm text-gray-600">{founder.equity}% {language === 'en' ? 'equity' : 'ملكية'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {founder.equity > 0 && <CheckCircle2 className="w-5 h-5 text-green-500" />}
+                        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${expandedFounder === founder.id ? 'rotate-180' : ''}`} />
+                      </div>
+                    </button>
+
+                    {expandedFounder === founder.id && (
+                      <div className="p-6 bg-white border-t border-gray-200 space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-gray-700 font-semibold text-sm flex items-center gap-2">
+                              {t.fullName}
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              value={founder.name}
+                              onChange={(e) => updateFounder(founder.id, 'name', e.target.value)}
+                              placeholder={language === 'en' ? 'Full name' : 'الاسم الكامل'}
+                              className="mt-2 border-gray-300"
+                              dir={isRTL ? 'rtl' : 'ltr'}
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-gray-700 font-semibold text-sm flex items-center gap-2">
+                              {t.equity}
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              type="number"
+                              value={founder.equity}
+                              onChange={(e) => updateFounder(founder.id, 'equity', parseFloat(e.target.value) || 0)}
+                              placeholder="0"
+                              min="0"
+                              max="100"
+                              className="mt-2 border-gray-300"
+                            />
+                          </div>
+
+                          <div className="md:col-span-2">
+                            <Label className="text-gray-700 font-semibold text-sm">
+                              {t.address}
+                            </Label>
+                            <Input
+                              value={founder.address}
+                              onChange={(e) => updateFounder(founder.id, 'address', e.target.value)}
+                              placeholder={language === 'en' ? 'Full address' : 'العنوان الكامل'}
+                              className="mt-2 border-gray-300"
+                              dir={isRTL ? 'rtl' : 'ltr'}
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-gray-700 font-semibold text-sm flex items-center gap-2">
+                              {t.roleTitle}
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              value={founder.role}
+                              onChange={(e) => updateFounder(founder.id, 'role', e.target.value)}
+                              placeholder={language === 'en' ? 'e.g., CEO, CTO' : 'مثال: الرئيس التنفيذي'}
+                              className="mt-2 border-gray-300"
+                              dir={isRTL ? 'rtl' : 'ltr'}
+                            />
+                          </div>
+
+                          <div className="md:col-span-2">
+                            <Label className="text-gray-700 font-semibold text-sm">
+                              {t.responsibilities}
+                            </Label>
+                            <Textarea
+                              value={founder.responsibilities}
+                              onChange={(e) => updateFounder(founder.id, 'responsibilities', e.target.value)}
+                              placeholder={language === 'en' ? 'Key responsibilities...' : 'المسؤوليات الرئيسية...'}
+                              className="mt-2 min-h-20 border-gray-300"
+                              dir={isRTL ? 'rtl' : 'ltr'}
+                            />
+                          </div>
+                        </div>
+
                         {founders.length > 2 && (
                           <Button
-                            variant="ghost"
-                            size="sm"
                             onClick={() => removeFounder(founder.id)}
-                            className="text-red-600 hover:text-red-700"
+                            variant="destructive"
+                            size="sm"
+                            className="w-full"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            {language === 'en' ? 'Remove Founder' : 'إزالة المؤسس'}
                           </Button>
                         )}
                       </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label className="text-gray-700 font-semibold">{t.fullName} *</Label>
-                          <Input
-                            value={founder.name}
-                            onChange={(e) => updateFounder(founder.id, 'name', e.target.value)}
-                            placeholder={language === 'en' ? 'Full name' : 'الاسم الكامل'}
-                            className="mt-2"
-                            dir={isRTL ? 'rtl' : 'ltr'}
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-gray-700 font-semibold">{t.equity} *</Label>
-                          <Input
-                            type="number"
-                            value={founder.equity}
-                            onChange={(e) => updateFounder(founder.id, 'equity', parseFloat(e.target.value) || 0)}
-                            placeholder="0"
-                            min="0"
-                            max="100"
-                            className="mt-2"
-                          />
-                        </div>
-
-                        <div className="md:col-span-2">
-                          <Label className="text-gray-700 font-semibold">{t.address}</Label>
-                          <Input
-                            value={founder.address}
-                            onChange={(e) => updateFounder(founder.id, 'address', e.target.value)}
-                            placeholder={language === 'en' ? 'Full address' : 'العنوان الكامل'}
-                            className="mt-2"
-                            dir={isRTL ? 'rtl' : 'ltr'}
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-gray-700 font-semibold">{t.roleTitle} *</Label>
-                          <Input
-                            value={founder.role}
-                            onChange={(e) => updateFounder(founder.id, 'role', e.target.value)}
-                            placeholder={language === 'en' ? 'e.g., CEO, CTO' : 'مثال: الرئيس التنفيذي'}
-                            className="mt-2"
-                            dir={isRTL ? 'rtl' : 'ltr'}
-                          />
-                        </div>
-
-                        <div className="md:col-span-2">
-                          <Label className="text-gray-700 font-semibold">{t.responsibilities}</Label>
-                          <Textarea
-                            value={founder.responsibilities}
-                            onChange={(e) => updateFounder(founder.id, 'responsibilities', e.target.value)}
-                            placeholder={language === 'en' ? 'Key responsibilities...' : 'المسؤوليات الرئيسية...'}
-                            className="mt-2 min-h-20"
-                            dir={isRTL ? 'rtl' : 'ltr'}
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    )}
+                  </div>
                 ))}
               </div>
 
               <Button
                 onClick={addFounder}
                 variant="outline"
-                className="mt-6 w-full border-dashed border-2 border-blue-300 text-blue-600 hover:bg-blue-50"
+                className="w-full mt-6 border-dashed border-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 py-6"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 {t.addFounder}
               </Button>
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Action Buttons */}
-            <div className="flex gap-4 pt-8 border-t">
-              <Button
-                onClick={generatePDF}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg"
-              >
-                <Download className="w-5 h-5 mr-2" />
-                {t.downloadPDF}
-              </Button>
-              <Button
-                onClick={generateWord}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg"
-              >
-                <FileText className="w-5 h-5 mr-2" />
-                {t.downloadWord}
-              </Button>
-            </div>
+          {/* Action Buttons */}
+          <div className="flex gap-4 pt-4">
+            <Button
+              onClick={generatePDF}
+              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-6 text-lg rounded-lg shadow-lg"
+            >
+              <Download className="w-5 h-5 mr-2" />
+              {t.downloadPDF}
+            </Button>
+            <Button
+              onClick={generateWord}
+              className="flex-1 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white py-6 text-lg rounded-lg shadow-lg"
+            >
+              <FileText className="w-5 h-5 mr-2" />
+              {t.downloadWord}
+            </Button>
+          </div>
 
-            {/* Info Box */}
-            <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-gray-700">
-                <strong>⚠️ {t.important}</strong> {t.disclaimer}
-              </p>
+          {/* Info Box */}
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-amber-900 mb-1">{t.important}</p>
+              <p className="text-sm text-amber-800">{t.disclaimer}</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
