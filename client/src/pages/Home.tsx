@@ -67,7 +67,7 @@ import CompetitorIntelligence from '@/components/CompetitorIntelligence';
 import TermNegotiationAdvisor from '@/components/TermNegotiationAdvisor';
 import EcosystemSection from '@/components/EcosystemSection';
 import ProfileSettings from './ProfileSettings';
-type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'profile-settings' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'saved-startups' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator' | 'oqal-notes' | 'zest-equity' | 'financial-projection' | 'competitor-intelligence' | 'term-negotiation' | 'jurisdictions';
+type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'profile-settings' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'saved-startups' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator' | 'oqal-notes' | 'zest-equity' | 'financial-projection' | 'competitor-intelligence' | 'term-negotiation' | 'jurisdictions' | 'cofounder-agreement-generator' | 'board-resolutions-generator';
 
 interface NavItem {
   id: ToolId;
@@ -143,6 +143,9 @@ const NAV_ITEMS: NavItem[] = [
   // Financing Instruments
   { id: 'oqal-notes', tier: 'pro',   label: 'OQAL Notes (Shariah)',         shortLabel: 'OQAL Notes',    navKey: 'navOQALNotes',   icon: Shield,      group: 'Legal & Compliance', newUntil: '2026-07-01', badge: 'New' },
   { id: 'zest-equity', tier: 'pro',  label: 'Zest Equity & Cap Table',      shortLabel: 'Zest Equity',   navKey: 'navZestEquity',  icon: TrendingUp,  group: 'Equity & Ownership', newUntil: '2026-07-01', badge: 'New' },
+  // Legal Document Generators
+  { id: 'cofounder-agreement-generator', tier: 'pro', label: 'Co-founder Agreement Generator', shortLabel: 'Co-founder Agreement', navKey: 'navCofounderGen', icon: FileText, group: 'Legal & Compliance', newUntil: '2026-04-15', badge: 'New' },
+  { id: 'board-resolutions-generator', tier: 'pro', label: 'Board Resolution Generator', shortLabel: 'Board Resolutions', navKey: 'navBoardResGen', icon: ClipboardCheck, group: 'Legal & Compliance', newUntil: '2026-04-15', badge: 'New' },
 ];
 
 const GROUPS = ['My Company', 'Valuation', 'Equity & Ownership', 'Capital Raising', 'Legal & Compliance', 'Market Intelligence', 'Ecosystem', 'AI Advisory', 'Admin'];
@@ -190,6 +193,8 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'jurisdictions': '#0284C7',
   'profile-settings': '#2D4A6B',
   'saved-startups': '#EC4899',
+  'cofounder-agreement-generator': '#06B6D4',
+  'board-resolutions-generator': '#8B5CF6',
 };
 
 function HomeInner() {
@@ -440,6 +445,8 @@ function HomeInner() {
       case 'zest-equity':                  return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><ZestEquity /></div>;
       case 'idea-validator':               return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><IdeaValidator /></div>;
       case 'financial-projection' | 'competitor-intelligence' | 'term-negotiation':           return <FinancialProjection />;
+      case 'cofounder-agreement-generator': return <div className="flex-1 min-w-0 overflow-y-auto"><iframe src="/legal/cofounder-agreement" className="w-full h-full border-0" style={{ minHeight: '100vh' }} /></div>;
+      case 'board-resolutions-generator': return <div className="flex-1 min-w-0 overflow-y-auto"><iframe src="/legal/board-resolutions" className="w-full h-full border-0" style={{ minHeight: '100vh' }} /></div>;
       default: return null;
     }
   };

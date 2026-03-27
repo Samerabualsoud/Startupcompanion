@@ -22,6 +22,8 @@ import PublicStartupDirectory from './pages/PublicStartupDirectory';
 import PublicStartupDetail from './pages/PublicStartupDetail';
 import ProfileSettings from './pages/ProfileSettings';
 import SavedStartups from './pages/SavedStartups';
+import CofounderAgreement from './pages/CofounderAgreement';
+import BoardResolutions from './pages/BoardResolutions';
 
 function AppRoutes() {
   return (
@@ -42,6 +44,8 @@ function AppRoutes() {
       <Route path={"/startup/:slug"} component={PublicStartupDetail} />
       <Route path={"/profile-settings"} component={ProfileSettings} />
       <Route path={"/saved-startups"} component={SavedStartups} />
+      <Route path={"/legal/cofounder-agreement"} component={CofounderAgreement} />
+      <Route path={"/legal/board-resolutions"} component={BoardResolutions} />
       <Route path={"/404"} component={NotFound} />     {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
