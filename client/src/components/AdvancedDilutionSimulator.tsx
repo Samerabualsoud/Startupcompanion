@@ -85,10 +85,11 @@ export default function AdvancedDilutionSimulator() {
 
   // Derive founders from cap table — safe even when capState is null
   // If no founders exist, use default founders for demonstration
-  const founders = capState?.shareholders.filter(s => s.type === 'founder') ?? [];
-  const totalSharesBasic = computed?.totalSharesBasic ?? 1;
+  // Ensure capState is loaded before deriving founders
+  const founders = capState ? capState.shareholders.filter(s => s.type === 'founder') : [];
+  const totalSharesBasic = computed?.totalSharesBasic ?? (founders.reduce((s, f) => s + f.shares, 0) || 1);
   const founderInitialPcts = founders.map(f => (f.shares / totalSharesBasic) * 100);
-  const esopInitialPct = computed?.esopPct ?? (capState?.esop.totalPoolShares ?? 0) / totalSharesBasic * 100;
+  const esopInitialPct = computed?.esopPct ?? (capState ? (capState.esop.totalPoolShares / totalSharesBasic) * 100 : 0);
 
   // ── Simulation — MUST be before any early return ────────────────────────────
 
@@ -178,10 +179,13 @@ export default function AdvancedDilutionSimulator() {
     setDilution(reportData);
   }, [simulation, setDilution]);
 
-  if (isLoading) {
+  if (isLoading || !capState) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+        <div className="text-center">
+          <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">{lang === 'ar' ? 'جاري تحميل جدول الملكية...' : 'Loading cap table...'}</p>
+        </div>
       </div>
     );
   }
