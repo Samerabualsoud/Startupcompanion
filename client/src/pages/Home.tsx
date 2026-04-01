@@ -98,7 +98,9 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'profile-settings', tier: 'free', label: 'Public Profile Settings', shortLabel: 'Publish', navKey: 'navProfileSettings', icon: Globe, group: 'My Company', newUntil: '2026-04-01' },
   { id: 'cogs', tier: 'free',          label: 'Unit Economics',        shortLabel: 'Unit Econ.',        navKey: 'navCOGS',        icon: DollarSign,  group: 'My Company',   newUntil: '2026-04-01' },
   { id: 'sales', tier: 'free',         label: 'Revenue Intelligence',          shortLabel: 'Revenue',       navKey: 'navSales',       icon: ShoppingCart, group: 'My Company',  newUntil: '2026-04-01' },
-  { id: 'financial-projection' | 'competitor-intelligence' | 'term-negotiation', tier: 'free', label: 'Financial Projection', shortLabel: 'Projection', navKey: 'navFinancialProjection', icon: TrendingUp, group: 'My Company', newUntil: '2026-07-01' },
+  { id: 'financial-projection', tier: 'free', label: 'Financial Projection', shortLabel: 'Projection', navKey: 'navFinancialProjection', icon: TrendingUp, group: 'My Company', newUntil: '2026-07-01' },
+  { id: 'competitor-intelligence', tier: 'pro', label: 'Competitor Intelligence', shortLabel: 'Competitors', navKey: 'navCompetitorIntel', icon: BarChart3, group: 'AI Advisory', badge: 'AI', newUntil: '2026-07-01' },
+  { id: 'term-negotiation', tier: 'pro', label: 'Term Negotiation Advisor', shortLabel: 'Negotiation', navKey: 'navTermNegotiation', icon: MessageCircle, group: 'AI Advisory', badge: 'AI', newUntil: '2026-07-01' },
   { id: 'data-room', tier: 'pro',     label: 'Virtual Data Room',              shortLabel: 'Data Room',   navKey: 'navDataRoom',    icon: FolderOpen,  group: 'My Company',   newUntil: '2026-04-01' },
   { id: 'cap-table', tier: 'pro',     label: 'Capitalization Table',      shortLabel: 'Cap Table',   navKey: 'navCapTable',    icon: Users,       group: 'My Company',   newUntil: '2026-04-01' },
   // Valuation
@@ -229,7 +231,7 @@ function HomeInner() {
     methodText:   'var(--muted-foreground)',
   };
   // Persist active tool across refreshes using localStorage + URL hash
-  const VALID_TOOL_IDS: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'profile-settings', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator', 'oqal-notes', 'zest-equity', 'financial-projection' | 'competitor-intelligence' | 'term-negotiation'];
+  const VALID_TOOL_IDS: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'profile-settings', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator', 'oqal-notes', 'zest-equity', 'financial-projection', 'competitor-intelligence', 'term-negotiation', 'jurisdictions', 'cofounder-agreement-generator', 'board-resolutions-generator'];
   const getInitialTool = (): ToolId => {
     // 1. Check URL hash first (e.g. /app#equity-split)
     const hash = window.location.hash.replace('#', '') as ToolId;
