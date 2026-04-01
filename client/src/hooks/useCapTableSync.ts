@@ -35,7 +35,7 @@ export function useCapTableSync() {
     lastSyncRef.current = now;
 
     // Invalidate queries that depend on Cap Table
-    queryClient.invalidateQueries({ queryKey: ['equity.get'] });
+    queryClient.invalidateQueries({ queryKey: ['equity', 'get'] });
     queryClient.invalidateQueries({ queryKey: ['dilution'] });
     queryClient.invalidateQueries({ queryKey: ['valuation'] });
 
@@ -55,7 +55,7 @@ export function useCapTableSync() {
 
     // Poll for Cap Table changes every 2 seconds
     const pollInterval = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ['equity.get'] });
+      queryClient.invalidateQueries({ queryKey: ['equity', 'get'] });
     }, 2000);
 
     return () => {
@@ -111,7 +111,8 @@ export function useDilutionSync() {
     const unsubscribe = queryClient.getQueryCache().subscribe((event: any) => {
       if (
         event.type === 'updated' &&
-        event.query.queryKey[0] === 'equity.get'
+        event.query.queryKey[0] === 'equity' &&
+        event.query.queryKey[1] === 'get'
       ) {
         // Invalidate dilution queries
         queryClient.invalidateQueries({ queryKey: ['dilution'] });
@@ -140,7 +141,8 @@ export function useValuationSync() {
     const unsubscribe = queryClient.getQueryCache().subscribe((event: any) => {
       if (
         event.type === 'updated' &&
-        event.query.queryKey[0] === 'equity.get'
+        event.query.queryKey[0] === 'equity' &&
+        event.query.queryKey[1] === 'get'
       ) {
         // Invalidate valuation queries
         queryClient.invalidateQueries({ queryKey: ['valuation'] });
