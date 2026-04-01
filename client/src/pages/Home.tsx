@@ -63,7 +63,7 @@ import OQALNotes from '@/components/OQALNotes';
 import ZestEquity from '@/components/ZestEquity';
 import IdeaValidator from '@/components/IdeaValidator';
 import FinancialProjection from '@/components/FinancialProjection';
-import CompetitorIntelligence from '@/components/CompetitorIntelligence';
+// import CompetitorIntelligence from '@/components/CompetitorIntelligence';
 import TermNegotiationAdvisor from '@/components/TermNegotiationAdvisor';
 import EcosystemSection from '@/components/EcosystemSection';
 import ProfileSettings from './ProfileSettings';
@@ -195,8 +195,6 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'competitor-intelligence': '#10B981',
   'term-negotiation': '#10B981',
   'jurisdictions': '#0284C7',
-  'profile-settings': '#2D4A6B',
-  'saved-startups': '#EC4899',
   'cofounder-agreement-generator': '#06B6D4',
   'board-resolutions-generator': '#8B5CF6',
 };
@@ -404,7 +402,7 @@ function HomeInner() {
           </div>
         );
       case 'accelerators':    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><AcceleratorRecommender /></div>;
-      case 'jurisdictions':    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><EcosystemSection BG={C.contentBg} BG_CARD={C.cardBg} BG_CARD2={C.cardBg} BORDER={C.border} TEXT_HI={C.textHi} TEXT_MED={C.textMed} TEXT_LOW={C.textLow} BLUE="#0F52DE" GREEN="#10B981" VIOLET="#7C3AED" isRTL={isRTL} /></div>;
+      case 'jurisdictions':    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><EcosystemSection BG={C.contentBg} BG_CARD={C.contentBg} BG_CARD2={C.contentBg} BORDER={C.sidebarBorder} TEXT_HI={C.activeText} TEXT_MED={C.navText} TEXT_LOW={C.groupHeader} BLUE="#0F52DE" GREEN="#10B981" VIOLET="#7C3AED" isRTL={isRTL} /></div>;
       case 'equity-split':    return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><CoFounderEquitySplit /></div>;
       case 'dilution':        return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><AdvancedDilutionSimulator /></div>;
       case 'vesting':         return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><VestingScheduleBuilder /></div>;
