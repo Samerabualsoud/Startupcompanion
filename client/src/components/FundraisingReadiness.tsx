@@ -1,5 +1,6 @@
 /**
  * FundraisingReadiness — 20-point fundraising readiness checklist with score
+ * + Post-raise equity impact simulator
  * Design: "Venture Capital Clarity" — Editorial Finance
  */
 
@@ -8,10 +9,11 @@ import { useState, useMemo, useEffect } from 'react';
 import { useStartup } from '@/contexts/StartupContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Circle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
-import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import { CheckCircle2, Circle, AlertCircle, ChevronDown, ChevronUp, TrendingDown } from 'lucide-react';
+import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartTooltip, Legend } from 'recharts';
 import { useReport } from '@/contexts/ReportContext';
 import { useToolState } from '@/hooks/useToolState';
+import { useCapTable } from '@/hooks/useCapTable';
 
 interface CheckItem {
   id: string;
@@ -75,7 +77,11 @@ export default function FundraisingReadiness() {
   const { lang, isRTL } = useLanguage();
   const { state: items, setState: setItems } = useToolState<CheckItem[]>('readiness', INITIAL_ITEMS);
   const [expandedCat, setExpandedCat] = useState<string | null>('Product');
+  const [showEquityImpact, setShowEquityImpact] = useState(false);
+  const [raiseAmount, setRaiseAmount] = useState(500_000);
+  const [preMoneyValuation, setPreMoneyValuation] = useState(3_000_000);
   const { setReadiness } = useReport();
+  const { state: capState } = useCapTable();
 
   const toggle = (id: string) => {
     setItems(prev => prev.map(item => item.id === id ? { ...item, checked: !item.checked } : item));
@@ -104,8 +110,35 @@ export default function FundraisingReadiness() {
     : { label: lang === 'ar' ? 'غير جاهز بعد' : 'Not Ready Yet', color: '#EF4444', icon: '🛑' };
 
   const radarData = categoryScores.map(c => ({ subject: c.category, score: c.pct, fullMark: 100 }));
-
   const categories = Array.from(new Set(INITIAL_ITEMS.map(i => i.category)));
+
+  // ── Post-Raise Equity Impact ──────────────────────────────────────────────
+  const founders = capState?.shareholders.filter(s => s.type === 'founder') ?? [];
+  const totalSharesBasic = founders.reduce((s, f) => s + f.shares, 0) || 1;
+
+  const equityImpactData = useMemo(() => {
+    if (founders.length === 0) return null;
+
+    const postMoneyVal = preMoneyValuation + raiseAmount;
+    const newInvestorShares = (raiseAmount / (raiseAmount / (raiseAmount / preMoneyValuation))) || 0;
+    const totalSharesAfter = totalSharesBasic + newInvestorShares;
+
+    return {
+      preRaise: founders.map(f => ({
+        name: f.name,
+        equity: (f.shares / totalSharesBasic) * 100,
+        color: f.color,
+      })),
+      postRaise: founders.map(f => ({
+        name: f.name,
+        equity: (f.shares / totalSharesAfter) * 100,
+        color: f.color,
+      })),
+      investorEquity: (newInvestorShares / totalSharesAfter) * 100,
+      postMoneyVal,
+      dilution: 100 - ((totalSharesBasic / totalSharesAfter) * 100),
+    };
+  }, [founders, totalSharesBasic, raiseAmount, preMoneyValuation]);
 
   // Publish to report context whenever score changes
   useEffect(() => {
@@ -120,6 +153,7 @@ export default function FundraisingReadiness() {
 
   return (
     <div className="space-y-5">
+      {/* Education panel */}
       <ToolGuide
         toolName={lang === 'ar' ? 'مقياس الاستعداد للتمويل' : 'Fundraising Readiness'}
         tagline={lang === 'ar' ? 'قيّم استعدادك للتمويل — ٢٠ نقطة تحقق عبر الفريق والمنتج والنمو والماليات.' : 'Assess your readiness to raise — 20 checks across team, product, traction, and financials.'}
@@ -191,6 +225,134 @@ export default function FundraisingReadiness() {
           </ResponsiveContainer>
         </div>
       </div>
+
+      {/* ── Post-Raise Equity Impact Section ── */}
+      {founders.length > 0 && (
+        <div className="border border-border rounded-xl overflow-hidden bg-card">
+          <button
+            onClick={() => setShowEquityImpact(!showEquityImpact)}
+            className="w-full flex items-center justify-between p-4 hover:bg-secondary/30 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <TrendingDown className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              <div>
+                <div className="text-sm font-semibold text-foreground">{lang === 'ar' ? 'تأثير التخفيف بعد التمويل' : 'Post-Raise Equity Impact'}</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">
+                  {lang === 'ar' ? 'نمّذج كيف تتغير حصص المؤسسين بعد جولة تمويل' : 'Model how founder equity changes after a funding round'}
+                </div>
+              </div>
+            </div>
+            {showEquityImpact ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+          </button>
+
+          {showEquityImpact && equityImpactData && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-t border-border p-4 space-y-4">
+              {/* Inputs */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">
+                    {lang === 'ar' ? 'التقييم قبل الاستثمار ($)' : 'Pre-Money Valuation ($)'}
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                    <input
+                      type="number" value={preMoneyValuation}
+                      onChange={e => setPreMoneyValuation(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-full pl-7 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">
+                    {lang === 'ar' ? 'مبلغ الاستثمار ($)' : 'Investment Amount ($)'}
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                    <input
+                      type="number" value={raiseAmount}
+                      onChange={e => setRaiseAmount(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-full pl-7 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Impact Summary */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="border border-border rounded-lg p-3 bg-secondary/20 text-center">
+                  <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">{lang === 'ar' ? 'التقييم بعد الاستثمار' : 'Post-Money'}</div>
+                  <div className="text-lg font-bold text-foreground">${(equityImpactData.postMoneyVal / 1_000_000).toFixed(1)}M</div>
+                </div>
+                <div className="border border-border rounded-lg p-3 bg-red-50 dark:bg-red-950/30 text-center">
+                  <div className="text-[9px] text-red-700 dark:text-red-400 uppercase tracking-wider mb-1">{lang === 'ar' ? 'التخفيف' : 'Dilution'}</div>
+                  <div className="text-lg font-bold text-red-600 dark:text-red-400">{equityImpactData.dilution.toFixed(1)}%</div>
+                </div>
+                <div className="border border-border rounded-lg p-3 bg-secondary/20 text-center">
+                  <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">{lang === 'ar' ? 'حصة المستثمر' : 'Investor %'}</div>
+                  <div className="text-lg font-bold text-foreground">{equityImpactData.investorEquity.toFixed(1)}%</div>
+                </div>
+              </div>
+
+              {/* Before/After Comparison */}
+              <div className="border border-border rounded-lg p-3 bg-secondary/10">
+                <div className="text-xs font-semibold text-foreground mb-3">{lang === 'ar' ? 'مقارنة الملكية' : 'Ownership Comparison'}</div>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={[
+                    {
+                      stage: lang === 'ar' ? 'قبل' : 'Before',
+                      ...equityImpactData.preRaise.reduce((acc, f) => ({ ...acc, [f.name]: f.equity }), {}),
+                    },
+                    {
+                      stage: lang === 'ar' ? 'بعد' : 'After',
+                      ...equityImpactData.postRaise.reduce((acc, f) => ({ ...acc, [f.name]: f.equity }), {}),
+                      Investor: equityImpactData.investorEquity,
+                    },
+                  ]}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis dataKey="stage" tick={{ fontSize: 10 }} />
+                    <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${v}%`} domain={[0, 100]} />
+                    <RechartTooltip formatter={(v: number) => `${v.toFixed(1)}%`} contentStyle={{ fontSize: 11, borderRadius: 6 }} />
+                    {equityImpactData.preRaise.map((f, i) => (
+                      <Bar key={f.name} dataKey={f.name} stackId="a" fill={f.color} />
+                    ))}
+                    <Bar dataKey="Investor" stackId="a" fill="#6B7280" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Founder Equity Details */}
+              <div className="space-y-2">
+                <div className="text-xs font-semibold text-foreground">{lang === 'ar' ? 'تفاصيل حصص المؤسسين' : 'Founder Equity Details'}</div>
+                {equityImpactData.postRaise.map((f, i) => {
+                  const prePct = equityImpactData.preRaise[i]?.equity ?? 0;
+                  const postPct = f.equity;
+                  const change = postPct - prePct;
+                  return (
+                    <div key={f.name} className="flex items-center justify-between p-2 rounded-lg bg-secondary/20">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ background: f.color }} />
+                        <span className="text-sm font-medium text-foreground">{f.name}</span>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <div className="text-xs text-muted-foreground">{prePct.toFixed(1)}% → {postPct.toFixed(1)}%</div>
+                          <div className={`text-xs font-bold ${change < 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                            {change < 0 ? '−' : '+'}{Math.abs(change).toFixed(1)}%
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+                <strong>{lang === 'ar' ? 'ملاحظة:' : 'Note:'}</strong> {lang === 'ar' ? 'هذا حساب مبسط للتخفيف الاقتصادي. قد يختلف الواقع بناءً على مجموعة ESOP، والأوراق المحولة، وحقوق المشاركة.' : 'This is a simplified economic dilution calculation. Actual results may vary based on ESOP pool refreshes, convertible notes, and pro-rata rights.'}
+              </div>
+            </motion.div>
+          )}
+        </div>
+      )}
 
       {/* Checklist by category */}
       {categories.map(cat => {

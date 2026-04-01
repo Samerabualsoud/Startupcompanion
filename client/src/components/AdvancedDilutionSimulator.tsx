@@ -84,6 +84,7 @@ export default function AdvancedDilutionSimulator() {
   };
 
   // Derive founders from cap table — safe even when capState is null
+  // If no founders exist, use default founders for demonstration
   const founders = capState?.shareholders.filter(s => s.type === 'founder') ?? [];
   const totalSharesBasic = computed?.totalSharesBasic ?? 1;
   const founderInitialPcts = founders.map(f => (f.shares / totalSharesBasic) * 100);
@@ -177,7 +178,7 @@ export default function AdvancedDilutionSimulator() {
     setDilution(reportData);
   }, [simulation, setDilution]);
 
-  if (isLoading || !capState) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -261,7 +262,7 @@ export default function AdvancedDilutionSimulator() {
           })}
           {founders.length === 0 && (
             <div className="p-4 text-sm text-muted-foreground text-center">
-              {lang === 'ar' ? 'لا يوجد مؤسسون في جدول الملكية. أضف المؤسسين في أداة جدول الملكية.' : 'No founders in cap table. Add founders in the Cap Table tool.'}
+              {lang === 'ar' ? 'لا يوجد مؤسسون في جدول الملكية. أضف المؤسسين في أداة جدول الملكية أولاً.' : 'No founders in cap table yet. Add founders in the Cap Table tool first.'}
             </div>
           )}
         </div>
@@ -270,7 +271,7 @@ export default function AdvancedDilutionSimulator() {
           <div className="w-3 h-3 rounded-full bg-purple-400 shrink-0" />
           <span className="text-sm font-medium text-foreground flex-1">{lang === 'ar' ? 'مجموعة خيارات الموظفين (ESOP)' : 'Employee Option Pool (ESOP)'}</span>
           <span className="text-xs font-bold text-purple-600 dark:text-purple-400">{esopInitialPct.toFixed(1)}%</span>
-          <span className="text-[10px] text-muted-foreground">({capState.esop.totalPoolShares.toLocaleString()} shares)</span>
+          {capState && <span className="text-[10px] text-muted-foreground">({capState.esop.totalPoolShares.toLocaleString()} shares)</span>}
         </div>
       </div>
 
@@ -342,100 +343,106 @@ export default function AdvancedDilutionSimulator() {
       </div>
 
       {/* ── Summary Metrics ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {founders.map(f => {
-          const finalFounder = finalStage.founders.find(ff => ff.id === f.id);
-          return (
-            <div key={f.id} className="border border-border rounded-xl p-3 bg-card text-center">
-              <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">{f.name}</div>
-              <div className="text-lg font-bold" style={{ color: f.color }}>{fmtPct(finalFounder?.pct ?? 0)}</div>
-              <div className="text-[9px] text-muted-foreground">{fmt(finalFounder?.value ?? 0)}</div>
-            </div>
-          );
-        })}
-        <div className="border border-border rounded-xl p-3 bg-card text-center">
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">Total Raised</div>
-          <div className="text-lg font-bold" style={{ color: '#2D4A6B' }}>{fmt(totalRaised)}</div>
-          <div className="text-[9px] text-muted-foreground">across all rounds</div>
+      {founders.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {founders.map(f => {
+            const finalFounder = finalStage.founders.find(ff => ff.id === f.id);
+            return (
+              <div key={f.id} className="border border-border rounded-xl p-3 bg-card text-center">
+                <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">{f.name}</div>
+                <div className="text-lg font-bold" style={{ color: f.color }}>{fmtPct(finalFounder?.pct ?? 0)}</div>
+                <div className="text-[9px] text-muted-foreground">{fmt(finalFounder?.value ?? 0)}</div>
+              </div>
+            );
+          })}
+          <div className="border border-border rounded-xl p-3 bg-card text-center">
+            <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">Total Raised</div>
+            <div className="text-lg font-bold" style={{ color: '#2D4A6B' }}>{fmt(totalRaised)}</div>
+            <div className="text-[9px] text-muted-foreground">across all rounds</div>
+          </div>
+          <div className="border border-border rounded-xl p-3 bg-card text-center">
+            <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">Final Post-Money</div>
+            <div className="text-lg font-bold" style={{ color: '#10B981' }}>{fmt(finalStage.postMoney)}</div>
+            <div className="text-[9px] text-muted-foreground">company valuation</div>
+          </div>
         </div>
-        <div className="border border-border rounded-xl p-3 bg-card text-center">
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">Final Post-Money</div>
-          <div className="text-lg font-bold" style={{ color: '#10B981' }}>{fmt(finalStage.postMoney)}</div>
-          <div className="text-[9px] text-muted-foreground">company valuation</div>
-        </div>
-      </div>
+      )}
 
       {/* ── Stacked Area Chart ── */}
-      <div className="border border-border rounded-xl p-4 bg-card">
-        <div className="text-xs font-semibold text-foreground mb-3">Ownership Distribution Over Time</div>
-        <ResponsiveContainer width="100%" height={230}>
-          <AreaChart data={areaData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-            <defs>
+      {founders.length > 0 && (
+        <div className="border border-border rounded-xl p-4 bg-card">
+          <div className="text-xs font-semibold text-foreground mb-3">Ownership Distribution Over Time</div>
+          <ResponsiveContainer width="100%" height={230}>
+            <AreaChart data={areaData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                {areaKeys.map((key, i) => (
+                  <linearGradient key={key} id={`grad-${i}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={areaColors[i]} stopOpacity={0.8} />
+                    <stop offset="95%" stopColor={areaColors[i]} stopOpacity={0.15} />
+                  </linearGradient>
+                ))}
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="stage" tick={{ fontSize: 10 }} />
+              <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${v}%`} domain={[0, 100]} />
+              <RechartTooltip
+                formatter={(v: number, name: string) => [`${v}%`, name]}
+                contentStyle={{ fontSize: 11, borderRadius: 6 }}
+              />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
               {areaKeys.map((key, i) => (
-                <linearGradient key={key} id={`grad-${i}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={areaColors[i]} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={areaColors[i]} stopOpacity={0.15} />
-                </linearGradient>
+                <Area key={key} type="monotone" dataKey={key} stackId="1"
+                  stroke={areaColors[i]} fill={`url(#grad-${i})`} strokeWidth={2} />
               ))}
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="stage" tick={{ fontSize: 10 }} />
-            <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${v}%`} domain={[0, 100]} />
-            <RechartTooltip
-              formatter={(v: number, name: string) => [`${v}%`, name]}
-              contentStyle={{ fontSize: 11, borderRadius: 6 }}
-            />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
-            {areaKeys.map((key, i) => (
-              <Area key={key} type="monotone" dataKey={key} stackId="1"
-                stroke={areaColors[i]} fill={`url(#grad-${i})`} strokeWidth={2} />
-            ))}
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       {/* ── Per-Round Table ── */}
-      <div className="border border-border rounded-xl overflow-hidden bg-card">
-        <div className="p-4 border-b border-border">
-          <div className="text-xs font-semibold text-foreground">Round-by-Round Breakdown</div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-border bg-secondary/30">
-                <th className="text-left px-4 py-2.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Stage</th>
-                {founders.map(f => (
-                  <th key={f.id} className="text-right px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap" style={{ color: f.color }}>{f.name}</th>
-                ))}
-                <th className="text-right px-3 py-2.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Investors</th>
-                <th className="text-right px-3 py-2.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Post-Money</th>
-                <th className="text-right px-3 py-2.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Raised</th>
-              </tr>
-            </thead>
-            <tbody>
-              {simulation.map((s, i) => (
-                <tr key={s.stage} className={`border-b border-border/50 ${i % 2 === 0 ? '' : 'bg-secondary/20'}`}>
-                  <td className="px-4 py-2.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: i === 0 ? '#6B7280' : rounds.find(r => r.name === s.stage)?.color ?? '#6B7280' }} />
-                      <span className="font-medium text-foreground whitespace-nowrap">{s.stage}</span>
-                    </div>
-                  </td>
-                  {s.founders.map(f => (
-                    <td key={f.id} className="px-3 py-2.5 text-right">
-                      <span className="font-bold" style={{ color: f.color }}>{fmtPct(f.pct)}</span>
-                      <div className="text-[9px] text-muted-foreground font-mono">{fmt(f.value)}</div>
-                    </td>
+      {founders.length > 0 && (
+        <div className="border border-border rounded-xl overflow-hidden bg-card">
+          <div className="p-4 border-b border-border">
+            <div className="text-xs font-semibold text-foreground">Round-by-Round Breakdown</div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-border bg-secondary/30">
+                  <th className="text-left px-4 py-2.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Stage</th>
+                  {founders.map(f => (
+                    <th key={f.id} className="text-right px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap" style={{ color: f.color }}>{f.name}</th>
                   ))}
-                  <td className="px-3 py-2.5 text-right font-mono text-muted-foreground">{fmtPct(s.investorPct)}</td>
-                  <td className="px-3 py-2.5 text-right font-mono text-foreground font-semibold">{fmt(s.postMoney)}</td>
-                  <td className="px-3 py-2.5 text-right font-mono text-muted-foreground">{i === 0 ? '—' : fmt(s.raised)}</td>
+                  <th className="text-right px-3 py-2.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Investors</th>
+                  <th className="text-right px-3 py-2.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Post-Money</th>
+                  <th className="text-right px-3 py-2.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Raised</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {simulation.map((s, i) => (
+                  <tr key={s.stage} className={`border-b border-border/50 ${i % 2 === 0 ? '' : 'bg-secondary/20'}`}>
+                    <td className="px-4 py-2.5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full shrink-0" style={{ background: i === 0 ? '#6B7280' : rounds.find(r => r.name === s.stage)?.color ?? '#6B7280' }} />
+                        <span className="font-medium text-foreground whitespace-nowrap">{s.stage}</span>
+                      </div>
+                    </td>
+                    {s.founders.map(f => (
+                      <td key={f.id} className="px-3 py-2.5 text-right">
+                        <span className="font-bold" style={{ color: f.color }}>{fmtPct(f.pct)}</span>
+                        <div className="text-[9px] text-muted-foreground font-mono">{fmt(f.value)}</div>
+                      </td>
+                    ))}
+                    <td className="px-3 py-2.5 text-right font-mono text-muted-foreground">{fmtPct(s.investorPct)}</td>
+                    <td className="px-3 py-2.5 text-right font-mono text-foreground font-semibold">{fmt(s.postMoney)}</td>
+                    <td className="px-3 py-2.5 text-right font-mono text-muted-foreground">{i === 0 ? '—' : fmt(s.raised)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
         <strong>Note:</strong> This models economic dilution only. Actual ownership depends on option pool refreshes, convertible notes, SAFEs, and pro-rata rights. Always model with a cap table tool (e.g., Carta, Pulley) before signing term sheets.

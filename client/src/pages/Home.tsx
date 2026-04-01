@@ -67,6 +67,8 @@ import CompetitorIntelligence from '@/components/CompetitorIntelligence';
 import TermNegotiationAdvisor from '@/components/TermNegotiationAdvisor';
 import EcosystemSection from '@/components/EcosystemSection';
 import ProfileSettings from './ProfileSettings';
+import CofounderAgreement from '@/pages/CofounderAgreement';
+import BoardResolutions from '@/pages/BoardResolutions';
 type ToolId = 'dashboard' | 'cogs' | 'sales' | 'data-room' | 'valuation' | 'accelerators' | 'equity-split' | 'dilution' | 'readiness' | 'pitch-deck' | 'term-sheet' | 'investor-crm' | 'runway' | 'profile' | 'profile-settings' | 'resources' | 'matching' | 'admin' | 'vesting' | 'free-zones' | 'ai-fundraising-advisor' | 'ai-market-research' | 'ai-investor-email' | 'ai-term-sheet' | 'ai-cofounder-agreement' | 'ai-due-diligence' | 'safe-note' | 'nda' | 'esop' | 'startup-directory' | 'saved-startups' | 'valuation-timeline' | 'term-sheet-builder' | 'cap-table' | 'idea-validator' | 'oqal-notes' | 'zest-equity' | 'financial-projection' | 'competitor-intelligence' | 'term-negotiation' | 'jurisdictions' | 'cofounder-agreement-generator' | 'board-resolutions-generator';
 
 interface NavItem {
@@ -444,9 +446,14 @@ function HomeInner() {
       case 'oqal-notes':                   return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><OQALNotes /></div>;
       case 'zest-equity':                  return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><ZestEquity /></div>;
       case 'idea-validator':               return <div className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6"><IdeaValidator /></div>;
-      case 'financial-projection' | 'competitor-intelligence' | 'term-negotiation':           return <FinancialProjection />;
-      case 'cofounder-agreement-generator': return <div className="flex-1 min-w-0 overflow-y-auto"><iframe src="/legal/cofounder-agreement" className="w-full h-full border-0" style={{ minHeight: '100vh' }} /></div>;
-      case 'board-resolutions-generator': return <div className="flex-1 min-w-0 overflow-y-auto"><iframe src="/legal/board-resolutions" className="w-full h-full border-0" style={{ minHeight: '100vh' }} /></div>;
+      case 'financial-projection':
+      case 'competitor-intelligence':
+      case 'term-negotiation':
+        return <FinancialProjection />;
+      case 'cofounder-agreement-generator':
+        return <div className="flex-1 min-w-0 overflow-y-auto"><CofounderAgreement /></div>;
+      case 'board-resolutions-generator':
+        return <div className="flex-1 min-w-0 overflow-y-auto"><BoardResolutions /></div>;
       default: return null;
     }
   };

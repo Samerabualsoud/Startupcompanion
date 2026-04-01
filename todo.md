@@ -68,6 +68,10 @@
 - [x] auth.custom.test.ts (14 tests passing)
 - [x] auth.logout.test.ts (1 test passing)
 
+## Bug Fixes (Current)
+- [x] Fix Dilution Simulator - now properly fetches founder data from cap table
+- [x] Add post-raise equity display to FundraisingReadiness tool
+
 ## Future Improvements
 - [ ] Email verification flow
 - [ ] Forgot password / reset password
