@@ -63,7 +63,6 @@ import OQALNotes from '@/components/OQALNotes';
 import ZestEquity from '@/components/ZestEquity';
 import IdeaValidator from '@/components/IdeaValidator';
 import FinancialProjection from '@/components/FinancialProjection';
-import CompetitorIntelligence from '@/components/CompetitorIntelligence';
 import TermNegotiationAdvisor from '@/components/TermNegotiationAdvisor';
 import EcosystemSection from '@/components/EcosystemSection';
 import ProfileSettings from './ProfileSettings';
@@ -98,7 +97,9 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'profile-settings', tier: 'free', label: 'Public Profile Settings', shortLabel: 'Publish', navKey: 'navProfileSettings', icon: Globe, group: 'My Company', newUntil: '2026-04-01' },
   { id: 'cogs', tier: 'free',          label: 'Unit Economics',        shortLabel: 'Unit Econ.',        navKey: 'navCOGS',        icon: DollarSign,  group: 'My Company',   newUntil: '2026-04-01' },
   { id: 'sales', tier: 'free',         label: 'Revenue Intelligence',          shortLabel: 'Revenue',       navKey: 'navSales',       icon: ShoppingCart, group: 'My Company',  newUntil: '2026-04-01' },
-  { id: 'financial-projection' | 'competitor-intelligence' | 'term-negotiation', tier: 'free', label: 'Financial Projection', shortLabel: 'Projection', navKey: 'navFinancialProjection', icon: TrendingUp, group: 'My Company', newUntil: '2026-07-01' },
+  { id: 'financial-projection', tier: 'free', label: 'Financial Projection', shortLabel: 'Projection', navKey: 'navFinancialProjection', icon: TrendingUp, group: 'My Company', newUntil: '2026-07-01' },
+  { id: 'competitor-intelligence', tier: 'pro', label: 'Competitor Intelligence', shortLabel: 'Competitors', navKey: 'navCompetitors', icon: Target, group: 'Market Intelligence', newUntil: '2026-07-01' },
+  { id: 'term-negotiation', tier: 'pro', label: 'Term Negotiation Advisor', shortLabel: 'Term Advisor', navKey: 'navTermAdvisor', icon: FileText, group: 'Capital Raising', newUntil: '2026-07-01' },
   { id: 'data-room', tier: 'pro',     label: 'Virtual Data Room',              shortLabel: 'Data Room',   navKey: 'navDataRoom',    icon: FolderOpen,  group: 'My Company',   newUntil: '2026-04-01' },
   { id: 'cap-table', tier: 'pro',     label: 'Capitalization Table',      shortLabel: 'Cap Table',   navKey: 'navCapTable',    icon: Users,       group: 'My Company',   newUntil: '2026-04-01' },
   // Valuation
@@ -193,8 +194,6 @@ const TOOL_COLORS: Record<ToolId, string> = {
   'competitor-intelligence': '#10B981',
   'term-negotiation': '#10B981',
   'jurisdictions': '#0284C7',
-  'profile-settings': '#2D4A6B',
-  'saved-startups': '#EC4899',
   'cofounder-agreement-generator': '#06B6D4',
   'board-resolutions-generator': '#8B5CF6',
 };
@@ -227,9 +226,14 @@ function HomeInner() {
     placeholderBg:'var(--secondary)',
     methodCardBg: 'var(--card)',
     methodText:   'var(--muted-foreground)',
+    border:       'var(--border)',
+    textHi:       'var(--foreground)',
+    textMed:      'var(--muted-foreground)',
+    textLow:      'var(--muted-foreground)',
+    cardBg:       'var(--card)',
   };
   // Persist active tool across refreshes using localStorage + URL hash
-  const VALID_TOOL_IDS: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'profile-settings', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator', 'oqal-notes', 'zest-equity', 'financial-projection' | 'competitor-intelligence' | 'term-negotiation'];
+  const VALID_TOOL_IDS: ToolId[] = ['dashboard', 'cogs', 'sales', 'data-room', 'valuation', 'accelerators', 'equity-split', 'dilution', 'readiness', 'pitch-deck', 'term-sheet', 'investor-crm', 'runway', 'profile', 'profile-settings', 'resources', 'matching', 'admin', 'vesting', 'free-zones', 'ai-fundraising-advisor', 'ai-market-research', 'ai-investor-email', 'ai-term-sheet', 'ai-cofounder-agreement', 'ai-due-diligence', 'safe-note', 'nda', 'esop', 'startup-directory', 'valuation-timeline', 'term-sheet-builder', 'cap-table', 'idea-validator', 'oqal-notes', 'zest-equity', 'financial-projection', 'competitor-intelligence', 'term-negotiation', 'jurisdictions', 'cofounder-agreement-generator', 'board-resolutions-generator', 'saved-startups'];
   const getInitialTool = (): ToolId => {
     // 1. Check URL hash first (e.g. /app#equity-split)
     const hash = window.location.hash.replace('#', '') as ToolId;
