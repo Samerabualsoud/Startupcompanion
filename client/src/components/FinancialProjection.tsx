@@ -383,6 +383,7 @@ export default function FinancialProjection() {
   }, [modelInputs, currency, scenario, yearHorizon]);
 
   const yearlyWithPayroll = useMemo(() => {
+    if (!output || !output.yearly || !output.monthly) return [];
     return output.yearly.map((y) => {
       const slice = output.monthly.filter(m => m.year === y.year);
       return {
@@ -393,7 +394,7 @@ export default function FinancialProjection() {
         ga: slice.reduce((s, m) => s + m.gaSpend, 0),
       };
     });
-  }, [output]);
+  }, [output.yearly, output.monthly]);
 
   // ── tRPC ───────────────────────────────────────────────────────────────────
   const saveMutation = trpc.projection.save.useMutation({
