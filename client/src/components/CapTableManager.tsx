@@ -38,7 +38,7 @@ function generateId() {
   return 'sh-' + Math.random().toString(36).slice(2, 10);
 }
 
-export default function CapTableManager() {
+function CapTableManagerInner() {
   const { isRTL, lang } = useLanguage();
   const { state: capState, setShareholders, isLoading, isSaving } = useCapTable();
 
@@ -51,18 +51,7 @@ export default function CapTableManager() {
     color: '#2D4A6B',
   });
 
-  if (isLoading || !capState) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">{lang === 'ar' ? 'جاري تحميل جدول الملكية...' : 'Loading cap table...'}</p>
-        </div>
-      </div>
-    );
-  }
-
-  const shareholders = capState.shareholders || [];
+  const shareholders = capState?.shareholders || [];
   const totalShares = shareholders.reduce((s, sh) => s + sh.shares, 0) || 1;
 
   const enriched = shareholders.map(sh => ({
@@ -120,7 +109,7 @@ export default function CapTableManager() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `cap-table-${capState.companyName || 'startup'}.csv`;
+    a.download = `cap-table-${capState?.companyName || 'startup'}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success(lang === 'ar' ? 'تم تصدير جدول الملكية' : 'Cap table exported as CSV.');
@@ -157,7 +146,7 @@ export default function CapTableManager() {
       <Card>
         <CardContent className="pt-4">
           <div className="text-sm text-muted-foreground">{lang === 'ar' ? 'اسم الشركة' : 'Company Name'}</div>
-          <div className="text-lg font-semibold text-foreground">{capState.companyName || '(Not set)'}</div>
+          <div className="text-lg font-semibold text-foreground">{capState?.companyName || '(Not set)'}</div>
         </CardContent>
       </Card>
 
@@ -266,37 +255,27 @@ export default function CapTableManager() {
                     <th className="text-left py-2 px-3 font-semibold text-foreground">{lang === 'ar' ? 'الاسم' : 'Name'}</th>
                     <th className="text-left py-2 px-3 font-semibold text-foreground">{lang === 'ar' ? 'النوع' : 'Type'}</th>
                     <th className="text-right py-2 px-3 font-semibold text-foreground">{lang === 'ar' ? 'الأسهم' : 'Shares'}</th>
-                    <th className="text-right py-2 px-3 font-semibold text-foreground">{lang === 'ar' ? 'الملكية' : 'Ownership'}</th>
+                    <th className="text-right py-2 px-3 font-semibold text-foreground">{lang === 'ar' ? 'الملكية %' : 'Ownership %'}</th>
                     <th className="text-center py-2 px-3 font-semibold text-foreground">{lang === 'ar' ? 'الإجراءات' : 'Actions'}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {enriched.map(sh => (
                     <tr key={sh.id} className="border-b border-border hover:bg-secondary/50">
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full" style={{ background: sh.color }} />
-                          <span className="font-medium text-foreground">{sh.name}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-3">
-                        <Badge variant="outline" className="text-xs">
+                      <td className="py-2 px-3 text-foreground">{sh.name}</td>
+                      <td className="py-2 px-3">
+                        <Badge variant="outline" style={{ background: TYPE_COLORS[sh.type], color: 'white', border: 'none' }}>
                           {TYPE_LABELS[sh.type] || sh.type}
                         </Badge>
                       </td>
-                      <td className="py-3 px-3 text-right text-foreground">{fmtShares(sh.shares)}</td>
-                      <td className="py-3 px-3 text-right">
-                        <span className="font-semibold" style={{ color: sh.color }}>
-                          {sh.ownershipPct.toFixed(1)}%
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-center">
+                      <td className="py-2 px-3 text-right text-foreground">{fmtShares(sh.shares)}</td>
+                      <td className="py-2 px-3 text-right text-foreground">{sh.ownershipPct.toFixed(2)}%</td>
+                      <td className="py-2 px-3 text-center">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDelete(sh.id)}
-                          disabled={isSaving}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -310,35 +289,40 @@ export default function CapTableManager() {
         </CardContent>
       </Card>
 
-      {/* Ownership Breakdown */}
+      {/* Ownership by Type */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{lang === 'ar' ? 'توزيع الملكية' : 'Ownership Breakdown'}</CardTitle>
+          <CardTitle className="text-base">{lang === 'ar' ? 'الملكية حسب النوع' : 'Ownership by Type'}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {Object.entries(byType).map(([type, pct]) => (
-              pct > 0 && (
-                <div key={type} className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full" style={{ background: TYPE_COLORS[type] }} />
-                  <span className="text-sm text-foreground flex-1">{TYPE_LABELS[type] || type}</span>
-                  <span className="text-sm font-semibold" style={{ color: TYPE_COLORS[type] }}>
-                    {pct.toFixed(1)}%
-                  </span>
-                </div>
-              )
+              <div key={type} className="p-3 rounded-lg" style={{ background: TYPE_COLORS[type] + '20' }}>
+                <div className="text-xs text-muted-foreground font-semibold">{TYPE_LABELS[type]}</div>
+                <div className="text-lg font-bold" style={{ color: TYPE_COLORS[type] }}>{pct.toFixed(1)}%</div>
+              </div>
             ))}
           </div>
         </CardContent>
       </Card>
-
-      {/* Saving Indicator */}
-      {isSaving && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/50 px-3 py-2 rounded-lg">
-          <RefreshCw className="w-3 h-3 animate-spin" />
-          {lang === 'ar' ? 'جاري الحفظ...' : 'Saving...'}
-        </div>
-      )}
     </div>
   );
+}
+
+export default function CapTableManager() {
+  const { lang } = useLanguage();
+  const { isLoading } = useCapTable();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">{lang === 'ar' ? 'جاري تحميل جدول الملكية...' : 'Loading cap table...'}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <CapTableManagerInner />;
 }
