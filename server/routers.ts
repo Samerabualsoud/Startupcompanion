@@ -26,6 +26,7 @@ import { publicProfileRouter } from './publicProfileRouter';
 import { watchlistRouter } from './watchlistRouter';
 import { dataSyncRouter } from './routers/dataSyncRouter';
 import { attachmentRouter } from './routers/attachmentRouter';
+import { startupRouter } from './routers/startup';
 
 export const appRouter = router({
   system: systemRouter,
@@ -55,6 +56,7 @@ export const appRouter = router({
   watchlist: watchlistRouter,
   dataSync: dataSyncRouter,
   attachments: attachmentRouter,
+  startup: startupRouter,
 });
 
 export type AppRouter = typeof appRouter;

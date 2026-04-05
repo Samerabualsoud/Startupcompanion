@@ -1,0 +1,1 @@
+ALTER TABLE `cap_tables` MODIFY COLUMN `shareholders` text;

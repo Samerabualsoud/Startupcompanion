@@ -1,4 +1,4 @@
-import { boolean, int, bigint, mysqlEnum, mysqlTable, text, timestamp, varchar, json, float } from "drizzle-orm/mysql-core";
+import { boolean, int, bigint, mysqlEnum, mysqlTable, text, timestamp, varchar, json, float, index } from "drizzle-orm/mysql-core";
 
 // ── Users ──────────────────────────────────────────────────────────────────
 export const users = mysqlTable("users", {
