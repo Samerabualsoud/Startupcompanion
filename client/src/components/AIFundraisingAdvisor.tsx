@@ -27,24 +27,36 @@ export default function AIFundraisingAdvisor() {
 
   const hasProfile = !!(snapshot.companyName || snapshot.sector || snapshot.stage);
 
-  const buildStartupContext = () => ({
-    name: snapshot.companyName || '',
-    sector: snapshot.sector || '',
-    stage: snapshot.stage || '',
-    country: snapshot.country || '',
-    problem: snapshot.problem || '',
-    solution: snapshot.solution || '',
-    businessModel: snapshot.businessModel || '',
-    mrr: snapshot.mrr || undefined,
-    currentARR: snapshot.currentARR || undefined,
-    monthlyBurnRate: snapshot.monthlyBurnRate || undefined,
-    numberOfCustomers: snapshot.numberOfCustomers || undefined,
-    teamSize: snapshot.employeeCount || undefined,
-    targetRaise: snapshot.targetRaise || undefined,
-    runwayMonths: undefined,
-    grossMargin: snapshot.grossMargin || undefined,
-    revenueGrowthRate: snapshot.revenueGrowthRate || undefined,
-  });
+  const buildStartupContext = () => {
+    // Validate and sanitize all numeric fields to prevent NaN
+    const sanitizeNumber = (val: any) => {
+      const num = Number(val);
+      return isNaN(num) || num === 0 ? undefined : num;
+    };
+
+    // Validate stage is one of the allowed values
+    const validStages = ['idea', 'pre-seed', 'seed', 'series-a', 'series-b', 'growth'];
+    const stage = validStages.includes(snapshot.stage) ? snapshot.stage : '';
+
+    return {
+      name: snapshot.companyName || '',
+      sector: snapshot.sector || '',
+      stage: stage,
+      country: snapshot.country || '',
+      problem: snapshot.problem || '',
+      solution: snapshot.solution || '',
+      businessModel: snapshot.businessModel || '',
+      mrr: sanitizeNumber(snapshot.mrr),
+      currentARR: sanitizeNumber(snapshot.currentARR),
+      monthlyBurnRate: sanitizeNumber(snapshot.monthlyBurnRate),
+      numberOfCustomers: sanitizeNumber(snapshot.numberOfCustomers),
+      teamSize: sanitizeNumber(snapshot.employeeCount),
+      targetRaise: sanitizeNumber(snapshot.targetRaise),
+      runwayMonths: undefined,
+      grossMargin: sanitizeNumber(snapshot.grossMargin),
+      revenueGrowthRate: sanitizeNumber(snapshot.revenueGrowthRate),
+    };
+  }
 
   const STARTER_QUESTIONS = hasProfile
     ? [
